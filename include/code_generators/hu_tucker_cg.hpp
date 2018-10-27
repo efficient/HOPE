@@ -1,8 +1,6 @@
 #ifndef HU_TUCKER_CG_H
 #define HU_TUCKER_CG_H
 
-#include <assert.h>
-
 #include "code_generator.hpp"
 
 namespace ope {

@@ -1,6 +1,7 @@
 #ifndef SYMBOL_SELECTOR_H
 #define SYMBOL_SELECTOR_H
 
+#include <assert.h>
 #include <string>
 #include <vector>
 

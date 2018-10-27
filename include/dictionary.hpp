@@ -1,6 +1,7 @@
 #ifndef DICTIONARY_H
 #define DICTIONARY_H
 
+#include <assert.h>
 #include <string>
 #include <vector>
 
