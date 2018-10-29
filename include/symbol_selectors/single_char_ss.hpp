@@ -39,12 +39,12 @@ bool SingleCharSS::selectSymbols (const std::vector<std::string>& key_list,
 
 void SingleCharSS::countSymbolFreq (const std::vector<std::string>& key_list) {
     for (int i = 0; i < (int)key_list.size(); i++) {
-        for (int j = 0; j < (int)keys[i].length(); j++) {
-            freq_list_[(uint8_t)keys[i][j]]++;
+        for (int j = 0; j < (int)key_list[i].length(); j++) {
+            freq_list_[(uint8_t)key_list[i][j]]++;
         }
     }
 }
 
 } // namespace ope
 
-#endif SINGLE_CHAR_SS_H
+#endif // SINGLE_CHAR_SS_H

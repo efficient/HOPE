@@ -22,4 +22,4 @@ public:
 
 } // namespace ope
 
-#endif DICTIONARY_H
+#endif // DICTIONARY_H

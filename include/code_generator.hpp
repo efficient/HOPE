@@ -13,9 +13,9 @@ public:
     virtual bool genCodes (const std::vector<SymbolFreq>& symbol_freq_list,
                            std::vector<SymbolCode>* symbol_code_list) = 0;
 
-    virtual double getCompressionRate () = 0;
+    virtual double getCompressionRate () const = 0;
 };
 
 } // namespace ope
 
-#endif CODE_GENERATOR_H
+#endif // CODE_GENERATOR_H

@@ -11,9 +11,11 @@ public:
     static SymbolSelector* createSymbolSelector(const int type) {
         if (type == 0)
             return new SingleCharSS();
+	else
+	    return new SingleCharSS();
     }
 };
 
 } // namespace ope
 
-#endif SYMBOL_SELECTOR_FACTORY_H
+#endif // SYMBOL_SELECTOR_FACTORY_H

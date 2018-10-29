@@ -14,4 +14,4 @@ typedef typename std::pair<std::string, Code> SymbolCode;
 
 } // namespace ope
 
-#endif COMMON_H
+#endif // COMMON_H

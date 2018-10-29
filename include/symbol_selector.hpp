@@ -18,4 +18,4 @@ public:
 
 } // namespace ope
 
-#endif SYMBOL_SELECTOR_H
+#endif // SYMBOL_SELECTOR_H

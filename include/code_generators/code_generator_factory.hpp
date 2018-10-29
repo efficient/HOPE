@@ -16,4 +16,4 @@ public:
 
 } // namespace ope
 
-#endif CODE_GENERATOR_FACTORY_H
+#endif // CODE_GENERATOR_FACTORY_H
