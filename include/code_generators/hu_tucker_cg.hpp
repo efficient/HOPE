@@ -69,12 +69,13 @@ double HuTuckerCG::getCompressionRate () const {
     }
     double cumu_cpr = 0;
     for (int i = 0; i < (int)freq_list_.size(); i++) {
-        if (freq_list_[i] > 0) {
+        if (freq_list_[i] > 1) {
             double prob = (freq_list_[i] + 0.0) / freq_sum;
-            double cpr = (code_len_list_[i] + 0.0) / symbol_list_[i].length();
+	    double cpr = (symbol_list_[i].length() * 8.0) / code_len_list_[i];
             cumu_cpr += (prob * cpr);
         }
     }
+    std::cout << std::endl;
     return cumu_cpr;
 }
 
@@ -102,7 +103,7 @@ void HuTuckerCG::genOptimalCodeLen() {
         maxp += freq_list_[k];
     }
 
-    for (int m = 0; m < n; m++) {
+    for (int m = 0; m < n - 1; m++) {
         int i = 0, i1 = 0, i2 = 0;
         int64_t pmin = maxp;
         int sumL = -1;
@@ -143,9 +144,9 @@ void HuTuckerCG::genOptimalCodeLen() {
 	d.push_back(i2);
         P[i1] = pmin; P[i2] = 0; L[i1] = sumL + 1;
     }
-    
-    L[s[n - 1]] = 0;
-    for (int m = n - 1; m >= 0; m--) {
+
+    L[s[n - 2]] = 0;
+    for (int m = n - 2; m >= 0; m--) {
         L[s[m]] += 1;
         L[d[m]] = L[s[m]];
     }
@@ -163,7 +164,7 @@ void HuTuckerCG::buildBinaryTree() {
         tmp_code_lens.push_back(code_len_list_[i]);
     }
     std::vector<int> node_idx_list;
-    for (int len = max_code_len; len > 1; len--) {
+    for (int len = max_code_len; len > 0; len--) {
         node_idx_list.clear();
         for (int i = 0; i < (int)tmp_code_lens.size(); i++) {
             if (tmp_code_lens[i] == len)

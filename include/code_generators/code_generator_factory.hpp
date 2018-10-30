@@ -11,6 +11,8 @@ public:
     static CodeGenerator* createCodeGenerator(const int type) {
         if (type == 0)
             return new HuTuckerCG();
+	else
+	    return new HuTuckerCG();
     }
 };
 

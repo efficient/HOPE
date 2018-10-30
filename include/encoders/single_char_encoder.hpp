@@ -40,7 +40,7 @@ bool SingleCharEncoder::build (const std::vector<std::string>& key_list,
 }
 
 int SingleCharEncoder::encode (const std::string& key, uint8_t* buffer) {
-    int64_t* int_buf = (int64_t*)code_buf;
+    int64_t* int_buf = (int64_t*)buffer;
     int idx = 0;
     int_buf[0] = 0;
     int int_buf_len = 0;

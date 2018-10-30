@@ -10,5 +10,6 @@ function (add_unit_test file_name)
 endfunction()
 
 add_unit_test(test_hu_tucker_cg)
+add_unit_test(test_single_char_encoder)
 
 
