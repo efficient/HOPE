@@ -140,10 +140,10 @@ void HuTuckerCG::genOptimalCodeLen() {
             int tmp = i1; i1 = i2; i2 = tmp;
         }
         s.push_back(i1);
-        d.push_back(i2);
+	d.push_back(i2);
         P[i1] = pmin; P[i2] = 0; L[i1] = sumL + 1;
     }
-
+    
     L[s[n - 1]] = 0;
     for (int m = n - 1; m >= 0; m--) {
         L[s[m]] += 1;
@@ -163,7 +163,7 @@ void HuTuckerCG::buildBinaryTree() {
         tmp_code_lens.push_back(code_len_list_[i]);
     }
     std::vector<int> node_idx_list;
-    for (int len = max_code_len; len > 0; len--) {
+    for (int len = max_code_len; len > 1; len--) {
         node_idx_list.clear();
         for (int i = 0; i < (int)tmp_code_lens.size(); i++) {
             if (tmp_code_lens[i] == len)
@@ -210,13 +210,13 @@ Code HuTuckerCG::lookup(const int idx) const {
     Code code = {0, 0};
     Node* n = root_;
     while (!n->isLeaf()) {
+	code.code <<= 1;
         if (idx > n->left_child->right_idx) {
             code.code += 1;
             n = n->right_child;
         } else {
             n = n->left_child;
         }
-        code.code <<= 1;
         code.len++;
     }
     return code;

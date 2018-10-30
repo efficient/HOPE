@@ -2,7 +2,9 @@
 
 #include <assert.h>
 
+#include <bitset>
 #include <fstream>
+#include <iostream>
 
 #include "hu_tucker_cg.hpp"
 #include "symbol_selector_factory.hpp"
@@ -32,9 +34,8 @@ TEST_F (HuTuckerCGTest, printSingleCharTest) {
     code_generator->genCodes(symbol_freq_list, &symbol_code_list);
 
     for (int i = 0; i < 256; i++) {
-	std::cout << i << ", " << symbol_code_list[i].first << "\t" 
-		  << symbol_code_list[i].second.len << "\t";
-	std::cout << std::bitset<32>(symbol_code_list[i].second.code)
+	std::cout << i << ", " << "\t" << (int)symbol_code_list[i].second.len << "\t";
+	std::cout << std::bitset<16>(symbol_code_list[i].second.code)
 		  << std::endl;
     }
 }

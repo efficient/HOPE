@@ -21,7 +21,7 @@ private:
 
 SingleCharSS::SingleCharSS() {
     for (int i = 0; i < 256; i++) {
-        freq_list_[i] = 0;
+        freq_list_[i] = 1;
     }
 }
 
