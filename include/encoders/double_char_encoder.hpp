@@ -1,5 +1,5 @@
-#ifndef SINGLE_CHAR_ENCODER_H
-#define SINGLE_CHAR_ENCODER_H
+#ifndef DOUBLE_CHAR_ENCODER_H
+#define DOUBLE_CHAR_ENCODER_H
 
 #include "encoder.hpp"
 
@@ -8,9 +8,9 @@
 
 namespace ope {
 
-class SingleCharEncoder : public Encoder {
+class DoubleCharEncoder : public Encoder {
 public:
-    SingleCharEncoder() {};
+    DoubleCharEncoder() {};
 
     bool build (const std::vector<std::string>& key_list,
                 const int64_t dict_size_limit);
@@ -23,13 +23,13 @@ public:
 private:
     bool buildDict(const std::vector<SymbolCode>& symbol_code_list);
 
-    Code dict_[256];
+    Code dict_[65536];
 };
 
-bool SingleCharEncoder::build (const std::vector<std::string>& key_list,
+bool DoubleCharEncoder::build (const std::vector<std::string>& key_list,
                                const int64_t dict_size_limit) {
     std::vector<SymbolFreq> symbol_freq_list;
-    SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(0);
+    SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(1);
     symbol_selector->selectSymbols(key_list, dict_size_limit, &symbol_freq_list);
 
     std::vector<SymbolCode> symbol_code_list;
@@ -39,15 +39,18 @@ bool SingleCharEncoder::build (const std::vector<std::string>& key_list,
     return buildDict(symbol_code_list);
 }
 
-int SingleCharEncoder::encode (const std::string& key, uint8_t* buffer) {
+int DoubleCharEncoder::encode (const std::string& key, uint8_t* buffer) {
     int64_t* int_buf = (int64_t*)buffer;
     int idx = 0;
     int_buf[0] = 0;
     int int_buf_len = 0;
-    for (int i = 0; i < (int)key.length(); i++) {
-	uint8_t s = (uint8_t)key[i];
-	int64_t s_buf = dict_[s].code;
-	int s_len = dict_[s].len;
+    int key_len = (int)key.length();
+    for (int i = 0; i < key_len; i += 2) {
+	unsigned s_idx = 256 * (uint8_t)key[i];
+	if (i + 1 < key_len)
+	    s_idx += (uint8_t)key[i + 1];
+	int64_t s_buf = dict_[s_idx].code;
+	int s_len = dict_[s_idx].len;
 	if (int_buf_len + s_len > 63) {
 	    int num_bits_left = 64 - int_buf_len;
 	    int_buf_len = s_len - num_bits_left;
@@ -67,18 +70,18 @@ int SingleCharEncoder::encode (const std::string& key, uint8_t* buffer) {
     return ((idx << 6) + int_buf_len);
 }
 
-int SingleCharEncoder::numEntries () {
-    return 256;
+int DoubleCharEncoder::numEntries () {
+    return 65536;
 }
 
-int64_t SingleCharEncoder::memoryUse () {
-    return sizeof(Code) * 256;
+int64_t DoubleCharEncoder::memoryUse () {
+    return sizeof(Code) * 65536;
 }
 
-bool SingleCharEncoder::buildDict(const std::vector<SymbolCode>& symbol_code_list) {
-    if (symbol_code_list.size() < 256)
+bool DoubleCharEncoder::buildDict(const std::vector<SymbolCode>& symbol_code_list) {
+    if (symbol_code_list.size() < 65536)
         return false;
-    for (int i = 0; i < 256; i++) {
+    for (int i = 0; i < 65536; i++) {
         dict_[i] = symbol_code_list[i].second;
     }
     return true;
@@ -86,4 +89,4 @@ bool SingleCharEncoder::buildDict(const std::vector<SymbolCode>& symbol_code_lis
 
 } // namespace ope
 
-#endif // SINGLE_CHAR_ENCODER_H
+#endif // DOUBLE_CHAR_ENCODER_H

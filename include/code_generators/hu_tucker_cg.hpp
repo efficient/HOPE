@@ -67,16 +67,16 @@ double HuTuckerCG::getCompressionRate () const {
     for (int i = 0; i < (int)freq_list_.size(); i++) {
         freq_sum += freq_list_[i];
     }
-    double cumu_cpr = 0;
+    double len = 0, enc_len = 0;
     for (int i = 0; i < (int)freq_list_.size(); i++) {
         if (freq_list_[i] > 1) {
             double prob = (freq_list_[i] + 0.0) / freq_sum;
-	    double cpr = (symbol_list_[i].length() * 8.0) / code_len_list_[i];
-            cumu_cpr += (prob * cpr);
+	    len += (prob * symbol_list_[i].length() * 8.0);
+	    enc_len += (prob * code_len_list_[i]);
         }
     }
-    std::cout << std::endl;
-    return cumu_cpr;
+    double cpr = len / enc_len;
+    return cpr;
 }
 
 void HuTuckerCG::clear() {
