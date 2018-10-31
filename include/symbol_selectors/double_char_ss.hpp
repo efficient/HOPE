@@ -42,8 +42,11 @@ bool DoubleCharSS::selectSymbols (const std::vector<std::string>& key_list,
 
 void DoubleCharSS::countSymbolFreq (const std::vector<std::string>& key_list) {
     for (int i = 0; i < (int)key_list.size(); i++) {
-        for (int j = 0; j < (int)key_list[i].length() - 1; j++) {
-	    unsigned idx = 256 * (uint8_t)key_list[i][j] + (uint8_t)key_list[i][j + 1];
+	int key_len = (int)key_list[i].length();
+        for (int j = 0; j < key_len; j++) {
+	    unsigned idx = 256 * (uint8_t)key_list[i][j];
+	    if (j + 1 < key_len)
+		idx += (uint8_t)key_list[i][j + 1];
             freq_list_[idx]++;
         }
     }
