@@ -15,10 +15,10 @@ public:
     bool build (const std::vector<std::string>& key_list,
                 const int64_t dict_size_limit);
 
-    int encode (const std::string& key, uint8_t* buffer);
+    int encode (const std::string& key, uint8_t* buffer) const;
 
-    int numEntries ();
-    int64_t memoryUse ();
+    int numEntries () const;
+    int64_t memoryUse () const;
 
 private:
     bool buildDict(const std::vector<SymbolCode>& symbol_code_list);
@@ -29,7 +29,7 @@ private:
 bool DoubleCharEncoder::build (const std::vector<std::string>& key_list,
                                const int64_t dict_size_limit) {
     std::vector<SymbolFreq> symbol_freq_list;
-    SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(1);
+    SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(2);
     symbol_selector->selectSymbols(key_list, dict_size_limit, &symbol_freq_list);
 
     std::vector<SymbolCode> symbol_code_list;
@@ -39,7 +39,7 @@ bool DoubleCharEncoder::build (const std::vector<std::string>& key_list,
     return buildDict(symbol_code_list);
 }
 
-int DoubleCharEncoder::encode (const std::string& key, uint8_t* buffer) {
+int DoubleCharEncoder::encode (const std::string& key, uint8_t* buffer) const {
     int64_t* int_buf = (int64_t*)buffer;
     int idx = 0;
     int_buf[0] = 0;
@@ -70,11 +70,11 @@ int DoubleCharEncoder::encode (const std::string& key, uint8_t* buffer) {
     return ((idx << 6) + int_buf_len);
 }
 
-int DoubleCharEncoder::numEntries () {
+int DoubleCharEncoder::numEntries () const {
     return 65536;
 }
 
-int64_t DoubleCharEncoder::memoryUse () {
+int64_t DoubleCharEncoder::memoryUse () const {
     return sizeof(Code) * 65536;
 }
 

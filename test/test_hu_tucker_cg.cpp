@@ -50,11 +50,11 @@ void printCPR(const HuTuckerCG* code_generator) {
 	      << code_generator->getCompressionRate() << std::endl;
 }
 
-//======================= Single Char ==============================
+//======================= Word Tests ==============================
 
 TEST_F (HuTuckerCGTest, printSingleCharWordTest) {
     std::vector<SymbolFreq> symbol_freq_list;
-    SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(0);
+    SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(1);
     symbol_selector->selectSymbols(words, 1000, &symbol_freq_list);
 
     std::vector<SymbolCode> symbol_code_list;
@@ -64,47 +64,9 @@ TEST_F (HuTuckerCGTest, printSingleCharWordTest) {
     print(symbol_code_list, code_generator);
 }
 
-TEST_F (HuTuckerCGTest, printSingleCharEmailTest) {
-    std::vector<SymbolFreq> symbol_freq_list;
-    SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(0);
-    symbol_selector->selectSymbols(emails, 1000, &symbol_freq_list);
-
-    std::vector<SymbolCode> symbol_code_list;
-    HuTuckerCG* code_generator = new HuTuckerCG();
-    code_generator->genCodes(symbol_freq_list, &symbol_code_list);
-
-    print(symbol_code_list, code_generator);
-}
-
-TEST_F (HuTuckerCGTest, printSingleCharWikiTest) {
-    std::vector<SymbolFreq> symbol_freq_list;
-    SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(0);
-    symbol_selector->selectSymbols(wikis, 1000, &symbol_freq_list);
-
-    std::vector<SymbolCode> symbol_code_list;
-    HuTuckerCG* code_generator = new HuTuckerCG();
-    code_generator->genCodes(symbol_freq_list, &symbol_code_list);
-
-    print(symbol_code_list, code_generator);
-}
-
-TEST_F (HuTuckerCGTest, printSingleCharUrlTest) {
-    std::vector<SymbolFreq> symbol_freq_list;
-    SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(0);
-    symbol_selector->selectSymbols(urls, 1000, &symbol_freq_list);
-
-    std::vector<SymbolCode> symbol_code_list;
-    HuTuckerCG* code_generator = new HuTuckerCG();
-    code_generator->genCodes(symbol_freq_list, &symbol_code_list);
-
-    print(symbol_code_list, code_generator);
-}
-
-//======================= Double Char ==============================
-
 TEST_F (HuTuckerCGTest, printDoubleCharWordTest) {
     std::vector<SymbolFreq> symbol_freq_list;
-    SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(1);
+    SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(2);
     symbol_selector->selectSymbols(words, 65536, &symbol_freq_list);
 
     std::vector<SymbolCode> symbol_code_list;
@@ -114,9 +76,47 @@ TEST_F (HuTuckerCGTest, printDoubleCharWordTest) {
     printCPR(code_generator);
 }
 
-TEST_F (HuTuckerCGTest, printDoubleCharEmailTest) {
+TEST_F (HuTuckerCGTest, print3GramWordTest) {
+    std::vector<SymbolFreq> symbol_freq_list;
+    SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(3);
+    symbol_selector->selectSymbols(words, 10000, &symbol_freq_list);
+
+    std::vector<SymbolCode> symbol_code_list;
+    HuTuckerCG* code_generator = new HuTuckerCG();
+    code_generator->genCodes(symbol_freq_list, &symbol_code_list);
+
+    printCPR(code_generator);
+}
+
+TEST_F (HuTuckerCGTest, print4GramWordTest) {
+    std::vector<SymbolFreq> symbol_freq_list;
+    SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(4);
+    symbol_selector->selectSymbols(words, 50000, &symbol_freq_list);
+
+    std::vector<SymbolCode> symbol_code_list;
+    HuTuckerCG* code_generator = new HuTuckerCG();
+    code_generator->genCodes(symbol_freq_list, &symbol_code_list);
+
+    printCPR(code_generator);
+}
+
+//======================= Email Tests ==============================
+/*
+TEST_F (HuTuckerCGTest, printSingleCharEmailTest) {
     std::vector<SymbolFreq> symbol_freq_list;
     SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(1);
+    symbol_selector->selectSymbols(emails, 1000, &symbol_freq_list);
+
+    std::vector<SymbolCode> symbol_code_list;
+    HuTuckerCG* code_generator = new HuTuckerCG();
+    code_generator->genCodes(symbol_freq_list, &symbol_code_list);
+
+    print(symbol_code_list, code_generator);
+}
+
+TEST_F (HuTuckerCGTest, printDoubleCharEmailTest) {
+    std::vector<SymbolFreq> symbol_freq_list;
+    SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(2);
     symbol_selector->selectSymbols(emails, 65536, &symbol_freq_list);
 
     std::vector<SymbolCode> symbol_code_list;
@@ -126,9 +126,47 @@ TEST_F (HuTuckerCGTest, printDoubleCharEmailTest) {
     printCPR(code_generator);
 }
 
-TEST_F (HuTuckerCGTest, printDoubleCharWikiTest) {
+TEST_F (HuTuckerCGTest, print3GramEmailTest) {
+    std::vector<SymbolFreq> symbol_freq_list;
+    SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(3);
+    symbol_selector->selectSymbols(emails, 10000, &symbol_freq_list);
+
+    std::vector<SymbolCode> symbol_code_list;
+    HuTuckerCG* code_generator = new HuTuckerCG();
+    code_generator->genCodes(symbol_freq_list, &symbol_code_list);
+
+    printCPR(code_generator);
+}
+
+TEST_F (HuTuckerCGTest, print4GramEmailTest) {
+    std::vector<SymbolFreq> symbol_freq_list;
+    SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(4);
+    symbol_selector->selectSymbols(emails, 50000, &symbol_freq_list);
+
+    std::vector<SymbolCode> symbol_code_list;
+    HuTuckerCG* code_generator = new HuTuckerCG();
+    code_generator->genCodes(symbol_freq_list, &symbol_code_list);
+
+    printCPR(code_generator);
+}
+*/
+//======================= Wiki Tests ==============================
+/*
+TEST_F (HuTuckerCGTest, printSingleCharWikiTest) {
     std::vector<SymbolFreq> symbol_freq_list;
     SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(1);
+    symbol_selector->selectSymbols(wikis, 1000, &symbol_freq_list);
+
+    std::vector<SymbolCode> symbol_code_list;
+    HuTuckerCG* code_generator = new HuTuckerCG();
+    code_generator->genCodes(symbol_freq_list, &symbol_code_list);
+
+    print(symbol_code_list, code_generator);
+}
+
+TEST_F (HuTuckerCGTest, printDoubleCharWikiTest) {
+    std::vector<SymbolFreq> symbol_freq_list;
+    SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(2);
     symbol_selector->selectSymbols(wikis, 65536, &symbol_freq_list);
 
     std::vector<SymbolCode> symbol_code_list;
@@ -138,10 +176,10 @@ TEST_F (HuTuckerCGTest, printDoubleCharWikiTest) {
     printCPR(code_generator);
 }
 
-TEST_F (HuTuckerCGTest, printDoubleCharUrlTest) {
+TEST_F (HuTuckerCGTest, print3GramWikiTest) {
     std::vector<SymbolFreq> symbol_freq_list;
-    SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(1);
-    symbol_selector->selectSymbols(urls, 65536, &symbol_freq_list);
+    SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(3);
+    symbol_selector->selectSymbols(wikis, 10000, &symbol_freq_list);
 
     std::vector<SymbolCode> symbol_code_list;
     HuTuckerCG* code_generator = new HuTuckerCG();
@@ -150,6 +188,44 @@ TEST_F (HuTuckerCGTest, printDoubleCharUrlTest) {
     printCPR(code_generator);
 }
 
+TEST_F (HuTuckerCGTest, print4GramWikiTest) {
+    std::vector<SymbolFreq> symbol_freq_list;
+    SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(4);
+    symbol_selector->selectSymbols(wikis, 50000, &symbol_freq_list);
+
+    std::vector<SymbolCode> symbol_code_list;
+    HuTuckerCG* code_generator = new HuTuckerCG();
+    code_generator->genCodes(symbol_freq_list, &symbol_code_list);
+
+    printCPR(code_generator);
+}
+*/
+//======================= Url Tests ==============================
+/*
+TEST_F (HuTuckerCGTest, printSingleCharUrlTest) {
+    std::vector<SymbolFreq> symbol_freq_list;
+    SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(1);
+    symbol_selector->selectSymbols(urls, 1000, &symbol_freq_list);
+
+    std::vector<SymbolCode> symbol_code_list;
+    HuTuckerCG* code_generator = new HuTuckerCG();
+    code_generator->genCodes(symbol_freq_list, &symbol_code_list);
+
+    print(symbol_code_list, code_generator);
+}
+
+TEST_F (HuTuckerCGTest, printDoubleCharUrlTest) {
+    std::vector<SymbolFreq> symbol_freq_list;
+    SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(2);
+    symbol_selector->selectSymbols(urls, 65536, &symbol_freq_list);
+
+    std::vector<SymbolCode> symbol_code_list;
+    HuTuckerCG* code_generator = new HuTuckerCG();
+    code_generator->genCodes(symbol_freq_list, &symbol_code_list);
+
+    printCPR(code_generator);
+}
+*/
 void loadWords() {
     std::ifstream infile(kFilePath);
     std::string key;
@@ -201,8 +277,8 @@ void loadUrls() {
 int main (int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);
     ope::hutuckertest::loadWords();
-    ope::hutuckertest::loadEmails();
-    ope::hutuckertest::loadWikis();
-    ope::hutuckertest::loadUrls();
+    //ope::hutuckertest::loadEmails();
+    //ope::hutuckertest::loadWikis();
+    //ope::hutuckertest::loadUrls();
     return RUN_ALL_TESTS();
 }
