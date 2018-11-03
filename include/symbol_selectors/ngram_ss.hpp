@@ -46,8 +46,8 @@ bool NGramSS::selectSymbols (const std::vector<std::string>& key_list,
     assert(interval_prefixes_.size() == interval_boundaries_.size());
     countIntervalFreq(key_list);
     assert(interval_prefixes_.size() == interval_freqs_.size());
-    for (int i = 0; i < (int)interval_prefixes_.size(); i++) {
-	symbol_freq_list->push_back(std::make_pair(interval_prefixes_[i],
+    for (int i = 0; i < (int)interval_boundaries_.size(); i++) {
+	symbol_freq_list->push_back(std::make_pair(interval_boundaries_[i],
 						   interval_freqs_[i]));
     }
     return true;
@@ -96,14 +96,13 @@ void NGramSS::fillInGap (const std::vector<std::string>& most_freq_symbols) {
 	interval_prefixes_.push_back(str1);
 	interval_boundaries_.push_back(str1);
 
-	if (str2[n_ - 1] - str1[n_ - 1] != 1) {
-	    std::string str1_right_bound = str1;
-	    str1_right_bound[n_ - 1] += 1;
+	std::string str1_right_bound = str1;
+	str1_right_bound[n_ - 1] += 1;
+	if (str1_right_bound.compare(str2) != 0) {
 	    interval_boundaries_.push_back(str1_right_bound);
-
 	    if (str1[0] != str2[0]) {
 		interval_prefixes_.push_back(std::string(1, str1[0]));
-		fillInSingleChar((int)(str1[0] + 1), (int)str2[0]);
+		fillInSingleChar((int)(uint8_t)(str1[0] + 1), (int)(uint8_t)str2[0]);
 	    } else {
 		std::string common_str = commonPrefix(str1, str2);
 		interval_prefixes_.push_back(common_str);

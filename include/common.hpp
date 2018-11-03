@@ -1,6 +1,8 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#include <string>
+
 namespace ope {
 
 typedef struct {
@@ -11,6 +13,12 @@ typedef struct {
 typedef typename std::pair<std::string, int64_t> SymbolFreq;
 
 typedef typename std::pair<std::string, Code> SymbolCode;
+
+typedef struct {
+    char start_key[3];
+    uint8_t common_prefix_len;
+    Code code;
+} Interval3Gram;
 
 } // namespace ope
 

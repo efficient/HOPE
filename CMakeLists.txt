@@ -15,6 +15,7 @@ enable_testing()
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/symbol_selectors")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/code_generators")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/dictionaries")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/encoders")
 
 add_subdirectory(test)

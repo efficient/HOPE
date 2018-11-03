@@ -1,0 +1,116 @@
+#ifndef ARRAY_3GRAM_DICT_H
+#define ARRAY_3GRAM_DICT_H
+
+#include "dictionary.hpp"
+
+namespace ope {
+
+class Array3GramDict : public  Dictionary {
+public:
+    Array3GramDict() {};
+    bool build (const std::vector<SymbolCode>& symbol_code_list);
+    Code lookup (const char* symbol, const int symbol_len, int& prefix_len) const;
+    int numEntries () const;
+    int64_t memoryUse () const;
+
+private:
+    int binarySearch(const char* symbol, const int symbol_len) const;
+    int compareDictEntry(const char* s1, const int s1_len, const int dict_idx) const;
+    
+    std::vector<Interval3Gram> dict_;
+};
+
+bool Array3GramDict::build (const std::vector<SymbolCode>& symbol_code_list) {
+    for (int i = 0; i < (int)symbol_code_list.size(); i++) {
+	Interval3Gram interval;
+	std::string symbol = symbol_code_list[i].first;
+	int symbol_len = symbol.length();
+	assert(symbol_len <= 3);
+	for (int i = 0; i < 3; i++) {
+	    if (i < symbol_len)
+		(interval.start_key)[i] = symbol[i];
+	    else
+		(interval.start_key)[i] = 0;
+	}
+	if (i < (int)symbol_code_list.size() - 1) {
+	    interval.common_prefix_len = 0;
+	    std::string next_symbol = symbol_code_list[i + 1].first;
+	    int next_symbol_len = next_symbol.length();
+	    next_symbol[next_symbol_len - 1] -= 1;
+	    int j = 0;
+	    while (j < symbol_len && j < next_symbol_len
+		   && symbol[j] == next_symbol[j]) {
+		interval.common_prefix_len++;
+		j++;
+	    }
+	} else {
+	    interval.common_prefix_len = (uint8_t)symbol.length();
+	}
+
+	assert(interval.common_prefix_len > 0);
+	
+	interval.code.code = symbol_code_list[i].second.code;
+	interval.code.len = symbol_code_list[i].second.len;
+	dict_.push_back(interval);
+    }
+    return true;
+}
+    
+Code Array3GramDict::lookup (const char* symbol, const int symbol_len,
+			     int& prefix_len) const {
+    int idx = binarySearch(symbol, symbol_len);
+    prefix_len = dict_[idx].common_prefix_len;
+    return dict_[idx].code;
+}
+    
+int Array3GramDict::numEntries () const {
+    return (int)dict_.size();
+}
+    
+int64_t Array3GramDict::memoryUse () const {
+    return (sizeof(Interval3Gram) * dict_.size());
+}
+
+int Array3GramDict::binarySearch(const char* symbol, const int symbol_len) const {
+    int l = 0;
+    int r = dict_.size();
+    int m = 0;
+    while (r - l > 1) {
+	m = (l + r) >> 1;
+	int cmp = compareDictEntry(symbol, symbol_len, m);
+	if (cmp < 0) {
+	    r = m;
+	} else if (cmp == 0) {
+	    return m;
+	} else {
+	    l = m;
+	}
+    }
+    return l;
+}
+
+int Array3GramDict::compareDictEntry(const char* s1, const int s1_len,
+				     const int dict_idx) const {
+    const char* dict_str = dict_[dict_idx].start_key;
+    for (int i = 0; i < 3; i++) {
+	if (i >= s1_len) {
+	    if (dict_str[i] == 0)
+		return 0;
+	    else
+		return -1;
+	}
+	if ((uint8_t)s1[i] < (uint8_t)dict_str[i])
+	    return -1;
+	if ((uint8_t)s1[i] > (uint8_t)dict_str[i])
+	    return 1;
+    }
+    if (s1_len > 3) {
+	return 1;
+    } else {
+	return 0;
+    }
+}
+
+} // namespace ope
+
+#endif // ARRAY_3GRAM_DICT_H

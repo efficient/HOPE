@@ -13,4 +13,5 @@ add_unit_test(test_ngram_ss)
 add_unit_test(test_hu_tucker_cg)
 add_unit_test(test_single_char_encoder)
 add_unit_test(test_double_char_encoder)
+add_unit_test(test_ngram_encoder)
 

@@ -12,8 +12,8 @@ namespace ope {
 class SymbolSelector {
 public:
     virtual bool selectSymbols (const std::vector<std::string>& key_list,
-                                const int64_t num_limit,
-                                std::vector<SymbolFreq>* symbol_freq_list) = 0;
+				const int64_t num_limit,
+				std::vector<SymbolFreq>* symbol_freq_list) = 0;    
 };
 
 } // namespace ope
