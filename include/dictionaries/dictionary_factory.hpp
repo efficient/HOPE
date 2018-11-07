@@ -3,6 +3,7 @@
 
 #include "dictionary.hpp"
 #include "array_3gram_dict.hpp"
+#include "trie_3gram_dict.hpp"
 
 namespace ope {
 
@@ -10,7 +11,8 @@ class DictionaryFactory {
 public:
     static Dictionary* createDictionary(const int type) {
         if (type == 3)
-            return new Array3GramDict();
+            //return new Array3GramDict();
+	    return new Trie3GramDict();
 	else
 	    return new Array3GramDict();
     }

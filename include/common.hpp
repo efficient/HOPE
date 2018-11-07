@@ -10,6 +10,11 @@ typedef struct {
     int8_t len;
 } Code;
 
+typedef struct {
+    uint8_t common_prefix_len;
+    Code code;
+} IntervalCode;
+
 typedef typename std::pair<std::string, int64_t> SymbolFreq;
 
 typedef typename std::pair<std::string, Code> SymbolCode;

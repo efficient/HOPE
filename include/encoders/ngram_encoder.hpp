@@ -11,7 +11,7 @@ namespace ope {
 
 class NGramEncoder : public Encoder {
 public:
-    static const int kCgType = 0;
+    static const int kCgType = 0;    
     
     NGramEncoder(int n) : n_(n) {};
 

@@ -118,7 +118,7 @@ void NGramSS::fillInGap (const std::vector<std::string>& most_freq_symbols) {
     interval_boundaries_.push_back(last_str_right_bound);
     interval_prefixes_.push_back(std::string(1, last_str[0]));
 
-    fillInSingleChar((int)(last_str[0] + 1), 255);
+    fillInSingleChar((int)(uint8_t)(last_str[0] + 1), 255);
 }
 
 void NGramSS::fillInSingleChar (const int first, const int last) {
