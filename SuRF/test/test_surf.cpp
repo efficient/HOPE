@@ -36,7 +36,6 @@ public:
     virtual void TearDown () {};
 
     void newSuRFWords(SuffixType suffix_type, level_t suffix_len);
-    void newSuRFInts(SuffixType suffix_type, level_t suffix_len);
 
     std::string encodeString(const std::string& key);
 
@@ -68,13 +67,13 @@ std::string SuRFUnitTest::encodeString(const std::string& key) {
 TEST_F (SuRFUnitTest, lookupWordTest) {
     encoder_ = ope::EncoderFactory::createEncoder(kEncoderType);
     encoder_->build(words, kDictSizeLimit);
-    for (unsigned i = 0; i < words.size(); i++) {
+    for (int i = 0; i < (int)words.size(); i++) {
 	words_compressed_.push_back(encodeString(words[i]));
     }
     for (int t = 0; t < kNumSuffixType; t++) {
 	for (int k = 0; k < kNumSuffixLen; k++) {
 	    newSuRFWords(kSuffixTypeList[t], kSuffixLenList[k]);
-	    for (unsigned i = 0; i < words.size(); i++) {
+	    for (int i = 0; i < (int)words.size(); i++) {
 		std::string enc_str = encodeString(words[i]);
 		bool key_exist = surf_->lookupKey(enc_str);
 		ASSERT_TRUE(key_exist);
