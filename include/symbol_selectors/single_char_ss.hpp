@@ -8,6 +8,7 @@ namespace ope {
 class SingleCharSS : public SymbolSelector {
 public:
     SingleCharSS();
+    ~SingleCharSS() {};
 
     bool selectSymbols (const std::vector<std::string>& key_list,
                         const int64_t num_limit,

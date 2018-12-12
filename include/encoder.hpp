@@ -9,6 +9,8 @@ namespace ope {
 
 class Encoder {
 public:
+    virtual ~Encoder() {};
+    
     virtual bool build (const std::vector<std::string>& key_list,
                         const int64_t dict_size_limit) = 0;
 

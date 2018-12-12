@@ -14,16 +14,16 @@ namespace ope {
 
 namespace doublecharencodertest {
 
-static const std::string kFilePath = "../../test/words.txt";
+static const std::string kFilePath = "../../datasets/words.txt";
 static const int kWordTestSize = 234369;
 static std::vector<std::string> words;
-static const std::string kEmailFilePath = "../../test/emails.txt";
+static const std::string kEmailFilePath = "../../datasets/emails.txt";
 static const int kEmailTestSize = 25000000;
 static std::vector<std::string> emails;
-static const std::string kWikiFilePath = "../../test/wikis.txt";
+static const std::string kWikiFilePath = "../../datasets/wikis.txt";
 static const int kWikiTestSize = 14000000;
 static std::vector<std::string> wikis;
-static const std::string kUrlFilePath = "../../test/urls.txt";
+static const std::string kUrlFilePath = "../../datasets/urls.txt";
 static const int kUrlTestSize = 25000000;
 static std::vector<std::string> urls;
 static const int kLongestCodeLen = 4096;
@@ -58,7 +58,7 @@ TEST_F (DoubleCharEncoderTest, wordTest) {
 	ASSERT_TRUE(cmp < 0);
     }
 }
-
+    /*
 TEST_F (DoubleCharEncoderTest, emailTest) {
     DoubleCharEncoder* encoder = new DoubleCharEncoder();
     encoder->build(emails, 65536);
@@ -109,7 +109,7 @@ TEST_F (DoubleCharEncoderTest, urlTest) {
 	ASSERT_TRUE(cmp < 0);
     }
 }
-
+    */
 void loadWords() {
     std::ifstream infile(kFilePath);
     std::string key;
@@ -161,8 +161,8 @@ void loadUrls() {
 int main (int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);
     ope::doublecharencodertest::loadWords();
-    ope::doublecharencodertest::loadEmails();
-    ope::doublecharencodertest::loadWikis();
-    ope::doublecharencodertest::loadUrls();
+    //ope::doublecharencodertest::loadEmails();
+    //ope::doublecharencodertest::loadWikis();
+    //ope::doublecharencodertest::loadUrls();
     return RUN_ALL_TESTS();
 }

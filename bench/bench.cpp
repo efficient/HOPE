@@ -7,9 +7,9 @@
 
 #include "encoder_factory.hpp"
 
-static const std::string file_email = "../../test/emails.txt";
-static const std::string file_wiki = "../../test/wikis.txt";
-static const std::string file_url = "../../test/urls.txt";
+static const std::string file_email = "../../datasets/emails.txt";
+static const std::string file_wiki = "../../datasets/wikis.txt";
+static const std::string file_url = "../../datasets/urls.txt";
 
 static const int kLongestCodeLen = 4096;
 
@@ -63,21 +63,21 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> emails;
     std::vector<std::string> emails_shuffle;
     int64_t total_len_email = loadKeys(file_email, emails, emails_shuffle);
-    //exec(1, 1000, emails, emails_shuffle, total_len_email);
+    exec(1, 1000, emails, emails_shuffle, total_len_email);
 
     std::vector<std::string> wikis;
     std::vector<std::string> wikis_shuffle;
     int64_t total_len_wiki = loadKeys(file_wiki, wikis, wikis_shuffle);
-    //exec(1, 1000, wikis, wikis_shuffle, total_len_wiki);
+    exec(1, 1000, wikis, wikis_shuffle, total_len_wiki);
 
     std::vector<std::string> urls;
     std::vector<std::string> urls_shuffle;
     int64_t total_len_url = loadKeys(file_url, urls, urls_shuffle);
-    //exec(1, 1000, urls, urls_shuffle, total_len_url);
+    exec(1, 1000, urls, urls_shuffle, total_len_url);
 
-    //exec(2, 65536, emails, emails_shuffle, total_len_email);
-    //exec(2, 65536, wikis, wikis_shuffle, total_len_wiki);
-    //exec(2, 65536, urls, urls_shuffle, total_len_url);
+    exec(2, 65536, emails, emails_shuffle, total_len_email);
+    exec(2, 65536, wikis, wikis_shuffle, total_len_wiki);
+    exec(2, 65536, urls, urls_shuffle, total_len_url);
 
     exec(3, 65536, emails, emails_shuffle, total_len_email);
     exec(3, 65536, wikis, wikis_shuffle, total_len_wiki);

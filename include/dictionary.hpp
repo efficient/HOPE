@@ -11,6 +11,8 @@ namespace ope {
 
 class Dictionary {
 public:
+    virtual ~Dictionary() {};
+    
     virtual bool build (const std::vector<SymbolCode>& symbol_code_list) = 0;
 
     virtual Code lookup (const char* symbol, const int symbol_len, int& prefix_len) const = 0;

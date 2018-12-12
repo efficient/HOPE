@@ -14,6 +14,7 @@ public:
     static const int kCgType = 0;    
     
     NGramEncoder(int n) : n_(n) {};
+    ~NGramEncoder() { delete dict_; };
 
     bool build (const std::vector<std::string>& key_list,
                 const int64_t dict_size_limit);

@@ -12,16 +12,16 @@ namespace ope {
 
 namespace ngramsstest {
 
-static const std::string kFilePath = "../../test/words.txt";
+static const std::string kFilePath = "../../datasets/words.txt";
 static const int kWordTestSize = 234369;
 static std::vector<std::string> words;
-static const std::string kEmailFilePath = "../../test/emails.txt";
+static const std::string kEmailFilePath = "../../datasets/emails.txt";
 static const int kEmailTestSize = 25000000;
 static std::vector<std::string> emails;
-static const std::string kWikiFilePath = "../../test/wikis.txt";
+static const std::string kWikiFilePath = "../../datasets/wikis.txt";
 static const int kWikiTestSize = 14000000;
 static std::vector<std::string> wikis;
-static const std::string kUrlFilePath = "../../test/urls.txt";
+static const std::string kUrlFilePath = "../../datasets/urls.txt";
 static const int kUrlTestSize = 25000000;
 static std::vector<std::string> urls;
 
@@ -51,7 +51,7 @@ TEST_F (NGramSSTest, word4Test) {
     ss->selectSymbols(words, 200, &symbol_freq_list);
     print(symbol_freq_list);
 }
-
+    /*
 TEST_F (NGramSSTest, email3Test) {
     NGramSS* ss = new NGramSS(3);
     std::vector<SymbolFreq> symbol_freq_list;
@@ -93,7 +93,7 @@ TEST_F (NGramSSTest, url4Test) {
     ss->selectSymbols(urls, 200, &symbol_freq_list);
     print(symbol_freq_list);
 }
-
+    */
 void loadWords() {
     std::ifstream infile(kFilePath);
     std::string key;
@@ -145,8 +145,8 @@ void loadUrls() {
 int main (int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);
     ope::ngramsstest::loadWords();
-    ope::ngramsstest::loadEmails();
-    ope::ngramsstest::loadWikis();
-    ope::ngramsstest::loadUrls();
+    //ope::ngramsstest::loadEmails();
+    //ope::ngramsstest::loadWikis();
+    //ope::ngramsstest::loadUrls();
     return RUN_ALL_TESTS();
 }

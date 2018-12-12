@@ -1,6 +1,8 @@
 #ifndef HU_TUCKER_CG_H
 #define HU_TUCKER_CG_H
 
+#include <queue>
+
 #include "code_generator.hpp"
 
 namespace ope {
@@ -25,6 +27,7 @@ public:
     };
 
     HuTuckerCG() {};
+    ~HuTuckerCG();
     bool genCodes(const std::vector<SymbolFreq>& symbol_freq_list,
                   std::vector<SymbolCode>* symbol_code_list);
     double getCompressionRate() const;
@@ -36,10 +39,12 @@ private:
 
     void buildBinaryTree();
     void initLeafs();
-    int getMaxCodeLen();
+    int getMaxCodeLen() const;
     void mergeNodes(const int idx1, const int idx2);
 
     Code lookup(const int idx) const;
+
+    void destroyBinaryTree();
 
     std::vector<std::string> symbol_list_;
     std::vector<int64_t> freq_list_;
@@ -47,6 +52,10 @@ private:
     std::vector<Node*> node_list_;
     Node* root_;
 };
+
+HuTuckerCG::~HuTuckerCG() {
+    destroyBinaryTree();
+}
 
 bool HuTuckerCG::genCodes (const std::vector<SymbolFreq>& symbol_freq_list,
                            std::vector<SymbolCode>* symbol_code_list) {
@@ -188,7 +197,7 @@ void HuTuckerCG::initLeafs() {
     }
 }
 
-int HuTuckerCG::getMaxCodeLen() {
+int HuTuckerCG::getMaxCodeLen() const {
     int max_len = 0;
     for (int i = 0; i < (int)code_len_list_.size(); i++) {
         if (code_len_list_[i] > max_len)
@@ -221,6 +230,20 @@ Code HuTuckerCG::lookup(const int idx) const {
         code.len++;
     }
     return code;
+}
+
+void HuTuckerCG::destroyBinaryTree() {
+    std::queue<Node*> node_q;
+    node_q.push(root_);
+    while (!node_q.empty()) {
+	Node* n = node_q.front();
+	if (!n->isLeaf()) {
+	    node_q.push(n->left_child);
+	    node_q.push(n->right_child);
+	}
+	node_q.pop();
+	delete n;
+    }
 }
 
 } // namespace ope

@@ -11,6 +11,7 @@ namespace ope {
 class NGramSS : public SymbolSelector {
 public:
     NGramSS(int n) : n_(n) {};
+    ~NGramSS() {};
 
     bool selectSymbols (const std::vector<std::string>& key_list,
                         const int64_t num_limit,

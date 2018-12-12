@@ -11,6 +11,7 @@ namespace ope {
 class SingleCharEncoder : public Encoder {
 public:
     SingleCharEncoder() {};
+    ~SingleCharEncoder() {};
 
     bool build (const std::vector<std::string>& key_list,
                 const int64_t dict_size_limit);

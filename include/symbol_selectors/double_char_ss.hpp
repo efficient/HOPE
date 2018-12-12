@@ -8,6 +8,7 @@ namespace ope {
 class DoubleCharSS : public SymbolSelector {
 public:
     DoubleCharSS();
+    ~DoubleCharSS() {};
 
     bool selectSymbols (const std::vector<std::string>& key_list,
                         const int64_t num_limit,

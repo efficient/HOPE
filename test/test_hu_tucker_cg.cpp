@@ -13,16 +13,16 @@ namespace ope {
 
 namespace hutuckertest {
 
-static const std::string kFilePath = "../../test/words.txt";
+static const std::string kFilePath = "../../datasets/words.txt";
 static const int kWordTestSize = 234369;
 static std::vector<std::string> words;
-static const std::string kEmailFilePath = "../../test/emails.txt";
+static const std::string kEmailFilePath = "../../datasets/emails.txt";
 static const int kEmailTestSize = 25000000;
 static std::vector<std::string> emails;
-static const std::string kWikiFilePath = "../../test/wikis.txt";
+static const std::string kWikiFilePath = "../../datasets/wikis.txt";
 static const int kWikiTestSize = 14000000;
 static std::vector<std::string> wikis;
-static const std::string kUrlFilePath = "../../test/urls.txt";
+static const std::string kUrlFilePath = "../../datasets/urls.txt";
 static const int kUrlTestSize = 25000000;
 static std::vector<std::string> urls;
 
@@ -51,7 +51,7 @@ void printCPR(const HuTuckerCG* code_generator) {
 }
 
 //======================= Word Tests ==============================
-/*
+
 TEST_F (HuTuckerCGTest, printSingleCharWordTest) {
     std::vector<SymbolFreq> symbol_freq_list;
     SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(1);
@@ -99,9 +99,9 @@ TEST_F (HuTuckerCGTest, print4GramWordTest) {
 
     printCPR(code_generator);
 }
-    */
-//======================= Email Tests ==============================
 
+//======================= Email Tests ==============================
+/*
 TEST_F (HuTuckerCGTest, printSingleCharEmailTest) {
     std::vector<SymbolFreq> symbol_freq_list;
     SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(1);
@@ -149,9 +149,9 @@ TEST_F (HuTuckerCGTest, print4GramEmailTest) {
 
     printCPR(code_generator);
 }
-
+*/
 //======================= Wiki Tests ==============================
-
+/*
 TEST_F (HuTuckerCGTest, printSingleCharWikiTest) {
     std::vector<SymbolFreq> symbol_freq_list;
     SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(1);
@@ -199,9 +199,9 @@ TEST_F (HuTuckerCGTest, print4GramWikiTest) {
 
     printCPR(code_generator);
 }
-
+*/
 //======================= Url Tests ==============================
-
+/*
 TEST_F (HuTuckerCGTest, printSingleCharUrlTest) {
     std::vector<SymbolFreq> symbol_freq_list;
     SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(1);
@@ -249,7 +249,7 @@ TEST_F (HuTuckerCGTest, print4GramUrlTest) {
 
     printCPR(code_generator);
 }
-
+*/
 void loadWords() {
     std::ifstream infile(kFilePath);
     std::string key;
@@ -301,8 +301,8 @@ void loadUrls() {
 int main (int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);
     ope::hutuckertest::loadWords();
-    ope::hutuckertest::loadEmails();
-    ope::hutuckertest::loadWikis();
-    ope::hutuckertest::loadUrls();
+    //ope::hutuckertest::loadEmails();
+    //ope::hutuckertest::loadWikis();
+    //ope::hutuckertest::loadUrls();
     return RUN_ALL_TESTS();
 }

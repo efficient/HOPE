@@ -10,6 +10,8 @@ namespace ope {
 
 class CodeGenerator {
 public:
+    virtual ~CodeGenerator() {};
+    
     virtual bool genCodes (const std::vector<SymbolFreq>& symbol_freq_list,
                            std::vector<SymbolCode>* symbol_code_list) = 0;
 
