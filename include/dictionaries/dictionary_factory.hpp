@@ -3,7 +3,9 @@
 
 #include "dictionary.hpp"
 #include "array_3gram_dict.hpp"
+#include "array_4gram_dict.hpp"
 #include "trie_3gram_dict.hpp"
+#include "trie_4gram_dict.hpp"
 
 namespace ope {
 
@@ -13,8 +15,11 @@ public:
         if (type == 3)
             //return new Array3GramDict();
 	    return new Trie3GramDict();
+	else if (type == 4)
+	    //return new Array4GramDict();
+	    return new Trie4GramDict();
 	else
-	    return new Array3GramDict();
+	    return nullptr;
     }
 };
 

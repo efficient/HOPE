@@ -82,6 +82,10 @@ int main(int argc, char *argv[]) {
     exec(3, 65536, emails, emails_shuffle, total_len_email);
     exec(3, 65536, wikis, wikis_shuffle, total_len_wiki);
     exec(3, 65536, urls, urls_shuffle, total_len_url);
+
+    exec(4, 65536, emails, emails_shuffle, total_len_email);
+    exec(4, 65536, wikis, wikis_shuffle, total_len_wiki);
+    exec(4, 65536, urls, urls_shuffle, total_len_url);
     
     return 0;
 }

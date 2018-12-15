@@ -17,8 +17,8 @@ public:
             return new DoubleCharEncoder();
 	else if (type == 3)
 	    return new NGramEncoder(3);
-	//else if (type == 4)
-	//return new NGramEncoder(4);
+	else if (type == 4)
+	    return new NGramEncoder(4);
 	else
 	    return new SingleCharEncoder();
     }

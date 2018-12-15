@@ -47,28 +47,76 @@ TEST_F (NGramEncoderTest, word3Test) {
     NGramEncoder* encoder = new NGramEncoder(3);
     encoder->build(words, 10000);
     uint8_t* buffer = new uint8_t[kLongestCodeLen];
+    int64_t total_len = 0;
+    int64_t total_enc_len = 0;
     for (int i = 0; i < (int)words.size() - 1; i++) {
 	int len = encoder->encode(words[i], buffer);
+	total_len += (words[i].length() * 8);
+	total_enc_len += len;
 	std::string str1 = std::string((const char*)buffer, getByteLen(len));
 	len = encoder->encode(words[i + 1], buffer);
 	std::string str2 = std::string((const char*)buffer, getByteLen(len));
 	int cmp = str1.compare(str2);
 	ASSERT_TRUE(cmp < 0);
     }
+    std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
+}
+
+TEST_F (NGramEncoderTest, word4Test) {
+    NGramEncoder* encoder = new NGramEncoder(4);
+    encoder->build(words, 10000);
+    uint8_t* buffer = new uint8_t[kLongestCodeLen];
+    int64_t total_len = 0;
+    int64_t total_enc_len = 0;
+    for (int i = 0; i < (int)words.size() - 1; i++) {
+	int len = encoder->encode(words[i], buffer);
+	total_len += (words[i].length() * 8);
+	total_enc_len += len;
+	std::string str1 = std::string((const char*)buffer, getByteLen(len));
+	len = encoder->encode(words[i + 1], buffer);
+	std::string str2 = std::string((const char*)buffer, getByteLen(len));
+	int cmp = str1.compare(str2);
+	ASSERT_TRUE(cmp < 0);
+    }
+    std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
 }
     /*
 TEST_F (NGramEncoderTest, email3Test) {
     NGramEncoder* encoder = new NGramEncoder(3);
     encoder->build(emails, 65536);
     uint8_t* buffer = new uint8_t[kLongestCodeLen];
+    int64_t total_len = 0;
+    int64_t total_enc_len = 0;
     for (int i = 0; i < (int)emails.size() - 1; i++) {
 	int len = encoder->encode(emails[i], buffer);
+	total_len += (emails[i].length() * 8);
+	total_enc_len += len;
 	std::string str1 = std::string((const char*)buffer, getByteLen(len));
 	len = encoder->encode(emails[i + 1], buffer);
 	std::string str2 = std::string((const char*)buffer, getByteLen(len));
 	int cmp = str1.compare(str2);
 	ASSERT_TRUE(cmp < 0);
     }
+    std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
+}
+
+TEST_F (NGramEncoderTest, email4Test) {
+    NGramEncoder* encoder = new NGramEncoder(4);
+    encoder->build(emails, 65536);
+    uint8_t* buffer = new uint8_t[kLongestCodeLen];
+    int64_t total_len = 0;
+    int64_t total_enc_len = 0;
+    for (int i = 0; i < (int)emails.size() - 1; i++) {
+	int len = encoder->encode(emails[i], buffer);
+	total_len += (emails[i].length() * 8);
+	total_enc_len += len;
+	std::string str1 = std::string((const char*)buffer, getByteLen(len));
+	len = encoder->encode(emails[i + 1], buffer);
+	std::string str2 = std::string((const char*)buffer, getByteLen(len));
+	int cmp = str1.compare(str2);
+	ASSERT_TRUE(cmp < 0);
+    }
+    std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
 }
 
 TEST_F (NGramEncoderTest, wiki3Test) {
