@@ -57,7 +57,8 @@ bool NGramSS::selectSymbols (const std::vector<std::string>& key_list,
 void NGramSS::countSymbolFreq (const std::vector<std::string>& key_list) {
     std::unordered_map<std::string, int64_t>::iterator iter;
     for (int i = 0; i < (int)key_list.size(); i++) {
-        for (int j = 0; j < (int)key_list[i].length() - 2; j++) {
+        //for (int j = 0; j < (int)key_list[i].length() - 2; j++) {
+	for (int j = 0; j < (int)key_list[i].length() - n_ + 1; j++) {
 	    std::string ngram = key_list[i].substr(j, n_);
 	    iter = freq_map_.find(ngram);
 	    if (iter == freq_map_.end())

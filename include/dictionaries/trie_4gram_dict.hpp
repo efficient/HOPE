@@ -1,11 +1,11 @@
-#ifndef TRIE_3GRAM_DICT_H
-#define TRIE_3GRAM_DICT_H
+#ifndef TRIE_4GRAM_DICT_H
+#define TRIE_4GRAM_DICT_H
 
 #include "dictionary.hpp"
 
 namespace ope {
 
-class Trie3GramDict : public  Dictionary {
+class Trie4GramDict : public  Dictionary {
 public:    
     class TrieNode {
     public:
@@ -72,8 +72,8 @@ public:
     };
 
 public:
-    Trie3GramDict();
-    ~Trie3GramDict();
+    Trie4GramDict();
+    ~Trie4GramDict();
     bool build (const std::vector<SymbolCode>& symbol_code_list);
     Code lookup (const char* symbol, const int symbol_len, int& prefix_len) const;
     int numEntries () const;
@@ -83,52 +83,60 @@ private:
     void buildTrie(const std::vector<SymbolCode>& symbol_code_list,
 		   std::vector<TrieNode>& level_1,
 		   std::vector<TrieNode>& level_2,
+		   std::vector<TrieNode>& level_3,
 		   std::vector<IntervalCode>& leafs);
     void copyNodesToArray(const std::vector<TrieNode>& level_1,
 			  const std::vector<TrieNode>& level_2,
+			  const std::vector<TrieNode>& level_3,
 			  const std::vector<IntervalCode>& leafs);
     void fillinOnesBefore();
 
     int dict_size_;
     int level_1_num_nodes_;
     int level_2_num_nodes_;
+    int level_3_num_nodes_;
     int num_leafs_;
     TrieNode* root_;
     TrieNode* level_1_;
     TrieNode* level_2_;
+    TrieNode* level_3_;
     IntervalCode* leafs_;
 };
 
-Trie3GramDict::Trie3GramDict() {
+Trie4GramDict::Trie4GramDict() {
     root_ = nullptr;
     level_1_num_nodes_ = 0;
     level_2_num_nodes_ = 0;
+    level_3_num_nodes_ = 0;
     num_leafs_ = 0;
 }
 
-Trie3GramDict::~Trie3GramDict() {
+Trie4GramDict::~Trie4GramDict() {
     delete root_;
     delete[] level_1_;
     delete[] level_2_;
+    delete[] level_3_;
     delete[] leafs_;
 }
 
-bool Trie3GramDict::build (const std::vector<SymbolCode>& symbol_code_list) {
+bool Trie4GramDict::build (const std::vector<SymbolCode>& symbol_code_list) {
     dict_size_ = (int)symbol_code_list.size();
     root_ = new TrieNode();
-    std::vector<TrieNode> level_1, level_2;
+    std::vector<TrieNode> level_1, level_2, level_3;
     std::vector<IntervalCode> leafs;
-    buildTrie(symbol_code_list, level_1, level_2, leafs);
-    copyNodesToArray(level_1, level_2, leafs);
+    buildTrie(symbol_code_list, level_1, level_2, level_3, leafs);
+    copyNodesToArray(level_1, level_2, level_3, leafs);
     fillinOnesBefore();
     return true;
 }
 
-void Trie3GramDict::buildTrie(const std::vector<SymbolCode>& symbol_code_list,
+void Trie4GramDict::buildTrie(const std::vector<SymbolCode>& symbol_code_list,
 			      std::vector<TrieNode>& level_1,
 			      std::vector<TrieNode>& level_2,
+			      std::vector<TrieNode>& level_3,
 			      std::vector<IntervalCode>& leafs) {
-    int prev_char_idx_0 = -1, prev_char_idx_1 = -1, prev_char_idx_2 = -1;
+    int prev_char_idx_0 = -1, prev_char_idx_1 = -1,
+	prev_char_idx_2 = -1, prev_char_idx_3 = -1;
     for (int i = 0; i < dict_size_; i++) {
 	std::string symbol = symbol_code_list[i].first;
 	int symbol_len = symbol.length();
@@ -139,22 +147,33 @@ void Trie3GramDict::buildTrie(const std::vector<SymbolCode>& symbol_code_list,
 	int char_idx_2 = 0;
 	if (symbol_len > 2)
 	    char_idx_2 = (uint8_t)symbol[2];
+	int char_idx_3 = 0;
+	if (symbol_len > 3)
+	    char_idx_3 = (uint8_t)symbol[3];
 
 	if (char_idx_0 > prev_char_idx_0) {
 	    level_1.push_back(TrieNode());
 	    level_2.push_back(TrieNode());
+	    level_3.push_back(TrieNode());
 	} else if (char_idx_1 > prev_char_idx_1) {
 	    assert(char_idx_0 == prev_char_idx_0);
 	    level_2.push_back(TrieNode());
+	    level_3.push_back(TrieNode());
+	} else if (char_idx_2 > prev_char_idx_2) {
+	    assert(char_idx_0 == prev_char_idx_0);
+	    assert(char_idx_1 == prev_char_idx_1);
+	    level_3.push_back(TrieNode());
 	} else {
 	    assert(char_idx_0 == prev_char_idx_0);
 	    assert(char_idx_1 == prev_char_idx_1);
-	    assert(char_idx_2 > prev_char_idx_2);
+	    assert(char_idx_2 == prev_char_idx_2);
+	    assert(char_idx_3 > prev_char_idx_3);
 	}
 
 	root_->setBit(char_idx_0);
 	level_1[level_1.size() - 1].setBit(char_idx_1);
 	level_2[level_2.size() - 1].setBit(char_idx_2);
+	level_3[level_3.size() - 1].setBit(char_idx_3);
 
 	IntervalCode leaf;
 	leaf.common_prefix_len = 0;
@@ -179,11 +198,13 @@ void Trie3GramDict::buildTrie(const std::vector<SymbolCode>& symbol_code_list,
 	prev_char_idx_0 = char_idx_0;
 	prev_char_idx_1 = char_idx_1;
 	prev_char_idx_2 = char_idx_2;
+	prev_char_idx_3 = char_idx_3;
     }
 }
 
-void Trie3GramDict::copyNodesToArray(const std::vector<TrieNode>& level_1,
+void Trie4GramDict::copyNodesToArray(const std::vector<TrieNode>& level_1,
 				     const std::vector<TrieNode>& level_2,
+				     const std::vector<TrieNode>& level_3,
 				     const std::vector<IntervalCode>& leafs) {
     level_1_num_nodes_ = level_1.size();
     level_1_ = new TrieNode[level_1_num_nodes_];
@@ -197,6 +218,12 @@ void Trie3GramDict::copyNodesToArray(const std::vector<TrieNode>& level_1,
 	level_2_[i].copyNode(&level_2[i]);
     }
 
+    level_3_num_nodes_ = level_3.size();
+    level_3_ = new TrieNode[level_3_num_nodes_];
+    for (int i = 0; i < level_3_num_nodes_; i++) {
+	level_3_[i].copyNode(&level_3[i]);
+    }
+
     num_leafs_ = leafs.size();
     leafs_ = new IntervalCode[num_leafs_];
     for (int i = 0; i < num_leafs_; i++) {
@@ -206,7 +233,7 @@ void Trie3GramDict::copyNodesToArray(const std::vector<TrieNode>& level_1,
     }
 }
 
-void Trie3GramDict::fillinOnesBefore() {
+void Trie4GramDict::fillinOnesBefore() {
     int level_1_ones = level_1_[0].countBits(255);
     for (int i = 1; i < level_1_num_nodes_; i++) {
 	level_1_[i].setOnesBefore(level_1_ones);
@@ -217,9 +244,14 @@ void Trie3GramDict::fillinOnesBefore() {
 	level_2_[i].setOnesBefore(level_2_ones);
 	level_2_ones += level_2_[i].countBits(255);
     }
+    int level_3_ones = level_3_[0].countBits(255);
+    for (int i = 1; i < level_3_num_nodes_; i++) {
+	level_3_[i].setOnesBefore(level_3_ones);
+	level_3_ones += level_3_[i].countBits(255);
+    }
 }
 
-Code Trie3GramDict::lookup (const char* symbol, const int symbol_len,
+Code Trie4GramDict::lookup (const char* symbol, const int symbol_len,
 			    int& prefix_len) const {
     int char_idx_0 = (uint8_t)symbol[0];
     int char_idx_1 = 0;
@@ -228,31 +260,50 @@ Code Trie3GramDict::lookup (const char* symbol, const int symbol_len,
     int char_idx_2 = 0;
     if (symbol_len > 2)
 	char_idx_2 = (uint8_t)symbol[2];
+    int char_idx_3 = 0;
+    if (symbol_len > 3)
+	char_idx_3 = (uint8_t)symbol[3];
 
     int level_1_node_num = root_->countBits(char_idx_0) - 1;
     TrieNode level_1_node = level_1_[level_1_node_num];
     int level_2_node_num = level_1_node.getOnesBefore()
 	+ level_1_node.countBits(char_idx_1) - 1;
     TrieNode level_2_node = level_2_[level_2_node_num];
-    int leaf_num = level_2_node.getOnesBefore() - 1;
-    if (level_1_node.readBit(char_idx_1))
-	leaf_num += level_2_node.countBits(char_idx_2);
-    else
-	leaf_num += level_2_node.countBits(255);
+    
+    int level_3_node_num = level_2_node.getOnesBefore() - 1;
+    bool level_1_mismatch = false;
+    if (level_1_node.readBit(char_idx_1)) {
+	level_3_node_num += level_2_node.countBits(char_idx_2);
+    } else {
+	level_3_node_num += level_2_node.countBits(255);
+	level_1_mismatch = true;
+    }
+    TrieNode level_3_node = level_3_[level_3_node_num];
+
+    int leaf_num = level_3_node.getOnesBefore() - 1;
+    if (level_1_mismatch) {
+	leaf_num += level_3_node.countBits(255);
+    } else {
+	if (level_2_node.readBit(char_idx_2))
+	    leaf_num += level_3_node.countBits(char_idx_3);
+	else
+	    leaf_num += level_3_node.countBits(255);
+    }
+
     prefix_len = leafs_[leaf_num].common_prefix_len;
     return leafs_[leaf_num].code;
 }
     
-int Trie3GramDict::numEntries () const {
+int Trie4GramDict::numEntries () const {
     return dict_size_;
 }
     
-int64_t Trie3GramDict::memoryUse () const {
-    return (sizeof(Trie3GramDict)
-	    + sizeof(TrieNode) * (1 + level_1_num_nodes_ + level_2_num_nodes_)
+int64_t Trie4GramDict::memoryUse () const {
+    return (sizeof(Trie4GramDict)
+	    + sizeof(TrieNode) * (1 + level_1_num_nodes_ + level_2_num_nodes_ + level_3_num_nodes_)
 	    + sizeof(Code) * num_leafs_);
 }
 
 } // namespace ope
 
-#endif // TRIE_3GRAM_DICT_H
+#endif // TRIE_4GRAM_DICT_H

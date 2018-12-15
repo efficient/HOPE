@@ -25,6 +25,12 @@ typedef struct {
     Code code;
 } Interval3Gram;
 
+typedef struct {
+    char start_key[4];
+    uint8_t common_prefix_len;
+    Code code;
+} Interval4Gram;
+
 } // namespace ope
 
 #endif // COMMON_H
