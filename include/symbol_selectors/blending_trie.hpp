@@ -4,6 +4,8 @@
 #include<map>
 #include<list>
 #include<vector>
+#include<iostream>
+#include<fstream> 
 
 #include "common.hpp"
 
@@ -64,6 +66,7 @@ public:
 	void build(const std::map<std::string, int64_t>& freq_map);
 	void insert(std::string key, int64_t freq);
 	void blendingAndGetLeaves(std::vector<SymbolFreq>& freq_vec);
+	void vis(std::string filename);
 
 private:
 	TrieNode *root_;
@@ -92,8 +95,8 @@ void BlendTrie::insert(std::string key, int64_t freq) {
 			node->addChild(key[i], new_node);
 			node = new_node;
 		}
-		node->setFreq(freq);
 	}
+	node->setFreq(freq);
 }
 
 void BlendTrie::blendingAndGetLeaves(std::vector<SymbolFreq>& freq_vec) {
@@ -120,6 +123,35 @@ void BlendTrie::blendingAndGetLeaves(std::vector<SymbolFreq>& freq_vec) {
 		}
 	}
 }
+
+void BlendTrie::vis(std::string filename) {
+	std::ofstream out;
+	out.open(filename);
+	out << "digraph G {" << std::endl;
+	std::list<TrieNode *> l;
+	std::map<TrieNode *, int> id;
+	int cnt = 0;
+	id.insert(std::make_pair(root_, cnt));
+	l.push_back(root_);
+	while (!l.empty()) {
+		TrieNode *cur_node = l.front();
+		l.pop_front();
+		for (auto iter = cur_node->getBegin(); iter != cur_node->getEnd(); iter++) {
+			cnt++;
+			id.insert(std::make_pair(iter->second, cnt));
+			l.push_back(iter->second);
+			out << "\t";
+			out << id.find(cur_node)->second << "->" << cnt <<std::endl;
+		}
+	}
+	for (auto iter = id.begin(); iter != id.end(); iter++) {
+		out << "\t" << iter->second << "[label=\"";
+		out << iter->first->getPrefix() << "\"];" << std::endl;
+	}
+	out.close();
+}
+
+
 
 } // namespace ope
 
