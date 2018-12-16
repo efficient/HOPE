@@ -97,23 +97,22 @@ void BlendTrie::insert(std::string key, int64_t freq) {
 }
 
 void BlendTrie::blendingAndGetLeaves(std::vector<SymbolFreq>& freq_vec) {
-	TrieNode *node = root_;
 	std::list<TrieNode *> l;
-	l.push_back(node);
+	l.push_back(root_);
 	while (!l.empty()) {
 		TrieNode *top_node = l.front();
 		l.pop_front();
 		TrieNode *high_freq_child = nullptr;
 		int64_t high_freq = -1;
-		for(auto iter = node->getBegin(); iter != node->getEnd(); iter++) {
-			l.push_front(iter->second);
+		for(auto iter = top_node->getBegin(); iter != top_node->getEnd(); iter++) {
+			l.push_back(iter->second);
 			iter->second->setPrefix(top_node->getPrefix() + std::string(1, iter->first));
 			if(iter->second->getFreq() > high_freq) {
 				high_freq = iter->second->getFreq();
 				high_freq_child = iter->second;
 			}
 		}
-		if (node->hasChildren()) {
+		if (top_node->hasChildren()) {
 			high_freq_child->setFreq(high_freq_child->getFreq()+top_node->getFreq());
 			top_node->setFreq(0);
 		} else {
