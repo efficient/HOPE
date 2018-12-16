@@ -21,6 +21,8 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/encoders")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/SuRF/include")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/ART/include")
 
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/libcuckoo/libcuckoo")
+
 find_library(JemallocLib jemalloc)
 find_library(TbbLib tbb)
 find_package (Threads)

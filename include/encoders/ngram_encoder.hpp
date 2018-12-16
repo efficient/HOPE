@@ -31,16 +31,43 @@ private:
 
 bool NGramEncoder::build (const std::vector<std::string>& key_list,
 			  const int64_t dict_size_limit) {
+#ifdef PRINT_BUILD_TIME_BREAKDOWN
+    double time_start = getNow();
+#endif
     std::vector<SymbolFreq> symbol_freq_list;
     SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(n_);
     symbol_selector->selectSymbols(key_list, dict_size_limit, &symbol_freq_list);
+#ifdef PRINT_BUILD_TIME_BREAKDOWN
+    double time_end = getNow();
+    double time_diff = time_end - time_start;
+    std::cout << "symbol select time = " << time_diff << std::endl;
+#endif
 
+#ifdef PRINT_BUILD_TIME_BREAKDOWN
+    time_start = getNow();
+#endif
     std::vector<SymbolCode> symbol_code_list;
     CodeGenerator* code_generator = CodeGeneratorFactory::createCodeGenerator(kCgType);
     code_generator->genCodes(symbol_freq_list, &symbol_code_list);
+#ifdef PRINT_BUILD_TIME_BREAKDOWN
+    time_end = getNow();
+    time_diff = time_end - time_start;
+    std::cout << "hu-tucker time = " << time_diff << std::endl;
+#endif
 
+#ifdef PRINT_BUILD_TIME_BREAKDOWN
+    time_start = getNow();
+#endif
     dict_ = DictionaryFactory::createDictionary(n_);
-    return dict_->build(symbol_code_list);
+    //return dict_->build(symbol_code_list);
+    bool ret_val = dict_->build(symbol_code_list);
+#ifdef PRINT_BUILD_TIME_BREAKDOWN
+    time_end = getNow();
+    time_diff = time_end - time_start;
+    std::cout << "dict build time = " << time_diff << std::endl;
+    std::cout << "num entries = " << dict_->numEntries() << std::endl;
+#endif
+    return ret_val;
 }
 
 int NGramEncoder::encode (const std::string& key, uint8_t* buffer) const {

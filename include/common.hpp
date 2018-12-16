@@ -1,7 +1,12 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#include <sys/time.h>
+#include <time.h>
+
 #include <string>
+
+//#define PRINT_BUILD_TIME_BREAKDOWN 1
 
 namespace ope {
 
@@ -30,6 +35,12 @@ typedef struct {
     uint8_t common_prefix_len;
     Code code;
 } Interval4Gram;
+
+double getNow() {
+  struct timeval tv;
+  gettimeofday(&tv, 0);
+  return tv.tv_sec + tv.tv_usec / 1000000.0;
+}
 
 } // namespace ope
 
