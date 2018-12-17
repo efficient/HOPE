@@ -174,7 +174,7 @@ void exec(const int expt_id, const int wkld_id,
     double lat = time_diff * 1000000000 / total_len; // in ns
     double cpr = (total_len * 8.0) / total_enc_len;
 
-    if (expt_id < 0 || expt_id > 5)
+    if (expt_id < 0 || expt_id > 6)
 	std::cout << "ERROR: INVALID EXPT ID!" << std::endl;
     
     if (wkld_id < 0 || wkld_id > 2)
@@ -487,6 +487,25 @@ int main(int argc, char *argv[]) {
 	output_cpr_email_dc.close();
 	output_lat_email_dc.close();
 	output_bt_email_dc.close();
+    }
+    else if (expt_id == 6) {
+	//-------------------------------------------------------------
+	// Build Time Breakdown; Expt ID = 6
+	//-------------------------------------------------------------
+	std::cout << "------------------------------------------------" << std::endl;
+	std::cout << "Build Time Breakdown; Expt ID = 6" << std::endl;
+	std::cout << "------------------------------------------------" << std::endl;
+
+	int percent_list[3] = {100, 10, 1};
+	int dict_size_limit = 65536;
+	int encoder_type = 4;
+	int expt_num = 1;
+	int total_num_expts = 3;
+	for (int p = 0; p < 3; p++) {
+	    std::cout << "Build Time Breakdown (" << expt_num << "/" << total_num_expts << ")" << std::endl;
+	    exec(expt_id, kEmail, encoder_type, dict_size_limit, percent_list[p], emails_shuffle, total_len_email);
+	    expt_num++;
+	}
     }
     
     return 0;
