@@ -102,16 +102,13 @@ namespace ope {
 			int cnt = 0;
 			auto result_iter = blend_results.begin();
 			for(auto iter = blend_freq_vec.begin(); iter != blend_freq_vec.end(); iter++) {
-				// std::cout << iter->first << "\t" << result_iter->first << std::endl;
 
 				ASSERT_TRUE(iter->first.compare(result_iter->first) == 0);
-				// std::cout << iter->second << "\t" << result_iter->second << std::endl;
 				ASSERT_TRUE(iter->second == result_iter->second);
 				cnt += iter->second - result_iter->second;
 				result_iter++;
 			}
 			ASSERT_TRUE(result_iter == blend_results.end());
-			// std::cout << cnt <<"!!!" << std::endl;
 		}
 
 		void loadEmails() {
