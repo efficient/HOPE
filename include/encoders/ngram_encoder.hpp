@@ -26,6 +26,7 @@ public:
 
 private:
     int n_;
+    int code_len_; // -1 means variable length
     Dictionary* dict_;
 };
 
@@ -49,6 +50,7 @@ bool NGramEncoder::build (const std::vector<std::string>& key_list,
     std::vector<SymbolCode> symbol_code_list;
     CodeGenerator* code_generator = CodeGeneratorFactory::createCodeGenerator(kCgType);
     code_generator->genCodes(symbol_freq_list, &symbol_code_list);
+    code_len_ = code_generator->getCodeLen();
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
     time_end = getNow();
     time_diff = time_end - time_start;
@@ -70,6 +72,56 @@ bool NGramEncoder::build (const std::vector<std::string>& key_list,
     return ret_val;
 }
 
+#ifdef USE_FIXED_LEN_DICT_CODE
+int NGramEncoder::encode (const std::string& key, uint8_t* buffer) const {
+    int64_t* int_buf = (int64_t*)buffer;
+    int int_buf_len = 0;
+    int idx = 0;
+    int_buf[0] = 0;
+    const char* key_str = key.c_str();
+    int pos = 0;
+    if (code_len_ == 16 || code_len_ == 8) {
+	while (pos < (int)key.length()) {
+	    int prefix_len = 0;
+	    Code code = dict_->lookup(key_str + pos, n_ + 1, prefix_len);
+	    int_buf[idx] <<= code_len_;
+	    int_buf[idx] += code.code;
+	    int_buf_len += code_len_;
+	    if (int_buf_len >= 64) {
+		int_buf[idx] = __builtin_bswap64(int_buf[idx]);
+		idx++;
+		int_buf[idx] = 0;
+		int_buf_len = 0;
+	    }
+	    pos += prefix_len;
+	}
+    } else {
+	while (pos < (int)key.length()) {
+	    int prefix_len = 0;
+	    Code code = dict_->lookup(key_str + pos, n_ + 1, prefix_len);
+	    int64_t s_buf = code.code;
+	    int s_len = code.len;
+	    if (int_buf_len + s_len > 63) {
+		int num_bits_left = 64 - int_buf_len;
+		int_buf_len = s_len - num_bits_left;
+		int_buf[idx] <<= num_bits_left;
+		int_buf[idx] |= (s_buf >> int_buf_len);
+		int_buf[idx] = __builtin_bswap64(int_buf[idx]);
+		int_buf[idx + 1] = s_buf;
+		idx++;
+	    } else {
+		int_buf[idx] <<= s_len;
+		int_buf[idx] |= s_buf;
+		int_buf_len += s_len;
+	    }
+	    pos += prefix_len;
+	}
+    }
+    int_buf[idx] <<= (64 - int_buf_len);
+    int_buf[idx] = __builtin_bswap64(int_buf[idx]);
+    return ((idx << 6) + int_buf_len);
+}
+#else
 int NGramEncoder::encode (const std::string& key, uint8_t* buffer) const {
     int64_t* int_buf = (int64_t*)buffer;
     int idx = 0;
@@ -101,6 +153,7 @@ int NGramEncoder::encode (const std::string& key, uint8_t* buffer) const {
     int_buf[idx] = __builtin_bswap64(int_buf[idx]);
     return ((idx << 6) + int_buf_len);
 }
+#endif
 
 int NGramEncoder::numEntries () const {
     return dict_->numEntries();

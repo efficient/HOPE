@@ -30,6 +30,7 @@ public:
     ~HuTuckerCG();
     bool genCodes(const std::vector<SymbolFreq>& symbol_freq_list,
                   std::vector<SymbolCode>* symbol_code_list);
+    int getCodeLen() const;
     double getCompressionRate() const;
 
 private:
@@ -69,6 +70,10 @@ bool HuTuckerCG::genCodes (const std::vector<SymbolFreq>& symbol_freq_list,
         symbol_code_list->push_back(std::make_pair(symbol_list_[i], code));
     }
     return true;
+}
+
+int HuTuckerCG::getCodeLen() const {
+    return -1;
 }
 
 double HuTuckerCG::getCompressionRate () const {

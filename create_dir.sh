@@ -9,6 +9,7 @@ mkdir results/microbench/sample_size_sweep
 mkdir results/microbench/cpr_latency
 mkdir results/microbench/hu_tucker
 mkdir results/microbench/array_trie
+mkdir results/microbench/ht_vs_dc
 
 mkdir figures
 mkdir figures/microbench
@@ -16,4 +17,5 @@ mkdir figures/microbench/sample_size_sweep
 mkdir figures/microbench/cpr_latency
 mkdir figures/microbench/hu_tucker
 mkdir figures/microbench/array_trie
+mkdir figures/microbench/ht_vs_dc
 

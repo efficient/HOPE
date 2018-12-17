@@ -76,6 +76,15 @@ TEST_F (NGramEncoderTest, word4Test) {
 	len = encoder->encode(words[i + 1], buffer);
 	std::string str2 = std::string((const char*)buffer, getByteLen(len));
 	int cmp = str1.compare(str2);
+
+	if (cmp >= 0) {
+	    std::cout << i << std::endl;
+	    std::cout << words[i] << std::endl;
+	    std::cout << words[i + 1] << std::endl;
+	    print(str1);
+	    print(str2);
+	}
+	
 	ASSERT_TRUE(cmp < 0);
     }
     std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;

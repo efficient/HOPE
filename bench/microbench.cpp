@@ -91,8 +91,34 @@ static const std::string file_mem_url_dict_size
 std::ofstream output_mem_url_dict_size;
 
 //-------------------------------------------------------------
-// Build Time
+// Hu-Tucker vs. Fixed Length Dict Codes
 //-------------------------------------------------------------
+static const std::string ht_vs_dc_subdir = "ht_vs_dc/";
+static const std::string file_x_email_ht
+= output_dir + ht_vs_dc_subdir + "x_email_ht.csv";
+std::ofstream output_x_email_ht;
+static const std::string file_cpr_email_ht
+= output_dir + ht_vs_dc_subdir + "cpr_email_ht.csv";
+std::ofstream output_cpr_email_ht;
+static const std::string file_lat_email_ht
+= output_dir + ht_vs_dc_subdir + "lat_email_ht.csv";
+std::ofstream output_lat_email_ht;
+static const std::string file_bt_email_ht
+= output_dir + ht_vs_dc_subdir + "bt_email_ht.csv";
+std::ofstream output_bt_email_ht;
+
+static const std::string file_x_email_dc
+= output_dir + ht_vs_dc_subdir + "x_email_dc.csv";
+std::ofstream output_x_email_dc;
+static const std::string file_cpr_email_dc
+= output_dir + ht_vs_dc_subdir + "cpr_email_dc.csv";
+std::ofstream output_cpr_email_dc;
+static const std::string file_lat_email_dc
+= output_dir + ht_vs_dc_subdir + "lat_email_dc.csv";
+std::ofstream output_lat_email_dc;
+static const std::string file_bt_email_dc
+= output_dir + ht_vs_dc_subdir + "bt_email_dc.csv";
+std::ofstream output_bt_email_dc;
 
 double getNow() {
   struct timeval tv;
@@ -148,7 +174,7 @@ void exec(const int expt_id, const int wkld_id,
     double lat = time_diff * 1000000000 / total_len; // in ns
     double cpr = (total_len * 8.0) / total_enc_len;
 
-    if (expt_id < 0 || expt_id > 3)
+    if (expt_id < 0 || expt_id > 5)
 	std::cout << "ERROR: INVALID EXPT ID!" << std::endl;
     
     if (wkld_id < 0 || wkld_id > 2)
@@ -181,6 +207,20 @@ void exec(const int expt_id, const int wkld_id,
 	    output_cpr_url_dict_size << cpr << "\n";
 	    output_lat_url_dict_size << lat << "\n";
 	    output_mem_url_dict_size << mem << "\n";
+	}
+    } else if (expt_id == 4) {
+	if (wkld_id == kEmail) {
+	    output_x_email_ht << dict_size << "\n";
+	    output_cpr_email_ht << cpr << "\n";
+	    output_lat_email_ht << lat << "\n";
+	    output_bt_email_ht << bt << "\n";
+	}
+    } else if (expt_id == 5) {
+	if (wkld_id == kEmail) {
+	    output_x_email_dc << dict_size << "\n";
+	    output_cpr_email_dc << cpr << "\n";
+	    output_lat_email_dc << lat << "\n";
+	    output_bt_email_dc << bt << "\n";
 	}
     }
     
@@ -368,22 +408,85 @@ int main(int argc, char *argv[]) {
     }
     else if (expt_id == 3) {
 	//-------------------------------------------------------------
-	// Build Time Breakdown; Expt ID = 3
+	// Hu-Tucker Build Time; Expt ID = 3
 	//-------------------------------------------------------------
 	std::cout << "------------------------------------------------" << std::endl;
-	std::cout << "Build Time Breakdown; Expt ID = 3" << std::endl;
+	std::cout << "Hu-Tucker Build Time; Expt ID = 3" << std::endl;
 	std::cout << "------------------------------------------------" << std::endl;
 
 	int percent = 10;
 	int dict_size_list[9] = {1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144};
+	int encoder_type = 4;
 	int expt_num = 1;
 	int total_num_expts = 9;
 	for (int ds = 0; ds < 9; ds++) {
 	    int dict_size_limit = dict_size_list[ds];
-	    std::cout << "Build Time Breakdown (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-	    exec(expt_id, kEmail, 4, dict_size_limit, percent, emails_shuffle, total_len_email);
+	    std::cout << "Hu-Tucker Build Time (" << expt_num << "/" << total_num_expts << ")" << std::endl;
+	    exec(expt_id, kEmail, encoder_type, dict_size_limit, percent, emails_shuffle, total_len_email);
 	    expt_num++;
 	}
+    }
+    else if (expt_id == 4) {
+	//-------------------------------------------------------------
+	// Hu-Tucker vs. Fixed Length Dict Codes (Part 1: Hu-Tucker)
+	//-------------------------------------------------------------
+	std::cout << "------------------------------------------------" << std::endl;
+	std::cout << "Hu-Tucker vs. Fixed Length Dict Codes (Part 1: Hu-Tucker); Expt ID = 4" << std::endl;
+	std::cout << "------------------------------------------------" << std::endl;
+
+	output_x_email_ht.open(file_x_email_ht);
+	output_cpr_email_ht.open(file_cpr_email_ht);
+	output_lat_email_ht.open(file_lat_email_ht);
+	output_bt_email_ht.open(file_bt_email_ht);
+
+	int percent = 10;
+	int dict_size_list[9] = {1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144};
+	int encoder_type = 4;
+	int expt_num = 1;
+	int total_num_expts = 9;
+	for (int ds = 0; ds < 9; ds++) {
+	    int dict_size_limit = dict_size_list[ds];
+	    std::cout << "Hu-Tucker vs. Fixed Length Dict Codes (Part 1: Hu-Tucker) ("
+		      << expt_num << "/" << total_num_expts << ")" << std::endl;
+	    exec(expt_id, kEmail, encoder_type, dict_size_limit, percent, emails_shuffle, total_len_email);
+	    expt_num++;
+	}
+
+	output_x_email_ht.close();
+	output_cpr_email_ht.close();
+	output_lat_email_ht.close();
+	output_bt_email_ht.close();
+    }
+    else if (expt_id == 5) {
+	//-------------------------------------------------------------
+	// Hu-Tucker vs. Fixed Length Dict Codes (Part 2: Dict Codes)
+	//-------------------------------------------------------------
+	std::cout << "------------------------------------------------" << std::endl;
+	std::cout << "Hu-Tucker vs. Fixed Length Dict Codes (Part 2: Dict Codes); Expt ID = 5" << std::endl;
+	std::cout << "------------------------------------------------" << std::endl;
+
+	output_x_email_dc.open(file_x_email_dc);
+	output_cpr_email_dc.open(file_cpr_email_dc);
+	output_lat_email_dc.open(file_lat_email_dc);
+	output_bt_email_dc.open(file_bt_email_dc);
+
+	int percent = 10;
+	int dict_size_list[9] = {1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144};
+	int encoder_type = 4;
+	int expt_num = 1;
+	int total_num_expts = 9;
+	for (int ds = 0; ds < 9; ds++) {
+	    int dict_size_limit = dict_size_list[ds];
+	    std::cout << "Hu-Tucker vs. Fixed Length Dict Codes (Part 2: Dict Codes) ("
+		      << expt_num << "/" << total_num_expts << ")" << std::endl;
+	    exec(expt_id, kEmail, encoder_type, dict_size_limit, percent, emails_shuffle, total_len_email);
+	    expt_num++;
+	}
+
+	output_x_email_dc.close();
+	output_cpr_email_dc.close();
+	output_lat_email_dc.close();
+	output_bt_email_dc.close();
     }
     
     return 0;
