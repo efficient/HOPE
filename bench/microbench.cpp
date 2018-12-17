@@ -51,24 +51,44 @@ std::ofstream output_bt_url_sample_size_sweep;
 // CPR and Latency
 //-------------------------------------------------------------
 static const std::string cpr_latency_subdir = "cpr_latency/";
+static const std::string file_x_email_dict_size
+= output_dir + cpr_latency_subdir + "x_email_dict_size.csv";
+std::ofstream output_x_email_dict_size;
 static const std::string file_cpr_email_dict_size
 = output_dir + cpr_latency_subdir + "cpr_email_dict_size.csv";
 std::ofstream output_cpr_email_dict_size;
 static const std::string file_lat_email_dict_size
 = output_dir + cpr_latency_subdir + "lat_email_dict_size.csv";
 std::ofstream output_lat_email_dict_size;
+static const std::string file_mem_email_dict_size
+= output_dir + cpr_latency_subdir + "mem_email_dict_size.csv";
+std::ofstream output_mem_email_dict_size;
+
+static const std::string file_x_wiki_dict_size
+= output_dir + cpr_latency_subdir + "x_wiki_dict_size.csv";
+std::ofstream output_x_wiki_dict_size;
 static const std::string file_cpr_wiki_dict_size
 = output_dir + cpr_latency_subdir + "cpr_wiki_dict_size.csv";
 std::ofstream output_cpr_wiki_dict_size;
 static const std::string file_lat_wiki_dict_size
 = output_dir + cpr_latency_subdir + "lat_wiki_dict_size.csv";
 std::ofstream output_lat_wiki_dict_size;
+static const std::string file_mem_wiki_dict_size
+= output_dir + cpr_latency_subdir + "mem_wiki_dict_size.csv";
+std::ofstream output_mem_wiki_dict_size;
+
+static const std::string file_x_url_dict_size
+= output_dir + cpr_latency_subdir + "x_url_dict_size.csv";
+std::ofstream output_x_url_dict_size;
 static const std::string file_cpr_url_dict_size
 = output_dir + cpr_latency_subdir + "cpr_url_dict_size.csv";
 std::ofstream output_cpr_url_dict_size;
 static const std::string file_lat_url_dict_size
 = output_dir + cpr_latency_subdir + "lat_url_dict_size.csv";
 std::ofstream output_lat_url_dict_size;
+static const std::string file_mem_url_dict_size
+= output_dir + cpr_latency_subdir + "mem_url_dict_size.csv";
+std::ofstream output_mem_url_dict_size;
 
 //-------------------------------------------------------------
 // Build Time
@@ -113,6 +133,9 @@ void exec(const int expt_id, const int wkld_id,
     double time_end = getNow();
     double bt = time_end - time_start;
 
+    int dict_size = encoder->numEntries();
+    int64_t mem = encoder->memoryUse();
+
     uint8_t* buffer = new uint8_t[kLongestCodeLen];
     uint64_t total_enc_len = 0;
     time_start = getNow();
@@ -125,6 +148,9 @@ void exec(const int expt_id, const int wkld_id,
     double lat = time_diff * 1000000000 / total_len; // in ns
     double cpr = (total_len * 8.0) / total_enc_len;
 
+    if (expt_id < 0 || expt_id > 3)
+	std::cout << "ERROR: INVALID EXPT ID!" << std::endl;
+    
     if (wkld_id < 0 || wkld_id > 2)
 	std::cout << "ERROR: INVALID WKLD ID!" << std::endl;
 
@@ -141,22 +167,28 @@ void exec(const int expt_id, const int wkld_id,
 	}
     } else if (expt_id == 1) {
 	if (wkld_id == kEmail) {
+	    output_x_email_dict_size << dict_size << "\n";
 	    output_cpr_email_dict_size << cpr << "\n";
 	    output_lat_email_dict_size << lat << "\n";
+	    output_mem_email_dict_size << mem << "\n";
 	} else if (wkld_id == kWiki) {
+	    output_x_wiki_dict_size << dict_size << "\n";
 	    output_cpr_wiki_dict_size << cpr << "\n";
 	    output_lat_wiki_dict_size << lat << "\n";
+	    output_mem_wiki_dict_size << mem << "\n";
 	} else if (wkld_id == kUrl) {
+	    output_x_url_dict_size << dict_size << "\n";
 	    output_cpr_url_dict_size << cpr << "\n";
 	    output_lat_url_dict_size << lat << "\n";
+	    output_mem_url_dict_size << mem << "\n";
 	}
-    } else {
-	std::cout << "ERROR: INVALID EXPT ID!" << std::endl;
     }
     
     std::cout << "Throughput = " << tput << " Mops/s" << std::endl;
     std::cout << "Latency = " << lat << " ns/char" << std::endl;
     std::cout << "CPR = " << cpr << std::endl;
+    std::cout << "Dict Size = " << dict_size << std::endl;
+    std::cout << "Memory = " << mem << std::endl;
 }
 } // namespace microbench
 
@@ -224,17 +256,25 @@ int main(int argc, char *argv[]) {
 	std::cout << "------------------------------------------------" << std::endl;
 	std::cout << "CPR and Latency; Expt ID = 1" << std::endl;
 	std::cout << "------------------------------------------------" << std::endl;
+	output_x_email_dict_size.open(file_x_email_dict_size);
 	output_cpr_email_dict_size.open(file_cpr_email_dict_size);
 	output_lat_email_dict_size.open(file_lat_email_dict_size);
+	output_mem_email_dict_size.open(file_mem_email_dict_size);
+
+	output_x_wiki_dict_size.open(file_x_wiki_dict_size);
 	output_cpr_wiki_dict_size.open(file_cpr_wiki_dict_size);
 	output_lat_wiki_dict_size.open(file_lat_wiki_dict_size);
+	output_mem_wiki_dict_size.open(file_mem_wiki_dict_size);
+
+	output_x_url_dict_size.open(file_x_url_dict_size);
 	output_cpr_url_dict_size.open(file_cpr_url_dict_size);
 	output_lat_url_dict_size.open(file_lat_url_dict_size);
+	output_mem_url_dict_size.open(file_mem_url_dict_size);
 
 	int percent = 10;
-	int dict_size_list[7] = {1024, 2048, 4096, 8192, 16384, 32768, 65536};
+	int dict_size_list[9] = {1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144};
 	int expt_num = 1;
-	int total_num_expts = 48;
+	int total_num_expts = 54;
 	// Single-Char
 	std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
 	exec(expt_id, kEmail, 1, 1000, percent, emails_shuffle, total_len_email);
@@ -272,12 +312,33 @@ int main(int argc, char *argv[]) {
 	    }
 	}
 
+	for (int ds = 7; ds < 9; ds++) {
+	    int dict_size_limit = dict_size_list[ds];
+	    std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
+	    exec(expt_id, kEmail, 4, dict_size_limit, percent, emails_shuffle, total_len_email);
+	    expt_num++;
+	    std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
+	    exec(expt_id, kWiki, 4, dict_size_limit, percent, wikis_shuffle, total_len_wiki);
+	    expt_num++;
+	    std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
+	    exec(expt_id, kUrl, 4, dict_size_limit, percent, urls_shuffle, total_len_url);
+	    expt_num++;
+	}
+
+	output_x_email_dict_size.close();
 	output_cpr_email_dict_size.close();
 	output_lat_email_dict_size.close();
+	output_mem_email_dict_size.close();
+
+	output_x_wiki_dict_size.close();
 	output_cpr_wiki_dict_size.close();
 	output_lat_wiki_dict_size.close();
+	output_mem_wiki_dict_size.close();
+
+	output_x_url_dict_size.close();
 	output_cpr_url_dict_size.close();
 	output_lat_url_dict_size.close();
+	output_mem_url_dict_size.close();
     }
     else if (expt_id == 2) {
 	//-------------------------------------------------------------
@@ -288,28 +349,39 @@ int main(int argc, char *argv[]) {
 	std::cout << "------------------------------------------------" << std::endl;
 
 	int percent = 10;
-	int dict_size_limit = 65536;
-	std::cout << "Trie vs Array (1/2)" << std::endl;
-	exec(expt_id, kEmail, 3, dict_size_limit, percent, emails_shuffle, total_len_email);
-	std::cout << "Trie vs Array (2/2)" << std::endl;
-	exec(expt_id, kEmail, 4, dict_size_limit, percent, emails_shuffle, total_len_email);
+	int dict_size_list[9] = {1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144};
+	int expt_num = 1;
+	int total_num_expts = 16;
+	for (int ds = 0; ds < 7; ds++) {
+	    int dict_size_limit = dict_size_list[ds];
+	    std::cout << "Trie vs Array (" << expt_num << "/" << total_num_expts << ")" << std::endl;
+	    exec(expt_id, kEmail, 3, dict_size_limit, percent, emails_shuffle, total_len_email);
+	    expt_num++;
+	}
+
+	for (int ds = 0; ds < 9; ds++) {
+	    int dict_size_limit = dict_size_list[ds];
+	    std::cout << "Trie vs Array (" << expt_num << "/" << total_num_expts << ")" << std::endl;
+	    exec(expt_id, kEmail, 4, dict_size_limit, percent, emails_shuffle, total_len_email);
+	    expt_num++;
+	}
     }
     else if (expt_id == 3) {
 	//-------------------------------------------------------------
 	// Build Time Breakdown; Expt ID = 3
 	//-------------------------------------------------------------
 	std::cout << "------------------------------------------------" << std::endl;
-	std::cout << "Build Time Breakdown; Expt ID = 2" << std::endl;
+	std::cout << "Build Time Breakdown; Expt ID = 3" << std::endl;
 	std::cout << "------------------------------------------------" << std::endl;
 
 	int percent = 10;
-	int dict_size_list[7] = {1024, 2048, 4096, 8192, 16384, 32768, 65536};
+	int dict_size_list[9] = {1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144};
 	int expt_num = 1;
-	int total_num_expts = 7;
-	for (int ds = 0; ds < 7; ds++) {
+	int total_num_expts = 9;
+	for (int ds = 0; ds < 9; ds++) {
 	    int dict_size_limit = dict_size_list[ds];
 	    std::cout << "Build Time Breakdown (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-	    exec(expt_id, kEmail, 3, dict_size_limit, percent, emails_shuffle, total_len_email);
+	    exec(expt_id, kEmail, 4, dict_size_limit, percent, emails_shuffle, total_len_email);
 	    expt_num++;
 	}
     }
