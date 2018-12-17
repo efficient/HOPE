@@ -10,6 +10,7 @@ mkdir results/microbench/cpr_latency
 mkdir results/microbench/hu_tucker
 mkdir results/microbench/array_trie
 mkdir results/microbench/ht_vs_dc
+mkdir results/microbench/build_time_breakdown
 
 mkdir figures
 mkdir figures/microbench
@@ -18,4 +19,6 @@ mkdir figures/microbench/cpr_latency
 mkdir figures/microbench/hu_tucker
 mkdir figures/microbench/array_trie
 mkdir figures/microbench/ht_vs_dc
+mkdir figures/microbench/build_time_breakdown
+
 

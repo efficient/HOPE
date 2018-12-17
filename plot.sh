@@ -26,4 +26,8 @@
 
 #python plot/microbench/ht_vs_dc/cpr_email_ht_vs_dc.py
 #python plot/microbench/ht_vs_dc/lat_email_ht_vs_dc.py
-python plot/microbench/ht_vs_dc/bt_email_ht_vs_dc.py
+#python plot/microbench/ht_vs_dc/bt_email_ht_vs_dc.py
+
+python plot/microbench/build_time_breakdown/bt_100_breakdown.py
+#python plot/microbench/build_time_breakdown/bt_10_breakdown.py
+#python plot/microbench/build_time_breakdown/bt_1_breakdown.py
