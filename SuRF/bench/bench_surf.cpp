@@ -153,6 +153,55 @@ int64_t computeRangeTruePositives(const std::vector<std::string> insert_keys,
     return true_positives;
 }
 
+void loadWorkload(int wkld_id,
+		  int64_t& point_tp, int64_t& range_tp,
+		  std::vector<std::string>& load_keys,
+		  std::vector<std::string>& insert_keys,
+		  std::vector<std::string>& insert_keys_shuffle,
+		  std::vector<std::string>& insert_keys_sample,
+		  std::vector<std::string>& txn_keys,
+		  std::vector<std::string>& upper_bound_keys) {
+    if (wkld_id == kEmail)
+	loadKeysFromFile(file_load_email, kNumEmailRecords, load_keys);
+    else if (wkld_id == kWiki)
+	loadKeysFromFile(file_load_wiki, kNumWikiRecords, load_keys);
+    else if (wkld_id == kUrl)
+	loadKeysFromFile(file_load_url, kNumEmailRecords, load_keys);
+    else
+	return;
+    
+    selectKeysToInsert(kPercent, insert_keys, load_keys);
+    load_keys.clear();
+    
+    for (int i = 0; i < (int)insert_keys.size(); i++) {
+	insert_keys_shuffle.push_back(insert_keys[i]);
+    }
+    std::random_shuffle(insert_keys_shuffle.begin(), insert_keys_shuffle.end());
+    
+    for (int i = 0; i < (int)insert_keys_shuffle.size(); i += (100 / kSamplePercent)) {
+	insert_keys_sample.push_back(insert_keys_shuffle[i]);
+    }
+    insert_keys_shuffle.clear();
+
+    if (wkld_id == kEmail)
+	loadKeysFromFile(file_txn_email, kNumTxns, txn_keys);
+    else if (wkld_id == kWiki)
+	loadKeysFromFile(file_txn_wiki, kNumTxns, txn_keys);
+    else if (wkld_id == kUrl)
+	loadKeysFromFile(file_txn_url, kNumTxns, txn_keys);
+    
+    for (int i = 0; i < (int)txn_keys.size(); i++) {
+	upper_bound_keys.push_back(getUpperBoundKey(txn_keys[i]));
+    }
+    std::cout << "insert_keys size = " << insert_keys.size() << std::endl;
+    std::cout << "insert_keys_sample size = " << insert_keys_sample.size() << std::endl;
+    std::cout << "txn_keys size = " << txn_keys.size() << std::endl;
+    std::cout << "upper_bound_keys size = " << upper_bound_keys.size() << std::endl;
+
+    point_tp = computePointTruePositives(insert_keys, txn_keys);
+    range_tp = computeRangeTruePositives(insert_keys, txn_keys, upper_bound_keys);
+}
+
 void exec(const int expt_id,
 	  const int wkld_id, const bool is_point,
 	  const int filter_type, const uint32_t suffix_len,
@@ -160,10 +209,10 @@ void exec(const int expt_id,
 	  const int encoder_type, const int64_t dict_size_limit,
 	  const int64_t point_true_positives,
 	  const int64_t range_true_positives,
-	  const std::vector<std::string> insert_keys,
-	  const std::vector<std::string> insert_keys_sample,
-	  const std::vector<std::string> txn_keys,
-	  const std::vector<std::string> upper_bound_keys) {
+	  const std::vector<std::string>& insert_keys,
+	  const std::vector<std::string>& insert_keys_sample,
+	  const std::vector<std::string>& txn_keys,
+	  const std::vector<std::string>& upper_bound_keys) {
     ope::Encoder* encoder = nullptr;
     uint8_t* buffer = new uint8_t[8192];
     std::vector<std::string> enc_insert_keys;
@@ -265,122 +314,147 @@ void exec(const int expt_id,
     }
 }
 
+void exec_group(const int expt_id,
+		const int filter_type, const uint32_t suffix_len,
+		const bool is_point,
+		int& expt_num, const int total_num_expt,
+		const int64_t email_point_tp, const int64_t email_range_tp,
+		const int64_t wiki_point_tp, const int64_t wiki_range_tp,
+		const int64_t url_point_tp, const int64_t url_range_tp,
+		const std::vector<std::string>& insert_emails,
+		const std::vector<std::string>& insert_emails_sample,
+		const std::vector<std::string>& txn_emails,
+		const std::vector<std::string>& upper_bound_emails,
+		const std::vector<std::string>& insert_wikis,
+		const std::vector<std::string>& insert_wikis_sample,
+		const std::vector<std::string>& txn_wikis,
+		const std::vector<std::string>& upper_bound_wikis,
+		const std::vector<std::string>& insert_urls,
+		const std::vector<std::string>& insert_urls_sample,
+		const std::vector<std::string>& txn_urls,
+		const std::vector<std::string>& upper_bound_urls) {
+    int dict_size[2] = {10000, 65536};
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kEmail, is_point, filter_type, suffix_len,
+	 false, 0, 0, email_point_tp, email_range_tp,	     
+	 insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
+    expt_num++;
+
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kWiki, is_point, filter_type, suffix_len,
+	 false, 0, 0, wiki_point_tp, wiki_range_tp,
+	 insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
+    expt_num++;
+
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kUrl, is_point, filter_type, suffix_len,
+	 false, 0, 0, url_point_tp, url_range_tp,
+	 insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
+    expt_num++;
+    //=================================================
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kEmail, is_point, filter_type, suffix_len,
+	 true, 1, 1000, email_point_tp, email_range_tp,	     
+	 insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
+    expt_num++;
+
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kWiki, is_point, filter_type, suffix_len,
+	 true, 1, 1000, wiki_point_tp, wiki_range_tp,
+	 insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
+    expt_num++;
+
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kUrl, is_point, filter_type, suffix_len,
+	 true, 1, 1000, url_point_tp, url_range_tp,
+	 insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
+    expt_num++;
+    //=================================================
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kEmail, is_point, filter_type, suffix_len,
+	 true, 2, 65536, email_point_tp, email_range_tp,	     
+	 insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
+    expt_num++;
+
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kWiki, is_point, filter_type, suffix_len,
+	 true, 2, 65536, wiki_point_tp, wiki_range_tp,
+	 insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
+    expt_num++;
+
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kUrl, is_point, filter_type, suffix_len,
+	 true, 2, 65536, url_point_tp, url_range_tp,
+	 insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
+    expt_num++;
+	    
+    for (int j = 0; j < 2; j++) {
+	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+	exec(expt_id, kEmail, is_point, filter_type, suffix_len,
+	     true, 3, dict_size[j], email_point_tp, email_range_tp,	     
+	     insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
+	expt_num++;
+
+	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+	exec(expt_id, kWiki, is_point, filter_type, suffix_len,
+	     true, 3, dict_size[j], wiki_point_tp, wiki_range_tp,
+	     insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
+	expt_num++;
+
+	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+	exec(expt_id, kUrl, is_point, filter_type, suffix_len,
+	     true, 3, dict_size[j], url_point_tp, url_range_tp,
+	     insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
+	expt_num++;
+    }
+
+    for (int j = 0; j < 2; j++) {
+	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+	exec(expt_id, kEmail, is_point, filter_type, suffix_len,
+	     true, 4, dict_size[j], email_point_tp, email_range_tp,	     
+	     insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
+	expt_num++;
+
+	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+	exec(expt_id, kWiki, is_point, filter_type, suffix_len,
+	     true, 4, dict_size[j], wiki_point_tp, wiki_range_tp,
+	     insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
+	expt_num++;
+
+	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+	exec(expt_id, kUrl, is_point, filter_type, suffix_len,
+	     true, 4, dict_size[j], url_point_tp, url_range_tp,
+	     insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
+	expt_num++;
+    }    
+}
+
 int main(int argc, char *argv[]) {
     int expt_id = (int)atoi(argv[1]);
 
     //-------------------------------------------------------------
-    // Init Email Workload
+    // Init Workloads
     //-------------------------------------------------------------
-    std::vector<std::string> load_emails;
-    std::vector<std::string> insert_emails;
-    std::vector<std::string> insert_emails_shuffle;
-    std::vector<std::string> insert_emails_sample;
-    std::vector<std::string> txn_emails;
-    std::vector<std::string> upper_bound_emails;
-    
-    loadKeysFromFile(file_load_email, kNumEmailRecords, load_emails);
-    selectKeysToInsert(kPercent, insert_emails, load_emails);
-    load_emails.clear();
-    
-    for (int i = 0; i < (int)insert_emails.size(); i++) {
-	insert_emails_shuffle.push_back(insert_emails[i]);
-    }
-    std::random_shuffle(insert_emails_shuffle.begin(), insert_emails_shuffle.end());
-    
-    for (int i = 0; i < (int)insert_emails_shuffle.size(); i += (100 / kSamplePercent)) {
-	insert_emails_sample.push_back(insert_emails_shuffle[i]);
-    }
-    insert_emails_shuffle.clear();
-    
-    loadKeysFromFile(file_txn_email, kNumTxns, txn_emails);
-    for (int i = 0; i < (int)txn_emails.size(); i++) {
-	upper_bound_emails.push_back(getUpperBoundKey(txn_emails[i]));
-    }
-    std::cout << "insert_emails size = " << insert_emails.size() << std::endl;
-    std::cout << "insert_emails_sample size = " << insert_emails_sample.size() << std::endl;
-    std::cout << "txn_emails size = " << txn_emails.size() << std::endl;
-    std::cout << "upper_bound_emails size = " << upper_bound_emails.size() << std::endl;
+    std::vector<std::string> load_emails, insert_emails, insert_emails_shuffle,
+	insert_emails_sample, txn_emails, upper_bound_emails;
+    int64_t email_point_tp, email_range_tp;
+    loadWorkload(kEmail, email_point_tp, email_range_tp,
+		 load_emails, insert_emails, insert_emails_shuffle,
+		 insert_emails_sample, txn_emails, upper_bound_emails);
 
-    int64_t email_point_tp
-	= computePointTruePositives(insert_emails, txn_emails);
-    int64_t email_range_tp
-	= computeRangeTruePositives(insert_emails, txn_emails, upper_bound_emails);
+    std::vector<std::string> load_wikis, insert_wikis, insert_wikis_shuffle,
+	insert_wikis_sample, txn_wikis, upper_bound_wikis;
+    int64_t wiki_point_tp, wiki_range_tp;
+    loadWorkload(kWiki, wiki_point_tp, wiki_range_tp,
+		 load_wikis, insert_wikis, insert_wikis_shuffle,
+		 insert_wikis_sample, txn_wikis, upper_bound_wikis);
 
-    //-------------------------------------------------------------
-    // Init Wiki Workload
-    //-------------------------------------------------------------
-    std::vector<std::string> load_wikis;
-    std::vector<std::string> insert_wikis;
-    std::vector<std::string> insert_wikis_shuffle;
-    std::vector<std::string> insert_wikis_sample;
-    std::vector<std::string> txn_wikis;
-    std::vector<std::string> upper_bound_wikis;
-    
-    loadKeysFromFile(file_load_wiki, kNumWikiRecords, load_wikis);
-    selectKeysToInsert(kPercent, insert_wikis, load_wikis);
-    load_wikis.clear();
-    
-    for (int i = 0; i < (int)insert_wikis.size(); i++) {
-	insert_wikis_shuffle.push_back(insert_wikis[i]);
-    }
-    std::random_shuffle(insert_wikis_shuffle.begin(), insert_wikis_shuffle.end());
-    
-    for (int i = 0; i < (int)insert_wikis_shuffle.size(); i += (100 / kSamplePercent)) {
-	insert_wikis_sample.push_back(insert_wikis_shuffle[i]);
-    }
-    insert_wikis_shuffle.clear();
-    
-    loadKeysFromFile(file_txn_wiki, kNumTxns, txn_wikis);
-    for (int i = 0; i < (int)txn_wikis.size(); i++) {
-	upper_bound_wikis.push_back(getUpperBoundKey(txn_wikis[i]));
-    }
-    std::cout << "insert_wikis size = " << insert_wikis.size() << std::endl;
-    std::cout << "insert_wikis_sample size = " << insert_wikis_sample.size() << std::endl;
-    std::cout << "txn_wikis size = " << txn_wikis.size() << std::endl;
-    std::cout << "upper_bound_wikis size = " << upper_bound_wikis.size() << std::endl;
-
-    int64_t wiki_point_tp
-	= computePointTruePositives(insert_wikis, txn_wikis);
-    int64_t wiki_range_tp
-	= computeRangeTruePositives(insert_wikis, txn_wikis, upper_bound_wikis);
-
-    //-------------------------------------------------------------
-    // Init URL Workload
-    //-------------------------------------------------------------
-    std::vector<std::string> load_urls;
-    std::vector<std::string> insert_urls;
-    std::vector<std::string> insert_urls_shuffle;
-    std::vector<std::string> insert_urls_sample;
-    std::vector<std::string> txn_urls;
-    std::vector<std::string> upper_bound_urls;
-    
-    loadKeysFromFile(file_load_url, kNumEmailRecords, load_urls);
-    selectKeysToInsert(kPercent, insert_urls, load_urls);
-    load_urls.clear();
-    
-    for (int i = 0; i < (int)insert_urls.size(); i++) {
-	insert_urls_shuffle.push_back(insert_urls[i]);
-    }
-    std::random_shuffle(insert_urls_shuffle.begin(), insert_urls_shuffle.end());
-    
-    for (int i = 0; i < (int)insert_urls_shuffle.size(); i += (100 / kSamplePercent)) {
-	insert_urls_sample.push_back(insert_urls_shuffle[i]);
-    }
-    insert_urls_shuffle.clear();
-    
-    loadKeysFromFile(file_txn_url, kNumTxns, txn_urls);
-    for (int i = 0; i < (int)txn_urls.size(); i++) {
-	upper_bound_urls.push_back(getUpperBoundKey(txn_urls[i]));
-    }
-    std::cout << "insert_urls size = " << insert_urls.size() << std::endl;
-    std::cout << "insert_urls_sample size = " << insert_urls_sample.size() << std::endl;
-    std::cout << "txn_urls size = " << txn_urls.size() << std::endl;
-    std::cout << "upper_bound_urls size = " << upper_bound_urls.size() << std::endl;
-
-    int64_t url_point_tp
-	= computePointTruePositives(insert_urls, txn_urls);
-    int64_t url_range_tp
-	= computeRangeTruePositives(insert_urls, txn_urls, upper_bound_urls);
+    std::vector<std::string> load_urls, insert_urls, insert_urls_shuffle,
+	insert_urls_sample, txn_urls, upper_bound_urls;
+    int64_t url_point_tp, url_range_tp;
+    loadWorkload(kUrl, url_point_tp, url_range_tp,
+		 load_urls, insert_urls, insert_urls_shuffle,
+		 insert_urls_sample, txn_urls, upper_bound_urls);
 
     if (expt_id == 0) {
 	//-------------------------------------------------------------
@@ -389,11 +463,6 @@ int main(int argc, char *argv[]) {
 	std::cout << "====================================" << std::endl;
 	std::cout << "Point Queries; Expt ID = 0" << std::endl;
 	std::cout << "====================================" << std::endl;
-
-	//expt_id, kEmail, is_point, filter_type, suffix_len,
-	//is_compressed, encoder_type, dict_size_limit,
-	//email_point_true_positives, email_range_true_positives,
-	//insert_keys, insert_keys_sample, txn_keys, upper_bound_keys
 
 	output_lat_email_surf.open(file_lat_email_surf);
 	output_mem_email_surf.open(file_mem_email_surf);
@@ -419,108 +488,24 @@ int main(int argc, char *argv[]) {
 	output_mem_url_surfreal.open(file_mem_url_surfreal);
 	output_fpr_url_surfreal.open(file_fpr_url_surfreal);
 
-	int filter_type[2] = {0, 2};
-	uint32_t suffix_len[2] = {0, 8};
-	int dict_size[2] = {10000, 65536};
-
 	int expt_num = 1;
 	int total_num_expt = 42;
 
-	for (int i = 0; i < 2; i++) {
-	    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-	    exec(expt_id, kEmail, true, filter_type[i], suffix_len[i],
-		 false, 0, 0, email_point_tp, email_range_tp,	     
-		 insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
-	    expt_num++;
-
-	    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-	    exec(expt_id, kWiki, true, filter_type[i], suffix_len[i],
-		 false, 0, 0, wiki_point_tp, wiki_range_tp,
-		 insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
-	    expt_num++;
-
-	    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-	    exec(expt_id, kUrl, true, filter_type[i], suffix_len[i],
-		 false, 0, 0, url_point_tp, url_range_tp,
-		 insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
-	    expt_num++;
-	    //=================================================
-	    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-	    exec(expt_id, kEmail, true, filter_type[i], suffix_len[i],
-		 true, 1, 1000, email_point_tp, email_range_tp,	     
-		 insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
-	    expt_num++;
-
-	    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-	    exec(expt_id, kWiki, true, filter_type[i], suffix_len[i],
-		 true, 1, 1000, wiki_point_tp, wiki_range_tp,
-		 insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
-	    expt_num++;
-
-	    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-	    exec(expt_id, kUrl, true, filter_type[i], suffix_len[i],
-		 true, 1, 1000, url_point_tp, url_range_tp,
-		 insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
-	    expt_num++;
-	    //=================================================
-	    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-	    exec(expt_id, kEmail, true, filter_type[i], suffix_len[i],
-		 true, 2, 65536, email_point_tp, email_range_tp,	     
-		 insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
-	    expt_num++;
-
-	    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-	    exec(expt_id, kWiki, true, filter_type[i], suffix_len[i],
-		 true, 2, 65536, wiki_point_tp, wiki_range_tp,
-		 insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
-	    expt_num++;
-
-	    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-	    exec(expt_id, kUrl, true, filter_type[i], suffix_len[i],
-		 true, 2, 65536, url_point_tp, url_range_tp,
-		 insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
-	    expt_num++;
-	    
-	    for (int j = 0; j < 2; j++) {
-		std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-		exec(expt_id, kEmail, true, filter_type[i], suffix_len[i],
-		     true, 3, dict_size[j], email_point_tp, email_range_tp,	     
-		     insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
-		expt_num++;
-
-		std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-		exec(expt_id, kWiki, true, filter_type[i], suffix_len[i],
-		     true, 3, dict_size[j], wiki_point_tp, wiki_range_tp,
-		     insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
-		expt_num++;
-
-		std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-		exec(expt_id, kUrl, true, filter_type[i], suffix_len[i],
-		     true, 3, dict_size[j], url_point_tp, url_range_tp,
-		     insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
-		expt_num++;
-	    }
-
-	    for (int j = 0; j < 2; j++) {
-		std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-		exec(expt_id, kEmail, true, filter_type[i], suffix_len[i],
-		     true, 4, dict_size[j], email_point_tp, email_range_tp,	     
-		     insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
-		expt_num++;
-
-		std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-		exec(expt_id, kWiki, true, filter_type[i], suffix_len[i],
-		     true, 4, dict_size[j], wiki_point_tp, wiki_range_tp,
-		     insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
-		expt_num++;
-
-		std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-		exec(expt_id, kUrl, true, filter_type[i], suffix_len[i],
-		     true, 4, dict_size[j], url_point_tp, url_range_tp,
-		     insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
-		expt_num++;
-	    }
-	}
+	exec_group(expt_id, 0, 0, true, expt_num, total_num_expt,
+		   email_point_tp, email_range_tp,
+		   wiki_point_tp, wiki_range_tp,
+		   url_point_tp, url_range_tp,
+		   insert_emails, insert_emails_sample, txn_emails, upper_bound_emails,
+		   insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis,
+		   insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
+	
+	exec_group(expt_id, 2, 8, true, expt_num, total_num_expt,
+		   email_point_tp, email_range_tp,
+		   wiki_point_tp, wiki_range_tp,
+		   url_point_tp, url_range_tp,
+		   insert_emails, insert_emails_sample, txn_emails, upper_bound_emails,
+		   insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis,
+		   insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 
 	output_lat_email_surf.close();
 	output_mem_email_surf.close();

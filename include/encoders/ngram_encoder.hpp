@@ -21,6 +21,10 @@ public:
 
     int encode (const std::string& key, uint8_t* buffer) const;
 
+    void encodePair (const std::string& l_key, const std::string& r_key,
+		     uint8_t* l_buffer, uint8_t* r_buffer,
+		     int& l_enc_len, int& r_enc_len) const;
+
     int numEntries () const;
     int64_t memoryUse () const;
 
@@ -154,6 +158,90 @@ int NGramEncoder::encode (const std::string& key, uint8_t* buffer) const {
     return ((idx << 6) + int_buf_len);
 }
 #endif
+
+void NGramEncoder::encodePair (const std::string& l_key, const std::string& r_key,
+			       uint8_t* l_buffer, uint8_t* r_buffer,
+			       int& l_enc_len, int& r_enc_len) const {
+    int64_t* int_buf_l = (int64_t*)l_buffer;
+    int64_t* int_buf_r = (int64_t*)r_buffer;
+    int idx_l = 0, idx_r = 0;
+    int_buf_l[0] = 0;
+    int int_buf_len_l = 0, int_buf_len_r = 0;
+    int key_len_l = (int)l_key.length();
+    int key_len_r = (int)r_key.length();
+
+    // compute common prefix len
+    int cp_len = 0;
+    while ((cp_len < key_len_l) && (l_key[cp_len] == r_key[cp_len])) {
+	cp_len++;
+    }
+
+    const char* l_key_str = l_key.c_str();
+    const char* r_key_str = r_key.c_str();
+    int pos = 0;
+
+    bool found_mismatch = false;
+    int r_start_pos = 0;
+    while (pos < key_len_l) {
+	if (!found_mismatch) {
+	    if (pos + n_ >= cp_len) {
+		r_start_pos = pos;
+		memcpy((void*)r_buffer, (const void*)l_buffer, 8 * (idx_l + 1));
+		idx_r = idx_l;
+		int_buf_len_r = int_buf_len_l;
+	    }
+	    found_mismatch = true;
+	}
+	
+	int prefix_len = 0;
+	Code code = dict_->lookup(l_key_str + pos, n_ + 1, prefix_len);
+	int64_t s_buf = code.code;
+	int s_len = code.len;
+	if (int_buf_len_l + s_len > 63) {
+	    int num_bits_left = 64 - int_buf_len_l;
+	    int_buf_len_l = s_len - num_bits_left;
+	    int_buf_l[idx_l] <<= num_bits_left;
+	    int_buf_l[idx_l] |= (s_buf >> int_buf_len_l);
+	    int_buf_l[idx_l] = __builtin_bswap64(int_buf_l[idx_l]);
+	    int_buf_l[idx_l + 1] = s_buf;
+	    idx_l++;
+	} else {
+	    int_buf_l[idx_l] <<= s_len;
+	    int_buf_l[idx_l] |= s_buf;
+	    int_buf_len_l += s_len;
+	}
+	pos += prefix_len;
+    }
+    int_buf_l[idx_l] <<= (64 - int_buf_len_l);
+    int_buf_l[idx_l] = __builtin_bswap64(int_buf_l[idx_l]);
+    l_enc_len = (idx_l << 6) + int_buf_len_l;
+
+    // continue encoding right key
+    pos = r_start_pos;
+    while (pos < key_len_r) {
+	int prefix_len = 0;
+	Code code = dict_->lookup(r_key_str + pos, n_ + 1, prefix_len);
+	int64_t s_buf = code.code;
+	int s_len = code.len;
+	if (int_buf_len_r + s_len > 63) {
+	    int num_bits_left = 64 - int_buf_len_r;
+	    int_buf_len_r = s_len - num_bits_left;
+	    int_buf_r[idx_r] <<= num_bits_left;
+	    int_buf_r[idx_r] |= (s_buf >> int_buf_len_r);
+	    int_buf_r[idx_r] = __builtin_bswap64(int_buf_r[idx_r]);
+	    int_buf_r[idx_r + 1] = s_buf;
+	    idx_r++;
+	} else {
+	    int_buf_r[idx_r] <<= s_len;
+	    int_buf_r[idx_r] |= s_buf;
+	    int_buf_len_r += s_len;
+	}
+	pos += prefix_len;
+    }
+    int_buf_r[idx_r] <<= (64 - int_buf_len_r);
+    int_buf_r[idx_r] = __builtin_bswap64(int_buf_r[idx_r]);
+    r_enc_len = (idx_r << 6) + int_buf_len_r;
+}
 
 int NGramEncoder::numEntries () const {
     return dict_->numEntries();
