@@ -71,10 +71,10 @@ namespace ARTDIC {
     }
 
     void N256::deleteChildren() {
-        for (auto &i : children) {
-            if (i != nullptr) {
-                N::deleteChildren(i);
-                delete i;
+        for (int i =0; i < 256; i++) {
+            if (children[i] != nullptr) {
+                N::deleteChildren(children[i]);
+                N::deleteNode(children[i]);
             }
         }
     }

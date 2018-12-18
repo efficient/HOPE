@@ -7,7 +7,7 @@
 
 namespace ARTDIC {
 
-    static const unsigned maxPrefixLen = 300;
+    static const unsigned maxPrefixLen = 255;
     enum class NTypes : uint8_t {
         N4 = 0,
         N16 = 1,
@@ -79,6 +79,8 @@ namespace ARTDIC {
         static N *getPrevChild(N *node, uint8_t k);
 
         static void deleteChildren(N *node);
+
+        static void deleteNode(N *node);
     };
 
     class N4 : public N {

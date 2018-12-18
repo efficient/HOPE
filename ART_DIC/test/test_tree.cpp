@@ -17,56 +17,111 @@ namespace ARTDIC {
 
     namespace treetest {
         static const std::string kEmailFilePath = "../../../datasets/emails.txt";
-        static const int kEmailTestSize = 100;
+        static const int kEmailTestSize = 10000;
         static std::vector<std::string> emails;
 
 
         class ARTDICTest : public ::testing::Test {
+        public:
+            static std::string getNextString(std::string str) {
+                for (int i = int(str.size() - 1); i >= 0; i--) {
+                    if (int(str[i]) != 127) {
+                        char next_chr = str[i] + 1;
+                        return str.substr(0, i) + std::string(1, next_chr);
+                    }
+                }
+                assert(false);
+                __builtin_unreachable();
+            }
 
+            static void getNextInterval(std::vector<std::string> sorted_intervals,
+                                        int cur_idx, std::string cur_str,
+                                        int& next_idx, std::string& next_str) {
+                for (int i = cur_idx; i < sorted_intervals.size(); i++) {
+                    if (sorted_intervals[i].compare(cur_str) > 0) {
+                        next_idx = i - 1;
+                        next_str = sorted_intervals[i-1];
+                        return;
+                    }
+                }
+                assert(false);
+                __builtin_unreachable();
+            }
         };
 
         TEST_F (ARTDICTest, emptyTest) {
 
         }
 
-        TEST_F (ARTDICTest, insertTest) {
+        TEST_F(ARTDICTest, pointLookupTest) {
             Tree *test = new Tree();
-            std::vector<ope::SymbolCode*> ls = {};
-            std::cout << emails.size() << std::endl;
-
+            std::vector<ope::SymbolCode> ls;
+            // std::cout << emails.size() << std::endl;
+            std::sort(emails.begin(), emails.end());
 
             for (int i = 0; i < emails.size(); i++) {
-                ope::SymbolCode* l = new ope::SymbolCode();
-                l->first = emails[i];
-                l->second = ope::Code();
-                l->second.code = i;
-                test->insert(*l);
-                ls.push_back(l);
+                ope::SymbolCode symbol_code = ope::SymbolCode();
+                symbol_code.first = emails[i];
+                symbol_code.second = ope::Code();
+                symbol_code.second.code = i;
+                ls.push_back(symbol_code);
             }
+
+            test->build(ls);
+
             for (int i = 0; i < emails.size(); i++) {
                 int prefix_len = -1;
                 ope::Code result = test->lookup(emails[i].c_str(), emails[i].size(), prefix_len);
                 ASSERT_TRUE(result.code == i);
             }
-            for (int i = 0; i <ls.size(); i++) {
-                delete ls[i];
-            }
-//            ope::SymbolCode l;
-//            l.first = "1";
-//            l.second = ope::Code();
-//            l.second.code = 123;
-//
-//            test->insert(l);
-//            int prefix_len = -1;
-//            ope::Code result = test->lookup("1",1,prefix_len);
-//            std::cout << result.code << std::endl;
-//            ASSERT_TRUE(result.code == 123);
             delete test;
         }
 
-        TEST_F (ARTDICTest, lookupTest) {
+        TEST_F(ARTDICTest, withinRangeLookupTest) {
+            Tree *test = new Tree();
+            std::vector<ope::SymbolCode> ls;
+            std::cout << emails.size() << std::endl;
+            std::sort(emails.begin(), emails.end());
 
+            for (int i = 0; i < emails.size(); i++) {
+                ope::SymbolCode symbol_code = ope::SymbolCode();
+                symbol_code.first = emails[i];
+                symbol_code.second = ope::Code();
+                symbol_code.second.code = i;
+                ls.push_back(symbol_code);
+            }
+
+            test->build(ls);
+
+            for (int i = 0; i < emails.size() - 1; i++) {
+                int prefix_len = -1;
+                std::string cur_str = getNextString(emails[i]);
+                std::string next_str;
+                int next_idx = -1;
+                getNextInterval(emails, i, cur_str, next_idx, next_str);
+                ope::Code result;
+                result = test->lookup(cur_str.c_str(), cur_str.size(), prefix_len);
+                if (cur_str.compare(next_str) < 0)
+                    ASSERT_TRUE(result.code == i);
+                else {
+                    // std::cout << cur_str << "\t" << next_str << std::endl;
+                    ASSERT_TRUE(result.code == next_idx);
+                }
+            }
+            delete test;
         }
+
+//        TEST_F(ARTDICTest, emailTest) {
+//
+//        }
+//
+//        TEST_F (ARTDICTest, insertTest) {
+//
+//        }
+//
+//        TEST_F (ARTDICTest, lookupTest) {
+//
+//        }
 
         void loadEmails() {
             std::ifstream infile(kEmailFilePath);

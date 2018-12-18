@@ -8,7 +8,7 @@ namespace ARTDIC {
 
     Tree::~Tree() {
         N::deleteChildren(root);
-        delete root;
+        N::deleteNode(root);
     }
 
     ope::Code Tree::lookup(const char *symbol, const int symbol_len, int &prefix_len) const {
@@ -24,7 +24,9 @@ namespace ARTDIC {
                             key_level, node_level, common_prefix)) {
                 if (key_level == symbol_len) {
                     prefix_len = key_level;
-                    return *reinterpret_cast<ope::Code *>(N::getValueFromLeaf(N::getChild(0, node)));
+                    LeafInfo* leaf_info = reinterpret_cast<LeafInfo *>(N::getValueFromLeaf(N::getChild(0, node)));
+                    return leaf_info->symbol_code->second;
+
                 }
                 next_node = N::getChild(reinterpret_cast<const uint8_t &>(symbol[key_level]), node);
                 if (next_node == nullptr) {
@@ -50,8 +52,8 @@ namespace ARTDIC {
                     N *prev = N::getFirstChild(node);
                     leaf_info = getRightBottom(prev);
                 } else {
-                    N *next = N::getNextChild(node, reinterpret_cast<const uint8_t &>(symbol[key_level]));
-                    leaf_info = getLeftBottom(next)->prev_leaf;
+                    N *next = N::getLastChild(node);
+                    leaf_info = getLeftBottom(next);
                 }
                 prefix_len = leaf_info->prefix_len;
                 return leaf_info->symbol_code->second;
@@ -61,8 +63,7 @@ namespace ARTDIC {
     }
 
     bool Tree::build(const std::vector<ope::SymbolCode> &symbol_code_list) {
-        // sort intervals
-        // TODO
+        // REQUIRE: symbol has been sorted
         LeafInfo *prev_leaf = nullptr;
 
         for (auto iter = symbol_code_list.begin(); iter != symbol_code_list.end(); iter++) {

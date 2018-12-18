@@ -90,7 +90,7 @@ namespace ARTDIC {
         for (unsigned char i : child_index) {
             if (i != empty_marker) {
                 N::deleteChildren(children[i]);
-                delete children[i];
+                N::deleteNode(children[i]);
             }
         }
     }

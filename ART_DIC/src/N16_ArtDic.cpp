@@ -82,17 +82,20 @@ namespace ARTDIC {
     N *N16::getPrevChild(uint8_t k) {
         if (count == 0)
             return nullptr;
-        for (int i = 0; i < count; i++) {
+        int i = 0;
+        for (; i < count; i++) {
             if(keys[i] >= k && i>= 1)
                 return children[i-1];
         }
+        if (i == count)
+            return children[i-1];
         return nullptr;
     }
 
     void N16::deleteChildren() {
         for(uint8_t i = 0; i < count; i++) {
             N::deleteChildren(children[i]);
-            delete children[i];
+            N::deleteNode(children[i]);
         }
     }
 

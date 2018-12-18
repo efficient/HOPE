@@ -360,4 +360,34 @@ namespace ARTDIC {
         __builtin_unreachable();
     }
 
+    void N::deleteNode(ARTDIC::N *node) {
+        if (N::isLeaf(node)) {
+            return;
+        }
+        switch (node->type) {
+            case NTypes::N4: {
+                auto n = static_cast<N4 *>(node);
+                delete n;
+                return;
+            }
+            case NTypes::N16: {
+                auto n = static_cast<N16 *>(node);
+                delete n;
+                return;
+            }
+            case NTypes::N48: {
+                auto n = static_cast<N48 *>(node);
+                delete n;
+                return;
+            }
+            case NTypes::N256: {
+                auto n = static_cast<N256 *>(node);
+                delete n;
+                return;
+            }
+        }
+        assert(false);
+        __builtin_unreachable();
+    }
+
 }
