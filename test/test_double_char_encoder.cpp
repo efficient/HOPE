@@ -58,6 +58,21 @@ TEST_F (DoubleCharEncoderTest, wordTest) {
 	ASSERT_TRUE(cmp < 0);
     }
 }
+
+TEST_F (DoubleCharEncoderTest, wordPairTest) {
+    DoubleCharEncoder* encoder = new DoubleCharEncoder();
+    encoder->build(words, 65536);
+    uint8_t* l_buffer = new uint8_t[kLongestCodeLen];
+    uint8_t* r_buffer = new uint8_t[kLongestCodeLen];
+    for (int i = 0; i < (int)words.size() - 1; i++) {
+	int l_len = 0, r_len = 0;
+	encoder->encodePair(words[i], words[i + 1], l_buffer, r_buffer, l_len, r_len);
+	std::string str1 = std::string((const char*)l_buffer, getByteLen(l_len));
+	std::string str2 = std::string((const char*)r_buffer, getByteLen(r_len));
+	int cmp = str1.compare(str2);
+	ASSERT_TRUE(cmp < 0);
+    }
+}
     /*
 TEST_F (DoubleCharEncoderTest, emailTest) {
     DoubleCharEncoder* encoder = new DoubleCharEncoder();

@@ -1,0 +1,33 @@
+#!bin/bash
+
+#python plot/microbench/sample_size_sweep/cpr_email.py
+#python plot/microbench/sample_size_sweep/cpr_wiki.py
+#python plot/microbench/sample_size_sweep/cpr_url.py
+
+#python plot/microbench/sample_size_sweep/bt_email.py
+#python plot/microbench/sample_size_sweep/bt_wiki.py
+#python plot/microbench/sample_size_sweep/bt_url.py
+
+#python plot/microbench/cpr_latency/cpr_email.py
+#python plot/microbench/cpr_latency/cpr_wiki.py
+#python plot/microbench/cpr_latency/cpr_url.py
+
+#python plot/microbench/cpr_latency/lat_email.py
+#python plot/microbench/cpr_latency/lat_wiki.py
+#python plot/microbench/cpr_latency/lat_url.py
+
+#python plot/microbench/cpr_latency/mem_email.py
+#python plot/microbench/cpr_latency/mem_wiki.py
+#python plot/microbench/cpr_latency/mem_url.py
+
+#python plot/microbench/hu_tucker/hu_tucker_email.py
+
+#python plot/microbench/array_trie/array_trie_email.py
+
+#python plot/microbench/ht_vs_dc/cpr_email_ht_vs_dc.py
+#python plot/microbench/ht_vs_dc/lat_email_ht_vs_dc.py
+#python plot/microbench/ht_vs_dc/bt_email_ht_vs_dc.py
+
+python plot/microbench/build_time_breakdown/bt_100_breakdown.py
+#python plot/microbench/build_time_breakdown/bt_10_breakdown.py
+#python plot/microbench/build_time_breakdown/bt_1_breakdown.py

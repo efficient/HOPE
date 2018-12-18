@@ -13,11 +13,17 @@ class DictionaryFactory {
 public:
     static Dictionary* createDictionary(const int type) {
         if (type == 3)
-            //return new Array3GramDict();
+#ifdef USE_ARRAY_DICT
+            return new Array3GramDict();
+#else
 	    return new Trie3GramDict();
+#endif
 	else if (type == 4)
-	    //return new Array4GramDict();
+#ifdef USE_ARRAY_DICT
+	    return new Array4GramDict();
+#else
 	    return new Trie4GramDict();
+#endif
 	else
 	    return nullptr;
     }
