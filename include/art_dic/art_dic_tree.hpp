@@ -1,8 +1,63 @@
-#include <vector>
-#include "../include/Tree_ArtDic.h"
-#include "N_ArtDic.cpp"
+#ifndef OPE_TREE_H
+#define OPE_TREE_H
 
-namespace ARTDIC {
+#include <string>
+#include <common.hpp>
+#include "art_dic_N.hpp"
+
+namespace ope {
+
+    struct LeafInfo {
+        const ope::SymbolCode *symbol_code;
+        LeafInfo *prev_leaf;
+        uint32_t prefix_len;
+        int visit_cnt = 0;
+    };
+
+    class Tree {
+    public:
+        Tree();
+
+        ~Tree();
+
+        ope::Code lookup(const char *symbol, const int symbol_len, int &prefix_len) const;
+
+        bool build(const std::vector<ope::SymbolCode> &symbol_code_list);
+
+        void countFreq(std::vector<std::string> keys, std::vector<ope::SymbolFreq> *symbol_freq_list);
+
+        //private:
+        N *root;
+
+        void insert(LeafInfo* leafinfo);
+
+        bool prefixMatch(N *node, uint8_t *key, int key_size, int &key_level,
+                         int &node_level, uint8_t *common_prefix) const;
+
+        N *spawn(uint8_t *common_prefix, N *node,
+                 std::string key, N *val,
+                 int node_level, int key_level, uint8_t parent_key);
+
+        void addLeaf(int insertkey_level, std::string& key,
+                     N *node, N *val, N *parent_node, uint8_t parent_key);
+
+        void changeStringToUint8(std::string org, uint8_t* des) {
+            for (int i = 0; i < org.size(); i++)
+                des[i] = reinterpret_cast<uint8_t&>(org[i]);
+        }
+
+        void skipIfEmpty(N *node_new, N *leaf_dup, uint8_t key);
+
+        void subKey(int start, int end, uint8_t *subKey, uint8_t *org);
+
+        int getCommonPrefixLen(std::string& str1, std::string& str2);
+
+        LeafInfo* getLeftBottom(N *node)const;
+
+        LeafInfo* getRightBottom(N *node)const;
+
+    };
+
 
     Tree::Tree() : root(new N256(nullptr, 0)) {};
 
@@ -23,10 +78,15 @@ namespace ARTDIC {
             if (prefixMatch(node, (uint8_t *) symbol, symbol_len,
                             key_level, node_level, common_prefix)) {
                 if (key_level == symbol_len) {
-                    prefix_len = key_level;
                     LeafInfo* leaf_info = reinterpret_cast<LeafInfo *>(N::getValueFromLeaf(N::getChild(0, node)));
+                    if (leaf_info != nullptr) {
+                        prefix_len = leaf_info->prefix_len;
+                        return leaf_info->symbol_code->second;
+                    }
+                    N* next = N::getFirstChild(node);
+                    leaf_info = getLeftBottom(next)->prev_leaf;
+                    prefix_len = leaf_info->prefix_len;
                     return leaf_info->symbol_code->second;
-
                 }
                 next_node = N::getChild(reinterpret_cast<const uint8_t &>(symbol[key_level]), node);
                 if (next_node == nullptr) {
@@ -36,26 +96,34 @@ namespace ARTDIC {
                         N *next = N::getNextChild(node, reinterpret_cast<const uint8_t &>(symbol[key_level]));
                         LeafInfo *next_leaf_info = getLeftBottom(next);
                         LeafInfo *leaf_info = next_leaf_info->prev_leaf;
+                        // result_leaf_info = leaf_info;
+                        prefix_len = leaf_info->prefix_len;
                         return leaf_info->symbol_code->second;
                     } else {
                         LeafInfo *leaf_info = getRightBottom(prev);
                         prefix_len = leaf_info->prefix_len;
+                        // result_leaf_info = leaf_info;
                         return leaf_info->symbol_code->second;
                     }
                 }
                 if (N::isLeaf(next_node)) {
-                    return reinterpret_cast<LeafInfo *>(N::getValueFromLeaf(next_node))->symbol_code->second;
+                    // result_leaf_info = reinterpret_cast<LeafInfo *>(N::getValueFromLeaf(next_node));
+                    // return result_leaf_info->symbol_code->second;
+                    LeafInfo *leaf_info = reinterpret_cast<LeafInfo *>(N::getValueFromLeaf(next_node));
+                    prefix_len = leaf_info->prefix_len;
+                    return leaf_info->symbol_code->second;
                 }
             } else {
                 LeafInfo *leaf_info = nullptr;
                 if (key_level == symbol_len || symbol[key_level] < node->prefix[node_level]) {
                     N *prev = N::getFirstChild(node);
-                    leaf_info = getRightBottom(prev);
+                    leaf_info = getLeftBottom(prev)->prev_leaf;
                 } else {
                     N *next = N::getLastChild(node);
-                    leaf_info = getLeftBottom(next);
+                    leaf_info = getRightBottom(next);
                 }
                 prefix_len = leaf_info->prefix_len;
+                // result_leaf_info = leaf_info;
                 return leaf_info->symbol_code->second;
             }
             key_level++;
@@ -69,11 +137,13 @@ namespace ARTDIC {
         for (auto iter = symbol_code_list.begin(); iter != symbol_code_list.end(); iter++) {
             LeafInfo *lf = new LeafInfo();
             std::string start_interval = iter->first;
-            std::string end_interval = (iter + 1)->first;
-            if (iter != symbol_code_list.end() - 1)
-                lf->prefix_len = (uint32_t)getCommonPrefixLen(start_interval, end_interval);
+            if (iter != symbol_code_list.end() - 1) {
+                std::string end_interval = (iter + 1)->first;
+                lf->prefix_len = (uint32_t) getCommonPrefixLen(start_interval, end_interval);
+                assert(lf->prefix_len > 0);
+            }
             else
-                lf->prefix_len = (uint32_t)start_interval.size();
+                lf->prefix_len = 1;
             lf->prev_leaf = prev_leaf;
             lf->symbol_code = &(*iter);
             insert(lf);
@@ -110,7 +180,7 @@ namespace ARTDIC {
                 // size of remain key == 1
                 if (key_level == key.size() - 1) {
                     N::insertOrUpdateNode(node, parent_node, parent_key,
-                            reinterpret_cast<uint8_t &>(key[key_level]), val);
+                                          reinterpret_cast<uint8_t &>(key[key_level]), val);
                     return;
                 }
                 node_key = reinterpret_cast<uint8_t &>(key[key_level]);
@@ -148,7 +218,14 @@ namespace ARTDIC {
     }
 
     void Tree::countFreq(std::vector<std::string> keys, std::vector<ope::SymbolFreq> *symbol_freq_list) {
+        for (auto iter = keys.begin(); iter != keys.end(); iter++) {
+            LeafInfo *result_leaf_info = nullptr;
+            int prefix_len = -1;
+            lookup(iter->c_str(), iter->size(), prefix_len);
+            assert(result_leaf_info != nullptr);
+            result_leaf_info->visit_cnt++;
 
+        }
     }
 
     void Tree::addLeaf(int insertkey_level, std::string& key,
@@ -250,3 +327,5 @@ namespace ARTDIC {
     }
 
 }
+
+#endif //OPE_TREE_H

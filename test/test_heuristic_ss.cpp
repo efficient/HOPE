@@ -13,7 +13,7 @@ namespace ope {
         static const int kWordTestSize = 234369;
         static std::vector<std::string> words;
         static const std::string kEmailFilePath = "../../datasets/emails.txt";
-        static const int kEmailTestSize = 10000;
+        static const int kEmailTestSize = 20000;
         static std::vector<std::string> emails;
 
         class HeuristicSSTest : public ::testing::Test {
@@ -61,11 +61,13 @@ namespace ope {
             HeuristicSS ss;
             std::vector<SymbolFreq> symbol_freq_list;
             ss.selectSymbols(emails, 0, &symbol_freq_list);
-//            std::sort(ss.intervals_.begin(), ss.intervals_.end());
+            std::sort(ss.intervals_.begin(), ss.intervals_.end());
 //            for(auto iter = ss.intervals_.begin(); iter != ss.intervals_.end(); iter++) {
 //                std::cout << iter->first << "\t" << iter->second << std::endl;
 //            }
-            ss.checkIntervals("", std::string(50,char(127)));
+            std::string start_str = std::string(1, char(0));
+            std::string end_str = std::string(50, char(127));
+            ss.checkIntervals(start_str, end_str);
         }
 
         void loadWords() {
