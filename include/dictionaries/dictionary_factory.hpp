@@ -6,6 +6,7 @@
 #include "array_4gram_dict.hpp"
 #include "trie_3gram_dict.hpp"
 #include "trie_4gram_dict.hpp"
+#include "trie_art_dict.hpp"
 
 namespace ope {
 
@@ -24,6 +25,8 @@ public:
 #else
 	    return new Trie4GramDict();
 #endif
+	    else if (type == 5)
+	    	return new TrieArtDict();
 	else
 	    return nullptr;
     }

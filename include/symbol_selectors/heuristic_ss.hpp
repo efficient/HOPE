@@ -19,7 +19,7 @@ namespace ope {
 
 
 // private:
-        void checkIntervals(std::string start_str, std::string end_str);
+        void checkIntervals(std::string& start_str, std::string& end_str);
 
         void getFrequencyTable(const std::vector<std::string> &key_list);
 
@@ -30,13 +30,18 @@ namespace ope {
 
         void fillGap(std::string start_exclude, std::string end_exclude);
 
-        void getIntervalFreq(std::vector<SymbolFreq> *symbol_freq_list);
+        void getIntervalFreq(std::vector<SymbolFreq> *symbol_freq_list,
+                                const std::vector<std::string> &key_list);
 
         std::string commonPrefix(const std::string &str1, const std::string &str2);
 
         std::string getNextString(const std::string &str);
 
         std::string getPrevString(const std::string &str);
+
+        void encode(const std::string& str, std::vector<int>& cnt);
+
+        int BinarySearch(std::string str, int pos, int &prefix_len);
 
         int64_t W;
         std::map<std::string, int64_t> freq_map_;
@@ -61,29 +66,74 @@ namespace ope {
         std::vector<SymbolFreq> blend_freq_table;
         tree.blendingAndGetLeaves(blend_freq_table);
         getInterval(blend_freq_table);
+        // sort intervals
+        std::sort(intervals_.begin(), intervals_.end(),
+                [](std::pair<std::string, std::string>& x, std::pair<std::string, std::string> y) {
+                    return x.first.compare(y.first) < 0;
+                });
         // simulate encode process to get Frequency
-        getIntervalFreq(symbol_freq_list);
+        getIntervalFreq(symbol_freq_list, key_list);
         return true;
     }
 
-    void HeuristicSS::getIntervalFreq(std::vector<SymbolFreq> *symbol_freq_list) {
+    int HeuristicSS::BinarySearch(std::string str, int pos, int &prefix_len) {
+        int l = 0;
+        int r = intervals_.size();
+        std::string compare_str = str.substr(pos, str.size() - pos);
+        while (l <= r) {
+            int mid = (l+r)/2;
+            std::string mid_left_bound = intervals_[mid].first;
+            if(mid_left_bound.compare(compare_str) <= 0) {
+                l = mid + 1;
+            } else {
+                r = mid - 1;
+            }
+        }
+        assert(r < intervals_.size());
+        prefix_len = commonPrefix(intervals_[r].first, getPrevString(intervals_[r].second)).size();
+        if (prefix_len == 0)
+            std::cout << "" << std::endl;
+        return r;
+    }
 
+    void HeuristicSS::encode(const std::string &str, std::vector<int>& cnt) {
+        int pos = 0;
+        int prefix_len = 0;
+        int interval_idx = -1;
+        while (pos < str.size()) {
+            interval_idx = BinarySearch(str, pos, prefix_len);
+            cnt[interval_idx]++;
+            assert(prefix_len > 0);
+            pos += prefix_len;
+        }
+    }
+
+    void HeuristicSS::getIntervalFreq(std::vector<SymbolFreq> *symbol_freq_list,
+                                        const std::vector<std::string> &key_list) {
+        std::vector<int> cnt(intervals_.size(), 0);
+        for (auto iter = key_list.begin(); iter != key_list.end(); iter++) {
+            encode(*iter, cnt);
+        }
+        for (int i = 0; i < intervals_.size(); i++) {
+            symbol_freq_list->push_back(std::make_pair(intervals_[i].first, cnt[i]));
+        }
     }
 
     void HeuristicSS::getFrequencyTable(const std::vector<std::string> &key_list) {
-        std::map<std::string, int64_t>::iterator iter;
+
         for (int i = 0; i < (int) key_list.size(); i++) {
             const std::string key = key_list[i];
-            int key_len = key.size();
+            int key_len = (int)key.size();
             // Get substring frequency
             for (int j = 0; j < key_len; j++) {
                 for (int k = 1; k <= key_len - j; k++) {
                     std::string substring = key.substr(j, k);
-                    iter = freq_map_.find(substring);
-                    if (iter == freq_map_.end())
+                    if (freq_map_.find(substring) == freq_map_.end())
                         freq_map_.insert(std::pair<std::string, int64_t>(substring, 1));
                     else
-                        iter->second += 1;
+                        // TODO
+                        // clean code
+                        freq_map_.find(substring)->second++;
                 }
             }
         }
@@ -108,8 +158,8 @@ namespace ope {
         }
         auto blend_freq_table_end = blend_freq_table.end() - 1;
         mergeIntervals(next_start, blend_freq_table_end);
-        std::string start_string = not_first_peak == true ? getNextString(blend_freq_table.begin()->first)
-                                                          : blend_freq_table.begin()->first;
+        std::string start_string = not_first_peak ? blend_freq_table.begin()->first
+                                                          : getNextString(blend_freq_table.begin()->first);
         fillGap(std::string(1, char(0)), start_string);
         std::string end_string = next_start == blend_freq_table_end ? getNextString(blend_freq_table_end->first)
                                                                     : blend_freq_table_end->first;
@@ -120,7 +170,7 @@ namespace ope {
         if (start_include.compare(end_exclude) >= 0)
             return;
         std::string com_prefix = commonPrefix(start_include, getPrevString(end_exclude));
-        if (com_prefix.size() > 0) {
+        if (!com_prefix.empty()) {
             intervals_.push_back(std::make_pair(start_include, end_exclude));
             return;
         }
@@ -153,7 +203,7 @@ namespace ope {
         for (auto iter = start_exclude_iter + 1; iter != end_exclude_iter; iter++) {
             std::string cur_key = iter->first;
             cnt += iter->second;
-            if (has_prefix == false) {
+            if (!has_prefix) {
                 prefix = cur_key;
                 has_prefix = true;
             } else
@@ -175,7 +225,9 @@ namespace ope {
 
     std::string HeuristicSS::commonPrefix(const std::string &str1,
                                           const std::string &str2) {
-        int min_len = std::min(str1.size(), str2.size());
+        if(str1 == "\0")
+            std::cout << std::endl;
+        int min_len = (int)std::min(str1.size(), str2.size());
         int i = 0;
         for (; i < min_len; i++) {
             if (str1[i] != str2[i])
@@ -186,8 +238,8 @@ namespace ope {
 
     std::string HeuristicSS::getPrevString(const std::string &str) {
         bool end_with_startchr = false;
-        for (int i = str.size() - 1; i >= 0; i--) {
-            if (int(str[i]) == 0) {
+        for (int i = (int)str.size() - 1; i >= 0; i--) {
+            if (uint8_t (str[i]) == 0) {
                 end_with_startchr = true;
                 continue;
             }
@@ -205,7 +257,7 @@ namespace ope {
 
     std::string HeuristicSS::getNextString(const std::string &str) {
         for (int i = int(str.size() - 1); i >= 0; i--) {
-            if (int(str[i]) != 127) {
+            if (uint8_t (str[i]) != 127) {
                 char next_chr = str[i] + 1;
                 return str.substr(0, i) + std::string(1, next_chr);
             }
@@ -214,7 +266,7 @@ namespace ope {
         return std::string();
     }
 
-    void HeuristicSS::checkIntervals(std::string start_str, std::string end_str) {
+    void HeuristicSS::checkIntervals(std::string& start_str, std::string& end_str) {
         if (start_str.compare(end_str) >= 0)
             assert(false);
         std::sort(intervals_.begin(), intervals_.end(),
@@ -240,6 +292,7 @@ namespace ope {
                 std::cout << "[Error] intervals not connected," << std::endl
                           << " Current interval : " << iter->first << " " << iter->second << std::endl
                           << " Correct start :  " << end << std::endl;
+               // assert(false);
             }
             end = iter->second;
         }

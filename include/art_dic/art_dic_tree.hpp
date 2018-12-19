@@ -14,11 +14,11 @@ namespace ope {
         int visit_cnt = 0;
     };
 
-    class Tree {
+    class ArtDicTree {
     public:
-        Tree();
+        ArtDicTree();
 
-        ~Tree();
+        ~ArtDicTree();
 
         ope::Code lookup(const char *symbol, const int symbol_len, int &prefix_len) const;
 
@@ -59,14 +59,14 @@ namespace ope {
     };
 
 
-    Tree::Tree() : root(new N256(nullptr, 0)) {};
+    ArtDicTree::ArtDicTree() : root(new N256(nullptr, 0)) {};
 
-    Tree::~Tree() {
+    ArtDicTree::~ArtDicTree() {
         N::deleteChildren(root);
         N::deleteNode(root);
     }
 
-    ope::Code Tree::lookup(const char *symbol, const int symbol_len, int &prefix_len) const {
+    ope::Code ArtDicTree::lookup(const char *symbol, const int symbol_len, int &prefix_len) const {
         N *node = nullptr;
         N *next_node = root;
         int key_level = 0;
@@ -130,7 +130,7 @@ namespace ope {
         }
     }
 
-    bool Tree::build(const std::vector<ope::SymbolCode> &symbol_code_list) {
+    bool ArtDicTree::build(const std::vector<ope::SymbolCode> &symbol_code_list) {
         // REQUIRE: symbol has been sorted
         LeafInfo *prev_leaf = nullptr;
 
@@ -152,7 +152,7 @@ namespace ope {
         return true;
     }
 
-    void Tree::insert(LeafInfo *leafInfo) {
+    void ArtDicTree::insert(LeafInfo *leafInfo) {
         const ope::SymbolCode *symbol_code = leafInfo->symbol_code;
         std::string key = symbol_code->first;
         N *node = nullptr;
@@ -217,7 +217,7 @@ namespace ope {
         }
     }
 
-    void Tree::countFreq(std::vector<std::string> keys, std::vector<ope::SymbolFreq> *symbol_freq_list) {
+    void ArtDicTree::countFreq(std::vector<std::string> keys, std::vector<ope::SymbolFreq> *symbol_freq_list) {
         for (auto iter = keys.begin(); iter != keys.end(); iter++) {
             LeafInfo *result_leaf_info = nullptr;
             int prefix_len = -1;
@@ -228,7 +228,7 @@ namespace ope {
         }
     }
 
-    void Tree::addLeaf(int insertkey_level, std::string& key,
+    void ArtDicTree::addLeaf(int insertkey_level, std::string& key,
                        N *node, N *val, N *parent_node, uint8_t parent_key) {
         if (insertkey_level == key.size() - 1) {
             N::insertOrUpdateNode(node, parent_node, parent_key,
@@ -247,7 +247,7 @@ namespace ope {
 
     }
 
-    N *Tree::spawn(uint8_t *common_prefix, N *node,
+    N *ArtDicTree::spawn(uint8_t *common_prefix, N *node,
                    std::string key, N *val,
                    int node_level, int key_level, uint8_t parent_key) {
         auto node_new = new N4(common_prefix, node_level);
@@ -263,7 +263,7 @@ namespace ope {
         return node_new;
     }
 
-    void Tree::skipIfEmpty(N *node_new, N *leaf_dup, uint8_t key) {
+    void ArtDicTree::skipIfEmpty(N *node_new, N *leaf_dup, uint8_t key) {
         // TODO: remove std
         uint8_t children_key[256];
         N *children_p[256];
@@ -276,7 +276,7 @@ namespace ope {
         }
     }
 
-    bool Tree::prefixMatch(N *node, uint8_t *key,
+    bool ArtDicTree::prefixMatch(N *node, uint8_t *key,
                            int key_size, int &key_level,
                            int &node_level, uint8_t *common_prefix) const {
         int i = 0;
@@ -294,13 +294,13 @@ namespace ope {
         return true;
     }
 
-    void Tree::subKey(int start, int end, uint8_t *subKey, uint8_t *org) {
+    void ArtDicTree::subKey(int start, int end, uint8_t *subKey, uint8_t *org) {
         for (int i = start; i < end; i++) {
             subKey[i - start] = org[i];
         }
     }
 
-    LeafInfo *Tree::getLeftBottom(N *node) const {
+    LeafInfo *ArtDicTree::getLeftBottom(N *node) const {
         while (true) {
             if (N::isLeaf(node))
                 return reinterpret_cast<LeafInfo *>(N::getValueFromLeaf(node));
@@ -308,7 +308,7 @@ namespace ope {
         }
     }
 
-    LeafInfo *Tree::getRightBottom(N *node) const {
+    LeafInfo *ArtDicTree::getRightBottom(N *node) const {
         while (true) {
             if (N::isLeaf(node))
                 return reinterpret_cast<LeafInfo *>(N::getValueFromLeaf(node));
@@ -316,7 +316,7 @@ namespace ope {
         }
     }
 
-    int Tree::getCommonPrefixLen(std::string &str1, std::string &str2) {
+    int ArtDicTree::getCommonPrefixLen(std::string &str1, std::string &str2) {
         int min_len = (int) std::min(str1.size(), str2.size());
         int i = 0;
         for (; i < min_len; i++) {

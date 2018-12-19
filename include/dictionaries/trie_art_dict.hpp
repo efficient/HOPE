@@ -15,11 +15,11 @@ namespace ope {
         int64_t memoryUse () const;
 
     private:
-        ope::Tree* tree;
+        ope::ArtDicTree* tree;
     };
 
     TrieArtDict::TrieArtDict() {
-        tree = new ope::Tree();
+        tree = new ope::ArtDicTree();
     }
 
     TrieArtDict::~TrieArtDict() {
