@@ -95,6 +95,6 @@ ax.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE, weight='bold')
 ax.grid()
 ax.set_axisbelow(True)
 
-ax.legend(loc=LEGEND_POS, prop={'size':LEGEND_FONT_SIZE}, ncol=2)
+ax.legend(loc=LEGEND_POS, prop={'size':LEGEND_FONT_SIZE})
 
 plot.savefig(GRAPH_OUTPUT_PATH, bbox_inches='tight')
