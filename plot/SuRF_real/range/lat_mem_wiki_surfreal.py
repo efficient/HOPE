@@ -76,10 +76,10 @@ product_min = 4
 product_diff = product_max - product_min
 
 x_array = []
-x = 0.001
+x = 0.005
 while x < X_LIMIT :
     x_array.append(x)
-    x += 0.001
+    x += 0.005
 x_list = np.array(x_array)
 
 y_lists = []
