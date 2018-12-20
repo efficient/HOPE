@@ -6,6 +6,8 @@
 
 namespace surf {
 
+#define PRINT_TRIE_HEIGHT 1
+
 using level_t = uint32_t;
 using position_t = uint32_t;
 
@@ -18,8 +20,8 @@ static const word_t kMsbMask = 0x8000000000000000;
 static const word_t kOneMask = 0xFFFFFFFFFFFFFFFF;
 
 static const bool kIncludeDense = true;
-//static const uint32_t kSparseDenseRatio = 64;
-static const uint32_t kSparseDenseRatio = 16;
+static const uint32_t kSparseDenseRatio = 64;
+//static const uint32_t kSparseDenseRatio = 16;
 static const label_t kTerminator = 255;
 
 static const int kHashShift = 7;

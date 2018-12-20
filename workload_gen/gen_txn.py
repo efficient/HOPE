@@ -13,16 +13,6 @@ class bcolors:
 
 #####################################################################################
 
-def reverseHostName ( email ) :
-    name, sep, host = email.partition('@')
-    hostparts = host[:-1].split('.')
-    r_host = ''
-    for part in hostparts :
-        r_host = part + '.' + r_host
-    return r_host + sep + name
-
-#####################################################################################
-
 if (len(sys.argv) < 3) :
     print bcolors.FAIL + 'Usage:'
     print 'arg 1, key type: randint, email, url, wiki' 

@@ -78,6 +78,9 @@ public:
     level_t getSparseStartLevel() const {
 	return sparse_start_level_;
     }
+    double getAvgTrieHeight() const {
+	return avg_trie_height_;
+    }
     SuffixType getSuffixType() const {
 	return suffix_type_;
     }
@@ -152,6 +155,8 @@ private:
     uint32_t sparse_dense_ratio_;
     level_t sparse_start_level_;
 
+    double avg_trie_height_;
+
     // LOUDS-Sparse bit/byte vectors
     std::vector<std::vector<label_t> > labels_;
     std::vector<std::vector<word_t> > child_indicator_bits_;
@@ -183,6 +188,7 @@ void SuRFBuilder::build(const std::vector<std::string>& keys) {
 }
 
 void SuRFBuilder::buildSparse(const std::vector<std::string>& keys) {
+    int64_t total_height = 0;
     for (position_t i = 0; i < keys.size(); i++) {
 	level_t level = skipCommonPrefix(keys[i]);	
 	position_t curpos = i;
@@ -193,7 +199,9 @@ void SuRFBuilder::buildSparse(const std::vector<std::string>& keys) {
 	else // for last key, there is no successor key in the list
 	    level = insertKeyBytesToTrieUntilUnique(keys[curpos], std::string(), level);
 	insertSuffix(keys[curpos], level);
+	total_height += level;
     }
+    avg_trie_height_ = (total_height + 0.0) / keys.size();
 }
 
 level_t SuRFBuilder::skipCommonPrefix(const std::string& key) {

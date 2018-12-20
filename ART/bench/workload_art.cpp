@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
 	std::cout << "1. key type: email, wiki, url" << std::endl;
 	std::cout << "2. query type: point, range" << std::endl;
 	std::cout << "3. compress?: 0, 1" << std::endl;
-	std::cout << "4. encoder type: 1 --> single, 2 --> double, 3 --> 3gram" << std::endl;
+	std::cout << "4. encoder type: 1 --> single, 2 --> double, 3 --> 3gram, 4 --> 4gram" << std::endl;
 	std::cout << "5. dictionary size limit" << std::endl;
 	return -1;
     }
@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
 	return -1;
     }
     
-    if (encoder_type <= 0 || encoder_type > 3) {
+    if (encoder_type <= 0 || encoder_type > 4) {
 	std::cout << kRed << "WRONG encoder type\n" << kNoColor;
 	return -1;
     }
@@ -148,6 +148,7 @@ int main(int argc, char *argv[]) {
     // create filter ==============================================
     ope::Encoder* encoder = nullptr;
     uint8_t* buffer = new uint8_t[8192];
+    uint8_t* buffer_r = new uint8_t[8192];
     std::vector<std::string> enc_insert_keys;
     
     double time1 = getNow();
@@ -181,6 +182,8 @@ int main(int argc, char *argv[]) {
 
     // traverse ART to get stats ==================================
     art->traverse(mem, avg_height);
+    if (encoder != nullptr)
+	mem += (encoder->memoryUse() / 1000000.0);
     std::cout << "Mem = " << mem << std::endl;
     std::cout << "Avg Tree Height = " << avg_height << std::endl;
 
@@ -207,7 +210,39 @@ int main(int argc, char *argv[]) {
 	    }
 	}
     } else if (query_type.compare(std::string("range")) == 0) {
-	// TODO
+	TID result[100];
+	std::size_t result_size = 100;
+	std::size_t results_found = 0;
+	if (is_compressed) {
+	    for (int i = 0; i < (int)txn_keys.size(); i++) {
+		int enc_len = 0, enc_len_r = 0;
+
+		encoder->encodePair(txn_keys[i], upper_bound_keys[i], buffer, buffer_r, enc_len, enc_len_r);
+
+		int enc_len_round = (enc_len + 7) >> 3;
+		int enc_len_r_round = (enc_len_r + 7) >> 3;
+		std::string left_key = std::string((const char*)buffer, enc_len_round);
+		std::string right_key = std::string((const char*)buffer_r, enc_len_r_round);
+
+		Key start_key;
+		loadKey((TID)&(left_key), start_key);
+		Key end_key;
+		loadKey((TID)&(right_key), end_key);
+		Key continue_key;
+		
+		sum += (int)art->lookupRange(start_key, end_key, continue_key, result, result_size, results_found, t2);
+	    }
+	} else {
+	    for (int i = 0; i < (int)txn_keys.size(); i++) {
+		Key start_key;
+		loadKey((TID)&(txn_keys[i]), start_key);
+		Key end_key;
+		loadKey((TID)&(upper_bound_keys[i]), end_key);
+		Key continue_key;
+		
+		sum += (int)art->lookupRange(start_key, end_key, continue_key, result, result_size, results_found, t2);
+	    }
+	}
     }
 
     double end_time = getNow();

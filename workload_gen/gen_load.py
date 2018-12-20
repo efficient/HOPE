@@ -111,7 +111,8 @@ elif key_type == 'email' :
     count = 0
     for line in f_load :
         cols = line.split()
-        email = reverseHostName(emails[count * gap])
+        #email = reverseHostName(emails[count * gap])
+        email = emails[count * gap].rstrip()
         f_load_out.write (email + '\n')
         f_email_keymap.write (cols[0] + ' ' + email + '\n')
         count += 1

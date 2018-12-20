@@ -71,6 +71,7 @@ int Array4GramDict::numEntries () const {
 }
     
 int64_t Array4GramDict::memoryUse () const {
+    //return (sizeof(4 + 1 + 4 + 1) * dict_size_);
     return (sizeof(Interval4Gram) * dict_size_);
 }
 

@@ -13,7 +13,8 @@
 namespace ope {
 
 typedef struct {
-    int64_t code;
+    //int64_t code;
+    int32_t code;
     int8_t len;
 } Code;
 

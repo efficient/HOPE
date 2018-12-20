@@ -250,6 +250,7 @@ int Trie3GramDict::numEntries () const {
 int64_t Trie3GramDict::memoryUse () const {
     return (sizeof(Trie3GramDict)
 	    + sizeof(TrieNode) * (1 + level_1_num_nodes_ + level_2_num_nodes_)
+	    //+ (4 + 1) * num_leafs_);
 	    + sizeof(Code) * num_leafs_);
 }
 
