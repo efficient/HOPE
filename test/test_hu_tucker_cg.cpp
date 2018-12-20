@@ -52,23 +52,23 @@ void printCPR(const HuTuckerCG* code_generator) {
 
 
 TEST_F(HuTuckerCGTest, testCodeOrder) {
-        std::vector<SymbolFreq> symbol_freq_list;
-        SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(1);
-        symbol_selector->selectSymbols(words, 1000, &symbol_freq_list);
+    std::vector<SymbolFreq> symbol_freq_list;
+    SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(1);
+    symbol_selector->selectSymbols(words, 1000, &symbol_freq_list);
 
-        std::vector<SymbolCode> symbol_code_list;
-        HuTuckerCG* code_generator = new HuTuckerCG();
-        code_generator->genCodes(symbol_freq_list, &symbol_code_list);
+    std::vector<SymbolCode> symbol_code_list;
+    HuTuckerCG* code_generator = new HuTuckerCG();
+    code_generator->genCodes(symbol_freq_list, &symbol_code_list);
 
-        std::sort(symbol_code_list.begin(), symbol_code_list.end(),
-                  [](SymbolCode& x, SymbolCode& y){
-                      return x.first.compare(y.first) < 0;
-                  });
-        for(auto iter = symbol_code_list.begin()+1; iter != symbol_code_list.end(); iter++){
-            std::cout << iter->first << " " << iter->second.code;
-            std::cout << (iter-1)->first << " " << (iter-1)->second.code;
-            assert(iter->second.code > (iter-1)->second.code);
-        }
+    std::sort(symbol_code_list.begin(), symbol_code_list.end(),
+            [](SymbolCode& x, SymbolCode& y){
+            return x.first.compare(y.first) < 0;
+    });
+    for(auto iter = symbol_code_list.begin()+1; iter != symbol_code_list.end(); iter++){
+        std::cout << iter->first << " " << iter->second.code;
+        std::cout << (iter-1)->first << " " << (iter-1)->second.code;
+        assert(iter->second.code > (iter-1)->second.code);
+    }
 }
 //======================= Word Tests ==============================
 
@@ -280,7 +280,7 @@ void loadWords() {
 	count++;
     }
 }
-    
+
 void loadEmails() {
     std::ifstream infile(kEmailFilePath);
     std::string key;
