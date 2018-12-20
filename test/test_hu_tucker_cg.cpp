@@ -67,7 +67,6 @@ TEST_F(HuTuckerCGTest, testCodeOrder) {
         for(auto iter = symbol_code_list.begin()+1; iter != symbol_code_list.end(); iter++){
             std::cout << iter->first << " " << iter->second.code;
             std::cout << (iter-1)->first << " " << (iter-1)->second.code;
-            auto last_iter = (iter-1);
             assert(iter->second.code > (iter-1)->second.code);
         }
 }
