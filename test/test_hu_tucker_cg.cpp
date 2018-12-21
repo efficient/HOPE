@@ -50,6 +50,14 @@ void printCPR(const HuTuckerCG* code_generator) {
 	      << code_generator->getCompressionRate() << std::endl;
 }
 
+std::string changeToBinary(int64_t num) {
+    std::string result = std::string();
+    while (num > 0) {
+        result = std::string(1, num%2 + '0') + result;
+        num = num / 2;
+    }
+    return result;
+}
 
 TEST_F(HuTuckerCGTest, testCodeOrder) {
     std::vector<SymbolFreq> symbol_freq_list;
@@ -62,12 +70,13 @@ TEST_F(HuTuckerCGTest, testCodeOrder) {
 
     std::sort(symbol_code_list.begin(), symbol_code_list.end(),
             [](SymbolCode& x, SymbolCode& y){
-            return x.first.compare(y.first) < 0;
+        return x.first.compare(y.first) < 0;
     });
     for(auto iter = symbol_code_list.begin()+1; iter != symbol_code_list.end(); iter++){
-        std::cout << iter->first << " " << iter->second.code;
-        std::cout << (iter-1)->first << " " << (iter-1)->second.code;
-        assert(iter->second.code > (iter-1)->second.code);
+        std::string str1 = changeToBinary(iter->second.code);
+        std::string str2 = changeToBinary((iter-1)->second.code);
+        int cmp = str1.compare(str2);
+        assert(cmp > 0);
     }
 }
 //======================= Word Tests ==============================
