@@ -157,6 +157,7 @@ int DoubleCharEncoder::numEntries () const {
 }
 
 int64_t DoubleCharEncoder::memoryUse () const {
+    //return (4 + 1) * 65536;
     return sizeof(Code) * 65536;
 }
 

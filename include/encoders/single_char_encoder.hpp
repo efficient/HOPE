@@ -144,6 +144,7 @@ int SingleCharEncoder::numEntries () const {
 }
 
 int64_t SingleCharEncoder::memoryUse () const {
+    //return (4 + 1) * 256;
     return sizeof(Code) * 256;
 }
 

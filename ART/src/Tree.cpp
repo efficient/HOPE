@@ -111,7 +111,7 @@ namespace ART_ROWEX {
     }
 
     bool Tree::lookupRange(const Key &start, const Key &end, Key &continueKey, TID result[],
-                                std::size_t resultSize, std::size_t &resultsFound, ThreadInfo &threadEpocheInfo) const {
+			   std::size_t resultSize, std::size_t &resultsFound, ThreadInfo &threadEpocheInfo) const {
         for (uint32_t i = 0; i < std::min(start.getKeyLen(), end.getKeyLen()); ++i) {
             if (start[i] > end[i]) {
                 resultsFound = 0;
@@ -232,6 +232,13 @@ namespace ART_ROWEX {
 
         while (true) {
             node = nextNode;
+
+	    // huanchen
+	    if (node == nullptr)
+		return false;
+	    if (N::isLeaf(node))
+		return true;
+	    
             PCEqualsResults prefixResult;
             prefixResult = checkPrefixEquals(node, level, start, end, loadKey);
             switch (prefixResult) {
@@ -570,7 +577,17 @@ namespace ART_ROWEX {
                 }
                 uint8_t kLevel = (k.getKeyLen() > level) ? k[level] : 0;
 
-                uint8_t curKey = i >= maxStoredPrefixLength ? kt[level] : p.prefix[i];
+		// huanchen
+		uint8_t curKey = 0;
+		if (i >= maxStoredPrefixLength) {
+		    if (kt.getKeyLen() <= level)
+			return PCCompareResults::Bigger;
+		    curKey = kt[level];
+		} else {
+		    curKey = p.prefix[i];
+		}
+
+                //uint8_t curKey = i >= maxStoredPrefixLength ? kt[level] : p.prefix[i];
                 if (curKey < kLevel) {
                     return PCCompareResults::Smaller;
                 } else if (curKey > kLevel) {

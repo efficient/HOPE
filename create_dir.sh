@@ -17,6 +17,9 @@ mkdir results/SuRF/range
 mkdir results/SuRF_real
 mkdir results/SuRF_real/point
 mkdir results/SuRF_real/range
+mkdir results/ART
+mkdir results/ART/point
+mkdir results/ART/range
 
 mkdir figures
 mkdir figures/microbench
@@ -32,5 +35,8 @@ mkdir figures/SuRF/range
 mkdir figures/SuRF_real
 mkdir figures/SuRF_real/point
 mkdir figures/SuRF_real/range
+mkdir figures/ART
+mkdir figures/ART/point
+mkdir figures/ART/range
 
 

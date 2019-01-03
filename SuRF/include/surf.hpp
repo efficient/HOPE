@@ -94,6 +94,7 @@ public:
     uint64_t serializedSize() const;
     uint64_t getMemoryUsage() const;
     level_t getHeight() const;
+    double getAvgHeight() const;
     level_t getSparseStartLevel() const;
 
     char* serialize() const {
@@ -122,6 +123,7 @@ private:
     LoudsDense* louds_dense_;
     LoudsSparse* louds_sparse_;
     SuRFBuilder* builder_;
+    double avg_height_;
     SuRF::Iter iter_;
 };
 
@@ -134,7 +136,17 @@ void SuRF::create(const std::vector<std::string>& keys,
     builder_->build(keys);
     louds_dense_ = new LoudsDense(builder_);
     louds_sparse_ = new LoudsSparse(builder_);
+    avg_height_ = builder_->getAvgTrieHeight();
     iter_ = SuRF::Iter(this);
+
+#ifdef PRINT_TRIE_HEIGHT
+    uint64_t dense_height = louds_dense_->getHeight();
+    uint64_t trie_height = louds_sparse_->getHeight();
+    std::cout << "\tLOUDS-DENSE Trie Height = " << dense_height << std::endl;
+    std::cout << "\tMax Trie Height = " << trie_height << std::endl;
+    std::cout << "\tAvg Trie Height = " << avg_height_ << std::endl;
+#endif
+    
     delete builder_;
 }
 
@@ -256,6 +268,10 @@ uint64_t SuRF::getMemoryUsage() const {
 
 level_t SuRF::getHeight() const {
     return louds_sparse_->getHeight();
+}
+
+double SuRF::getAvgHeight() const {
+    return avg_height_;
 }
 
 level_t SuRF::getSparseStartLevel() const {

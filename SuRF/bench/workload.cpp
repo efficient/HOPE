@@ -238,7 +238,11 @@ int main(int argc, char *argv[]) {
 	fp_rate = false_positives / (true_negatives + false_positives + 0.0);
     std::cout << kGreen << "False Positive Rate = " << kNoColor << fp_rate << "\n";
 
-    std::cout << kGreen << "Memory = " << kNoColor << filter->getMemoryUsage() << "\n\n";
+    double mem = filter->getMemoryUsage() + 0.0;
+    if (encoder != nullptr)
+	mem += encoder->memoryUse();
+    mem /= 1000000; // MB
+    std::cout << kGreen << "Memory = " << kNoColor << mem << "MB\n\n";
 
     return 0;
 }

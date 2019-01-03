@@ -26,7 +26,8 @@ bool FixedLenDictCG::genCodes(const std::vector<SymbolFreq>& symbol_freq_list,
 	code_len_++;
 	num_intervals >>= 1;
     }
-    int64_t counter = 0;
+    //int64_t counter = 0;
+    int32_t counter = 0;
     for (int i = 0; i < (int)symbol_freq_list.size(); i++) {
 	Code code = {counter, code_len_};
 	symbol_code_list->push_back(std::make_pair(symbol_freq_list[i].first, code));

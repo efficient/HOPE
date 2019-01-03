@@ -104,12 +104,11 @@ Code Array3GramDict::lookup (const char* symbol, const int symbol_len,
 }
     
 int Array3GramDict::numEntries () const {
-    //return dict_.size();
     return dict_size_;
 }
     
 int64_t Array3GramDict::memoryUse () const {
-    //return (sizeof(Interval3Gram) * dict_.size());
+    //return ((3 + 1 + 4 + 1) * dict_size_);
     return (sizeof(Interval3Gram) * dict_size_);
 }
 
