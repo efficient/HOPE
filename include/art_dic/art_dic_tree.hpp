@@ -56,6 +56,8 @@ namespace ope {
 
         LeafInfo* getRightBottom(N *node)const;
 
+        std::string getPrevString(const std::string &str);
+
     };
 
 
@@ -138,7 +140,7 @@ namespace ope {
             LeafInfo *lf = new LeafInfo();
             std::string start_interval = iter->first;
             if (iter != symbol_code_list.end() - 1) {
-                std::string end_interval = (iter + 1)->first;
+                std::string end_interval = getPrevString((iter + 1)->first);
                 lf->prefix_len = (uint32_t) getCommonPrefixLen(start_interval, end_interval);
                 assert(lf->prefix_len > 0);
             }
@@ -325,6 +327,26 @@ namespace ope {
         }
         return i;
     }
+
+    std::string ArtDicTree::getPrevString(const std::string &str) {
+        bool end_with_startchr = false;
+        for (int i = (int)str.size() - 1; i >= 0; i--) {
+            if (uint8_t (str[i]) == 0) {
+                end_with_startchr = true;
+                continue;
+            }
+            std::string addchr;
+            if (!end_with_startchr) {
+                char prev_chr = str[i] - 1;
+                addchr = std::string(1, prev_chr);
+            } else
+                addchr = std::string(1, str[i]);
+            return str.substr(0, i) + addchr;
+        }
+        assert(false);
+        return std::string();
+    }
+
 
 }
 

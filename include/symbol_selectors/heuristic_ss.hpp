@@ -2,6 +2,8 @@
 #define HEURISTIC_SS_H
 
 #include <map>
+#include <fstream>
+#include<iostream>
 #include "symbol_selector.hpp"
 #include "blending_trie.hpp"
 
@@ -25,8 +27,11 @@ namespace ope {
 
         void getInterval(std::vector<SymbolFreq> &blend_freq_table);
 
+        void mergeAdjacentComPrefixIntervals();
+
         void mergeIntervals(std::vector<SymbolFreq>::iterator start_exclude_iter,
                             std::vector<SymbolFreq>::iterator end_exclude_iter);
+
 
         void fillGap(std::string start_exclude, std::string end_exclude);
 
@@ -41,7 +46,7 @@ namespace ope {
 
         void encode(const std::string& str, std::vector<int>& cnt);
 
-        int BinarySearch(std::string str, int pos, int &prefix_len);
+        int BinarySearch(const std::string& str, int pos, int &prefix_len);
 
         int64_t W;
         std::map<std::string, int64_t> freq_map_;
@@ -50,7 +55,7 @@ namespace ope {
     };
 
     HeuristicSS::HeuristicSS() {
-        W = 100;
+        W = 800;
     }
 
     bool HeuristicSS::selectSymbols(const std::vector<std::string> &key_list,
@@ -66,40 +71,50 @@ namespace ope {
         std::vector<SymbolFreq> blend_freq_table;
         tree.blendingAndGetLeaves(blend_freq_table);
         getInterval(blend_freq_table);
+        for (int i = 0; i < 10; i++) {
+            std::cout << (blend_freq_table.rbegin()+i)->first
+            << "\t" <<(blend_freq_table.rbegin()+i)->second << std::endl;
+        }
         // sort intervals
         std::sort(intervals_.begin(), intervals_.end(),
                 [](std::pair<std::string, std::string>& x, std::pair<std::string, std::string> y) {
                     return x.first.compare(y.first) < 0;
                 });
+        // Merge adjacent intervals with same prefix
+        mergeAdjacentComPrefixIntervals();
+        std::string start = std::string(1, char(0));
+        std::string end = std::string(50, char(127));
+        checkIntervals(start, end);
         // simulate encode process to get Frequency
         getIntervalFreq(symbol_freq_list, key_list);
         return true;
     }
 
-    int HeuristicSS::BinarySearch(std::string str, int pos, int &prefix_len) {
+    int HeuristicSS::BinarySearch(const std::string& str, int pos, int &prefix_len) {
         int l = 0;
-        int r = intervals_.size();
+        int r = static_cast<int>(intervals_.size());
         std::string compare_str = str.substr(pos, str.size() - pos);
         while (l <= r) {
             int mid = (l+r)/2;
             std::string mid_left_bound = intervals_[mid].first;
-            if(mid_left_bound.compare(compare_str) <= 0) {
+            if(mid_left_bound.compare(compare_str) < 0) {
                 l = mid + 1;
-            } else {
+            } else if (mid_left_bound.compare(compare_str) > 0){
                 r = mid - 1;
+            } else {
+                r = mid;
+                break;
             }
         }
         assert(r < intervals_.size());
-        prefix_len = commonPrefix(intervals_[r].first, getPrevString(intervals_[r].second)).size();
-        if (prefix_len == 0)
-            std::cout << "" << std::endl;
+        prefix_len = static_cast<int>(commonPrefix(intervals_[r].first, getPrevString(intervals_[r].second)).size());
         return r;
     }
 
     void HeuristicSS::encode(const std::string &str, std::vector<int>& cnt) {
         int pos = 0;
         int prefix_len = 0;
-        int interval_idx = -1;
+        int interval_idx;
         while (pos < str.size()) {
             interval_idx = BinarySearch(str, pos, prefix_len);
             cnt[interval_idx]++;
@@ -114,8 +129,9 @@ namespace ope {
         for (auto iter = key_list.begin(); iter != key_list.end(); iter++) {
             encode(*iter, cnt);
         }
+
         for (int i = 0; i < intervals_.size(); i++) {
-            symbol_freq_list->push_back(std::make_pair(intervals_[i].first, cnt[i]));
+            symbol_freq_list->push_back(std::make_pair(intervals_[i].first, cnt[i] + 1));
         }
     }
 
@@ -144,7 +160,7 @@ namespace ope {
                   [](const SymbolFreq &x, const SymbolFreq &y) {
                       return (x.first.compare(y.first) < 0);
                   });
-        std::vector<SymbolFreq>::iterator next_start = blend_freq_table.begin();
+        auto next_start = blend_freq_table.begin();
         bool not_first_peak = true;
         for (auto iter = blend_freq_table.begin(); iter != blend_freq_table.end(); iter++) {
             if (iter->second * iter->first.size() > W) {
@@ -225,8 +241,6 @@ namespace ope {
 
     std::string HeuristicSS::commonPrefix(const std::string &str1,
                                           const std::string &str2) {
-        if(str1 == "\0")
-            std::cout << std::endl;
         int min_len = (int)std::min(str1.size(), str2.size());
         int i = 0;
         for (; i < min_len; i++) {
@@ -245,7 +259,7 @@ namespace ope {
             }
             std::string addchr;
             if (!end_with_startchr) {
-                char prev_chr = str[i] - 1;
+                char prev_chr = static_cast<char>(str[i] - 1);
                 addchr = std::string(1, prev_chr);
             } else
                 addchr = std::string(1, str[i]);
@@ -297,6 +311,26 @@ namespace ope {
             end = iter->second;
         }
         std::cout << "Check " << cnt << " intervals" << std::endl;
+    }
+
+
+    void HeuristicSS::mergeAdjacentComPrefixIntervals() {
+        std::vector<std::pair<std::string, std::string>>merged_intervals;
+        merged_intervals.push_back(std::make_pair(intervals_.begin()->first, intervals_.begin()->second));
+        std::string last_prefix = std::string();
+        for (auto iter = intervals_.begin() + 1; iter != intervals_.end(); iter++) {
+            auto last_interval = merged_intervals.rbegin();
+            last_prefix = commonPrefix(last_interval->first, getPrevString(last_interval->second));
+            std::string cur_prefix = commonPrefix(iter->first, getPrevString(iter->second));
+            if (last_prefix == cur_prefix) {
+                merged_intervals.pop_back();
+                merged_intervals.push_back(std::make_pair(last_interval->first, iter->second));
+            } else {
+                merged_intervals.push_back(std::make_pair(iter->first, iter->second));
+            }
+        }
+        intervals_.clear();
+        intervals_.insert(intervals_.begin(), merged_intervals.begin(), merged_intervals.end());
     }
 
 } // namespace ope

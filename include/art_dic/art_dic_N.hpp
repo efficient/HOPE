@@ -661,7 +661,7 @@ namespace ope {
     N *N4::getPrevChild(uint8_t k) {
         if (count == 0)
             return nullptr;
-        for (uint8_t  i = k; (int)i >= 0; i--) {
+        for (uint8_t  i = k; i <= k; i--) {
             N *child = getChild(i);
             if(child != nullptr)
                 return child;
@@ -763,7 +763,7 @@ namespace ope {
     N *N16::getPrevChild(uint8_t k) {
         if (count == 0)
             return nullptr;
-        for (uint8_t  i = k; (int)i >= 0; i--) {
+        for (uint8_t  i = k; i <= k; i--) {
             N *child = getChild(i);
             if(child != nullptr)
                 return child;
@@ -858,7 +858,7 @@ namespace ope {
     N *N48::getPrevChild(uint8_t k) {
         if (count == 0)
             return nullptr;
-        for (uint8_t i = k; (int)i >= 0; i--) {
+        for (uint8_t i = k; i <= k; i--) {
             N *child = getChild((uint8_t) i);
             if(child != nullptr)
                 return child;
@@ -947,7 +947,7 @@ namespace ope {
     N *N256::getPrevChild(uint8_t k) {
         if (count == 0)
             return nullptr;
-        for (uint8_t i = k; (int)i >= 0; i--) {
+        for (uint8_t i = k; i <= k; i--) {
             N *child = getChild((uint8_t)k);
             if(child != nullptr)
                 return child;
