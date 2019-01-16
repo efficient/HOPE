@@ -18,7 +18,7 @@ namespace ope {
         static const int kLongestCodeLen = 4096;
 
         static const std::string kEmailFilePath = "../../datasets/email_100000.txt";
-        static const int kEmailTestSize = 100000;
+        static const int kEmailTestSize = 10000;
         static std::vector<std::string> emails;
 
         class HeuristicEnCoderTest : public ::testing::Test {

@@ -8,7 +8,7 @@
 namespace ope {
 
     struct LeafInfo {
-        const ope::SymbolCode *symbol_code;
+        const SymbolCode *symbol_code;
         LeafInfo *prev_leaf;
         uint32_t prefix_len;
         int visit_cnt = 0;
@@ -20,11 +20,11 @@ namespace ope {
 
         ~ArtDicTree();
 
-        ope::Code lookup(const char *symbol, const int symbol_len, int &prefix_len) const;
+        Code lookup(const char *symbol, int symbol_len, int &prefix_len) const;
 
-        bool build(const std::vector<ope::SymbolCode> &symbol_code_list);
+        bool build(const std::vector<SymbolCode> &symbol_code_list);
 
-        void countFreq(std::vector<std::string> keys, std::vector<ope::SymbolFreq> *symbol_freq_list);
+        void countFreq(std::vector<std::string> keys, std::vector<SymbolFreq> *symbol_freq_list);
 
         //private:
         N *root;
@@ -68,7 +68,7 @@ namespace ope {
         N::deleteNode(root);
     }
 
-    ope::Code ArtDicTree::lookup(const char *symbol, const int symbol_len, int &prefix_len) const {
+    Code ArtDicTree::lookup(const char *symbol, const int symbol_len, int &prefix_len) const {
         N *node = nullptr;
         N *next_node = root;
         int key_level = 0;
@@ -81,42 +81,37 @@ namespace ope {
                             key_level, node_level, common_prefix)) {
                 if (key_level == symbol_len) {
                     LeafInfo* leaf_info = reinterpret_cast<LeafInfo *>(N::getValueFromLeaf(N::getChild(0, node)));
-                    if (leaf_info != nullptr) {
-                        prefix_len = leaf_info->prefix_len;
-                        return leaf_info->symbol_code->second;
+                    if (leaf_info == nullptr) {
+                        N *next = N::getFirstChild(node);
+                        leaf_info = getLeftBottom(next)->prev_leaf;
                     }
-                    N* next = N::getFirstChild(node);
-                    leaf_info = getLeftBottom(next)->prev_leaf;
                     prefix_len = leaf_info->prefix_len;
                     return leaf_info->symbol_code->second;
                 }
-                next_node = N::getChild(reinterpret_cast<const uint8_t &>(symbol[key_level]), node);
+                const uint8_t & next_level_key_chr = reinterpret_cast<const uint8_t &>(symbol[key_level]);
+                next_node = N::getChild(next_level_key_chr, node);
                 if (next_node == nullptr) {
                     // Get previous child
-                    N *prev = N::getPrevChild(node, reinterpret_cast<const uint8_t &>(symbol[key_level]));
+                    N *prev = N::getPrevChild(node, next_level_key_chr);
+                    LeafInfo* leaf_info = NULL;
                     if (prev == nullptr) {
-                        N *next = N::getNextChild(node, reinterpret_cast<const uint8_t &>(symbol[key_level]));
+                        N *next = N::getNextChild(node, next_level_key_chr);
+                        assert(next != NULL);
                         LeafInfo *next_leaf_info = getLeftBottom(next);
-                        LeafInfo *leaf_info = next_leaf_info->prev_leaf;
-                        // result_leaf_info = leaf_info;
-                        prefix_len = leaf_info->prefix_len;
-                        return leaf_info->symbol_code->second;
+                        leaf_info = next_leaf_info->prev_leaf;
                     } else {
-                        LeafInfo *leaf_info = getRightBottom(prev);
-                        prefix_len = leaf_info->prefix_len;
-                        // result_leaf_info = leaf_info;
-                        return leaf_info->symbol_code->second;
+                        leaf_info = getRightBottom(prev);
                     }
+                    prefix_len = leaf_info->prefix_len;
+                    return leaf_info->symbol_code->second;
                 }
                 if (N::isLeaf(next_node)) {
-                    // result_leaf_info = reinterpret_cast<LeafInfo *>(N::getValueFromLeaf(next_node));
-                    // return result_leaf_info->symbol_code->second;
                     LeafInfo *leaf_info = reinterpret_cast<LeafInfo *>(N::getValueFromLeaf(next_node));
                     prefix_len = leaf_info->prefix_len;
                     return leaf_info->symbol_code->second;
                 }
             } else {
-                LeafInfo *leaf_info = nullptr;
+                LeafInfo *leaf_info = NULL;
                 if (key_level == symbol_len || symbol[key_level] < node->prefix[node_level]) {
                     N *prev = N::getFirstChild(node);
                     leaf_info = getLeftBottom(prev)->prev_leaf;
@@ -125,14 +120,13 @@ namespace ope {
                     leaf_info = getRightBottom(next);
                 }
                 prefix_len = leaf_info->prefix_len;
-                // result_leaf_info = leaf_info;
                 return leaf_info->symbol_code->second;
             }
             key_level++;
         }
     }
 
-    bool ArtDicTree::build(const std::vector<ope::SymbolCode> &symbol_code_list) {
+    bool ArtDicTree::build(const std::vector<SymbolCode> &symbol_code_list) {
         // REQUIRE: symbol has been sorted
         LeafInfo *prev_leaf = nullptr;
 
@@ -155,7 +149,7 @@ namespace ope {
     }
 
     void ArtDicTree::insert(LeafInfo *leafInfo) {
-        const ope::SymbolCode *symbol_code = leafInfo->symbol_code;
+        const SymbolCode *symbol_code = leafInfo->symbol_code;
         std::string key = symbol_code->first;
         N *node = nullptr;
         N *next_node = root;
@@ -219,14 +213,13 @@ namespace ope {
         }
     }
 
-    void ArtDicTree::countFreq(std::vector<std::string> keys, std::vector<ope::SymbolFreq> *symbol_freq_list) {
+    void ArtDicTree::countFreq(std::vector<std::string> keys, std::vector<SymbolFreq> *symbol_freq_list) {
         for (auto iter = keys.begin(); iter != keys.end(); iter++) {
             LeafInfo *result_leaf_info = nullptr;
             int prefix_len = -1;
             lookup(iter->c_str(), iter->size(), prefix_len);
             assert(result_leaf_info != nullptr);
             result_leaf_info->visit_cnt++;
-
         }
     }
 
@@ -255,6 +248,7 @@ namespace ope {
         auto node_new = new N4(common_prefix, node_level);
         addLeaf(key_level, key, node_new, val,
                 node, parent_key);
+
         N *leaf_dup = node->duplicate();
         uint8_t leaf_key[maxPrefixLen];
         subKey(node_level + 1, node->prefix_len, leaf_key, node->prefix);

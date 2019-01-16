@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <cstdint>
 #include <algorithm>
+#include <emmintrin.h> // x86 SSE intrinsics
+
 using namespace std;
 
 namespace ope {
@@ -120,6 +122,11 @@ namespace ope {
 
         N16(const uint8_t *prefix, uint32_t prefix_len) : N(NTypes::N16, prefix, prefix_len) {};
 
+        static uint8_t flipSign(uint8_t keyByte) {
+            // Flip the sign bit, enables signed SSE comparison of unsigned values, used by Node16
+            return keyByte ^ 128;
+        };
+
         // TODO
         bool insert(uint8_t key, N *node);
 
@@ -225,7 +232,7 @@ namespace ope {
 
     template<class curN, class biggerN>
     void N::insertGrow(curN *n, uint8_t key, N *val, uint8_t key_par, N *node_par) {
-        // current key has alreay existed
+        // current key has already existed
         if (n->getChild(key) != nullptr) {
             n->change(key, val);
             return;
@@ -316,8 +323,6 @@ namespace ope {
                 return;
             }
         }
-        cout << "[Error]insert and grow Node" << endl;
-        assert(false);
     }
 
     void N::removeNode(N *node, N *parent_node, uint8_t key_par, uint8_t key) {
@@ -344,8 +349,6 @@ namespace ope {
                 return;
             }
         }
-        cout << "[Error]remove and shrink Node" << endl;
-        assert(false);
     }
 
     N *N::duplicate() {
@@ -429,14 +432,13 @@ namespace ope {
                 return reinterpret_cast<N256 *>(this)->remove(key);
             }
         }
-        return false;
     }
 
     void N::getChildren(N *node, uint8_t start, uint8_t end,
                         uint8_t *children_key, N **children_p, int &child_cnt) {
         child_cnt = 0;
         for (uint8_t cur = start; cur < end; cur++) {
-            //cout << "Current key:"<<unsigned(cur)<<endl;
+            // cout << "Current key:"<<unsigned(cur)<<endl;
             N *child = getChild(cur, node);
             if (child == nullptr)
                 continue;
@@ -549,8 +551,6 @@ namespace ope {
                 return reinterpret_cast<N256 *>(node)->deleteChildren();
             }
         }
-        assert(false);
-        __builtin_unreachable();
     }
 
     void N::deleteNode(N *node) {
@@ -584,13 +584,6 @@ namespace ope {
     }
 
 
-
-
-
-
-
-
-
     bool N4::insert(uint8_t k, N *node) {
         if (count == 4)
             return false;
@@ -598,7 +591,7 @@ namespace ope {
         while (i < count && k >= keys[i])
             i += 1;
         memcpy(keys + i + 1, keys + i, (count - i) * sizeof(k));
-        memcpy(children + i + 1, children + i, (count - i) * sizeof(N * ));
+        memcpy(children + i + 1, children + i, (count - i) * sizeof(N *));
         keys[i] = k;
         children[i] = node;
         count += 1;
@@ -609,7 +602,7 @@ namespace ope {
         for (int i = 0; i < count; i++) {
             if (keys[i] == k) {
                 memcpy(keys + i, keys + i + 1, (count - i - 1) * sizeof(k));
-                memcpy(children + i, children + i + 1, (count - i - 1) * sizeof(N * ));
+                memcpy(children + i, children + i + 1, (count - i - 1) * sizeof(N *));
                 count--;
                 return true;
             }
@@ -652,7 +645,7 @@ namespace ope {
         if (count == 0)
             return nullptr;
         for (int i = 0; i < count; i++) {
-            if(keys[i] >= k)
+            if (keys[i] >= k)
                 return children[i];
         }
         return nullptr;
@@ -661,16 +654,16 @@ namespace ope {
     N *N4::getPrevChild(uint8_t k) {
         if (count == 0)
             return nullptr;
-        for (uint8_t  i = k; i <= k; i--) {
+        for (uint8_t i = k; i <= k; i--) {
             N *child = getChild(i);
-            if(child != nullptr)
+            if (child != nullptr)
                 return child;
         }
         return nullptr;
     }
 
     void N4::deleteChildren() {
-        for(uint8_t i = 0; i < count; i++) {
+        for (uint8_t i = 0; i < count; i++) {
             N::deleteChildren(children[i]);
             N::deleteNode(children[i]);
         }
@@ -684,17 +677,15 @@ namespace ope {
     }
 
 
-
-
-
-
     bool N16::insert(uint8_t k, N *node) {
         if (count == 16)
             return false;
-        // TODO: use __mm__cmplt to speed up
-        unsigned int i = 0;
-        while (i < count && k >= keys[i])
-            i += 1;
+
+        uint8_t keyByteFlipped = flipSign(k);
+        __m128i cmp = _mm_cmplt_epi8(_mm_set1_epi8(keyByteFlipped), _mm_loadu_si128(reinterpret_cast<__m128i *>(keys)));
+        uint16_t bitfield = _mm_movemask_epi8(cmp) & (0xFFFF >> (16 - count));
+        unsigned i = bitfield ? __builtin_ctz(bitfield) : count;
+
         memcpy(keys + i + 1, keys + i, (count - i) * sizeof(k));
         memcpy(children + i + 1, children + i, (count - i) * sizeof(node));
         keys[i] = k;
@@ -709,6 +700,7 @@ namespace ope {
                 return children[i];
         }
         return nullptr;
+
     }
 
     bool N16::remove(uint8_t k) {
@@ -719,7 +711,7 @@ namespace ope {
         for (int i = 0; i < count; i++) {
             if (keys[i] == k) {
                 memcpy(keys + i, keys + i + 1, (count - i - 1) * sizeof(k));
-                memcpy(children + i, children + i + 1, (count - i - 1) * sizeof(N * ));
+                memcpy(children + i, children + i + 1, (count - i - 1) * sizeof(N *));
                 count--;
                 return true;
             }
@@ -747,14 +739,14 @@ namespace ope {
     N *N16::getLastChild() {
         if (count == 0)
             return nullptr;
-        return getChild(keys[count-1]);
+        return getChild(keys[count - 1]);
     }
 
     N *N16::getNextChild(uint8_t k) {
         if (count == 0)
             return nullptr;
         for (int i = 0; i < count; i++) {
-            if(keys[i] >= k)
+            if (keys[i] >= k)
                 return children[i];
         }
         return nullptr;
@@ -763,16 +755,16 @@ namespace ope {
     N *N16::getPrevChild(uint8_t k) {
         if (count == 0)
             return nullptr;
-        for (uint8_t  i = k; i <= k; i--) {
+        for (uint8_t i = k; i <= k; i--) {
             N *child = getChild(i);
-            if(child != nullptr)
+            if (child != nullptr)
                 return child;
         }
         return nullptr;
     }
 
     void N16::deleteChildren() {
-        for(uint8_t i = 0; i < count; i++) {
+        for (uint8_t i = 0; i < count; i++) {
             N::deleteChildren(children[i]);
             N::deleteNode(children[i]);
         }
@@ -794,7 +786,7 @@ namespace ope {
             pos = (pos + 1) % 48;
         }
         children[pos] = n;
-        child_index[k] = pos;
+        child_index[k] = static_cast<uint8_t>(pos);
         count++;
         return true;
     }
@@ -824,7 +816,7 @@ namespace ope {
         if (count == 0)
             return nullptr;
         for (int k = 0; k < 256; k++) {
-            N * child = getChild((uint8_t)k);
+            N *child = getChild((uint8_t) k);
             if (child != nullptr)
                 return child;
         }
@@ -835,8 +827,8 @@ namespace ope {
     N *N48::getLastChild() {
         if (count == 0)
             return nullptr;
-        for (uint8_t k = 255; (int)k >= 0; k--) {
-            N * child = getChild(k);
+        for (uint8_t k = 255; (int) k >= 0; k--) {
+            N *child = getChild(k);
             if (child != nullptr)
                 return child;
         }
@@ -848,8 +840,8 @@ namespace ope {
         if (count == 0)
             return nullptr;
         for (int i = k; i < 256; i++) {
-            N *child = getChild((uint8_t)i);
-            if(child != nullptr)
+            N *child = getChild((uint8_t) i);
+            if (child != nullptr)
                 return child;
         }
         return nullptr;
@@ -860,7 +852,7 @@ namespace ope {
             return nullptr;
         for (uint8_t i = k; i <= k; i--) {
             N *child = getChild((uint8_t) i);
-            if(child != nullptr)
+            if (child != nullptr)
                 return child;
         }
         return nullptr;
@@ -877,7 +869,7 @@ namespace ope {
 
     template<class NODE>
     void N48::copyTo(NODE *n) const {
-        for (int i = 0; i < 256; i++) {
+        for (unsigned i = 0; i < 256; i++) {
             if (child_index[i] != empty_marker) {
                 n->insert(i, children[child_index[i]]);
             }
@@ -885,9 +877,9 @@ namespace ope {
     }
 
 
-
-
     bool N256::insert(uint8_t k, N *n) {
+        if (count == 255)
+            return false;
         children[k] = n;
         count++;
         return true;
@@ -913,8 +905,8 @@ namespace ope {
         if (count == 0)
             return nullptr;
         for (int k = 0; k < 256; k++) {
-            N *child = getChild((uint8_t)k);
-            if(child != nullptr)
+            N *child = getChild((uint8_t) k);
+            if (child != nullptr)
                 return child;
         }
         assert(false);
@@ -924,9 +916,9 @@ namespace ope {
     N *N256::getLastChild() {
         if (count == 0)
             return nullptr;
-        for (uint8_t k = 255; (int)k > 0; k--) {
+        for (uint8_t k = 255; (int) k > 0; k--) {
             N *child = getChild(k);
-            if(child != nullptr)
+            if (child != nullptr)
                 return child;
         }
         assert(false);
@@ -937,8 +929,8 @@ namespace ope {
         if (count == 0)
             return nullptr;
         for (int i = k; i < 256; i++) {
-            N *child = getChild((uint8_t)i);
-            if(child != nullptr)
+            N *child = getChild((uint8_t) i);
+            if (child != nullptr)
                 return child;
         }
         return nullptr;
@@ -948,15 +940,15 @@ namespace ope {
         if (count == 0)
             return nullptr;
         for (uint8_t i = k; i <= k; i--) {
-            N *child = getChild((uint8_t)k);
-            if(child != nullptr)
+            N *child = getChild((uint8_t) i);
+            if (child != nullptr)
                 return child;
         }
         return nullptr;
     }
 
     void N256::deleteChildren() {
-        for (int i =0; i < 256; i++) {
+        for (int i = 0; i < 256; i++) {
             if (children[i] != nullptr) {
                 N::deleteChildren(children[i]);
                 N::deleteNode(children[i]);
@@ -966,12 +958,13 @@ namespace ope {
 
     template<class NODE>
     void N256::copyTo(NODE *n) const {
-        for (int i = 0; i < count; i++) {
-            n->insert(i, children[i]);
+        for (unsigned i = 0; i < 256; i++) {
+            if (children[i] != nullptr)
+                n->insert(i, children[i]);
         }
+
+
     }
-
-
 }
 
 #endif
