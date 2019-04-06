@@ -20,7 +20,7 @@ namespace ope {
                            std::vector<SymbolFreq> *symbol_freq_list);
 
 
-// private:
+ private:
         void checkIntervals(std::string& start_str, std::string& end_str);
 
         void getFrequencyTable(const std::vector<std::string> &key_list);
@@ -55,7 +55,7 @@ namespace ope {
     };
 
     HeuristicSS::HeuristicSS() {
-        W = 800;
+        W = 200;
     }
 
     bool HeuristicSS::selectSymbols(const std::vector<std::string> &key_list,
@@ -71,19 +71,22 @@ namespace ope {
         std::vector<SymbolFreq> blend_freq_table;
         tree.blendingAndGetLeaves(blend_freq_table);
         getInterval(blend_freq_table);
-        for (int i = 0; i < 10; i++) {
-            std::cout << (blend_freq_table.rbegin()+i)->first
-            << "\t" <<(blend_freq_table.rbegin()+i)->second << std::endl;
+        // too many intervals
+        if (intervals_.size() > num_limit) {
+            std::cout << "Interval number exceeds limit" << std::endl;
+            assert(false);
         }
+
         // sort intervals
         std::sort(intervals_.begin(), intervals_.end(),
                 [](std::pair<std::string, std::string>& x, std::pair<std::string, std::string> y) {
                     return x.first.compare(y.first) < 0;
                 });
+
         // Merge adjacent intervals with same prefix
         mergeAdjacentComPrefixIntervals();
         std::string start = std::string(1, char(0));
-        std::string end = std::string(50, char(127));
+        std::string end = std::string(50, char(255));
         checkIntervals(start, end);
         // simulate encode process to get Frequency
         getIntervalFreq(symbol_freq_list, key_list);
@@ -190,7 +193,6 @@ namespace ope {
             intervals_.push_back(std::make_pair(start_include, end_exclude));
             return;
         }
-        // std::cout << "**" << start_include << "\t" << end_exclude << std::endl;
         char start_chr = start_include[0];
         char end_chr = end_exclude[0];
         for (int i = 0; i <= int(end_chr - start_chr); i++) {
@@ -202,7 +204,6 @@ namespace ope {
                 cur_end = end_exclude;
             if (cur_start.compare(cur_end) < 0) {
                 intervals_.push_back(std::make_pair(cur_start, cur_end));
-                // std::cout << cur_start << "*" << std::endl;
             }
         }
     }

@@ -51,7 +51,7 @@ namespace ope {
         return result;
     }
 
-    void HeuristicEncoder::checkOrder(vector<ope::SymbolCode> &symbol_code_list) {
+    void HeuristicEncoder::checkOrder(vector<SymbolCode> &symbol_code_list) {
         std::sort(symbol_code_list.begin(), symbol_code_list.end(),
                   [](SymbolCode& x, SymbolCode& y){
                       return x.first.compare(y.first) < 0;
@@ -72,24 +72,28 @@ namespace ope {
 
     bool HeuristicEncoder::build(const std::vector<std::string> &key_list,
                                  const int64_t dict_size_limit) {
+        double curtime = getNow();
         std::vector<SymbolFreq> symbol_freq_list;
         SymbolSelector *symbol_selector = SymbolSelectorFactory::createSymbolSelector(5);
         symbol_selector->selectSymbols(key_list, dict_size_limit, &symbol_freq_list);
-
-//        for (auto iter = symbol_freq_list.begin(); iter != symbol_freq_list.end(); iter++)
-//            std::cout << iter->first << std::endl;
+        std::cout << "Finish getting symbol frequency, use:" << getNow() - curtime << std::endl;
+        curtime = getNow();
 
         std::vector<SymbolCode> symbol_code_list;
         CodeGenerator *code_generator = CodeGeneratorFactory::createCodeGenerator(1);
-
         code_generator->genCodes(symbol_freq_list, &symbol_code_list);
+        std::cout << "Finish getting code, use:" << getNow() - curtime << std::endl;
+        curtime = getNow();
 
         // TODO: delete when release
-        checkOrder(symbol_code_list);
+//        checkOrder(symbol_code_list);
+//        std::cout << "Finish checking intervals, use:" << getNow() - curtime << std::endl;
+//        curtime = getNow();
 
         dict_ = DictionaryFactory::createDictionary(5);
-
-        return dict_->build(symbol_code_list);
+        auto dic = dict_->build(symbol_code_list);
+        std::cout << "Finish building dic, use:" << getNow() - curtime << std::endl;
+        return dic;
     }
 
     int HeuristicEncoder::encode(const std::string &key, uint8_t *buffer) const {
@@ -130,14 +134,12 @@ namespace ope {
         return;
     }
 
-    // TODO
     int HeuristicEncoder::numEntries() const {
-        return 0;
+        return dict_->numEntries();
     }
 
-    // TODO
     int64_t HeuristicEncoder::memoryUse() const {
-        return 0;
+        return dict_->memoryUse();
     }
 
 }

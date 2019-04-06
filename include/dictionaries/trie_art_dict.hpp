@@ -15,7 +15,8 @@ namespace ope {
         int64_t memoryUse () const;
 
     private:
-        ope::ArtDicTree* tree;
+        int num_entries = 0;
+        ArtDicTree* tree;
     };
 
     TrieArtDict::TrieArtDict() {
@@ -26,22 +27,29 @@ namespace ope {
         delete tree;
     }
 
-    bool TrieArtDict::build(const std::vector<ope::SymbolCode> &symbol_code_list) {
-        return tree->build(symbol_code_list);
+    bool TrieArtDict::build(const std::vector<SymbolCode> &symbol_code_list) {
+        num_entries = int(symbol_code_list.size());
+        bool result = tree->build(symbol_code_list);
+        std::cout << "N4: " << tree->getN4Num() << std::endl
+                  << "N16: " << tree->getN16Num() << std::endl
+                  << "N48: " << tree->getN48Num() << std::endl
+                  << "N256: " << tree->getN256Num() << std::endl;
+        return result;
     }
 
     Code TrieArtDict::lookup(const char *symbol, const int symbol_len, int &prefix_len) const {
         return tree->lookup(symbol, symbol_len, prefix_len);
     }
 
-    // TODO
     int TrieArtDict::numEntries() const {
-        return 0;
+        return num_entries;
     }
 
-    // TODO
     int64_t TrieArtDict::memoryUse() const {
-        return 0;
+        return sizeof(N4) * tree->getN4Num() +
+                sizeof(N16) * tree->getN16Num() +
+                sizeof(N48) * tree->getN48Num() +
+                sizeof(N256) * tree->getN256Num();
     }
 
 } // namespace ope

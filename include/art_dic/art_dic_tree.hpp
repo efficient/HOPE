@@ -26,7 +26,14 @@ namespace ope {
 
         void countFreq(std::vector<std::string> keys, std::vector<SymbolFreq> *symbol_freq_list);
 
-        //private:
+        int getN4Num();
+
+        int getN16Num();
+
+        int getN48Num();
+
+        int getN256Num();
+    private:
         N *root;
 
         void insert(LeafInfo* leafinfo);
@@ -61,11 +68,18 @@ namespace ope {
     };
 
 
-    ArtDicTree::ArtDicTree() : root(new N256(nullptr, 0)) {};
+    ArtDicTree::ArtDicTree() : root(new N256(nullptr, 0)) {
+    };
 
     ArtDicTree::~ArtDicTree() {
         N::deleteChildren(root);
         N::deleteNode(root);
+        std::cout << "Number of nodes after deletion" << std::endl;
+        std::cout << cnt_N4 << " " << cnt_N16 << " " << cnt_N48 << " " << cnt_N256 << std::endl;
+//        N4::cnt_N4 = 0;
+//        N16::cnt_N16 = 0;
+//        N48::cnt_N48 = 0;
+//        N256::cnt_N256 = 0;
     }
 
     Code ArtDicTree::lookup(const char *symbol, const int symbol_len, int &prefix_len) const {
@@ -341,6 +355,21 @@ namespace ope {
         return std::string();
     }
 
+    int ArtDicTree::getN4Num() {
+        return cnt_N4;
+    }
+
+    int ArtDicTree::getN16Num() {
+        return cnt_N16;
+    }
+
+    int ArtDicTree::getN48Num() {
+        return cnt_N48;
+    }
+
+    int ArtDicTree::getN256Num() {
+        return cnt_N256;
+    }
 
 }
 

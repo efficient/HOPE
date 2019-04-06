@@ -11,6 +11,11 @@ using namespace std;
 namespace ope {
 
     static const unsigned maxPrefixLen = 255;
+    static int cnt_N4 = 0;
+    static int cnt_N16 = 0;
+    static int cnt_N48 = 0;
+    static int cnt_N256 = 0;
+
     enum class NTypes : uint8_t {
         N4 = 0,
         N16 = 1,
@@ -88,10 +93,17 @@ namespace ope {
 
     class N4 : public N {
     public:
+
         uint8_t keys[4];
         N *children[4] = {nullptr};
 
-        N4(const uint8_t *prefix, uint32_t prefix_len) : N(NTypes::N4, prefix, prefix_len) {};
+        N4(const uint8_t *prefix, uint32_t prefix_len) : N(NTypes::N4, prefix, prefix_len) {
+            cnt_N4++;
+        };
+
+        ~N4(){
+            cnt_N4--;
+        }
 
         bool insert(uint8_t key, N *node);
 
@@ -117,17 +129,23 @@ namespace ope {
 
     class N16 : public N {
     public:
+
         uint8_t keys[16];
         N *children[16] = {nullptr};
 
-        N16(const uint8_t *prefix, uint32_t prefix_len) : N(NTypes::N16, prefix, prefix_len) {};
+        N16(const uint8_t *prefix, uint32_t prefix_len) : N(NTypes::N16, prefix, prefix_len) {
+            cnt_N16++;
+        };
+
+        ~N16(){
+            cnt_N16--;
+        }
 
         static uint8_t flipSign(uint8_t keyByte) {
             // Flip the sign bit, enables signed SSE comparison of unsigned values, used by Node16
             return keyByte ^ 128;
         };
 
-        // TODO
         bool insert(uint8_t key, N *node);
 
         bool remove(uint8_t key);
@@ -152,13 +170,19 @@ namespace ope {
 
     class N48 : public N {
     public:
+
         const uint8_t empty_marker = 48;
         uint8_t child_index[256];
         N *children[48] = {nullptr};
 
         N48(const uint8_t *prefix, uint32_t prefix_len) : N(NTypes::N48, prefix, prefix_len) {
             std::fill_n(child_index, 256, empty_marker);
+            cnt_N48++;
         };
+
+        ~N48() {
+            cnt_N48--;
+        }
 
         bool insert(uint8_t key, N *n);
 
@@ -184,9 +208,16 @@ namespace ope {
 
     class N256 : public N {
     public:
+
         N *children[256] = {nullptr};
 
-        N256(const uint8_t *prefix, uint32_t prefix_len) : N(NTypes::N256, prefix, prefix_len) {};
+        N256(const uint8_t *prefix, uint32_t prefix_len) : N(NTypes::N256, prefix, prefix_len) {
+            cnt_N256++;
+        };
+
+        ~N256(){
+            cnt_N256--;
+        }
 
         bool insert(uint8_t key, N *n);
 
