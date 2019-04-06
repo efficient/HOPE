@@ -79,7 +79,6 @@ namespace ope {
             for (int i = 0; i < emails.size() - 1; i++) {
                 int prefix_len = -1;
                 ope::Code result = test->lookup(emails[i].c_str(), emails[i].size(), prefix_len);
-                //ASSERT_TRUE(prefix_len == getCommonPrefixLen(emails[i], emails[i+1]));
                 ASSERT_TRUE(result.code == i);
             }
             delete test;
@@ -104,22 +103,28 @@ namespace ope {
             for (int i = 0; i < emails.size() - 1; i++) {
                 int prefix_len = -1;
                 std::string cur_str = getNextString(emails[i]);
-                std::string next_str;
-                int next_idx = -1;
+                std::string next_str = cur_str;
+                int next_idx = i;
                 getNextInterval(emails, i, cur_str, next_idx, next_str);
                 ope::Code result;
+                // next string <= cur_star
                 result = test->lookup(cur_str.c_str(), cur_str.size(), prefix_len);
-                if (cur_str.compare(next_str) < 0) {
-                    //ASSERT_TRUE(prefix_len == getCommonPrefixLen(emails[i], emails[i+1]));
-                    ASSERT_TRUE(result.code == i);
+
+                if (result.code != next_idx) {
+                    std::cout << result.code << " " << next_idx << std::endl;
                 }
-                else {
+                ASSERT_TRUE(result.code = next_idx);
+//                if (cur_str.compare(next_str) < 0) {
+//                    //ASSERT_TRUE(prefix_len == getCommonPrefixLen(emails[i], emails[i+1]));
+//                    ASSERT_TRUE(result.code == i);
+//                }
+//                else {
 //                    std::cout << cur_str << "\t" << next_str << std::endl;
 //                    std::cout << result.code << "\t" << next_idx << std::endl;
 //                    std::cout << emails[next_idx+1] << std::endl;
 //                    ASSERT_TRUE(prefix_len == getCommonPrefixLen(emails[next_idx], emails[next_idx+1]));
 //                    ASSERT_TRUE(result.code == next_idx);
-                }
+//                }
             }
             delete test;
         }
