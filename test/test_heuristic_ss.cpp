@@ -60,7 +60,7 @@ namespace ope {
         TEST_F(HeuristicSSTest, getInterval) {
             HeuristicSS ss;
             std::vector<SymbolFreq> symbol_freq_list;
-            ss.selectSymbols(emails, 0, &symbol_freq_list);
+            ss.selectSymbols(emails, 1000000, &symbol_freq_list);
 //            std::sort(ss.intervals_.begin(), ss.intervals_.end());
 //            for(auto iter = ss.intervals_.begin(); iter != ss.intervals_.end(); iter++) {
 //                std::cout << iter->first << "\t" << iter->second << std::endl;

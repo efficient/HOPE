@@ -17,7 +17,7 @@ namespace ope {
         static std::vector<std::string> words;
         static const int kLongestCodeLen = 4096;
 
-        static const std::string kEmailFilePath = "../../datasets/email_100000.txt";
+        static const std::string kEmailFilePath = "../../datasets/emails.txt";
         static const int kEmailTestSize = 10000;
         static std::vector<std::string> emails;
 
@@ -63,14 +63,13 @@ namespace ope {
 
                     ASSERT_TRUE(cmp < 0);
                 }
-                 std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
-
+                std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
         }
 
 
         TEST_F (HeuristicEnCoderTest, emailTest) {
             HeuristicEncoder* encoder = new HeuristicEncoder();
-            encoder->build(emails, 100000);
+            encoder->build(emails, 1000000);
             uint8_t* buffer = new uint8_t[kLongestCodeLen];
             int64_t total_len = 0;
             int64_t total_enc_len = 0;
@@ -105,6 +104,7 @@ namespace ope {
                 words.push_back(key);
                 count++;
             }
+            std::sort(words.begin(), words.end());
         }
 
         void loadEmails() {
@@ -130,13 +130,12 @@ namespace ope {
             std::sort(emails.begin(), emails.end());
             emails.erase( unique( emails.begin(), emails.end() ), emails.end() );
         }
-
     }
 }
 
 int main (int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);
-    // ope::heuristicencodertest::loadWords();
+    ope::heuristicencodertest::loadWords();
     ope::heuristicencodertest::loadEmails();
     //ope::ngramencodertest::loadWikis();
     //ope::ngramencodertest::loadUrls();

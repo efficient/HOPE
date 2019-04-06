@@ -19,8 +19,9 @@ namespace ope {
                            const int64_t num_limit,
                            std::vector<SymbolFreq> *symbol_freq_list);
 
+        std::string getPrevString(const std::string &str);
 
- private:
+    private:
         void checkIntervals(std::string& start_str, std::string& end_str);
 
         void getFrequencyTable(const std::vector<std::string> &key_list);
@@ -42,7 +43,6 @@ namespace ope {
 
         std::string getNextString(const std::string &str);
 
-        std::string getPrevString(const std::string &str);
 
         void encode(const std::string& str, std::vector<int>& cnt);
 
