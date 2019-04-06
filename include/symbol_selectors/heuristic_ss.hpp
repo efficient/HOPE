@@ -1,9 +1,10 @@
 #ifndef HEURISTIC_SS_H
 #define HEURISTIC_SS_H
 
+#include <algorithm>
 #include <map>
 #include <fstream>
-#include<iostream>
+#include <iostream>
 #include "symbol_selector.hpp"
 #include "blending_trie.hpp"
 
@@ -72,7 +73,7 @@ namespace ope {
         tree.blendingAndGetLeaves(blend_freq_table);
         getInterval(blend_freq_table);
         // too many intervals
-        if (intervals_.size() > num_limit) {
+        if ((int)intervals_.size() > num_limit) {
             std::cout << "Interval number exceeds limit" << std::endl;
             assert(false);
         }
@@ -109,7 +110,7 @@ namespace ope {
                 break;
             }
         }
-        assert(r < intervals_.size());
+        assert(r < (int)intervals_.size());
         prefix_len = static_cast<int>(commonPrefix(intervals_[r].first, getPrevString(intervals_[r].second)).size());
         return r;
     }
@@ -118,7 +119,7 @@ namespace ope {
         int pos = 0;
         int prefix_len = 0;
         int interval_idx;
-        while (pos < str.size()) {
+        while (pos < (int)str.size()) {
             interval_idx = BinarySearch(str, pos, prefix_len);
             cnt[interval_idx]++;
             assert(prefix_len > 0);
@@ -133,7 +134,7 @@ namespace ope {
             encode(*iter, cnt);
         }
 
-        for (int i = 0; i < intervals_.size(); i++) {
+        for (int i = 0; i < (int)intervals_.size(); i++) {
             symbol_freq_list->push_back(std::make_pair(intervals_[i].first, cnt[i] + 1));
         }
     }
@@ -166,7 +167,7 @@ namespace ope {
         auto next_start = blend_freq_table.begin();
         bool not_first_peak = true;
         for (auto iter = blend_freq_table.begin(); iter != blend_freq_table.end(); iter++) {
-            if (iter->second * iter->first.size() > W) {
+            if (iter->second * (int)(iter->first.size()) > W) {
                 if (not_first_peak) {
                     not_first_peak = (iter == blend_freq_table.begin());
                 }
@@ -225,7 +226,7 @@ namespace ope {
                 has_prefix = true;
             } else
                 prefix = commonPrefix(prefix, cur_key);
-            if (prefix.size() * cnt > W) {
+            if ((int)prefix.size() * cnt > W) {
                 std::string cur_start = max(prefix, next_start);
                 std::string cur_end = min(getNextString(prefix), (iter + 1)->first);
                 intervals_.push_back(std::make_pair(cur_start, cur_end));

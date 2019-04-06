@@ -88,19 +88,20 @@ namespace ope {
             while (infile.good() && count < kEmailTestSize) {
                 infile >> key;
                 int i = 0;
-                for(; i < key.size(); i++) {
+                for(; i < (int)key.size(); i++) {
                     if(key[i] <= 0) {
                         std::cout << key << std::endl;
                         break;
                     }
                 }
-                if (i != key.size()) {
+                if (i != (int)key.size()) {
                     std::cout << "Continue here" << std::endl;
                     continue;
                 }
                 emails.push_back(key);
                 count++;
             }
+            std::sort(emails.begin(), emails.end());
         }
 
     } // namespace heuristictest

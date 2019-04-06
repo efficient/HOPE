@@ -40,7 +40,7 @@ namespace ope {
 
         N(NTypes _type, const uint8_t *_prefix, uint32_t _prefix_len)
                 : type(_type), prefix_len(_prefix_len) {
-            for (int i = 0; i < _prefix_len; i++)
+            for (int i = 0; i < (int)_prefix_len; i++)
                 prefix[i] = _prefix[i];
         };
 
@@ -463,6 +463,7 @@ namespace ope {
                 return reinterpret_cast<N256 *>(this)->remove(key);
             }
         }
+	return false;
     }
 
     void N::getChildren(N *node, uint8_t start, uint8_t end,
@@ -712,10 +713,15 @@ namespace ope {
         if (count == 16)
             return false;
 
-        uint8_t keyByteFlipped = flipSign(k);
-        __m128i cmp = _mm_cmplt_epi8(_mm_set1_epi8(keyByteFlipped), _mm_loadu_si128(reinterpret_cast<__m128i *>(keys)));
-        uint16_t bitfield = _mm_movemask_epi8(cmp) & (0xFFFF >> (16 - count));
-        unsigned i = bitfield ? __builtin_ctz(bitfield) : count;
+        // TODO: use __mm__cmplt to speed up
+        unsigned int i = 0;
+        while (i < count && k >= keys[i])
+            i += 1;
+
+//        uint8_t keyByteFlipped = flipSign(k);
+//        __m128i cmp = _mm_cmplt_epi8(_mm_set1_epi8(keyByteFlipped), _mm_loadu_si128(reinterpret_cast<__m128i *>(keys)));
+//        uint16_t bitfield = _mm_movemask_epi8(cmp) & (0xFFFF >> (16 - count));
+//        unsigned i = bitfield ? __builtin_ctz(bitfield) : count;
 
         memcpy(keys + i + 1, keys + i, (count - i) * sizeof(k));
         memcpy(children + i + 1, children + i, (count - i) * sizeof(node));

@@ -49,7 +49,7 @@ namespace ope {
                      N *node, N *val, N *parent_node, uint8_t parent_key);
 
         void changeStringToUint8(std::string org, uint8_t* des) {
-            for (int i = 0; i < org.size(); i++)
+            for (int i = 0; i < (int)org.size(); i++)
                 des[i] = reinterpret_cast<uint8_t&>(org[i]);
         }
 
@@ -76,10 +76,6 @@ namespace ope {
         N::deleteNode(root);
         std::cout << "Number of nodes after deletion" << std::endl;
         std::cout << cnt_N4 << " " << cnt_N16 << " " << cnt_N48 << " " << cnt_N256 << std::endl;
-//        N4::cnt_N4 = 0;
-//        N16::cnt_N16 = 0;
-//        N48::cnt_N48 = 0;
-//        N256::cnt_N256 = 0;
     }
 
     Code ArtDicTree::lookup(const char *symbol, const int symbol_len, int &prefix_len) const {
@@ -97,7 +93,8 @@ namespace ope {
                     LeafInfo* leaf_info = reinterpret_cast<LeafInfo *>(N::getValueFromLeaf(N::getChild(0, node)));
                     if (leaf_info == nullptr) {
                         N *next = N::getFirstChild(node);
-                        leaf_info = getLeftBottom(next)->prev_leaf;
+                        auto nowLeaf = getLeftBottom(next);
+                        leaf_info = nowLeaf->prev_leaf;
                     }
                     prefix_len = leaf_info->prefix_len;
                     return leaf_info->symbol_code->second;
@@ -150,10 +147,14 @@ namespace ope {
             if (iter != symbol_code_list.end() - 1) {
                 std::string end_interval = getPrevString((iter + 1)->first);
                 lf->prefix_len = (uint32_t) getCommonPrefixLen(start_interval, end_interval);
-                //assert(lf->prefix_len > 0);
+                // assert(lf->prefix_len > 0)
+                if (lf->prefix_len == 0) {
+
+                }
             }
-            else
+            else {
                 lf->prefix_len = 1;
+            }
             lf->prev_leaf = prev_leaf;
             lf->symbol_code = &(*iter);
             insert(lf);
@@ -188,7 +189,7 @@ namespace ope {
                     return;
                 }
                 // size of remain key == 1
-                if (key_level == key.size() - 1) {
+                if (key_level == (int)key.size() - 1) {
                     N::insertOrUpdateNode(node, parent_node, parent_key,
                                           reinterpret_cast<uint8_t &>(key[key_level]), val);
                     return;
@@ -203,7 +204,7 @@ namespace ope {
                     uint8_t prefix[maxPrefixLen];
                     N *new_node = new N4(prefix, 0);
                     new_node->insert(0, next_node);
-                    if (key_level == key.size() - 2) {
+                    if (key_level == (int)key.size() - 2) {
                         new_node->insert(reinterpret_cast<uint8_t &>(key[key_level + 1]), val);
                     } else {
                         uint8_t leaf_prefix[maxPrefixLen];
@@ -239,7 +240,7 @@ namespace ope {
 
     void ArtDicTree::addLeaf(int insertkey_level, std::string& key,
                        N *node, N *val, N *parent_node, uint8_t parent_key) {
-        if (insertkey_level == key.size() - 1) {
+        if (insertkey_level == (int)key.size() - 1) {
             N::insertOrUpdateNode(node, parent_node, parent_key,
                                   reinterpret_cast<uint8_t &>(key[insertkey_level]), val);
             return;
@@ -291,7 +292,7 @@ namespace ope {
                            int &node_level, uint8_t *common_prefix) const {
         int i = 0;
         uint8_t *node_prefix = node->prefix;
-        for (; i < node->prefix_len; i++) {
+        for (; i < (int)node->prefix_len; i++) {
             if (key_level + i >= key_size || key[key_level + i] != node_prefix[i]) {
                 node_level = i;
                 key_level += i;

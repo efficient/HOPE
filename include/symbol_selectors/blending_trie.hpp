@@ -32,7 +32,7 @@ namespace ope {
         }
 
         void setPrefix(std::string new_prefix) {
-            prefix = std::move(new_prefix);
+            prefix = new_prefix;
         }
 
         void addChild(char key, TrieNode *child) {
@@ -53,7 +53,7 @@ namespace ope {
         }
 
         bool hasChildren() {
-            return children.empty();
+            return !children.empty();
         }
 
         std::map<char, TrieNode *> getChildren() {
@@ -107,13 +107,13 @@ namespace ope {
 
     void BlendTrie::insert(std::string key, int64_t freq) {
         TrieNode *node = root_;
-        for (char i : key) {
-            auto child = node->getChild(i);
+        for (int i = 0; i < (int)key.size(); i++) {
+            std::map<char, TrieNode *>::iterator child = node->getChild(key[i]);
             if (child != node->getEnd()) {
                 node = child->second;
             } else {
                 TrieNode *new_node = new TrieNode();
-                node->addChild(i, new_node);
+                node->addChild(key[i], new_node);
                 node = new_node;
             }
         }
@@ -136,7 +136,7 @@ namespace ope {
                     high_freq_child = iter->second;
                 }
             }
-            assert(high_freq_child != nullptr);
+            //assert(high_freq_child != nullptr);
             if (top_node->hasChildren()) {
                 high_freq_child->setFreq(high_freq_child->getFreq() + top_node->getFreq());
                 top_node->setFreq(0);
@@ -182,6 +182,7 @@ namespace ope {
             out << "\t" << iter.second << "[label=\"";
             out << iter.first->getPrefix() << "\"];" << std::endl;
         }
+        out << "}" << std::endl;
         out.close();
     }
 
