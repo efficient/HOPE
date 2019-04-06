@@ -150,7 +150,7 @@ namespace ope {
             if (iter != symbol_code_list.end() - 1) {
                 std::string end_interval = getPrevString((iter + 1)->first);
                 lf->prefix_len = (uint32_t) getCommonPrefixLen(start_interval, end_interval);
-                assert(lf->prefix_len > 0);
+                //assert(lf->prefix_len > 0);
             }
             else
                 lf->prefix_len = 1;
