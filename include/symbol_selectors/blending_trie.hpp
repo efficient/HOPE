@@ -105,7 +105,7 @@ namespace ope {
 
     void BlendTrie::insert(std::string key, int64_t freq) {
         TrieNode *node = root_;
-        for (int i = 0; i < key.size(); i++) {
+        for (int i = 0; i < (int)key.size(); i++) {
             std::map<char, TrieNode *>::iterator child = node->getChild(key[i]);
             if (child != node->getEnd()) {
                 node = child->second;

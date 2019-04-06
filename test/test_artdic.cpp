@@ -34,7 +34,7 @@ namespace ope {
             static void getNextInterval(std::vector<std::string> sorted_intervals,
                                         int cur_idx, std::string cur_str,
                                         int& next_idx, std::string& next_str) {
-                for (int i = cur_idx; i < sorted_intervals.size(); i++) {
+                for (int i = cur_idx; i < (int)sorted_intervals.size(); i++) {
                     if (sorted_intervals[i].compare(cur_str) > 0) {
                         next_idx = i - 1;
                         next_str = sorted_intervals[i-1];
@@ -66,7 +66,7 @@ namespace ope {
             std::cout << "number of test emails:" << emails.size() << std::endl;
             std::sort(emails.begin(), emails.end());
 
-            for (int i = 0; i < emails.size(); i++) {
+            for (int i = 0; i < (int)emails.size(); i++) {
                 ope::SymbolCode symbol_code = ope::SymbolCode();
                 symbol_code.first = emails[i];
                 symbol_code.second = ope::Code();
@@ -76,7 +76,7 @@ namespace ope {
 
             test->build(ls);
 
-            for (int i = 0; i < emails.size() - 1; i++) {
+            for (int i = 0; i < (int)emails.size() - 1; i++) {
                 int prefix_len = -1;
                 ope::Code result = test->lookup(emails[i].c_str(), emails[i].size(), prefix_len);
                 //ASSERT_TRUE(prefix_len == getCommonPrefixLen(emails[i], emails[i+1]));
@@ -91,7 +91,7 @@ namespace ope {
             std::cout << emails.size() << std::endl;
             std::sort(emails.begin(), emails.end());
 
-            for (int i = 0; i < emails.size(); i++) {
+            for (int i = 0; i < (int)emails.size(); i++) {
                 ope::SymbolCode symbol_code = ope::SymbolCode();
                 symbol_code.first = emails[i];
                 symbol_code.second = ope::Code();
@@ -101,7 +101,7 @@ namespace ope {
 
             test->build(ls);
 
-            for (int i = 0; i < emails.size() - 1; i++) {
+            for (int i = 0; i < (int)emails.size() - 1; i++) {
                 int prefix_len = -1;
                 std::string cur_str = getNextString(emails[i]);
                 std::string next_str;

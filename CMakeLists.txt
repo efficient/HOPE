@@ -19,10 +19,10 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/symbol_selectors")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/code_generators")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/dictionaries")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/encoders")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/art_dic")
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/SuRF/include")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/ART/include")
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/ART_DIC/include")
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/libcuckoo/libcuckoo")
 
@@ -31,14 +31,11 @@ find_library(TbbLib tbb)
 find_package (Threads)
 
 add_library(ART ART/src/Tree.cpp)
-add_library(ART_DIC ART_DIC/src/Tree_ArtDic.cpp)
 
 target_link_libraries(ART ${TbbLib} ${JemallocLib} ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(ART_DIC)
 
 add_subdirectory(test)
 add_subdirectory(bench)
-add_subdirectory(ART_DIC/test)
 #add_subdirectory(SuRF/test)
 #add_subdirectory(SuRF/bench)
 #add_subdirectory(ART/test)

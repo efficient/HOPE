@@ -49,7 +49,7 @@ namespace ope {
                      N *node, N *val, N *parent_node, uint8_t parent_key);
 
         void changeStringToUint8(std::string org, uint8_t* des) {
-            for (int i = 0; i < org.size(); i++)
+            for (int i = 0; i < (int)org.size(); i++)
                 des[i] = reinterpret_cast<uint8_t&>(org[i]);
         }
 
@@ -188,7 +188,7 @@ namespace ope {
                     return;
                 }
                 // size of remain key == 1
-                if (key_level == key.size() - 1) {
+                if (key_level == (int)key.size() - 1) {
                     N::insertOrUpdateNode(node, parent_node, parent_key,
                                           reinterpret_cast<uint8_t &>(key[key_level]), val);
                     return;
@@ -203,7 +203,7 @@ namespace ope {
                     uint8_t prefix[maxPrefixLen];
                     N *new_node = new N4(prefix, 0);
                     new_node->insert(0, next_node);
-                    if (key_level == key.size() - 2) {
+                    if (key_level == (int)key.size() - 2) {
                         new_node->insert(reinterpret_cast<uint8_t &>(key[key_level + 1]), val);
                     } else {
                         uint8_t leaf_prefix[maxPrefixLen];
@@ -239,7 +239,7 @@ namespace ope {
 
     void ArtDicTree::addLeaf(int insertkey_level, std::string& key,
                        N *node, N *val, N *parent_node, uint8_t parent_key) {
-        if (insertkey_level == key.size() - 1) {
+        if (insertkey_level == (int)key.size() - 1) {
             N::insertOrUpdateNode(node, parent_node, parent_key,
                                   reinterpret_cast<uint8_t &>(key[insertkey_level]), val);
             return;
@@ -291,7 +291,7 @@ namespace ope {
                            int &node_level, uint8_t *common_prefix) const {
         int i = 0;
         uint8_t *node_prefix = node->prefix;
-        for (; i < node->prefix_len; i++) {
+        for (; i < (int)node->prefix_len; i++) {
             if (key_level + i >= key_size || key[key_level + i] != node_prefix[i]) {
                 node_level = i;
                 key_level += i;

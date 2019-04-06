@@ -40,7 +40,7 @@ namespace ope {
 
         N(NTypes _type, const uint8_t *_prefix, uint32_t _prefix_len)
                 : type(_type), prefix_len(_prefix_len) {
-            for (int i = 0; i < _prefix_len; i++)
+            for (int i = 0; i < (int)_prefix_len; i++)
                 prefix[i] = _prefix[i];
         };
 
@@ -463,6 +463,7 @@ namespace ope {
                 return reinterpret_cast<N256 *>(this)->remove(key);
             }
         }
+	return false;
     }
 
     void N::getChildren(N *node, uint8_t start, uint8_t end,
