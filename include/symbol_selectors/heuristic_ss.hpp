@@ -171,7 +171,7 @@ namespace ope {
                 if (not_first_peak) {
                     not_first_peak = (iter == blend_freq_table.begin());
                 }
-                intervals_.emplace_back(iter->first, getNextString(iter->first));
+                intervals_.push_back(std::make_pair(iter->first, getNextString(iter->first)));
                 mergeIntervals(next_start, iter);
                 next_start = iter;
             }
@@ -217,15 +217,16 @@ namespace ope {
         std::string prefix = std::string();
         std::string next_start = getNextString(start_exclude_iter->first);
         int64_t cnt = 0;
-        int interval_num = 0;
+
         for (auto iter = start_exclude_iter + 1; iter != end_exclude_iter; iter++) {
             std::string cur_key = iter->first;
             cnt += iter->second;
             if (!has_prefix) {
                 prefix = cur_key;
                 has_prefix = true;
-            } else
+            } else {
                 prefix = commonPrefix(prefix, cur_key);
+            }
             if ((int)prefix.size() * cnt > W) {
                 std::string cur_start = max(prefix, next_start);
                 std::string cur_end = min(getNextString(prefix), (iter + 1)->first);
@@ -236,7 +237,6 @@ namespace ope {
                 cnt = 0;
                 has_prefix = false;
             }
-            interval_num += 1;
         }
         fillGap(next_start, end_exclude_iter->first);
     }
@@ -325,7 +325,7 @@ namespace ope {
         merged_intervals.push_back(std::make_pair(intervals_.begin()->first, intervals_.begin()->second));
         std::string last_prefix = std::string();
         for (auto iter = intervals_.begin() + 1; iter != intervals_.end(); iter++) {
-            auto last_interval = merged_intervals.rbegin();
+            std::vector<std::pair<std::string, std::string>>::reverse_iterator last_interval = merged_intervals.rbegin();
             last_prefix = commonPrefix(last_interval->first, getPrevString(last_interval->second));
             std::string cur_prefix = commonPrefix(iter->first, getPrevString(iter->second));
             if (last_prefix == cur_prefix) {
