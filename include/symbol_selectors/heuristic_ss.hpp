@@ -47,7 +47,7 @@ namespace ope {
 
         void encode(const std::string& str, std::vector<int>& cnt);
 
-        int BinarySearch(const std::string& str, int pos, int &prefix_len);
+        int BinarySearch(const std::string& str, unsigned int pos, int &prefix_len);
 
         int64_t W;
         std::map<std::string, int64_t> freq_map_;
@@ -77,26 +77,25 @@ namespace ope {
             std::cout << "Interval number exceeds limit" << std::endl;
             assert(false);
         }
-
         // sort intervals
         std::sort(intervals_.begin(), intervals_.end(),
                 [](std::pair<std::string, std::string>& x, std::pair<std::string, std::string> y) {
                     return x.first.compare(y.first) < 0;
                 });
-
         // Merge adjacent intervals with same prefix
         mergeAdjacentComPrefixIntervals();
         std::string start = std::string(1, char(0));
-        std::string end = std::string(50, char(255));
+        std::string end = std::string(50, char(127));
         checkIntervals(start, end);
         // simulate encode process to get Frequency
         getIntervalFreq(symbol_freq_list, key_list);
         return true;
     }
 
-    int HeuristicSS::BinarySearch(const std::string& str, int pos, int &prefix_len) {
+    int HeuristicSS::BinarySearch(const std::string& str, unsigned int pos, int &prefix_len) {
         int l = 0;
         int r = static_cast<int>(intervals_.size());
+        assert(pos <= str.size());
         std::string compare_str = str.substr(pos, str.size() - pos);
         while (l <= r) {
             int mid = (l+r)/2;
@@ -116,10 +115,10 @@ namespace ope {
     }
 
     void HeuristicSS::encode(const std::string &str, std::vector<int>& cnt) {
-        int pos = 0;
+        unsigned int pos = 0;
         int prefix_len = 0;
         int interval_idx;
-        while (pos < (int)str.size()) {
+        while (pos < str.size()) {
             interval_idx = BinarySearch(str, pos, prefix_len);
             cnt[interval_idx]++;
             assert(prefix_len > 0);
@@ -130,11 +129,12 @@ namespace ope {
     void HeuristicSS::getIntervalFreq(std::vector<SymbolFreq> *symbol_freq_list,
                                         const std::vector<std::string> &key_list) {
         std::vector<int> cnt(intervals_.size(), 0);
-        for (auto iter = key_list.begin(); iter != key_list.end(); iter++) {
-            encode(*iter, cnt);
+        for (const auto &iter : key_list) {
+            encode(iter, cnt);
         }
 
         for (int i = 0; i < (int)intervals_.size(); i++) {
+            // plus one for each interval to avoid 0 frequency
             symbol_freq_list->push_back(std::make_pair(intervals_[i].first, cnt[i] + 1));
         }
     }
@@ -171,7 +171,7 @@ namespace ope {
                 if (not_first_peak) {
                     not_first_peak = (iter == blend_freq_table.begin());
                 }
-                intervals_.push_back(std::make_pair(iter->first, getNextString(iter->first)));
+                intervals_.emplace_back(iter->first, getNextString(iter->first));
                 mergeIntervals(next_start, iter);
                 next_start = iter;
             }
@@ -311,6 +311,10 @@ namespace ope {
                // assert(false);
             }
             end = iter->second;
+
+            if (cnt >= 15000 && cnt <= 15010) {
+                std::cout << iter->first << " " << iter->second << std::endl;
+            }
         }
         std::cout << "Check " << cnt << " intervals" << std::endl;
     }

@@ -1,5 +1,7 @@
 #include <utility>
 
+#include <utility>
+
 #ifndef BLENDING_TRI_H
 #define BLENDING_TRI_H
 
@@ -32,13 +34,12 @@ namespace ope {
         }
 
         void setPrefix(std::string new_prefix) {
-            prefix = new_prefix;
+            prefix = std::move(new_prefix);
         }
 
         void addChild(char key, TrieNode *child) {
             children.insert(std::make_pair(key, child));
         }
-
 
         std::map<char, TrieNode *>::iterator getChild(char key) {
             return children.find(key);
@@ -93,7 +94,6 @@ namespace ope {
     }
 
     BlendTrie::~BlendTrie() {
-        // TODO
         // Delete all the nodes
         clear(root_);
     }
@@ -112,7 +112,7 @@ namespace ope {
             if (child != node->getEnd()) {
                 node = child->second;
             } else {
-                TrieNode *new_node = new TrieNode();
+                auto new_node = new TrieNode();
                 node->addChild(key[i], new_node);
                 node = new_node;
             }
@@ -136,7 +136,6 @@ namespace ope {
                     high_freq_child = iter->second;
                 }
             }
-            //assert(high_freq_child != nullptr);
             if (top_node->hasChildren()) {
                 high_freq_child->setFreq(high_freq_child->getFreq() + top_node->getFreq());
                 top_node->setFreq(0);
