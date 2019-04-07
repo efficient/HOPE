@@ -171,7 +171,7 @@ namespace ope {
                 if (not_first_peak) {
                     not_first_peak = (iter == blend_freq_table.begin());
                 }
-                intervals_.emplace_back(iter->first, getNextString(iter->first));
+                intervals_.push_back(std::make_pair(iter->first, getNextString(iter->first)));
                 mergeIntervals(next_start, iter);
                 next_start = iter;
             }
@@ -308,13 +308,13 @@ namespace ope {
                 std::cout << "[Error] intervals not connected," << std::endl
                           << " Current interval : " << iter->first << " " << iter->second << std::endl
                           << " Correct start :  " << end << std::endl;
-               // assert(false);
+		assert(false);
             }
             end = iter->second;
 
-            if (cnt >= 15000 && cnt <= 15010) {
-                std::cout << iter->first << " " << iter->second << std::endl;
-            }
+            //if (cnt >= 15000 && cnt <= 15010) {
+            //    std::cout << iter->first << " " << iter->second << std::endl;
+            //}
         }
         std::cout << "Check " << cnt << " intervals" << std::endl;
     }
@@ -326,11 +326,12 @@ namespace ope {
         std::string last_prefix = std::string();
         for (auto iter = intervals_.begin() + 1; iter != intervals_.end(); iter++) {
             auto last_interval = merged_intervals.rbegin();
+	    std::string last_key = last_interval->first;
             last_prefix = commonPrefix(last_interval->first, getPrevString(last_interval->second));
             std::string cur_prefix = commonPrefix(iter->first, getPrevString(iter->second));
             if (last_prefix == cur_prefix) {
                 merged_intervals.pop_back();
-                merged_intervals.push_back(std::make_pair(last_interval->first, iter->second));
+                merged_intervals.push_back(std::make_pair(last_key, iter->second));
             } else {
                 merged_intervals.push_back(std::make_pair(iter->first, iter->second));
             }
