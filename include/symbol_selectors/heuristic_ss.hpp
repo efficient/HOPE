@@ -92,14 +92,14 @@ namespace ope {
             mergeAdjacentComPrefixIntervals();
             // too many intervals
             if ((int) intervals_.size() > num_limit) {
-                std::cout << "Interval number exceeds limit " << intervals_.size() << std::endl;
-                std::cout << "Change new W to " << W * 2 << std::endl;
+                std::cout << "Interval number exceeds limit " << intervals_.size();
+                std::cout << " Change new W to " << W * 2 << std::endl;
                 last_w = W;
                 setW(W * 2);
             } else  { // size < num_limit, W is too big
-                std::cout << "Not enough intervals " << intervals_.size() << std::endl;
+                std::cout << "Not enough intervals " << intervals_.size();
                 int64_t new_w = W - (int64_t)abs((W - last_w)/2.0);
-                std::cout << "Change new W to " << new_w << std::endl;
+                std::cout << " Change new W to " << new_w << std::endl;
                 last_w = W;
                 setW(new_w);
             }
