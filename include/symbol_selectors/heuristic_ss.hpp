@@ -5,6 +5,7 @@
 #include <map>
 #include <fstream>
 #include <iostream>
+#include <cmath>
 #include "symbol_selector.hpp"
 #include "blending_trie.hpp"
 
@@ -21,6 +22,8 @@ namespace ope {
                            std::vector<SymbolFreq> *symbol_freq_list);
 
         std::string getPrevString(const std::string &str);
+
+        void setW(int64_t new_w);
 
     private:
         void checkIntervals(std::string& start_str, std::string& end_str);
@@ -59,6 +62,10 @@ namespace ope {
         W = 200;
     }
 
+    void HeuristicSS::setW(int64_t new_w) {
+        W = new_w;
+    }
+
     bool HeuristicSS::selectSymbols(const std::vector<std::string> &key_list,
                                     const int64_t num_limit,
                                     std::vector<SymbolFreq> *symbol_freq_list) {
@@ -71,19 +78,32 @@ namespace ope {
         // Blending
         std::vector<SymbolFreq> blend_freq_table;
         tree.blendingAndGetLeaves(blend_freq_table);
-        getInterval(blend_freq_table);
-        // too many intervals
-        if ((int)intervals_.size() > num_limit) {
-            std::cout << "Interval number exceeds limit" << std::endl;
-            assert(false);
+        // Search for best W
+        int64_t last_w = 0;
+        while (abs(num_limit - (int)intervals_.size()) > 2000) {
+            intervals_.clear();
+            getInterval(blend_freq_table);
+            // sort intervals
+            std::sort(intervals_.begin(), intervals_.end(),
+                      [](std::pair<std::string, std::string>& x, std::pair<std::string, std::string> y) {
+                          return x.first.compare(y.first) < 0;
+                      });
+            // Merge adjacent intervals with same prefix
+            mergeAdjacentComPrefixIntervals();
+            // too many intervals
+            if ((int) intervals_.size() > num_limit) {
+                std::cout << "Interval number exceeds limit " << intervals_.size() << std::endl;
+                std::cout << "Change new W to " << W * 2 << std::endl;
+                last_w = W;
+                setW(W * 2);
+            } else  { // size < num_limit, W is too big
+                std::cout << "Not enough intervals " << intervals_.size() << std::endl;
+                int64_t new_w = W - (int64_t)abs((W - last_w)/2.0);
+                std::cout << "Change new W to " << new_w << std::endl;
+                last_w = W;
+                setW(new_w);
+            }
         }
-        // sort intervals
-        std::sort(intervals_.begin(), intervals_.end(),
-                [](std::pair<std::string, std::string>& x, std::pair<std::string, std::string> y) {
-                    return x.first.compare(y.first) < 0;
-                });
-        // Merge adjacent intervals with same prefix
-        mergeAdjacentComPrefixIntervals();
         std::string start = std::string(1, char(0));
         std::string end = std::string(50, char(127));
         checkIntervals(start, end);
@@ -308,13 +328,13 @@ namespace ope {
                 std::cout << "[Error] intervals not connected," << std::endl
                           << " Current interval : " << iter->first << " " << iter->second << std::endl
                           << " Correct start :  " << end << std::endl;
-               // assert(false);
+		assert(false);
             }
             end = iter->second;
 
-            if (cnt >= 15000 && cnt <= 15010) {
-                std::cout << iter->first << " " << iter->second << std::endl;
-            }
+            //if (cnt >= 15000 && cnt <= 15010) {
+            //    std::cout << iter->first << " " << iter->second << std::endl;
+            //}
         }
         std::cout << "Check " << cnt << " intervals" << std::endl;
     }
@@ -325,12 +345,13 @@ namespace ope {
         merged_intervals.push_back(std::make_pair(intervals_.begin()->first, intervals_.begin()->second));
         std::string last_prefix = std::string();
         for (auto iter = intervals_.begin() + 1; iter != intervals_.end(); iter++) {
-            std::vector<std::pair<std::string, std::string>>::reverse_iterator last_interval = merged_intervals.rbegin();
+            auto last_interval = merged_intervals.rbegin();
+	        std::string last_key = last_interval->first;
             last_prefix = commonPrefix(last_interval->first, getPrevString(last_interval->second));
             std::string cur_prefix = commonPrefix(iter->first, getPrevString(iter->second));
             if (last_prefix == cur_prefix) {
                 merged_intervals.pop_back();
-                merged_intervals.push_back(std::make_pair(last_interval->first, iter->second));
+                merged_intervals.push_back(std::make_pair(last_key, iter->second));
             } else {
                 merged_intervals.push_back(std::make_pair(iter->first, iter->second));
             }

@@ -39,7 +39,7 @@ namespace ope {
 
         TEST_F(HeuristicEnCoderTest, wordTest) {
                 HeuristicEncoder* encoder = new HeuristicEncoder();
-                encoder->build(words, 1000000);
+                encoder->build(words, 65535);
                 uint8_t* buffer = new uint8_t[kLongestCodeLen];
                 int64_t total_len = 0;
                 int64_t total_enc_len = 0;
@@ -69,7 +69,7 @@ namespace ope {
 
         TEST_F (HeuristicEnCoderTest, emailTest) {
             HeuristicEncoder* encoder = new HeuristicEncoder();
-            encoder->build(emails, 1000000);
+            encoder->build(emails, 65535);
             uint8_t* buffer = new uint8_t[kLongestCodeLen];
             int64_t total_len = 0;
             int64_t total_enc_len = 0;
