@@ -896,7 +896,7 @@ namespace ope {
     }
 
     void N48::deleteChildren() {
-        for (unsigned char i : child_index) {
+        for (unsigned i : child_index) {
             if (i != empty_marker) {
                 N::deleteChildren(children[i]);
                 N::deleteNode(children[i]);

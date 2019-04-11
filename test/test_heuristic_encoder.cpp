@@ -113,17 +113,17 @@ namespace ope {
             int count = 0;
             while (infile.good() && count < kEmailTestSize) {
                 infile >> key;
-                int i = 0;
-                for(; i < (int)key.size(); i++) {
-                    if(key[i] <= 0) {
-                        std::cout << key << std::endl;
-                        break;
-                    }
-                }
-                if (i != (int)key.size()) {
-                    std::cout << "Continue here" << std::endl;
-                    continue;
-                }
+//                int i = 0;
+//                for(; i < (int)key.size(); i++) {
+//                    if(key[i] <= 0) {
+//                        std::cout << key << std::endl;
+//                        break;
+//                    }
+//                }
+//                if (i != (int)key.size()) {
+//                    std::cout << "Continue here" << std::endl;
+//                    continue;
+//                }
                 emails.push_back(key);
                 count++;
             }

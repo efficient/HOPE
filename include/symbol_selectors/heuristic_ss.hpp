@@ -25,7 +25,7 @@ namespace ope {
 
         void setW(int64_t new_w);
 
-    private:
+    //private:
         void checkIntervals(std::string& start_str, std::string& end_str);
 
         void getFrequencyTable(const std::vector<std::string> &key_list);
@@ -66,6 +66,26 @@ namespace ope {
         W = new_w;
     }
 
+    int strCompare(std::string s1, std::string s2) {
+        int len1 = (int) s1.size();
+        int len2 = (int) s2.size();
+        int len = len1 < len2 ? len1 : len2;
+        for (int i = 0; i < len; i++) {
+            uint8_t c1 = static_cast<uint8_t >(s1[i]);
+            uint8_t c2 = static_cast<uint8_t >(s2[i]);
+            if (c1 < c2)
+                return -1;
+            if (c1 > c2)
+                return 1;
+        }
+        if (len1 < len2)
+            return -1;
+        else if (len1 == len2)
+            return 0;
+        else
+            return 1;
+    }
+
     bool HeuristicSS::selectSymbols(const std::vector<std::string> &key_list,
                                     const int64_t num_limit,
                                     std::vector<SymbolFreq> *symbol_freq_list) {
@@ -80,13 +100,14 @@ namespace ope {
         tree.blendingAndGetLeaves(blend_freq_table);
         // Search for best W
         int64_t last_w = 0;
-        while (abs(num_limit - (int)intervals_.size()) > 2000) {
+        while (abs(num_limit - (int)intervals_.size()) > (int)(0.05 * num_limit)) {
+//        while (abs(num_limit - (int)intervals_.size()) > (int)) {
             intervals_.clear();
             getInterval(blend_freq_table);
             // sort intervals
             std::sort(intervals_.begin(), intervals_.end(),
                       [](std::pair<std::string, std::string>& x, std::pair<std::string, std::string> y) {
-                          return x.first.compare(y.first) < 0;
+                          return strCompare(x.first, y.first) < 0;
                       });
             // Merge adjacent intervals with same prefix
             mergeAdjacentComPrefixIntervals();
@@ -98,14 +119,14 @@ namespace ope {
                 setW(W * 2);
             } else  { // size < num_limit, W is too big
                 std::cout << "Not enough intervals " << intervals_.size();
-                int64_t new_w = W - (int64_t)abs((W - last_w)/2.0);
+                int64_t new_w = W - (int64_t)(abs((W - last_w)/2.0 + 1));
                 std::cout << " Change new W to " << new_w << std::endl;
                 last_w = W;
                 setW(new_w);
             }
         }
         std::string start = std::string(1, char(0));
-        std::string end = std::string(50, char(127));
+        std::string end = std::string(50, char(255));
         checkIntervals(start, end);
         // simulate encode process to get Frequency
         getIntervalFreq(symbol_freq_list, key_list);
@@ -120,9 +141,10 @@ namespace ope {
         while (l <= r) {
             int mid = (l+r)/2;
             std::string mid_left_bound = intervals_[mid].first;
-            if(mid_left_bound.compare(compare_str) < 0) {
+            int cmp = strCompare(mid_left_bound, compare_str);
+            if(cmp < 0) {
                 l = mid + 1;
-            } else if (mid_left_bound.compare(compare_str) > 0){
+            } else if (cmp > 0){
                 r = mid - 1;
             } else {
                 r = mid;
@@ -182,7 +204,7 @@ namespace ope {
     void HeuristicSS::getInterval(std::vector<SymbolFreq> &blend_freq_table) {
         std::sort(blend_freq_table.begin(), blend_freq_table.end(),
                   [](const SymbolFreq &x, const SymbolFreq &y) {
-                      return (x.first.compare(y.first) < 0);
+                      return strCompare(x.first, y.first) < 0;
                   });
         auto next_start = blend_freq_table.begin();
         bool not_first_peak = true;
@@ -191,7 +213,7 @@ namespace ope {
                 if (not_first_peak) {
                     not_first_peak = (iter == blend_freq_table.begin());
                 }
-                intervals_.push_back(std::make_pair(iter->first, getNextString(iter->first)));
+                intervals_.emplace_back(std::make_pair(iter->first, getNextString(iter->first)));
                 mergeIntervals(next_start, iter);
                 next_start = iter;
             }
@@ -203,28 +225,28 @@ namespace ope {
         fillGap(std::string(1, char(0)), start_string);
         std::string end_string = next_start == blend_freq_table_end ? getNextString(blend_freq_table_end->first)
                                                                     : blend_freq_table_end->first;
-        fillGap(end_string, std::string(50, char(127)));
+        fillGap(end_string, std::string(50, char(255)));
     }
 
     void HeuristicSS::fillGap(std::string start_include, std::string end_exclude) {
-        if (start_include.compare(end_exclude) >= 0)
+        if (strCompare(start_include, end_exclude) >= 0)
             return;
         std::string com_prefix = commonPrefix(start_include, getPrevString(end_exclude));
         if (!com_prefix.empty()) {
-            intervals_.push_back(std::make_pair(start_include, end_exclude));
+            intervals_.emplace_back(std::make_pair(start_include, end_exclude));
             return;
         }
-        char start_chr = start_include[0];
-        char end_chr = end_exclude[0];
+        uint8_t start_chr = static_cast<uint8_t >(start_include[0]);
+        uint8_t end_chr = static_cast<uint8_t >(end_exclude[0]);
         for (int i = 0; i <= int(end_chr - start_chr); i++) {
             std::string cur_start = std::string(1, start_chr + i);
             std::string cur_end = std::string(1, start_chr + i + 1);
-            if (i == 0 && cur_start.compare(start_include) < 0)
+            if (i == 0 && strCompare(cur_start, start_include) < 0)
                 cur_start = start_include;
-            if (i == end_chr - start_chr && cur_end.compare(end_exclude) > 0)
+            if (i == end_chr - start_chr && strCompare(cur_end, end_exclude) > 0)
                 cur_end = end_exclude;
-            if (cur_start.compare(cur_end) < 0) {
-                intervals_.push_back(std::make_pair(cur_start, cur_end));
+            if (strCompare(cur_start, cur_end) < 0) {
+                intervals_.emplace_back(std::make_pair(cur_start, cur_end));
             }
         }
     }
@@ -250,7 +272,7 @@ namespace ope {
             if ((int)prefix.size() * cnt > W) {
                 std::string cur_start = max(prefix, next_start);
                 std::string cur_end = min(getNextString(prefix), (iter + 1)->first);
-                intervals_.push_back(std::make_pair(cur_start, cur_end));
+                intervals_.emplace_back(cur_start, cur_end);
                 fillGap(next_start, cur_start);
                 next_start = cur_end;
                 prefix.clear();
@@ -281,8 +303,8 @@ namespace ope {
             }
             std::string addchr;
             if (!end_with_startchr) {
-                char prev_chr = static_cast<char>(str[i] - 1);
-                addchr = std::string(1, prev_chr);
+                uint8_t prev_chr = static_cast<uint8_t>(str[i] - 1);
+                addchr = std::string(1, char(prev_chr));
             } else
                 addchr = std::string(1, str[i]);
             return str.substr(0, i) + addchr;
@@ -303,32 +325,32 @@ namespace ope {
     }
 
     void HeuristicSS::checkIntervals(std::string& start_str, std::string& end_str) {
-        if (start_str.compare(end_str) >= 0)
+        if (strCompare(start_str, end_str) >= 0)
             assert(false);
         std::sort(intervals_.begin(), intervals_.end(),
                   [](const std::pair<std::string, std::string> &x, const std::pair<std::string, std::string> &y) {
-                      return x.first.compare(y.first) < 0;
+                      return strCompare(x.first, y.first) < 0;
                   });
         std::string end = std::string();
         int64_t cnt = 0;
         for (auto iter = intervals_.begin(); iter != intervals_.end(); iter++) {
-            if (iter->first.compare(start_str) < 0)
+            if (strCompare(iter->first, start_str) < 0)
                 continue;
-            if (iter->first.compare(end_str) > 0) {
+            if (strCompare(iter->first, end_str) > 0) {
                 std::cout << "Check " << cnt << " intervals" << std::endl;
                 return;
             }
             cnt++;
-            if (iter->first.compare(iter->second) >= 0) {
+            if (strCompare(iter->first, iter->second) >= 0) {
                 std::cout << "[Error] Start boundary : " << iter->first
                           << " End boundary : " << iter->second << std::endl;
                 assert(false);
             }
-            if (end.size() > 0 && end.compare(iter->first) != 0) {
+            if ((int)end.size() > 0 && strCompare(end, iter->first) != 0) {
                 std::cout << "[Error] intervals not connected," << std::endl
                           << " Current interval : " << iter->first << " " << iter->second << std::endl
                           << " Correct start :  " << end << std::endl;
-		assert(false);
+		        assert(false);
             }
             end = iter->second;
 
@@ -351,9 +373,9 @@ namespace ope {
             std::string cur_prefix = commonPrefix(iter->first, getPrevString(iter->second));
             if (last_prefix == cur_prefix) {
                 merged_intervals.pop_back();
-                merged_intervals.push_back(std::make_pair(last_key, iter->second));
+                merged_intervals.emplace_back(last_key, iter->second);
             } else {
-                merged_intervals.push_back(std::make_pair(iter->first, iter->second));
+                merged_intervals.emplace_back(iter->first, iter->second);
             }
         }
         intervals_.clear();

@@ -30,23 +30,28 @@ namespace ope {
         }
 
         TEST_F(HeuristicSSTest, fillGapSmall) {
-            //HeuristicSS ss;
-            //ss.fillGap("abc", "dc");
-            //for (auto iter = ss.intervals_.begin(); iter != ss.intervals_.end(); iter++) {
-            //     std::cout << "[" << iter->first << ", " << iter->second << ")" << std::endl;
-            //}
-            //std::cout << "------------------------" << std::endl;
-            //HeuristicSS ss1;
-            //ss1.fillGap("beq", "bev");
-            //for (auto iter = ss1.intervals_.begin(); iter != ss1.intervals_.end(); iter++) {
-            //	std::cout << "[" << iter->first << ", " << iter->second << ")" << std::endl;
-            //}
-            //std::cout << "------------------------" << std::endl;
-            //HeuristicSS ss2;
-            //ss2.fillGap("beq", "ber");
-            //for (auto iter = ss2.intervals_.begin(); iter != ss2.intervals_.end(); iter++) {
-            // 	std::cout << "[" << iter->first << ", " << iter->second << ")" << std::endl;
-            //}
+//            HeuristicSS ss;
+//            ss.fillGap(std::string(1, char(230)), std::string(1, char(235)));
+//            for (auto iter = ss.intervals_.begin(); iter != ss.intervals_.end(); iter++) {
+//                 std::cout << "[" << iter->first << ", " << iter->second << ")" << std::endl;
+//            }
+//            std::string start = std::string(1, char(0));
+//            std::string end = std::string(1, char(255));
+//            ss.checkIntervals(start, end);
+//            std::cout << "------------------------" << std::endl;
+//            HeuristicSS ss1;
+//            ss1.fillGap(std::string(1, char(125)), std::string(1, char(200)));
+//            for (auto iter = ss1.intervals_.begin(); iter != ss1.intervals_.end(); iter++) {
+//            	std::cout << "[" << iter->first << ", " << iter->second << ")" << std::endl;
+//            }
+//            ss1.checkIntervals(start, end);
+//            std::cout << "------------------------" << std::endl;
+
+//            HeuristicSS ss2;
+//            ss2.fillGap("beq", "ber");
+//            for (auto iter = ss2.intervals_.begin(); iter != ss2.intervals_.end(); iter++) {
+//             	std::cout << "[" << iter->first << ", " << iter->second << ")" << std::endl;
+//            }
         }
 
         TEST_F(HeuristicSSTest, getPrevString) {
@@ -60,7 +65,7 @@ namespace ope {
         TEST_F(HeuristicSSTest, getInterval) {
             HeuristicSS ss;
             std::vector<SymbolFreq> symbol_freq_list;
-            ss.selectSymbols(emails, 1000000, &symbol_freq_list);
+            ss.selectSymbols(emails, 65535, &symbol_freq_list);
             //std::sort(ss.intervals_.begin(), ss.intervals_.end());
             //for(auto iter = ss.intervals_.begin(); iter != ss.intervals_.end(); iter++) {
             //    std::cout << iter->first << "\t" << iter->second << std::endl;
@@ -85,21 +90,25 @@ namespace ope {
             std::ifstream infile(kEmailFilePath);
             std::string key;
             int count = 0;
+            int spe = 0;
             while (infile.good() && count < kEmailTestSize) {
                 infile >> key;
                 int i = 0;
                 for(; i < (int)key.size(); i++) {
                     if(key[i] <= 0) {
-                        std::cout << key << std::endl;
-                        break;
+                        spe = 1;
                     }
                 }
-                if (i != (int)key.size()) {
-                    std::cout << "Continue here" << std::endl;
-                    continue;
-                }
-                emails.push_back(key);
-                count++;
+//                if (i != (int)key.size()) {
+//                    std::cout << "Continue here" << std::endl;
+//                    continue;
+//                }
+//                if (spe == 1) {
+//                    spe = 0;
+                    std::cout << key << std::endl;
+                    emails.push_back(key);
+                    count++;
+//                }
             }
             std::sort(emails.begin(), emails.end());
         }

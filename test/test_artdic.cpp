@@ -14,11 +14,31 @@ namespace ope {
 
     namespace treetest {
         static const std::string kEmailFilePath = "../../datasets/emails.txt";
-        static const int kEmailTestSize = 10000;
+        static const int kEmailTestSize = 20000;
         static std::vector<std::string> emails;
 
 
         class ARTDICTest : public ::testing::Test {
+        private:
+            static int strCompare(std::string s1, std::string s2) {
+                int len1 = (int)s1.size();
+                int len2 = (int)s2.size();
+                int len = min(len1, len2);
+                for(int i = 0; i < len ; i++) {
+                    uint8_t c1 = static_cast<uint8_t >(s1[i]);
+                    uint8_t c2 = static_cast<uint8_t >(s2[i]);
+                    if (c1 < c2)
+                        return -1;
+                    if (c1 > c2)
+                        return 1;
+                }
+                if (len1< len2)
+                    return -1;
+                else if (len1 == len2)
+                    return 0;
+                else
+                    return 1;
+            }
         public:
             static std::string getNextString(std::string str) {
                 for (int i = int(str.size() - 1); i >= 0; i--) {
@@ -32,10 +52,10 @@ namespace ope {
             }
 
             static void getNextInterval(std::vector<std::string> sorted_intervals,
-                                        int cur_idx, std::string cur_str,
+                                        int cur_idx, std::string& cur_str,
                                         int& next_idx, std::string& next_str) {
                 for (int i = cur_idx; i < (int)sorted_intervals.size(); i++) {
-                    if (sorted_intervals[i].compare(cur_str) > 0) {
+                    if (strCompare(sorted_intervals[i], cur_str) > 0) {
                         next_idx = i - 1;
                         next_str = sorted_intervals[i-1];
                         return;
@@ -99,9 +119,6 @@ namespace ope {
                 getNextInterval(emails, i, cur_str, next_idx, next_str);
                 ope::Code result;
                 // next string <= cur_star
-                if (i == 2031) {
-                    std::cout << "break" << std::endl;
-                }
                 result = test->lookup(cur_str.c_str(), cur_str.size(), prefix_len);
 
 
@@ -150,6 +167,7 @@ namespace ope {
             }
             return i;
         }
+
 
 
         void loadEmails() {

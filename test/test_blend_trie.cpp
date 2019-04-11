@@ -64,6 +64,19 @@ namespace ope {
             ASSERT_TRUE(node.getChild('2')->second->getPrefix().compare("2") == 0);
         }
 
+        TEST_F(BlendTrieTest, getFrequencyTable) {
+            std::vector<std::string> demo;
+            std::map<std::string, int64_t > freq_table;
+            demo.emplace_back("abc");
+            demo.emplace_back("abb");
+            demo.emplace_back("aba");
+
+            getFrequencyTable(demo, freq_table);
+            for (auto &iter : freq_table) {
+                std::cout << iter.first << " " << iter.second << std::endl;
+            }
+        }
+
         TEST_F (BlendTrieTest, smallTrie) {
             BlendTrie tree;
             std::map<std::string, int64_t> freq_map_;
