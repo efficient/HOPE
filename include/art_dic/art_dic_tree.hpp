@@ -215,6 +215,7 @@ namespace ope {
                     }
                     N::insertOrUpdateNode(node, parent_node, parent_key,
                                           reinterpret_cast<uint8_t &>(key[key_level]), new_node);
+                    //delete node;
                     return;
                 }
                 key_level++;
@@ -271,6 +272,7 @@ namespace ope {
         leaf_dup->prefix_len = node->prefix_len - node_level - 1;
         node_new->insert(node->prefix[node_level], leaf_dup);
         skipIfEmpty(node_new, leaf_dup, node->prefix[node_level]);
+        N::deleteNode(node);
         return node_new;
     }
 
@@ -283,7 +285,7 @@ namespace ope {
         if (leaf_dup->prefix_len == 0 && leaf_dup->count == 1 && children_key[0] == 0) {
             N::insertOrUpdateNode(node_new, nullptr, 0,
                                   key, children_p[0]);
-            delete leaf_dup;
+            N::deleteNode(leaf_dup);
         }
     }
 

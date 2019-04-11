@@ -30,10 +30,10 @@ namespace ope {
     bool TrieArtDict::build(const std::vector<SymbolCode> &symbol_code_list) {
         num_entries = int(symbol_code_list.size());
         bool result = tree->build(symbol_code_list);
-        std::cout << "N4: " << tree->getN4Num() << std::endl
-                  << "N16: " << tree->getN16Num() << std::endl
-                  << "N48: " << tree->getN48Num() << std::endl
-                  << "N256: " << tree->getN256Num() << std::endl;
+//        std::cout << "N4: " << tree->getN4Num() << std::endl
+//                  << "N16: " << tree->getN16Num() << std::endl
+//                  << "N48: " << tree->getN48Num() << std::endl
+//                  << "N256: " << tree->getN256Num() << std::endl;
         return result;
     }
 

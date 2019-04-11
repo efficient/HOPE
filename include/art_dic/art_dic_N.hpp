@@ -587,6 +587,9 @@ namespace ope {
 
     void N::deleteNode(N *node) {
         if (N::isLeaf(node)) {
+            node = getValueFromLeaf(node);
+            // Delete leaf object
+            delete(node);
             return;
         }
         switch (node->type) {
