@@ -29,7 +29,7 @@ namespace ope {
         // node type
         NTypes type;
 
-        // number of childrens
+        // number of children
         uint8_t count = 0;
 
         // length of compressed path
@@ -91,6 +91,7 @@ namespace ope {
         static void deleteNode(N *node);
     };
 
+
     class N4 : public N {
     public:
 
@@ -126,6 +127,7 @@ namespace ope {
         template<class NODE>
         void copyTo(NODE *n) const;
     };
+
 
     class N16 : public N {
     public:
@@ -168,6 +170,7 @@ namespace ope {
         void copyTo(NODE *n) const;
     };
 
+
     class N48 : public N {
     public:
 
@@ -206,6 +209,7 @@ namespace ope {
         void copyTo(NODE *n) const;
     };
 
+
     class N256 : public N {
     public:
 
@@ -240,6 +244,7 @@ namespace ope {
         template<class NODE>
         void copyTo(NODE *n) const;
     };
+
 
     void N::setPrefix(const uint8_t *_prefix, int length) {
         for (int i = 0; i < length; i++) {
@@ -279,7 +284,6 @@ namespace ope {
         big_node->insert(key, val);
         // replace old node with new node
         N::change(node_par, key_par, big_node);
-
         // delete old node
         delete n;
     }
@@ -463,14 +467,13 @@ namespace ope {
                 return reinterpret_cast<N256 *>(this)->remove(key);
             }
         }
-	return false;
+	    return false;
     }
 
     void N::getChildren(N *node, uint8_t start, uint8_t end,
                         uint8_t *children_key, N **children_p, int &child_cnt) {
         child_cnt = 0;
         for (uint8_t cur = start; cur < end; cur++) {
-            // cout << "Current key:"<<unsigned(cur)<<endl;
             N *child = getChild(cur, node);
             if (child == nullptr)
                 continue;
@@ -524,7 +527,6 @@ namespace ope {
             }
         }
         assert(false);
-        __builtin_unreachable();
     }
 
     N *N::getNextChild(N *node, uint8_t k) {
@@ -543,7 +545,6 @@ namespace ope {
             }
         }
         assert(false);
-        __builtin_unreachable();
     }
 
     N *N::getPrevChild(N *node, uint8_t k) {
@@ -562,7 +563,6 @@ namespace ope {
             }
         }
         assert(false);
-        __builtin_unreachable();
     }
 
     void N::deleteChildren(N *node) {
@@ -583,6 +583,7 @@ namespace ope {
                 return reinterpret_cast<N256 *>(node)->deleteChildren();
             }
         }
+        assert(false);
     }
 
     void N::deleteNode(N *node) {
@@ -615,9 +616,7 @@ namespace ope {
             }
         }
         assert(false);
-        __builtin_unreachable();
     }
-
 
     bool N4::insert(uint8_t k, N *node) {
         if (count == 4)
@@ -642,7 +641,6 @@ namespace ope {
                 return true;
             }
         }
-        cout << "[Error]Remove N4 element not exist" << endl;
         assert(false);
     }
 
@@ -740,7 +738,6 @@ namespace ope {
                 return children[i];
         }
         return nullptr;
-
     }
 
     bool N16::remove(uint8_t k) {
@@ -758,7 +755,6 @@ namespace ope {
         }
         cout << " [Error]Remove N16 element not exist" << endl;
         assert(false);
-        __builtin_unreachable();
     }
 
     void N16::change(uint8_t key, N *val) {
@@ -861,7 +857,6 @@ namespace ope {
                 return child;
         }
         assert(false);
-        __builtin_unreachable();
     }
 
     N *N48::getLastChild() {
@@ -873,7 +868,6 @@ namespace ope {
                 return child;
         }
         assert(false);
-        __builtin_unreachable();
     }
 
     N *N48::getNextChild(uint8_t k) {
@@ -916,7 +910,6 @@ namespace ope {
         }
     }
 
-
     bool N256::insert(uint8_t k, N *n) {
         if (count == 255)
             return false;
@@ -942,15 +935,16 @@ namespace ope {
     }
 
     N *N256::getFirstChild() {
-        if (count == 0)
+        if (count == 0) {
             return nullptr;
+        }
         for (int k = 0; k < 256; k++) {
             N *child = getChild((uint8_t) k);
-            if (child != nullptr)
+            if (child != nullptr) {
                 return child;
+            }
         }
         assert(false);
-        __builtin_unreachable();
     }
 
     N *N256::getLastChild() {
@@ -962,7 +956,6 @@ namespace ope {
                 return child;
         }
         assert(false);
-        __builtin_unreachable();
     }
 
     N *N256::getNextChild(uint8_t k) {
@@ -1002,8 +995,6 @@ namespace ope {
             if (children[i] != nullptr)
                 n->insert(i, children[i]);
         }
-
-
     }
 }
 

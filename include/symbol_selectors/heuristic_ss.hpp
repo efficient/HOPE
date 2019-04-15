@@ -25,7 +25,7 @@ namespace ope {
 
         void setW(int64_t new_w);
 
-    //private:
+    private:
         void checkIntervals(std::string& start_str, std::string& end_str);
 
         void getFrequencyTable(const std::vector<std::string> &key_list);
@@ -101,7 +101,6 @@ namespace ope {
         // Search for best W
         int64_t last_w = 0;
         while (abs(num_limit - (int)intervals_.size()) > (int)(0.05 * num_limit)) {
-//        while (abs(num_limit - (int)intervals_.size()) > (int)) {
             intervals_.clear();
             getInterval(blend_freq_table);
             // sort intervals
@@ -190,12 +189,11 @@ namespace ope {
             for (int j = 0; j < key_len; j++) {
                 for (int k = 1; k <= key_len - j; k++) {
                     std::string substring = key.substr(j, k);
-                    if (freq_map_.find(substring) == freq_map_.end())
+                    if (freq_map_.find(substring) == freq_map_.end()) {
                         freq_map_.insert(std::pair<std::string, int64_t>(substring, 1));
-                    else
-                        // TODO
-                        // clean code
+                    } else {
                         freq_map_.find(substring)->second++;
+                    }
                 }
             }
         }
@@ -353,14 +351,9 @@ namespace ope {
 		        assert(false);
             }
             end = iter->second;
-
-            //if (cnt >= 15000 && cnt <= 15010) {
-            //    std::cout << iter->first << " " << iter->second << std::endl;
-            //}
         }
         std::cout << "Check " << cnt << " intervals" << std::endl;
     }
-
 
     void HeuristicSS::mergeAdjacentComPrefixIntervals() {
         std::vector<std::pair<std::string, std::string>>merged_intervals;

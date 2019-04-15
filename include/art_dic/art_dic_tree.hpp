@@ -6,13 +6,13 @@
 #include "art_dic_N.hpp"
 
 namespace ope {
-
     struct LeafInfo {
         const SymbolCode *symbol_code;
         LeafInfo *prev_leaf;
         uint32_t prefix_len;
         int visit_cnt = 0;
     };
+
 
     class ArtDicTree {
     public:
@@ -64,7 +64,6 @@ namespace ope {
         LeafInfo* getRightBottom(N *node)const;
 
         std::string getPrevString(const std::string &str);
-
     };
 
 
@@ -148,9 +147,6 @@ namespace ope {
                 std::string end_interval = getPrevString((iter + 1)->first);
                 lf->prefix_len = (uint32_t) getCommonPrefixLen(start_interval, end_interval);
                 // assert(lf->prefix_len > 0)
-                if (lf->prefix_len == 0) {
-
-                }
             }
             else {
                 lf->prefix_len = 1;
@@ -373,7 +369,6 @@ namespace ope {
     int ArtDicTree::getN256Num() {
         return cnt_N256;
     }
-
 }
 
 #endif //OPE_TREE_H

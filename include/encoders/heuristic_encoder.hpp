@@ -85,11 +85,6 @@ namespace ope {
         std::cout << "Finish getting code, use:" << getNow() - curtime << std::endl;
         curtime = getNow();
 
-        // TODO: delete when release
-//        checkOrder(symbol_code_list);
-//        std::cout << "Finish checking intervals, use:" << getNow() - curtime << std::endl;
-//        curtime = getNow();
-
         dict_ = DictionaryFactory::createDictionary(5);
         auto dic = dict_->build(symbol_code_list);
         std::cout << "Finish building dic, use:" << getNow() - curtime << std::endl;
@@ -128,7 +123,6 @@ namespace ope {
         return ((idx << 6) + int_buf_len);
     }
 
-    // TODO
     void HeuristicEncoder::encodePair(const std::string &l_key, const std::string &r_key, uint8_t *l_buffer,
                                       uint8_t *r_buffer, int &l_enc_len, int &r_enc_len) const {
         return;
@@ -141,7 +135,6 @@ namespace ope {
     int64_t HeuristicEncoder::memoryUse() const {
         return dict_->memoryUse();
     }
-
 }
 
 #endif
