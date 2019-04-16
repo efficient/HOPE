@@ -12,11 +12,14 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -g -O3 -Wall -Werror -march=nati
 
 enable_testing()
 
+include_directories("/usr/local/include")
+
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/symbol_selectors")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/code_generators")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/dictionaries")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/encoders")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/art_dic")
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/SuRF/include")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/ART/include")
@@ -28,11 +31,12 @@ find_library(TbbLib tbb)
 find_package (Threads)
 
 add_library(ART ART/src/Tree.cpp)
+
 target_link_libraries(ART ${TbbLib} ${JemallocLib} ${CMAKE_THREAD_LIBS_INIT})
 
 add_subdirectory(test)
 add_subdirectory(bench)
-add_subdirectory(SuRF/test)
-add_subdirectory(SuRF/bench)
-add_subdirectory(ART/test)
-add_subdirectory(ART/bench)
+#add_subdirectory(SuRF/test)
+#add_subdirectory(SuRF/bench)
+#add_subdirectory(ART/test)
+#add_subdirectory(ART/bench)

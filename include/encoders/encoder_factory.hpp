@@ -5,6 +5,7 @@
 #include "single_char_encoder.hpp"
 #include "double_char_encoder.hpp"
 #include "ngram_encoder.hpp"
+#include "heuristic_encoder.hpp"
 
 namespace ope {
 
@@ -19,6 +20,8 @@ public:
 	    return new NGramEncoder(3);
 	else if (type == 4)
 	    return new NGramEncoder(4);
+	else if (type == 5)
+		return new HeuristicEncoder();
 	else
 	    return new SingleCharEncoder();
     }
