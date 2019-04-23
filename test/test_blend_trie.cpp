@@ -1,7 +1,6 @@
 #include "gtest/gtest.h"
 
 #include <assert.h>
-
 #include <bitset>
 #include <fstream>
 #include <iostream>
@@ -21,17 +20,17 @@ namespace ope {
         static const std::string kBlendingResultPath = "../../datasets/blend_results_" +
                                                        std::to_string(kEmailTestSize) + ".txt";
         static std::vector<SymbolFreq> blend_results;
-        static std::map<std::string, int64_t> blend_freq_map;
+        static std::unordered_map<std::string, int64_t> blend_freq_map;
 
         class BlendTrieTest : public ::testing::Test {
         public:
             void getFrequencyTable(const std::vector<std::string> &key_list,
-                                   std::map<std::string, int64_t> &freq_map_);
+                                   std::unordered_map<std::string, int64_t> &freq_map_);
         };
 
         void BlendTrieTest::getFrequencyTable(const std::vector<std::string> &key_list,
-                                              std::map<std::string, int64_t> &freq_map_) {
-            std::map<std::string, int64_t>::iterator iter;
+                                              std::unordered_map<std::string, int64_t> &freq_map_) {
+            std::unordered_map<std::string, int64_t>::iterator iter;
             for (int i = 0; i < (int) key_list.size(); i++) {
                 const std::string key = key_list[i];
                 int key_len = (int)key.size();
@@ -66,7 +65,7 @@ namespace ope {
 
         TEST_F(BlendTrieTest, getFrequencyTable) {
             std::vector<std::string> demo;
-            std::map<std::string, int64_t > freq_table;
+            std::unordered_map<std::string, int64_t > freq_table;
             demo.emplace_back("abc");
             demo.emplace_back("abb");
             demo.emplace_back("aba");
@@ -79,7 +78,7 @@ namespace ope {
 
         TEST_F (BlendTrieTest, smallTrie) {
             BlendTrie tree;
-            std::map<std::string, int64_t> freq_map_;
+            std::unordered_map<std::string, int64_t> freq_map_;
             freq_map_.insert(std::make_pair("a", 1));
             freq_map_.insert(std::make_pair("b", 1));
             freq_map_.insert(std::make_pair("d", 1));
@@ -152,7 +151,6 @@ namespace ope {
                 line_num++;
             }
         }
-
     } // namespace blendtrietest
 
 } // namespace ope

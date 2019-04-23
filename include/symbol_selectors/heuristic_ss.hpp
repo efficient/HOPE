@@ -9,7 +9,6 @@
 #include <cmath>
 #include "symbol_selector.hpp"
 #include "blending_trie.hpp"
-#include "trie_general_dic.hpp"
 
 namespace ope {
 
@@ -31,7 +30,6 @@ namespace ope {
         void checkIntervals(std::string& start_str, std::string& end_str);
 
         void getFrequencyTable(const std::vector<std::string> &key_list);
-        void getTrieFrequencyTable(const std::vector<std::string> &key_list);
 
         void getInterval(std::vector<SymbolFreq> &blend_freq_table);
 
@@ -195,12 +193,6 @@ namespace ope {
         }
     }
 
-    void HeuristicSS::getTrieFrequencyTable(const std::vector<std::string> &key_list) {
-//        General_Trie trie;
-//        trie.build(key_list);
-//        trie.getFrequency(freq_map_, "");
-    }
-
     void HeuristicSS::getFrequencyTable(const std::vector<std::string> &key_list) {
         for (int i = 0; i < (int) key_list.size(); i++) {
             const std::string key = key_list[i];
@@ -219,30 +211,6 @@ namespace ope {
                 }
             }
         }
-//        std::hash<std::string> str_hash;
-//        std::map<size_t ,std::string> hash_string_map;
-//        std::map<size_t ,int64_t > freq;
-//        for (int i = 0; i < (int) key_list.size(); i++) {
-//            const std::string key = key_list[i];
-//            int key_len = (int)key.size();
-//            // Get substring frequency
-//            for (int j = 0; j < key_len; j++) {
-//                for (int k = 1; k <= key_len - j; k++) {
-//                    std::string substring = key.substr(j, k);
-//                    size_t hash_s = str_hash(substring);
-//                    auto result = freq.find(hash_s);
-//                    if (result == freq.end()) {
-//                        freq.insert(std::pair<size_t , int64_t>(hash_s, 1));
-//                        hash_string_map.insert(std::pair<size_t, std::string>(hash_s, substring));
-//                    } else {
-//                        result->second++;
-//                    }
-//                }
-//            }
-//            for (auto iter = freq.begin(); iter != freq.end(); iter++) {
-//                freq_map_.insert(std::pair<std::string, int64_t>(hash_string_map.find(iter->first)->second, iter->second));
-//            }
-//        }
     }
 
     void HeuristicSS::getInterval(std::vector<SymbolFreq> &blend_freq_table) {

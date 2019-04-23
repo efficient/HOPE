@@ -181,7 +181,7 @@ namespace ope {
             changeStringToUint8(key, uint8_key);
             if (prefixMatch(node, uint8_key, (uint32_t)key.size(), key_level, node_level, common_prefix)) {
                 // left_key == prefix
-                if (key_level == key.size()) {
+                if (key_level == (int)key.size()) {
                     N::insertOrUpdateNode(node, parent_node, parent_key, 0, val);
                     return;
                 }
@@ -262,7 +262,7 @@ namespace ope {
         addLeaf(key_level, key, node_new, val, node, parent_key);
         // The order of the next two lines cannot be changed!
         node_new->insert(node->prefix[node_level], node);
-        assert(node_level < node->prefix_len);
+        assert(node_level < (int)node->prefix_len);
         node->setPrefix(node->prefix + node_level + 1, node->prefix_len - node_level - 1);
 //        skipIfEmpty(node_new, node, node->prefix[node_level]);
         return node_new;
