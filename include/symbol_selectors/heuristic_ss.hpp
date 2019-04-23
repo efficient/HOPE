@@ -3,11 +3,13 @@
 
 #include <algorithm>
 #include <map>
+#include <unordered_map>
 #include <fstream>
 #include <iostream>
 #include <cmath>
 #include "symbol_selector.hpp"
 #include "blending_trie.hpp"
+#include "trie_general_dic.hpp"
 
 namespace ope {
 
@@ -29,6 +31,7 @@ namespace ope {
         void checkIntervals(std::string& start_str, std::string& end_str);
 
         void getFrequencyTable(const std::vector<std::string> &key_list);
+        void getTrieFrequencyTable(const std::vector<std::string> &key_list);
 
         void getInterval(std::vector<SymbolFreq> &blend_freq_table);
 
@@ -53,7 +56,7 @@ namespace ope {
         int BinarySearch(const std::string& str, unsigned int pos, int &prefix_len);
 
         int64_t W;
-        std::map<std::string, int64_t> freq_map_;
+        std::unordered_map<std::string, int64_t> freq_map_;
         std::vector<std::pair<std::string, std::string>> intervals_;
 
     };
@@ -91,13 +94,22 @@ namespace ope {
                                     std::vector<SymbolFreq> *symbol_freq_list) {
         if (key_list.empty())
             return false;
+        double  curtime = getNow();
         getFrequencyTable(key_list);
+        std::cout << "Finish getting symbol frequency, use:" << getNow() - curtime << std::endl;
+        curtime = getNow();
+
         // Build Trie
         BlendTrie tree;
         tree.build(freq_map_);
+        std::cout << "Finish building trie, use:" << getNow() - curtime << std::endl;
+        curtime = getNow();
+
         // Blending
         std::vector<SymbolFreq> blend_freq_table;
         tree.blendingAndGetLeaves(blend_freq_table);
+        std::cout << "Finish blending, use:" << getNow() - curtime << std::endl;
+
         // Search for best W
         int64_t last_w = 0;
         while (abs(num_limit - (int)intervals_.size()) > (int)(0.05 * num_limit)) {
@@ -127,8 +139,11 @@ namespace ope {
         std::string start = std::string(1, char(0));
         std::string end = std::string(50, char(255));
         checkIntervals(start, end);
+        curtime = getNow();
         // simulate encode process to get Frequency
         getIntervalFreq(symbol_freq_list, key_list);
+        std::cout << "Finish simulating encode process, use:" << getNow() - curtime << std::endl;
+        curtime = getNow();
         return true;
     }
 
@@ -180,8 +195,13 @@ namespace ope {
         }
     }
 
-    void HeuristicSS::getFrequencyTable(const std::vector<std::string> &key_list) {
+    void HeuristicSS::getTrieFrequencyTable(const std::vector<std::string> &key_list) {
+//        General_Trie trie;
+//        trie.build(key_list);
+//        trie.getFrequency(freq_map_, "");
+    }
 
+    void HeuristicSS::getFrequencyTable(const std::vector<std::string> &key_list) {
         for (int i = 0; i < (int) key_list.size(); i++) {
             const std::string key = key_list[i];
             int key_len = (int)key.size();
@@ -189,14 +209,40 @@ namespace ope {
             for (int j = 0; j < key_len; j++) {
                 for (int k = 1; k <= key_len - j; k++) {
                     std::string substring = key.substr(j, k);
-                    if (freq_map_.find(substring) == freq_map_.end()) {
+
+                    auto result = freq_map_.find(substring);
+                    if (result == freq_map_.end()) {
                         freq_map_.insert(std::pair<std::string, int64_t>(substring, 1));
                     } else {
-                        freq_map_.find(substring)->second++;
+                        result->second++;
                     }
                 }
             }
         }
+//        std::hash<std::string> str_hash;
+//        std::map<size_t ,std::string> hash_string_map;
+//        std::map<size_t ,int64_t > freq;
+//        for (int i = 0; i < (int) key_list.size(); i++) {
+//            const std::string key = key_list[i];
+//            int key_len = (int)key.size();
+//            // Get substring frequency
+//            for (int j = 0; j < key_len; j++) {
+//                for (int k = 1; k <= key_len - j; k++) {
+//                    std::string substring = key.substr(j, k);
+//                    size_t hash_s = str_hash(substring);
+//                    auto result = freq.find(hash_s);
+//                    if (result == freq.end()) {
+//                        freq.insert(std::pair<size_t , int64_t>(hash_s, 1));
+//                        hash_string_map.insert(std::pair<size_t, std::string>(hash_s, substring));
+//                    } else {
+//                        result->second++;
+//                    }
+//                }
+//            }
+//            for (auto iter = freq.begin(); iter != freq.end(); iter++) {
+//                freq_map_.insert(std::pair<std::string, int64_t>(hash_string_map.find(iter->first)->second, iter->second));
+//            }
+//        }
     }
 
     void HeuristicSS::getInterval(std::vector<SymbolFreq> &blend_freq_table) {
@@ -205,20 +251,18 @@ namespace ope {
                       return strCompare(x.first, y.first) < 0;
                   });
         auto next_start = blend_freq_table.begin();
-        bool not_first_peak = true;
+        bool is_first_peak = (next_start->second * (int)(next_start->first.size()) > W);
         for (auto iter = blend_freq_table.begin(); iter != blend_freq_table.end(); iter++) {
             if (iter->second * (int)(iter->first.size()) > W) {
-                if (not_first_peak) {
-                    not_first_peak = (iter == blend_freq_table.begin());
-                }
                 intervals_.emplace_back(std::make_pair(iter->first, getNextString(iter->first)));
                 mergeIntervals(next_start, iter);
                 next_start = iter;
             }
         }
+
         auto blend_freq_table_end = blend_freq_table.end() - 1;
         mergeIntervals(next_start, blend_freq_table_end);
-        std::string start_string = not_first_peak ? blend_freq_table.begin()->first
+        std::string start_string = is_first_peak ? blend_freq_table.begin()->first
                                                           : getNextString(blend_freq_table.begin()->first);
         fillGap(std::string(1, char(0)), start_string);
         std::string end_string = next_start == blend_freq_table_end ? getNextString(blend_freq_table_end->first)

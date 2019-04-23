@@ -98,7 +98,7 @@ namespace ope {
                     prefix_len = leaf_info->prefix_len;
                     return leaf_info->symbol_code->second;
                 }
-                const uint8_t & next_level_key_chr = reinterpret_cast<const uint8_t &>(symbol[key_level]);
+                const uint8_t & next_level_key_chr = static_cast<uint8_t >(symbol[key_level]);
                 next_node = N::getChild(next_level_key_chr, node);
                 if (next_node == nullptr) {
                     // Get previous child
@@ -122,7 +122,8 @@ namespace ope {
                 }
             } else {
                 LeafInfo *leaf_info = NULL;
-                if (key_level == symbol_len || symbol[key_level] < node->prefix[node_level]) {
+                if (key_level == symbol_len ||
+                        static_cast<uint8_t >(symbol[key_level]) < static_cast<uint8_t >(node->prefix[node_level])) {
                     N *prev = N::getFirstChild(node);
                     leaf_info = getLeftBottom(prev)->prev_leaf;
                 } else {
@@ -169,6 +170,7 @@ namespace ope {
         uint8_t node_key = 0;
         int key_level = 0;
         int node_level = 0;
+        N *val = N::setLeaf(reinterpret_cast<N *>(reinterpret_cast<int64_t >(leafInfo)));
 
         while (true) {
             parent_node = node;
@@ -177,24 +179,17 @@ namespace ope {
             uint8_t common_prefix[maxPrefixLen];
             uint8_t uint8_key[maxPrefixLen];
             changeStringToUint8(key, uint8_key);
-            N *val = N::setLeaf(reinterpret_cast<N *>(reinterpret_cast<int64_t >(leafInfo)));
             if (prefixMatch(node, uint8_key, (uint32_t)key.size(), key_level, node_level, common_prefix)) {
-                // key == prefix
-                if (node->prefix_len == key.size()) {
+                // left_key == prefix
+                if (key_level == key.size()) {
                     N::insertOrUpdateNode(node, parent_node, parent_key, 0, val);
                     return;
                 }
-                // size of remain key == 1
-                if (key_level == (int)key.size() - 1) {
-                    N::insertOrUpdateNode(node, parent_node, parent_key,
-                                          reinterpret_cast<uint8_t &>(key[key_level]), val);
-                    return;
-                }
+
                 node_key = reinterpret_cast<uint8_t &>(key[key_level]);
                 next_node = N::getChild(node_key, node);
                 if (next_node == nullptr) {
-                    addLeaf(key_level, key, node, val,
-                            parent_node, parent_key);
+                    addLeaf(key_level, key, node, val, parent_node, parent_key);
                     return;
                 } else if (N::isLeaf(next_node)) {
                     uint8_t prefix[maxPrefixLen];
@@ -211,7 +206,6 @@ namespace ope {
                     }
                     N::insertOrUpdateNode(node, parent_node, parent_key,
                                           reinterpret_cast<uint8_t &>(key[key_level]), new_node);
-                    //delete node;
                     return;
                 }
                 key_level++;
@@ -237,6 +231,11 @@ namespace ope {
 
     void ArtDicTree::addLeaf(int insertkey_level, std::string& key,
                        N *node, N *val, N *parent_node, uint8_t parent_key) {
+        if (insertkey_level == (int)key.size()) {
+            N::insertOrUpdateNode(node, parent_node, parent_key, 0, val);
+            return;
+        }
+
         if (insertkey_level == (int)key.size() - 1) {
             N::insertOrUpdateNode(node, parent_node, parent_key,
                                   reinterpret_cast<uint8_t &>(key[insertkey_level]), val);
@@ -254,21 +253,18 @@ namespace ope {
 
     }
 
+    // break the node
     N *ArtDicTree::spawn(uint8_t *common_prefix, N *node,
                    std::string key, N *val,
                    int node_level, int key_level, uint8_t parent_key) {
-        auto node_new = new N4(common_prefix, node_level);
-        addLeaf(key_level, key, node_new, val,
-                node, parent_key);
-
-        N *leaf_dup = node->duplicate();
-        uint8_t leaf_key[maxPrefixLen];
-        subKey(node_level + 1, node->prefix_len, leaf_key, node->prefix);
-        leaf_dup->setPrefix(leaf_key, node->prefix_len - node_level - 1);
-        leaf_dup->prefix_len = node->prefix_len - node_level - 1;
-        node_new->insert(node->prefix[node_level], leaf_dup);
-        skipIfEmpty(node_new, leaf_dup, node->prefix[node_level]);
-        N::deleteNode(node);
+        auto node_new = new N4(common_prefix, (uint32_t)node_level);
+        // Insert given value
+        addLeaf(key_level, key, node_new, val, node, parent_key);
+        // The order of the next two lines cannot be changed!
+        node_new->insert(node->prefix[node_level], node);
+        assert(node_level < node->prefix_len);
+        node->setPrefix(node->prefix + node_level + 1, node->prefix_len - node_level - 1);
+//        skipIfEmpty(node_new, node, node->prefix[node_level]);
         return node_new;
     }
 
