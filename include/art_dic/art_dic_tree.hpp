@@ -6,14 +6,6 @@
 #include "art_dic_N.hpp"
 
 namespace ope {
-    struct LeafInfo {
-        const SymbolCode *symbol_code;
-        LeafInfo *prev_leaf;
-        uint32_t prefix_len;
-        int visit_cnt = 0;
-    };
-
-
     class ArtDicTree {
     public:
         ArtDicTree();

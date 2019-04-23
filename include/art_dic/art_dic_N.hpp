@@ -10,6 +10,14 @@ using namespace std;
 
 namespace ope {
 
+    struct LeafInfo {
+        const SymbolCode *symbol_code;
+        LeafInfo *prev_leaf;
+        uint32_t prefix_len;
+        int visit_cnt = 0;
+    };
+
+
     static const unsigned maxPrefixLen = 255;
     static int cnt_N4 = 0;
     static int cnt_N16 = 0;
@@ -588,9 +596,9 @@ namespace ope {
 
     void N::deleteNode(N *node) {
         if (N::isLeaf(node)) {
-            node = getValueFromLeaf(node);
+            auto leaf = reinterpret_cast<LeafInfo*>(getValueFromLeaf(node));
             // Delete leaf object
-            delete(node);
+            delete(leaf);
             return;
         }
         switch (node->type) {
