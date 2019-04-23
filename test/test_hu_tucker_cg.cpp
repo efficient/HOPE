@@ -5,7 +5,6 @@
 #include <bitset>
 #include <fstream>
 #include <iostream>
-#include <limits>
 
 #include "hu_tucker_cg.hpp"
 #include "symbol_selector_factory.hpp"
@@ -33,18 +32,12 @@ public:
     virtual void TearDown () {}
 };
 
-
-
 void print(const std::vector<SymbolCode> &symbol_code_list,
 	   const HuTuckerCG* code_generator) {
     for (int i = 0; i < (int)symbol_code_list.size(); i++) {
 	int64_t code = symbol_code_list[i].second.code;
 	unsigned len = symbol_code_list[i].second.len;
-	std::cout << i << ", " << "\t" << len << "\tstart:";
-	for (int j = 0; j < symbol_code_list[i].first.size(); j++) {
-	    std::cout << symbol_code_list[i].first[j] <<" ";
-	}
-	std::cout << "\t";
+	std::cout << i << ", " << "\t" << len << "\t";
 	code <<= (32 - len);
 	std::cout << std::bitset<32>(code) << std::endl;
     }
@@ -57,16 +50,12 @@ void printCPR(const HuTuckerCG* code_generator) {
 	      << code_generator->getCompressionRate() << std::endl;
 }
 
-std::string changeToBinary(int64_t num, int8_t len) {
+std::string changeToBinary(int64_t num) {
     std::string result = std::string();
-    int cnt = 0;
     while (num > 0) {
         result = std::string(1, num%2 + '0') + result;
         num = num / 2;
-        cnt += 1;
     }
-    for (int i = cnt; i < len; i++)
-        result = '0' + result;
     return result;
 }
 
@@ -84,16 +73,10 @@ TEST_F(HuTuckerCGTest, testCodeOrder) {
         return x.first.compare(y.first) < 0;
     });
     for(auto iter = symbol_code_list.begin()+1; iter != symbol_code_list.end(); iter++){
-        std::string str1 = changeToBinary((iter-1)->second.code, (iter-1)->second.len);
-        std::string str2 = changeToBinary(iter->second.code, iter->second.len);
+        std::string str1 = changeToBinary(iter->second.code);
+        std::string str2 = changeToBinary((iter-1)->second.code);
         int cmp = str1.compare(str2);
-        if (cmp >= 0) {
-            std::cout << (iter-1)->first << "\t" << (iter-1)->second.code << "\t";
-            std::cout << iter->first << "\t" << iter->second.code << "\t";
-            std::cout << int((iter-1)->second.len) << "\t" << int(iter->second.len)<< "\t";
-            std::cout << str1 << "\t" << str2 << "\t"<<std::endl;
-        }
-       assert(cmp < 0);
+        assert(cmp > 0);
     }
 }
 //======================= Word Tests ==============================
@@ -119,7 +102,6 @@ TEST_F (HuTuckerCGTest, printDoubleCharWordTest) {
     HuTuckerCG* code_generator = new HuTuckerCG();
     code_generator->genCodes(symbol_freq_list, &symbol_code_list);
 
-    print(symbol_code_list, code_generator);
     printCPR(code_generator);
 }
 
