@@ -6,6 +6,7 @@
 #define BLENDING_TRI_H
 
 #include<map>
+#include <unordered_map>
 #include<list>
 #include<vector>
 #include<iostream>
@@ -74,7 +75,7 @@ namespace ope {
 
         ~BlendTrie();
 
-        void build(const std::map<std::string, int64_t> &freq_map);
+        void build(const std::unordered_map<std::string, int64_t> &freq_map);
 
         void insert(std::string key, int64_t freq);
 
@@ -98,7 +99,7 @@ namespace ope {
         clear(root_);
     }
 
-    void BlendTrie::build(const std::map<std::string, int64_t> &freq_map) {
+    void BlendTrie::build(const std::unordered_map<std::string, int64_t> &freq_map) {
         root_ = new TrieNode();
         for (const auto &iter : freq_map) {
             insert(iter.first, iter.second);

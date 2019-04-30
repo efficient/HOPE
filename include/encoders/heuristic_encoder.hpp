@@ -14,7 +14,9 @@ namespace ope {
     public:
         HeuristicEncoder() {};
 
-        ~HeuristicEncoder() {};
+        ~HeuristicEncoder() {
+            delete dict_;
+        };
 
         bool build(const std::vector<std::string> &key_list,
                    const int64_t dict_size_limit);
@@ -33,7 +35,7 @@ namespace ope {
 
     private:
         Dictionary *dict_;
-
+        std::vector<SymbolCode> symbol_code_list;
         std::string changeToBinary(int64_t num, int8_t len);
 
     };
@@ -78,12 +80,13 @@ namespace ope {
         symbol_selector->selectSymbols(key_list, dict_size_limit, &symbol_freq_list);
         std::cout << "Finish getting symbol frequency, use:" << getNow() - curtime << std::endl;
         curtime = getNow();
+        delete symbol_selector;
 
-        std::vector<SymbolCode> symbol_code_list;
         CodeGenerator *code_generator = CodeGeneratorFactory::createCodeGenerator(1);
         code_generator->genCodes(symbol_freq_list, &symbol_code_list);
         std::cout << "Finish getting code, use:" << getNow() - curtime << std::endl;
         curtime = getNow();
+        delete code_generator;
 
         dict_ = DictionaryFactory::createDictionary(5);
         auto dic = dict_->build(symbol_code_list);
