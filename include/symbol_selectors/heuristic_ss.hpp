@@ -60,7 +60,7 @@ namespace ope {
     };
 
     HeuristicSS::HeuristicSS() {
-        W = 200;
+        W = 2000;
     }
 
     void HeuristicSS::setW(int64_t new_w) {
