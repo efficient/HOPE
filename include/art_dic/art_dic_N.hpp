@@ -48,6 +48,11 @@ namespace ope {
 
         N(NTypes _type, const uint8_t *_prefix, uint32_t _prefix_len)
                 : type(_type), prefix_len(_prefix_len) {
+	    if (_prefix_len > maxPrefixLen) {
+	        std::cout << "[Error] Prefix length " << _prefix_len << " greater than max prefix length" << std::endl;
+		assert(false); 
+	    }
+            prefix_len = _prefix_len;
             for (int i = 0; i < (int)_prefix_len; i++)
                 prefix[i] = _prefix[i];
         };
@@ -255,6 +260,11 @@ namespace ope {
 
 
     void N::setPrefix(const uint8_t *_prefix, int length) {
+	if ((uint32_t)length > maxPrefixLen) {
+            std::cout << "[Error] Prefix length " << length << " greater than max prefix length" << std::endl;
+            assert(false); 
+	}
+
         for (int i = 0; i < length; i++) {
             prefix[i] = _prefix[i];
         }
