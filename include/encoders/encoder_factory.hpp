@@ -21,7 +21,7 @@ public:
 	else if (type == 4)
 	    return new NGramEncoder(4);
 	else if (type == 5)
-		return new HeuristicEncoder();
+            return new HeuristicEncoder();
 	else
 	    return new SingleCharEncoder();
     }

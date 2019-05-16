@@ -93,13 +93,16 @@ namespace ope {
         if (key_list.empty())
             return false;
         double  curtime = getNow();
+        /*
         getFrequencyTable(key_list);
         std::cout << "Finish getting symbol frequency, use:" << getNow() - curtime << std::endl;
+        */
         curtime = getNow();
-
+    
         // Build Trie
         BlendTrie tree;
-        tree.build(freq_map_);
+        tree.build(key_list);
+        //tree.build(freq_map_);
         std::cout << "Finish building trie, use:" << getNow() - curtime << std::endl;
         curtime = getNow();
 
@@ -196,7 +199,7 @@ namespace ope {
     void HeuristicSS::getFrequencyTable(const std::vector<std::string> &key_list) {
         for (int i = 0; i < (int) key_list.size(); i++) {
             const std::string key = key_list[i];
-            int key_len = (int)key.size();
+            int key_len = (int)(key.size()<128?key.size():128);
             // Get substring frequency
             for (int j = 0; j < key_len; j++) {
                 for (int k = 1; k <= key_len - j; k++) {

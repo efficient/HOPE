@@ -584,9 +584,13 @@ namespace ope {
     }
 
     void N::deleteChildren(N *node) {
+        if (node == NULL) return;
+
         if (N::isLeaf(node)) {
+            //deleteNode(node);
             return;
         }
+
         switch (node->type) {
             case NTypes::N4: {
                 return reinterpret_cast<N4 *>(node)->deleteChildren();

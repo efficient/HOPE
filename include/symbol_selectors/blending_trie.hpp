@@ -74,10 +74,11 @@ namespace ope {
         BlendTrie();
 
         ~BlendTrie();
+        
+        void build(std::vector<std::string> key_list);
+//        void build(const std::unordered_map<std::string, int64_t> &freq_map);
 
-        void build(const std::unordered_map<std::string, int64_t> &freq_map);
-
-        void insert(std::string key, int64_t freq);
+        void insert(std::string &key, int64_t freq);
 
         void clear(TrieNode *node);
 
@@ -98,17 +99,32 @@ namespace ope {
         // Delete all the nodes
         clear(root_);
     }
-
+    /*
     void BlendTrie::build(const std::unordered_map<std::string, int64_t> &freq_map) {
         root_ = new TrieNode();
         for (const auto &iter : freq_map) {
             insert(iter.first, iter.second);
         }
+    }*/
+   
+    void BlendTrie::build(std::vector<std::string> key_list) {
+        root_ = new TrieNode();
+        int maxkey_len = 50;
+        for (int i = 0; i < (int)key_list.size(); i++) {
+            std::string key = key_list[i];
+            for (int j = 0; j < (int)key.size(); j++) {
+                for (int k = 1; k <= (int)key.size() - j && k < maxkey_len; k++) {
+                    std::string substring = key.substr(j, k);
+                    //std::cout << substring << "*" << std::endl;
+                    insert(substring, 1);
+                }
+            }
+        }
     }
 
-    void BlendTrie::insert(std::string key, int64_t freq) {
+    void BlendTrie::insert(std::string &key, int64_t freq) {
         TrieNode *node = root_;
-        for (int i = 0; i < (int)key.size(); i++) {
+        for (int i = 0; i < (int)key.length(); i++) {
             std::map<char, TrieNode *>::iterator child = node->getChild(key[i]);
             if (child != node->getEnd()) {
                 node = child->second;
@@ -118,7 +134,7 @@ namespace ope {
                 node = new_node;
             }
         }
-        node->setFreq(freq);
+        node->setFreq(freq + node->getFreq());
     }
 
     void BlendTrie::blendingAndGetLeaves(std::vector<SymbolFreq> &freq_vec) {
