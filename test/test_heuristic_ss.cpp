@@ -90,29 +90,14 @@ namespace ope {
             std::ifstream infile(kEmailFilePath);
             std::string key;
             int count = 0;
-            //int spe = 0;
             while (infile.good() && count < kEmailTestSize) {
                 infile >> key;
-                //int i = 0;
-                //for(; i < (int)key.size(); i++) {
-		//if(key[i] <= 0) {
-		//spe = 1;
-		//}
-                //}
-//                if (i != (int)key.size()) {
-//                    std::cout << "Continue here" << std::endl;
-//                    continue;
-//                }
-//                if (spe == 1) {
-//                    spe = 0;
-                    std::cout << key << std::endl;
-                    emails.push_back(key);
-                    count++;
-//                }
+                std::cout << key << std::endl;
+                emails.push_back(key);
+                count++;
             }
             std::sort(emails.begin(), emails.end());
         }
-
     } // namespace heuristictest
 
 } // namespace ope

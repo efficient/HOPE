@@ -10,6 +10,14 @@ using namespace std;
 
 namespace ope {
 
+    struct LeafInfo {
+        const SymbolCode *symbol_code;
+        LeafInfo *prev_leaf;
+        uint32_t prefix_len;
+        int visit_cnt = 0;
+    };
+
+
     static const unsigned maxPrefixLen = 255;
     static int cnt_N4 = 0;
     static int cnt_N16 = 0;
@@ -40,6 +48,11 @@ namespace ope {
 
         N(NTypes _type, const uint8_t *_prefix, uint32_t _prefix_len)
                 : type(_type), prefix_len(_prefix_len) {
+	    if (_prefix_len > maxPrefixLen) {
+	        std::cout << "[Error] Prefix length " << _prefix_len << " greater than max prefix length" << std::endl;
+		assert(false); 
+	    }
+            prefix_len = _prefix_len;
             for (int i = 0; i < (int)_prefix_len; i++)
                 prefix[i] = _prefix[i];
         };
@@ -247,6 +260,11 @@ namespace ope {
 
 
     void N::setPrefix(const uint8_t *_prefix, int length) {
+	if ((uint32_t)length > maxPrefixLen) {
+            std::cout << "[Error] Prefix length " << length << " greater than max prefix length" << std::endl;
+            assert(false); 
+	}
+
         for (int i = 0; i < length; i++) {
             prefix[i] = _prefix[i];
         }
@@ -566,9 +584,13 @@ namespace ope {
     }
 
     void N::deleteChildren(N *node) {
+        if (node == NULL) return;
+
         if (N::isLeaf(node)) {
+            //deleteNode(node);
             return;
         }
+
         switch (node->type) {
             case NTypes::N4: {
                 return reinterpret_cast<N4 *>(node)->deleteChildren();
@@ -588,9 +610,9 @@ namespace ope {
 
     void N::deleteNode(N *node) {
         if (N::isLeaf(node)) {
-            node = getValueFromLeaf(node);
+            auto leaf = reinterpret_cast<LeafInfo*>(getValueFromLeaf(node));
             // Delete leaf object
-            delete(node);
+            delete(leaf);
             return;
         }
         switch (node->type) {
