@@ -17,8 +17,8 @@ namespace ope {
         static std::vector<std::string> words;
         static const int kLongestCodeLen = 4096;
 
-        static const std::string kEmailFilePath = "../../datasets/emails.txt";
-        static const int kEmailTestSize = 10000;
+        static const std::string kEmailFilePath = "../../datasets/urls.txt";
+        static const int kEmailTestSize = 100000;
         static std::vector<std::string> emails;
 
         class HeuristicEnCoderTest : public ::testing::Test {
@@ -36,7 +36,7 @@ namespace ope {
             std::cout << std::endl;
         }
 
-
+/*
         TEST_F(HeuristicEnCoderTest, wordTest) {
                 HeuristicEncoder* encoder = new HeuristicEncoder();
                 encoder->build(words, 65535);
@@ -63,9 +63,11 @@ namespace ope {
 
                     ASSERT_TRUE(cmp < 0);
                 }
+                delete[] buffer;
+                delete encoder;
                 std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
         }
-
+*/
 
         TEST_F (HeuristicEnCoderTest, emailTest) {
             HeuristicEncoder* encoder = new HeuristicEncoder();
@@ -91,9 +93,10 @@ namespace ope {
                 }
                 ASSERT_TRUE(cmp < 0);
             }
+            delete[] buffer;
+            delete encoder;
             std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
         }
-
 
         void loadWords() {
             std::ifstream infile(kFilePath);
@@ -113,20 +116,10 @@ namespace ope {
             int count = 0;
             while (infile.good() && count < kEmailTestSize) {
                 infile >> key;
-//                int i = 0;
-//                for(; i < (int)key.size(); i++) {
-//                    if(key[i] <= 0) {
-//                        std::cout << key << std::endl;
-//                        break;
-//                    }
-//                }
-//                if (i != (int)key.size()) {
-//                    std::cout << "Continue here" << std::endl;
-//                    continue;
-//                }
                 emails.push_back(key);
                 count++;
             }
+            std::cout << "Load " << count << " emails" << std::endl;
             std::sort(emails.begin(), emails.end());
             emails.erase( unique( emails.begin(), emails.end() ), emails.end() );
         }

@@ -23,7 +23,6 @@ int64_t loadKeys(const std::string& file_name,
 		 const int sample_percent,
 		 std::vector<std::string> &keys,
 		 std::vector<std::string> &keys_shuffle) {
-    int cnt = 0;
     std::ifstream infile(file_name);
     int step_size = 100 / sample_percent;
     std::string key;
