@@ -23,6 +23,7 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/art_dic")
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/SuRF/include")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/ART/include")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/btree/include")
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/libcuckoo/libcuckoo")
 
@@ -34,9 +35,10 @@ add_library(ART ART/src/Tree.cpp)
 
 target_link_libraries(ART ${TbbLib} ${JemallocLib} ${CMAKE_THREAD_LIBS_INIT})
 
-add_subdirectory(test)
+#add_subdirectory(test)
 add_subdirectory(bench)
 #add_subdirectory(SuRF/test)
 #add_subdirectory(SuRF/bench)
 #add_subdirectory(ART/test)
 #add_subdirectory(ART/bench)
+add_subdirectory(btree)
