@@ -179,9 +179,12 @@ int main(int argc, char *argv[]) {
 
     double mem = 0;
     double avg_height = 0;
-
+    int cnt_N4 = 0;
+    int cnt_N16 = 0;
+    int cnt_N48 = 0;
+    int cnt_N256 = 0;
     // traverse ART to get stats ==================================
-    art->traverse(mem, avg_height);
+    art->traverse(mem, avg_height, cnt_N4, cnt_N16, cnt_N48, cnt_N256);
     if (encoder != nullptr)
 	mem += (encoder->memoryUse() / 1000000.0);
     std::cout << "Mem = " << mem << std::endl;

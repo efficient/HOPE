@@ -14,6 +14,7 @@ static const uint64_t kNumEmailRecords = 25000000;
 static const uint64_t kNumWikiRecords = 14000000;
 static const uint64_t kNumTxns = 10000000;
 static const int kSamplePercent = 10;
+static const int kUrlSamplePercent = 1;
 
 static const std::string file_load_email = "workloads/load_email";
 static const std::string file_load_wiki = "workloads/load_wiki";
@@ -128,8 +129,9 @@ void loadWorkload(int wkld_id,
 
     load_keys.clear();
     std::random_shuffle(insert_keys.begin(), insert_keys.end());  
-    
-    for (int i = 0; i < (int)insert_keys.size(); i += (100 / kSamplePercent)) {
+
+    int percent = (wkld_id == kUrl) ? kUrlSamplePercent : kSamplePercent; 
+    for (int i = 0; i < (int)insert_keys.size(); i += (100 / percent)) {
 	insert_keys_sample.push_back(insert_keys[i]);
     }
 
@@ -352,7 +354,7 @@ void exec_group(const int expt_id, const bool is_point,
 	     insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 	expt_num++;
     }
-
+    
     for (int j = 0; j < 2; j++) {
 	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
 	exec(expt_id, kEmail, is_point, true, 4, dict_size[j],
@@ -368,7 +370,25 @@ void exec_group(const int expt_id, const bool is_point,
 	exec(expt_id, kUrl, is_point, true, 4, dict_size[j],
 	     insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 	expt_num++;
-    }    
+    }
+
+    int dict_size_5[2] = {8192, 65536};
+    for (int j = 0; j < 2; j++) {
+	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+	exec(expt_id, kEmail, is_point, true, 5, dict_size_5[j],
+	     insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
+	expt_num++;
+
+	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+	exec(expt_id, kWiki, is_point, true, 5, dict_size_5[j],
+	     insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
+	expt_num++;
+
+	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+	exec(expt_id, kUrl, is_point, true, 5, dict_size_5[j],
+	     insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
+	expt_num++;
+    } 
 }
 
 int main(int argc, char *argv[]) {

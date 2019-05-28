@@ -17,13 +17,14 @@ GROUP_NUM = 2
 GROUP_NAMES = ["SuRF", "SuRF-Real8"]
 
 GROUP_SIZE = 7
-CATEGORY_NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 8192", "3-Grams, 65536", "4-Grams, 8192", "4-Grams, 65536"]
+CATEGORY_NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 8192", "3-Grams, 65536",
+                  "4-Grams, 8192", "4-Grams, 65536", "ALM, 1000", "ALM, 65536"]
 
 CSV_SURF_FILE_PATH = "results/SuRF/range/fpr_email_surf_range.csv"
 CSV_SURFREAL_FILE_PATH = "results/SuRF_real/range/fpr_email_surfreal_range.csv"
 GRAPH_OUTPUT_PATH = "figures/SuRF/range/fpr_email_surf_range.pdf"
 
-COLORS = ['#fef0d9', '#fdd49e', '#fdbb84', '#fc8d59', '#ef6548', '#d7301f', '#990000']
+COLORS = ['#fef0d9', '#fdd49e', '#fdbb84', '#fc8d59', '#ef6548', '#d7301f', '#990000', '#350004']
 
 Y_LABEL = "False Positive Rate (\%)"
 Y_LABEL_FONT_SIZE = 20
@@ -60,7 +61,7 @@ for i in range(0, GROUP_SIZE) :
 #========================================================================================
 mpl.rcParams['ps.useafm'] = True
 mpl.rcParams['pdf.use14corefonts'] = True
-mpl.rcParams['text.usetex'] = True
+mpl.rcParams['text.usetex'] = False
 
 mpl.rcParams['text.latex.preamble'] = [
        r'\usepackage{siunitx}',   # i need upright \micro symbols, but you need...
@@ -102,7 +103,7 @@ ax.set_ylim(0, 40)
 for label in ax.get_yticklabels():
     label.set_fontsize(Y_TICK_FONT_SIZE)
 
-ax.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE, weight='bold')
+ax.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
 
 #ax.legend(loc=LEGEND_POS, prop={'size':LEGEND_FONT_SIZE})
 

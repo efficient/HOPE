@@ -60,7 +60,7 @@ for i in range(0, GROUP_SIZE) :
 #========================================================================================
 mpl.rcParams['ps.useafm'] = True
 mpl.rcParams['pdf.use14corefonts'] = True
-mpl.rcParams['text.usetex'] = True
+mpl.rcParams['text.usetex'] = False
 
 mpl.rcParams['text.latex.preamble'] = [
        r'\usepackage{siunitx}',   # i need upright \micro symbols, but you need...

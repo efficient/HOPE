@@ -51,6 +51,7 @@ void exec(const int encoder_type, const int64_t dict_size_limit,
     uint8_t* buffer = new uint8_t[kLongestCodeLen];
     uint64_t total_enc_len = 0;
     double time_start = getNow();
+    int64_t mem = encoder->memoryUse();
     for (int i = 0; i < (int)keys_shuffle.size(); i++) {
 	total_enc_len += encoder->encode(keys_shuffle[i], buffer);
     }
@@ -63,6 +64,23 @@ void exec(const int encoder_type, const int64_t dict_size_limit,
     std::cout << "Throughput = " << tput << " Mops/s" << std::endl;
     std::cout << "Latency = " << lat << " ns/char" << std::endl;
     std::cout << "CPR = " << cpr << std::endl;
+    std::cout << "Memory = " << mem << std::endl;
+    delete[] buffer;
+    delete encoder;
+
+}
+
+int64_t getPercentKey(std::vector<std::string>& all_keys,
+                   std::vector<std::string>& insert_keys,
+                   double percent) {
+    int64_t insert_len = 0;
+    int step = int(100/percent);
+    for (int i = 0; i < (int)all_keys.size(); i+= step) {
+        insert_keys.push_back(all_keys[i]);
+	insert_len += all_keys[i].length();
+    }
+    std::cout << "Get " << all_keys.size() << " " << insert_keys.size() << " keys" << std::endl;
+    return insert_len;
 }
 
 int main(int argc, char *argv[]) {

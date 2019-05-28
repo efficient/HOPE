@@ -7,10 +7,10 @@ import numpy as np
 
 import csv
 
-NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 8192", "3-Grams, 65536", "4-Grams, 8192", "4-Grams, 65536"]
-LABELS = ["Uncompressed", "Single", "Double", "3-Grams", "4-Grams"]
+NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 8192", "3-Grams, 65536", "4-Grams, 8192", "4-Grams, 65536", "ALM, 10000", "ALM, 65536"]
+LABELS = ["Uncompressed", "Single", "Double", "3-Grams", "4-Grams", "ALM"]
 
-COLORS = ['#fef0d9', '#fdcc8a', '#fc8d59', '#e34a33', '#b30000']
+COLORS = ['#fef0d9', '#fdcc8a', '#fc8d59', '#e34a33', '#b30000', '#350004']
 #COLORS = ['#fef0d9', '#fdd49e', '#fdbb84', '#fc8d59', '#e34a33', '#b30000']
 
 BACKCOLORS = ['#fff7fb', '#ece7f2', '#d0d1e6', '#a6bddb', '#74a9cf', '#3690c0', '#0570b0', '#045a8d', '#023858']
@@ -25,8 +25,8 @@ Y_LABEL_FONT_SIZE = 20
 X_TICK_FONT_SIZE = 18
 Y_TICK_FONT_SIZE = 18
 
-X_LIMIT = 1.5
-Y_LIMIT = 40
+X_LIMIT = 3.0
+Y_LIMIT = 110
 
 LEGEND_FONT_SIZE = 16
 LEGEND_POS = 'upper left'
@@ -57,7 +57,7 @@ for row in csvrows :
 #========================================================================================
 mpl.rcParams['ps.useafm'] = True
 mpl.rcParams['pdf.use14corefonts'] = True
-mpl.rcParams['text.usetex'] = True
+mpl.rcParams['text.usetex'] = False 
 
 mpl.rcParams['text.latex.preamble'] = [
        r'\usepackage{siunitx}',   # i need upright \micro symbols, but you need...
@@ -99,28 +99,35 @@ ax.scatter(data_x[3], data_y[3], s=SIZE, c=COLORS[3], marker='o', label=NAMES[3]
 ax.scatter(data_x[4], data_y[4], s=SIZE, c=COLORS[3], marker='s', label=NAMES[4])
 ax.scatter(data_x[5], data_y[5], s=SIZE, c=COLORS[4], marker='o', label=NAMES[5])
 ax.scatter(data_x[6], data_y[6], s=SIZE, c=COLORS[4], marker='s', label=NAMES[6])
+ax.scatter(data_x[7], data_y[7], s=SIZE, c=COLORS[5], marker='o', label=NAMES[7])
+ax.scatter(data_x[8], data_y[8], s=SIZE, c=COLORS[5], marker='s', label=NAMES[8])
 
-ax.set_xlabel(X_LABEL, fontsize=X_LABEL_FONT_SIZE, weight='bold')
+
+ax.set_xlabel(X_LABEL, fontsize=X_LABEL_FONT_SIZE)
 ax.set_xlim(0, X_LIMIT)
 
-ax.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE, weight='bold')
+ax.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
 ax.set_ylim(0, Y_LIMIT)
+ax.scatter(data_x[5], data_y[5], s=SIZE, c=COLORS[4], marker='o', label=NAMES[5])
+ax.scatter(data_x[6], data_y[6], s=SIZE, c=COLORS[4], marker='s', label=NAMES[6])
 
-x_ticks = [0, 0.3, 0.6, 0.9, 1.2, 1.5]
+
+x_ticks = [0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0]
 ax.set_xticks(x_ticks)
 ax.tick_params(axis='x', labelsize=X_TICK_FONT_SIZE)
 
-y_ticks = [0, 10, 20, 30, 40]
+y_ticks = [0, 20, 40, 60, 80, 100]
 ax.set_yticks(y_ticks)
 ax.tick_params(axis='y', labelsize=Y_TICK_FONT_SIZE)
 
 #ax.grid()
 
-ax.annotate(LABELS[0], (data_x[0], data_y[0] * 1.1), ha='center', va='center', size=16)
-ax.annotate(LABELS[1], (data_x[1], data_y[1] * 1.12), ha='center', va='center', size=16)
-ax.annotate(LABELS[2], (data_x[2], data_y[2] * 0.86), ha='center', va='center', size=16)
-ax.annotate(LABELS[3], ((data_x[3] + data_x[4])/2, data_y[4] * 0.85), ha='center', va='center', size=16)
-ax.annotate(LABELS[4], ((data_x[5] + data_x[6])/2 * 1.05, data_y[6] * 0.85), ha='center', va='center', size=16)
+ax.annotate(LABELS[0], (data_x[0], data_y[0] * 1.12), ha='center', va='center', size=12)
+ax.annotate(LABELS[1], (data_x[1], data_y[1] * 1.12), ha='center', va='center', size=12)
+ax.annotate(LABELS[2], (data_x[2], data_y[2] * 0.9), ha='center', va='center', size=12)
+ax.annotate(LABELS[3], ((data_x[3] + data_x[4])/2 * 1.1, data_y[4] * 0.9), ha='center', va='center', size=12)
+ax.annotate(LABELS[4], ((data_x[5] + data_x[6])/2 * 1.1, data_y[6] * 0.9), ha='center', va='center', size=12)
+ax.annotate(LABELS[5], (data_x[8], data_y[8] * 0.92), ha='center', va='center', size=12)
 
 #ax.legend(loc=LEGEND_POS, prop={'size':LEGEND_FONT_SIZE}, scatterpoints=1)
 

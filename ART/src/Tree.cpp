@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <algorithm>
+#include <functional>
 #include "Tree.h"
 #include "N.cpp"
 #include "Epoche.cpp"
@@ -22,7 +23,9 @@ namespace ART_ROWEX {
     }
 
     //huanchen
-    void Tree::traverse(double& memory, double& avg_height) const {
+    void Tree::traverse(double& memory, double& avg_height,
+                        int& cnt_N4, int& cnt_N16,
+                        int& cnt_N48, int& cnt_N256) const {
 	uint64_t mem = 0;
 	uint64_t height_sum = 0;
 	uint64_t node_count = 1;
@@ -41,14 +44,19 @@ namespace ART_ROWEX {
 	    N* node = node_queue.front();
 	    
 	    NTypes type = node->getType();
-	    if (type == NTypes::N4)
+	    if (type == NTypes::N4) {
 		mem += sizeof(N4);
-	    else if (type == NTypes::N16)
+                cnt_N4++;
+	    } else if (type == NTypes::N16) {
 		mem += sizeof(N16);
-	    else if (type == NTypes::N48)
+                cnt_N16++;
+	    } else if (type == NTypes::N48) {
 		mem += sizeof(N48);
-	    else if (type == NTypes::N256)
+                cnt_N48++;
+	    } else if (type == NTypes::N256) {
 		mem += sizeof(N256);
+                cnt_N256++;
+            }
 	    
 	    std::tuple<uint8_t, N*> children[256];
 	    uint32_t children_count = 0;
@@ -70,7 +78,7 @@ namespace ART_ROWEX {
 	memory = (mem + 0.0) / 1000000;
 	avg_height = (height_sum + 0.0) / node_count;
 	std::cout << "node count = " << node_count << std::endl;
-	std::cout << "mem = " << memory << " MB" << std::endl;
+	std::cout << "mem = " << memory << " MB" << "(" << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << ")" << std::endl;
 	std::cout << "avg height = " << avg_height << std::endl;
     }
 

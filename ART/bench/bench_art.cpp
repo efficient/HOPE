@@ -14,6 +14,7 @@ static const uint64_t kNumEmailRecords = 25000000;
 static const uint64_t kNumWikiRecords = 14000000;
 static const uint64_t kNumTxns = 10000000;
 static const int kSamplePercent = 10;
+static const int kUrlSamplePercent = 1;
 
 static const std::string file_load_email = "workloads/load_email";
 static const std::string file_load_wiki = "workloads/load_wiki";
@@ -45,6 +46,9 @@ static const std::string file_mem_email_art = output_dir_art_point + "mem_email_
 std::ofstream output_mem_email_art;
 static const std::string file_height_email_art = output_dir_art_point + "height_email_art.csv";
 std::ofstream output_height_email_art;
+static const std::string file_stats_email_art = output_dir_art_point + "stats_email_art.csv";
+std::ofstream output_stats_email_art;
+
 
 static const std::string file_lat_wiki_art = output_dir_art_point + "lat_wiki_art.csv";
 std::ofstream output_lat_wiki_art;
@@ -52,6 +56,9 @@ static const std::string file_mem_wiki_art = output_dir_art_point + "mem_wiki_ar
 std::ofstream output_mem_wiki_art;
 static const std::string file_height_wiki_art = output_dir_art_point + "height_wiki_art.csv";
 std::ofstream output_height_wiki_art;
+static const std::string file_stats_wiki_art = output_dir_art_point + "stats_wiki_art.csv";
+std::ofstream output_stats_wiki_art;
+
 
 static const std::string file_lat_url_art = output_dir_art_point + "lat_url_art.csv";
 std::ofstream output_lat_url_art;
@@ -59,6 +66,9 @@ static const std::string file_mem_url_art = output_dir_art_point + "mem_url_art.
 std::ofstream output_mem_url_art;
 static const std::string file_height_url_art = output_dir_art_point + "height_url_art.csv";
 std::ofstream output_height_url_art;
+static const std::string file_stats_url_art = output_dir_art_point + "stats_url_art.csv";
+std::ofstream output_stats_url_art;
+
 
 //-------------------------------------------------------------
 // Expt ID = 1
@@ -68,16 +78,22 @@ static const std::string file_lat_email_art_range = output_dir_art_range + "lat_
 std::ofstream output_lat_email_art_range;
 static const std::string file_mem_email_art_range = output_dir_art_range + "mem_email_art_range.csv";
 std::ofstream output_mem_email_art_range;
+static const std::string file_stats_email_art_range = output_dir_art_range + "stats_email_art_range.csv";
+std::ofstream output_stats_email_art_range;
 
 static const std::string file_lat_wiki_art_range = output_dir_art_range + "lat_wiki_art_range.csv";
 std::ofstream output_lat_wiki_art_range;
 static const std::string file_mem_wiki_art_range = output_dir_art_range + "mem_wiki_art_range.csv";
 std::ofstream output_mem_wiki_art_range;
+static const std::string file_stats_wiki_art_range = output_dir_art_range + "stats_wiki_art_range.csv";
+std::ofstream output_stats_wiki_art_range;
 
 static const std::string file_lat_url_art_range = output_dir_art_range + "lat_url_art_range.csv";
 std::ofstream output_lat_url_art_range;
 static const std::string file_mem_url_art_range = output_dir_art_range + "mem_url_art_range.csv";
 std::ofstream output_mem_url_art_range;
+static const std::string file_stats_url_art_range = output_dir_art_range + "stats_url_art_range.csv";
+std::ofstream output_stats_url_art_range;
 
 double getNow() {
     struct timeval tv;
@@ -140,7 +156,8 @@ void loadWorkload(int wkld_id,
     load_keys.clear();
     std::random_shuffle(insert_keys.begin(), insert_keys.end());  
     
-    for (int i = 0; i < (int)insert_keys.size(); i += (100 / kSamplePercent)) {
+    int current_percent = wkld_id == kUrl ? kUrlSamplePercent : kSamplePercent; 
+    for (int i = 0; i < (int)insert_keys.size(); i += (100 / current_percent)) {
 	insert_keys_sample.push_back(insert_keys[i]);
     }
 
@@ -202,7 +219,11 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     // traverse ART to get stats ==================================
     double mem = 0;
     double avg_height = 0;
-    art->traverse(mem, avg_height);
+    int cnt_N4 = 0;
+    int cnt_N16 = 0;
+    int cnt_N48 = 0;
+    int cnt_N256 = 0;
+    art->traverse(mem, avg_height, cnt_N4, cnt_N16, cnt_N48, cnt_N256);
     if (encoder != nullptr)
 	mem += (encoder->memoryUse() / 1000000.0);
     std::cout << "Mem = " << mem << std::endl;
@@ -279,25 +300,31 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
 	    output_lat_email_art << lat << "\n";
 	    output_mem_email_art << mem << "\n";
 	    output_height_email_art << avg_height << "\n";
+            output_stats_email_art << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << "\n";
 	} else if (wkld_id == kWiki) {
 	    output_lat_wiki_art << lat << "\n";
 	    output_mem_wiki_art << mem << "\n";
 	    output_height_wiki_art << avg_height << "\n";
+            output_stats_wiki_art << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << "\n";
 	} else if (wkld_id == kUrl) {
 	    output_lat_url_art << lat << "\n";
 	    output_mem_url_art << mem << "\n";
 	    output_height_url_art << avg_height << "\n";
+            output_stats_url_art << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << "\n";
 	}
     } else if (expt_id == 1) {
 	if (wkld_id == kEmail) {
 	    output_lat_email_art_range << lat << "\n";
 	    output_mem_email_art_range << mem << "\n";
+            output_stats_email_art_range << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << "\n";
 	} else if (wkld_id == kWiki) {
 	    output_lat_wiki_art_range << lat << "\n";
 	    output_mem_wiki_art_range << mem << "\n";
+            output_stats_wiki_art_range << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << "\n";
 	} else if (wkld_id == kUrl) {
 	    output_lat_url_art_range << lat << "\n";
 	    output_mem_url_art_range << mem << "\n";
+            output_stats_url_art_range << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << "\n";
 	}
     }
 }
@@ -316,7 +343,7 @@ void exec_group(const int expt_id, const bool is_point,
 		const std::vector<std::string>& insert_urls_sample,
 		const std::vector<std::string>& txn_urls,
 		const std::vector<std::string>& upper_bound_urls) {
-    int dict_size[2] = {10000, 65536};
+    int dict_size[2] = {8192, 65536};
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
     exec(expt_id, kEmail, is_point, false, 0, 0,
 	 insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
@@ -395,6 +422,23 @@ void exec_group(const int expt_id, const bool is_point,
 	     insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 	expt_num++;
     }    
+    
+    for (int j = 0; j < 2; j++) {
+	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+	exec(expt_id, kEmail, is_point, true, 5, dict_size[j],
+	     insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
+	expt_num++;
+
+	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+	exec(expt_id, kWiki, is_point, true, 5, dict_size[j],
+	     insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
+	expt_num++;
+
+	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+	exec(expt_id, kUrl, is_point, true, 5, dict_size[j],
+	     insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
+	expt_num++;
+    } 
 }
 
 int main(int argc, char *argv[]) {
@@ -423,18 +467,21 @@ int main(int argc, char *argv[]) {
 	output_lat_email_art.open(file_lat_email_art);
 	output_mem_email_art.open(file_mem_email_art);
 	output_height_email_art.open(file_height_email_art);
+	output_stats_email_art.open(file_stats_email_art);
 
 	output_lat_wiki_art.open(file_lat_wiki_art);
 	output_mem_wiki_art.open(file_mem_wiki_art);
 	output_height_wiki_art.open(file_height_wiki_art);
+	output_stats_wiki_art.open(file_stats_wiki_art);
 
 	output_lat_url_art.open(file_lat_url_art);
 	output_mem_url_art.open(file_mem_url_art);
 	output_height_url_art.open(file_height_url_art);
+	output_stats_url_art.open(file_stats_url_art);
 
 	bool is_point = true;
 	int expt_num = 1;
-	int total_num_expt = 21;
+	int total_num_expt = 27;
 	exec_group(expt_id, is_point, expt_num, total_num_expt,
 		   insert_emails, insert_emails_sample, txn_emails, upper_bound_emails,
 		   insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis,
@@ -443,14 +490,17 @@ int main(int argc, char *argv[]) {
 	output_lat_email_art.close();
 	output_mem_email_art.close();
 	output_height_email_art.close();
+	output_stats_email_art.close();
 
 	output_lat_wiki_art.close();
 	output_mem_wiki_art.close();
 	output_height_wiki_art.close();
+	output_stats_wiki_art.close();
 
 	output_lat_url_art.close();
 	output_mem_url_art.close();
 	output_height_url_art.close();
+	output_stats_url_art.close();
     }
     else if (expt_id == 1) {
 	//-------------------------------------------------------------
@@ -462,16 +512,19 @@ int main(int argc, char *argv[]) {
 
 	output_lat_email_art_range.open(file_lat_email_art_range);
 	output_mem_email_art_range.open(file_mem_email_art_range);
+	output_stats_email_art_range.open(file_stats_email_art_range);
 
 	output_lat_wiki_art_range.open(file_lat_wiki_art_range);
 	output_mem_wiki_art_range.open(file_mem_wiki_art_range);
+	output_stats_wiki_art_range.open(file_stats_wiki_art_range);
 
 	output_lat_url_art_range.open(file_lat_url_art_range);
 	output_mem_url_art_range.open(file_mem_url_art_range);
+	output_stats_url_art_range.open(file_stats_url_art_range);
 
 	bool is_point = false;
 	int expt_num = 1;
-	int total_num_expt = 21;
+	int total_num_expt = 27;
 	exec_group(expt_id, is_point, expt_num, total_num_expt,
 		   insert_emails, insert_emails_sample, txn_emails, upper_bound_emails,
 		   insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis,
@@ -479,12 +532,15 @@ int main(int argc, char *argv[]) {
 	
 	output_lat_email_art_range.close();
 	output_mem_email_art_range.close();
+	output_stats_email_art_range.close();
 
 	output_lat_wiki_art_range.close();
 	output_mem_wiki_art_range.close();
+	output_stats_wiki_art_range.close();
 
 	output_lat_url_art_range.close();
 	output_mem_url_art_range.close();
+	output_stats_url_art_range.close();
     }
 
     return 0;
