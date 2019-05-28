@@ -10,6 +10,9 @@
 #include "symbol_selector.hpp"
 #include "blending_trie.hpp"
 
+#define BLEND_FILE_NAME  "./blend_result_"
+//#define WRITE_BLEND_RESULT 1 
+
 namespace ope {
 
     class HeuristicSS : public SymbolSelector {
@@ -59,8 +62,8 @@ namespace ope {
 
     };
 
-    HeuristicSS::HeuristicSS() {
-        W = 2000;
+    HeuristicSS::HeuristicSS(){
+        W = 20000;
     }
 
     void HeuristicSS::setW(int64_t new_w) {
@@ -87,28 +90,67 @@ namespace ope {
             return 1;
     }
 
+    bool readIntervals(std::vector<SymbolFreq>& blend_freq_table, std::string key) {
+#ifdef WRITE_BLEND_RESULT
+        std::ifstream myfile(BLEND_FILE_NAME + key.substr(0,4));
+        if (myfile.is_open()) {
+            std::string line;
+            while (getline(myfile, line)) {
+                errno = 0;
+                unsigned long idx = line.find('\t');
+                std::string key = line.substr(0, idx);
+                std::string freq_str = line.substr(idx+1, line.length());
+                int64_t freq = std::atoi(freq_str.c_str());
+                if (errno != 0) {
+                    std::cout << "Fail to convert interval: " << freq_str << std::endl;
+                } else {
+                    blend_freq_table.emplace_back(key, freq);
+                }
+            }
+            myfile.close();
+            return true;
+        }
+#endif
+        return false;
+    }
+
+    bool writeIntervals(std::vector<SymbolFreq>& blend_freq_table, std::string key){
+        std::ofstream myfile(BLEND_FILE_NAME + key.substr(0,4));
+        if (myfile.is_open()){
+            for (int i = 0; i < (int)blend_freq_table.size(); i++) {
+                myfile << blend_freq_table[i].first << "\t";
+                myfile << blend_freq_table[i].second << std::endl;
+            }
+            myfile.close();
+            return true;
+        }
+        std::cout << "Fail to write to Blend file***" << std::endl;
+        return false;
+    }
+
     bool HeuristicSS::selectSymbols(const std::vector<std::string> &key_list,
                                     const int64_t num_limit,
                                     std::vector<SymbolFreq> *symbol_freq_list) {
         if (key_list.empty())
             return false;
-        double  curtime = getNow();
-        /*
-        getFrequencyTable(key_list);
-        std::cout << "Finish getting symbol frequency, use:" << getNow() - curtime << std::endl;
-        */
-        curtime = getNow();
-    
-        // Build Trie
-        BlendTrie tree;
-        tree.build(key_list);
-        //tree.build(freq_map_);
-        std::cout << "Finish building trie, use:" << getNow() - curtime << std::endl;
-        curtime = getNow();
 
-        // Blending
+        double curtime = getNow();
         std::vector<SymbolFreq> blend_freq_table;
-        tree.blendingAndGetLeaves(blend_freq_table);
+        if (readIntervals(blend_freq_table, key_list[0])) {
+            std::cout << "Read blending results from file" << std::endl;
+        } else {
+            curtime = getNow();
+            // Build Trie
+            BlendTrie tree;
+            tree.build(key_list);
+            std::cout << "Finish building trie, use:" << getNow() - curtime << std::endl;
+            // Blending
+            tree.blendingAndGetLeaves(blend_freq_table);
+            // Write blending results  to file
+#ifdef WRITE_BLEND_RESULT
+            writeIntervals(blend_freq_table, key_list[0]);
+#endif
+        }
         std::cout << "Finish blending, use:" << getNow() - curtime << std::endl;
 
         // Search for best W
@@ -147,6 +189,7 @@ namespace ope {
         curtime = getNow();
         return true;
     }
+
 
     int HeuristicSS::BinarySearch(const std::string& str, unsigned int pos, int &prefix_len) {
         int l = 0;

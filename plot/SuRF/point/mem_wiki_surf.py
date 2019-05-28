@@ -11,20 +11,22 @@ def autolabel(rects):
         ax.text(rect.get_x() + rect.get_width()/2., height + 0.01,
                 '%0.1f' % float(height),
 #                '%d' % int(height),
-                ha='center', va='bottom')
+                ha='center', va='bottom', fontsize=6)
 
-GROUP_SIZE = 9 
-CATEGORY_NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 10000", "3-Grams, 65536", "4-Grams, 10000", "4-Grams, 65536", "ALM, 10000", "ALM, 65536"]
+GROUP_NUM = 9
+GROUP_NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 8192", "3-Grams, 65536", "4-Grams, 8192", "4-Grams, 65536", "ALM, 8129", "ALM, 65536" ]
 
-CSV_FILE_PATH = "results/ART/point/height_url_art.csv"
-GRAPH_OUTPUT_PATH = "figures/ART/point/height_url_art.pdf"
+GROUP_SIZE = 3
+CATEGORY_NAMES = ["Total", "Filter", "Encoder"] 
+CSV_SURF_FILE_PATH = "results/SuRF/point/stats_wiki_surf.csv"
+GRAPH_OUTPUT_PATH = "figures/SuRF/point/mem_wiki_surf.pdf"
 
-COLORS = ['#fef0d9', '#fdd49e', '#fdbb84', '#fc8d59', '#ef6548', '#d7301f', '#990000', '#5b0006', '#350004']
+COLORS = ['#fef0d9', '#fdd49e', '#fdbb84']
 
-Y_LABEL = "Average Trie Height"
+Y_LABEL = "Memory Use"
 Y_LABEL_FONT_SIZE = 20
 
-X_TICK_FONT_SIZE = 20
+X_TICK_FONT_SIZE = 10
 Y_TICK_FONT_SIZE = 16
 
 LEGEND_FONT_SIZE = 18
@@ -33,13 +35,19 @@ LEGEND_POS = 'upper left'
 GRAPH_HEIGHT = 4.5 #inches
 GRAPH_WIDTH = 8.0 #inches
 
-f_in = open(CSV_FILE_PATH)
-reader = csv.reader(f_in)
+f_in_mem = open(CSV_SURF_FILE_PATH)
+reader = csv.reader(f_in_mem)
 csvrows = list(reader)
-data = []
+mem = []
+filter_mem = []
+encoder_mem = []
 for row in csvrows :
-    for item in row :
-        data.append(float(item))
+    record = [float(x) for x in row]
+    mem.append(record[0])
+    filter_mem.append(record[1])
+    encoder_mem.append(record[2])
+
+data = [mem, filter_mem, encoder_mem]
 
 #========================================================================================
 mpl.rcParams['ps.useafm'] = True
@@ -55,29 +63,38 @@ mpl.rcParams['text.latex.preamble'] = [
 ]
 #========================================================================================
 
-width = GRAPH_WIDTH  / ((GROUP_SIZE + 1) + 1.0)
+width = GRAPH_WIDTH  / (((GROUP_SIZE + 1) * GROUP_NUM) + 1.0)
 
 fig = plot.figure(figsize={GRAPH_HEIGHT, GRAPH_WIDTH})
 ax = fig.add_subplot(111)
 
 rect = []
-
 for i in range(0, GROUP_SIZE) :
     pos = []
-    pos.append(width + width * i)
-    rect.append(ax.bar(pos, [data[i]], width, color=COLORS[i], label=CATEGORY_NAMES[i]))
+    for j in range(0, GROUP_NUM) :
+        pos.append(width + width * i + width * j * (GROUP_SIZE + 1))
+    rect.append(ax.bar(pos, data[i], width, color=COLORS[i], label=CATEGORY_NAMES[i]))
     autolabel(rect[i])
 
-ax.get_xaxis().set_visible(False)
+xtick_pos = []
+for j in range(0, GROUP_NUM) :
+    xtick_pos.append(width + width * (GROUP_SIZE / 2.0) + width * j * (GROUP_SIZE + 1))
 
-y_ticks = [0, 3, 6, 9, 12, 15]
+ax.set_xticks(xtick_pos)
+ax.set_xticklabels(GROUP_NAMES)
+
+for label in ax.get_xticklabels():
+    label.set_fontsize(X_TICK_FONT_SIZE)
+plot.setp(ax.get_xticklabels(), rotation=30, horizontalalignment='center')
+
+y_ticks = [0, 15, 30, 45, 60]
 ax.set_yticks(y_ticks)
-ax.set_ylim(0, 15)
+ax.set_ylim(0, 60)
 
 for label in ax.get_yticklabels():
     label.set_fontsize(Y_TICK_FONT_SIZE)
 
-ax.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
+ax.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE, weight='bold')
 
 #ax.legend(loc=LEGEND_POS, prop={'size':LEGEND_FONT_SIZE})
 

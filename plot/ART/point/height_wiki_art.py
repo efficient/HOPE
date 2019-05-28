@@ -13,13 +13,13 @@ def autolabel(rects):
 #                '%d' % int(height),
                 ha='center', va='bottom')
 
-GROUP_SIZE = 7
-CATEGORY_NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 8192", "3-Grams, 65536", "4-Grams, 8192", "4-Grams, 65536"]
+GROUP_SIZE = 9 
+CATEGORY_NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 10000", "3-Grams, 65536", "4-Grams, 10000", "4-Grams, 65536", "ALM, 10000", "ALM, 65536"]
 
 CSV_FILE_PATH = "results/ART/point/height_wiki_art.csv"
 GRAPH_OUTPUT_PATH = "figures/ART/point/height_wiki_art.pdf"
 
-COLORS = ['#fef0d9', '#fdd49e', '#fdbb84', '#fc8d59', '#ef6548', '#d7301f', '#990000']
+COLORS = ['#fef0d9', '#fdd49e', '#fdbb84', '#fc8d59', '#ef6548', '#d7301f', '#990000', '#5b0006', '#350004']
 
 Y_LABEL = "Average Trie Height"
 Y_LABEL_FONT_SIZE = 20
@@ -44,7 +44,7 @@ for row in csvrows :
 #========================================================================================
 mpl.rcParams['ps.useafm'] = True
 mpl.rcParams['pdf.use14corefonts'] = True
-mpl.rcParams['text.usetex'] = True
+mpl.rcParams['text.usetex'] = False
 
 mpl.rcParams['text.latex.preamble'] = [
        r'\usepackage{siunitx}',   # i need upright \micro symbols, but you need...
@@ -77,7 +77,7 @@ ax.set_ylim(0, 8)
 for label in ax.get_yticklabels():
     label.set_fontsize(Y_TICK_FONT_SIZE)
 
-ax.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE, weight='bold')
+ax.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
 
 #ax.legend(loc=LEGEND_POS, prop={'size':LEGEND_FONT_SIZE})
 
