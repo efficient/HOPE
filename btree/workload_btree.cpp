@@ -193,7 +193,8 @@ int main(int argc, char *argv[]) {
 	} else {
 	    for (int i = 0; i < (int)txn_keys.size(); i++) {
 		btree_type::const_iterator iter = bt->lower_bound(txn_keys[i]);
-		while (iter.key().compare(upper_bound_keys[i]) < 0) {
+		while (iter != bt->end()
+		       && iter.key().compare(upper_bound_keys[i]) < 0) {
 		    ++iter;
 		}
 		sum += (iter->second);

@@ -191,9 +191,16 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     double build_time = end_time - start_time;
     std::cout << "Build time = " << build_time << std::endl;
 
+    std::cout << "size = " << bt->get_stats().size << std::endl;
+    std::cout << "leaves = " << bt->get_stats().leaves << std::endl;
+    std::cout << "inner_nodes = " << bt->get_stats().inner_nodes << std::endl;
+    std::cout << "avgfill = " << bt->get_stats().avgfill_leaves() << std::endl;
+    std::cout << "btree size = " << (256 * bt->get_stats().nodes()) << std::endl;
+    std::cout << "total key size = " << total_key_size << std::endl;
+
     int64_t btree_size = 256 * bt->get_stats().nodes();
-    double mem = (btree_size + total_key_size) / 1000000.0;
-    std::cout << "Mem = " << mem << std::endl;
+    double mem = (btree_size + total_key_size + encoder->memoryUse()) / 1000000.0;
+    std::cout << kGreen << "Mem = " << kNoColor << mem << std::endl;
 
     // execute transactions =======================================
     uint64_t sum = 0;
@@ -229,7 +236,8 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
 		std::string right_key = std::string((const char*)buffer_r, enc_len_r_round);
 
 		btree_type::const_iterator iter = bt->lower_bound(left_key);
-		while (iter.key().compare(right_key) < 0) {
+		while (iter != bt->end()
+		       && iter.key().compare(right_key) < 0) {
 		    ++iter;
 		}
 		sum += (iter->second);
@@ -237,7 +245,8 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
 	} else {
 	    for (int i = 0; i < (int)txn_keys.size(); i++) {
 		btree_type::const_iterator iter = bt->lower_bound(txn_keys[i]);
-		while (iter.key().compare(upper_bound_keys[i]) < 0) {
+		while (iter != bt->end()
+		       && iter.key().compare(upper_bound_keys[i]) < 0) {
 		    ++iter;
 		}
 		sum += (iter->second);
@@ -425,7 +434,7 @@ int main(int argc, char *argv[]) {
 
 	bool is_point = true;
 	int expt_num = 1;
-	int total_num_expt = 21;
+	int total_num_expt = 27;
 	exec_group(expt_id, is_point, expt_num, total_num_expt,
 		   insert_emails, insert_emails_sample, txn_emails, upper_bound_emails,
 		   insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis,
@@ -459,7 +468,7 @@ int main(int argc, char *argv[]) {
 
 	bool is_point = false;
 	int expt_num = 1;
-	int total_num_expt = 21;
+	int total_num_expt = 27;
 	exec_group(expt_id, is_point, expt_num, total_num_expt,
 		   insert_emails, insert_emails_sample, txn_emails, upper_bound_emails,
 		   insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis,

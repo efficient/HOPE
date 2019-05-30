@@ -78,25 +78,30 @@ namespace ope {
 
         TEST_F (BlendTrieTest, smallTrie) {
             BlendTrie tree;
-            std::unordered_map<std::string, int64_t> freq_map_;
+            /*std::unordered_map<std::string, int64_t> freq_map_;
             freq_map_.insert(std::make_pair("a", 1));
             freq_map_.insert(std::make_pair("b", 1));
             freq_map_.insert(std::make_pair("d", 1));
             freq_map_.insert(std::make_pair("ab", 1));
             freq_map_.insert(std::make_pair("bd", 1));
             freq_map_.insert(std::make_pair("abd", 1));
-            tree.build(freq_map_);
+            tree.build(freq_map_);*/
+            std::vector<std::string> key_list;
+            key_list.push_back("abc");
+            key_list.push_back("abd");
+            tree.build(key_list);
             std::vector<SymbolFreq> freq_vec;
             tree.blendingAndGetLeaves(freq_vec);
-            // for (auto it = freq_vec.begin(); it != freq_vec.end(); it++){
-            // 	std::cout << it->first << "\t" << it->second << std::endl;
-            // }
+            for (auto it = freq_vec.begin(); it != freq_vec.end(); it++){
+             	std::cout << it->first << "\t" << it->second << std::endl;
+             }
         }
 
         TEST_F (BlendTrieTest, emailTrie) {
-            getFrequencyTable(emails, blend_freq_map);
+            //getFrequencyTable(emails, blend_freq_map);
             BlendTrie tree;
-            tree.build(blend_freq_map);
+            //tree.build(blend_freq_map);
+            tree.build(emails);
             std::vector<SymbolFreq> blend_freq_vec;
             tree.blendingAndGetLeaves(blend_freq_vec);
             std::sort(blend_freq_vec.begin(), blend_freq_vec.end(),

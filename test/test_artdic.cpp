@@ -13,8 +13,8 @@
 namespace ope {
 
     namespace treetest {
-        static const std::string kEmailFilePath = "../../datasets/emails.txt";
-        static const int kEmailTestSize = 20000;
+        static const std::string kEmailFilePath = "../../datasets/urls_long.txt";
+        static const int kEmailTestSize = 35000;
         static std::vector<std::string> emails;
 
 
@@ -54,15 +54,16 @@ namespace ope {
             static void getNextInterval(std::vector<std::string> sorted_intervals,
                                         int cur_idx, std::string& cur_str,
                                         int& next_idx, std::string& next_str) {
-                for (int i = cur_idx; i < (int)sorted_intervals.size(); i++) {
+                int i = cur_idx;
+                for (; i < (int)sorted_intervals.size(); i++) {
                     if (strCompare(sorted_intervals[i], cur_str) > 0) {
                         next_idx = i - 1;
                         next_str = sorted_intervals[i-1];
                         return;
                     }
                 }
-                assert(false);
-                __builtin_unreachable();
+                next_idx = i - 1;
+                next_str = sorted_intervals[i-1];
             }
 
         };
@@ -77,7 +78,8 @@ namespace ope {
             std::cout << "number of test emails:" << emails.size() << std::endl;
             std::sort(emails.begin(), emails.end());
 
-            for (int i = 0; i < (int)emails.size(); i++) {
+            for (int i = 0; i < (int)emails.size() - 1; i++) {
+                std::cout << emails[i] << std::endl;
                 ope::SymbolCode symbol_code = ope::SymbolCode();
                 symbol_code.first = emails[i];
                 symbol_code.second = ope::Code();
@@ -90,11 +92,12 @@ namespace ope {
             for (int i = 0; i < (int)emails.size() - 1; i++) {
                 int prefix_len = -1;
                 ope::Code result = test->lookup(emails[i].c_str(), emails[i].size(), prefix_len);
+                std::cout << "lookup:"<<result.code<<" answer:"<<i<<std::endl;
                 ASSERT_TRUE(result.code == i);
             }
             delete test;
         }
-
+/*
         TEST_F(ARTDICTest, withinRangeLookupTest) {
             ArtDicTree *test = new ArtDicTree();
             std::vector<ope::SymbolCode> ls;
@@ -144,7 +147,7 @@ namespace ope {
             }
             delete test;
         }
-
+*/
         TEST_F(ARTDICTest, emailTest) {
 
         }
