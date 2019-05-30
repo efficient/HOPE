@@ -72,7 +72,7 @@ namespace ART_ROWEX {
         ThreadInfo getThreadInfo();
 
 	//huanchen
-	void traverse(double& mem, double& avg_height, int& cnt_N4, int& cnt_N16, int& cnt_N48, int& cnt_N256) const;
+	void traverse(double& mem, double& avg_height, int& cnt_N4, int& cnt_N16, int& cnt_N48, int& cnt_N256, uint64_t&  waste_child_mem, uint64_t& skip_prefix_mem, uint64_t& waste_prefix_mem) const;
 
         TID lookup(const Key &k, ThreadInfo &threadEpocheInfo) const;
 

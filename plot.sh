@@ -111,16 +111,16 @@ python plot/ART/range/lat_mem_url_art.py
 ############################################################
 # ART Node Stats
 ############################################################
-python plot/ART/point/mem_email_art.py
-python plot/ART/point/mem_wiki_art.py
-python plot/ART/point/mem_url_art.py
+#python plot/ART/point/mem_email_art.py
+#python plot/ART/point/mem_wiki_art.py
+#python plot/ART/point/mem_url_art.py
 
 ############################################################
 # SuRF Memory Stats
 ############################################################
-python plot/SuRF/point/mem_email_surf.py
-python plot/SuRF/point/mem_wiki_surf.py
-python plot/SuRF/point/mem_url_surf.py
+#python plot/SuRF/point/mem_email_surf.py
+#python plot/SuRF/point/mem_wiki_surf.py
+#python plot/SuRF/point/mem_url_surf.py
 
 ############################################################
 # Btree point

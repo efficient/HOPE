@@ -128,6 +128,8 @@ namespace ope {
 
     void HeuristicEncoder::encodePair(const std::string &l_key, const std::string &r_key, uint8_t *l_buffer,
                                       uint8_t *r_buffer, int &l_enc_len, int &r_enc_len) const {
+        l_enc_len = encode(l_key,l_buffer);
+        r_enc_len = encode(r_key,r_buffer);
         return;
     }
 

@@ -183,8 +183,12 @@ int main(int argc, char *argv[]) {
     int cnt_N16 = 0;
     int cnt_N48 = 0;
     int cnt_N256 = 0;
+    uint64_t waste_child_mem = 0;
+    uint64_t skip_prefix_mem = 0;
+    uint64_t waste_prefix_mem = 0;
     // traverse ART to get stats ==================================
-    art->traverse(mem, avg_height, cnt_N4, cnt_N16, cnt_N48, cnt_N256);
+    art->traverse(mem, avg_height, cnt_N4, cnt_N16, cnt_N48, cnt_N256,
+                  waste_child_mem, skip_prefix_mem, waste_prefix_mem);
     if (encoder != nullptr)
 	mem += (encoder->memoryUse() / 1000000.0);
     std::cout << "Mem = " << mem << std::endl;

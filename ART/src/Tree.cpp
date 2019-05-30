@@ -25,7 +25,9 @@ namespace ART_ROWEX {
     //huanchen
     void Tree::traverse(double& memory, double& avg_height,
                         int& cnt_N4, int& cnt_N16,
-                        int& cnt_N48, int& cnt_N256) const {
+                        int& cnt_N48, int& cnt_N256,
+                        uint64_t&  waste_child_mem, uint64_t& skip_prefix_mem ,
+                        uint64_t& waste_prefix_mem) const {
 	uint64_t mem = 0;
 	uint64_t height_sum = 0;
 	uint64_t node_count = 1;
@@ -44,17 +46,29 @@ namespace ART_ROWEX {
 	    N* node = node_queue.front();
 	    
 	    NTypes type = node->getType();
+            uint64_t child_cnt = node->getCount();
+            uint64_t prefix_cnt = node->getPrefi().prefixCount;
+            //std::cout << "Prefix length:" << prefix_cnt << std::endl;
+            if (prefix_cnt < ART_ROWEX::maxStoredPrefixLength) {
+                waste_prefix_mem += (ART_ROWEX::maxStoredPrefixLength - prefix_cnt) * sizeof(uint8_t);
+	    } else {
+		skip_prefix_mem += (prefix_cnt - ART_ROWEX::maxStoredPrefixLength) * sizeof(uint8_t);
+            }
 	    if (type == NTypes::N4) {
 		mem += sizeof(N4);
-                cnt_N4++;
+                waste_child_mem += (4 - child_cnt) * (sizeof(uint8_t) + sizeof(N*));
+		cnt_N4++;
 	    } else if (type == NTypes::N16) {
 		mem += sizeof(N16);
+                waste_child_mem += (16 - child_cnt) * (sizeof(uint8_t) + sizeof(N*));
                 cnt_N16++;
 	    } else if (type == NTypes::N48) {
 		mem += sizeof(N48);
+                waste_child_mem += (48 - child_cnt) * sizeof(N*) + (256 - child_cnt) * sizeof(uint8_t);
                 cnt_N48++;
 	    } else if (type == NTypes::N256) {
 		mem += sizeof(N256);
+                waste_child_mem += (256 - child_cnt) * (sizeof(N*));
                 cnt_N256++;
             }
 	    
@@ -75,6 +89,9 @@ namespace ART_ROWEX {
 	    node_queue.pop();
 	    node_count_cur_level--;
 	}
+        std::cout << "Waste prefix mem:" << waste_prefix_mem << std::endl;
+        std::cout << "Skip prefix mem:" << skip_prefix_mem << std::endl;
+        std::cout << "Waste child mem:" << waste_child_mem << std::endl;
 	memory = (mem + 0.0) / 1000000;
 	avg_height = (height_sum + 0.0) / node_count;
 	std::cout << "node count = " << node_count << std::endl;
