@@ -14,7 +14,7 @@ static const uint64_t kNumEmailRecords = 25000000;
 static const uint64_t kNumWikiRecords = 14000000;
 static const uint64_t kNumTxns = 10000000;
 static const int kSamplePercent = 10;
-static const int kUrlSamplePercent = 1;
+static const double kUrlSamplePercent = 0.1;
 
 static const std::string file_load_email = "workloads/load_email";
 static const std::string file_load_wiki = "workloads/load_wiki";
@@ -156,8 +156,8 @@ void loadWorkload(int wkld_id,
     load_keys.clear();
     std::random_shuffle(insert_keys.begin(), insert_keys.end());  
     
-    int current_percent = wkld_id == kUrl ? kUrlSamplePercent : kSamplePercent; 
-    for (int i = 0; i < (int)insert_keys.size(); i += (100 / current_percent)) {
+    double current_percent = wkld_id == kUrl ? kUrlSamplePercent : kSamplePercent; 
+    for (int i = 0; i < (int)insert_keys.size(); i += int(100 / current_percent)) {
 	insert_keys_sample.push_back(insert_keys[i]);
     }
 
@@ -218,12 +218,18 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
 
     // traverse ART to get stats ==================================
     double mem = 0;
+    double art_mem = 0;
     double avg_height = 0;
     int cnt_N4 = 0;
     int cnt_N16 = 0;
     int cnt_N48 = 0;
     int cnt_N256 = 0;
-    art->traverse(mem, avg_height, cnt_N4, cnt_N16, cnt_N48, cnt_N256);
+    uint64_t waste_child_mem = 0;
+    uint64_t skip_prefix_mem = 0;
+    uint64_t waste_prefix_mem = 0;
+    art->traverse(mem, avg_height, cnt_N4, cnt_N16, cnt_N48, cnt_N256,
+                  waste_child_mem, skip_prefix_mem, waste_prefix_mem);
+    art_mem = mem;
     if (encoder != nullptr)
 	mem += (encoder->memoryUse() / 1000000.0);
     std::cout << "Mem = " << mem << std::endl;
@@ -300,31 +306,30 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
 	    output_lat_email_art << lat << "\n";
 	    output_mem_email_art << mem << "\n";
 	    output_height_email_art << avg_height << "\n";
-            output_stats_email_art << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << "\n";
+            output_stats_email_art << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << "," << waste_child_mem << "," << skip_prefix_mem << "," << waste_prefix_mem << "," << art_mem << "," << mem << "\n";
 	} else if (wkld_id == kWiki) {
 	    output_lat_wiki_art << lat << "\n";
 	    output_mem_wiki_art << mem << "\n";
 	    output_height_wiki_art << avg_height << "\n";
-            output_stats_wiki_art << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << "\n";
+            output_stats_wiki_art << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << "," << waste_child_mem << "," << skip_prefix_mem << "," << waste_prefix_mem << "," << art_mem << "," << mem << "\n";
 	} else if (wkld_id == kUrl) {
 	    output_lat_url_art << lat << "\n";
 	    output_mem_url_art << mem << "\n";
 	    output_height_url_art << avg_height << "\n";
-            output_stats_url_art << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << "\n";
+            output_stats_url_art << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << "," << waste_child_mem << "," << skip_prefix_mem << "," << waste_prefix_mem << "," << art_mem << "," << mem << "\n";
 	}
     } else if (expt_id == 1) {
 	if (wkld_id == kEmail) {
 	    output_lat_email_art_range << lat << "\n";
 	    output_mem_email_art_range << mem << "\n";
-            output_stats_email_art_range << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << "\n";
+            output_stats_email_art_range << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << "," << waste_child_mem << "," << skip_prefix_mem << "," << waste_prefix_mem << "," << art_mem << "," << mem << "\n";
 	} else if (wkld_id == kWiki) {
 	    output_lat_wiki_art_range << lat << "\n";
 	    output_mem_wiki_art_range << mem << "\n";
-            output_stats_wiki_art_range << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << "\n";
+            output_stats_wiki_art_range << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << "," << waste_child_mem << "," << skip_prefix_mem << "," << waste_prefix_mem << "," << art_mem << "," << mem << "\n";
 	} else if (wkld_id == kUrl) {
 	    output_lat_url_art_range << lat << "\n";
-	    output_mem_url_art_range << mem << "\n";
-            output_stats_url_art_range << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << "\n";
+	    output_mem_url_art_range << mem << "\n";            output_stats_url_art_range << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << "," << waste_child_mem << "," << skip_prefix_mem << "," << waste_prefix_mem << "," << art_mem << "," << mem << "\n";
 	}
     }
 }
@@ -422,7 +427,7 @@ void exec_group(const int expt_id, const bool is_point,
 	     insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 	expt_num++;
     }    
-    
+  
     for (int j = 0; j < 2; j++) {
 	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
 	exec(expt_id, kEmail, is_point, true, 5, dict_size[j],
