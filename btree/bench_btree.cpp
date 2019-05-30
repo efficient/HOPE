@@ -6,7 +6,7 @@
 #include <fstream>
 
 #include "encoder_factory.hpp"
-#include "Tree.h"
+#include "btree_map.hpp"
 
 //#define NOT_USE_ENCODE_PAIR 1
 
@@ -14,7 +14,7 @@ static const uint64_t kNumEmailRecords = 25000000;
 static const uint64_t kNumWikiRecords = 14000000;
 static const uint64_t kNumTxns = 10000000;
 static const int kSamplePercent = 10;
-static const double kUrlSamplePercent = 0.1;
+static const int kUrlSamplePercent = 1;
 
 static const std::string file_load_email = "workloads/load_email";
 static const std::string file_load_wiki = "workloads/load_wiki";
@@ -39,71 +39,45 @@ static const int kUrl = 2;
 //-------------------------------------------------------------
 // Expt ID = 0
 //-------------------------------------------------------------
-static const std::string output_dir_art_point = "results/ART/point/";
-static const std::string file_lat_email_art = output_dir_art_point + "lat_email_art.csv";
-std::ofstream output_lat_email_art;
-static const std::string file_mem_email_art = output_dir_art_point + "mem_email_art.csv";
-std::ofstream output_mem_email_art;
-static const std::string file_height_email_art = output_dir_art_point + "height_email_art.csv";
-std::ofstream output_height_email_art;
-static const std::string file_stats_email_art = output_dir_art_point + "stats_email_art.csv";
-std::ofstream output_stats_email_art;
+static const std::string output_dir_btree_point = "results/btree/point/";
+static const std::string file_lat_email_btree = output_dir_btree_point + "lat_email_btree.csv";
+std::ofstream output_lat_email_btree;
+static const std::string file_mem_email_btree = output_dir_btree_point + "mem_email_btree.csv";
+std::ofstream output_mem_email_btree;
 
+static const std::string file_lat_wiki_btree = output_dir_btree_point + "lat_wiki_btree.csv";
+std::ofstream output_lat_wiki_btree;
+static const std::string file_mem_wiki_btree = output_dir_btree_point + "mem_wiki_btree.csv";
+std::ofstream output_mem_wiki_btree;
 
-static const std::string file_lat_wiki_art = output_dir_art_point + "lat_wiki_art.csv";
-std::ofstream output_lat_wiki_art;
-static const std::string file_mem_wiki_art = output_dir_art_point + "mem_wiki_art.csv";
-std::ofstream output_mem_wiki_art;
-static const std::string file_height_wiki_art = output_dir_art_point + "height_wiki_art.csv";
-std::ofstream output_height_wiki_art;
-static const std::string file_stats_wiki_art = output_dir_art_point + "stats_wiki_art.csv";
-std::ofstream output_stats_wiki_art;
-
-
-static const std::string file_lat_url_art = output_dir_art_point + "lat_url_art.csv";
-std::ofstream output_lat_url_art;
-static const std::string file_mem_url_art = output_dir_art_point + "mem_url_art.csv";
-std::ofstream output_mem_url_art;
-static const std::string file_height_url_art = output_dir_art_point + "height_url_art.csv";
-std::ofstream output_height_url_art;
-static const std::string file_stats_url_art = output_dir_art_point + "stats_url_art.csv";
-std::ofstream output_stats_url_art;
-
+static const std::string file_lat_url_btree = output_dir_btree_point + "lat_url_btree.csv";
+std::ofstream output_lat_url_btree;
+static const std::string file_mem_url_btree = output_dir_btree_point + "mem_url_btree.csv";
+std::ofstream output_mem_url_btree;
 
 //-------------------------------------------------------------
 // Expt ID = 1
 //-------------------------------------------------------------
-static const std::string output_dir_art_range = "results/ART/range/";
-static const std::string file_lat_email_art_range = output_dir_art_range + "lat_email_art_range.csv";
-std::ofstream output_lat_email_art_range;
-static const std::string file_mem_email_art_range = output_dir_art_range + "mem_email_art_range.csv";
-std::ofstream output_mem_email_art_range;
-static const std::string file_stats_email_art_range = output_dir_art_range + "stats_email_art_range.csv";
-std::ofstream output_stats_email_art_range;
+static const std::string output_dir_btree_range = "results/btree/range/";
+static const std::string file_lat_email_btree_range = output_dir_btree_range + "lat_email_btree_range.csv";
+std::ofstream output_lat_email_btree_range;
+static const std::string file_mem_email_btree_range = output_dir_btree_range + "mem_email_btree_range.csv";
+std::ofstream output_mem_email_btree_range;
 
-static const std::string file_lat_wiki_art_range = output_dir_art_range + "lat_wiki_art_range.csv";
-std::ofstream output_lat_wiki_art_range;
-static const std::string file_mem_wiki_art_range = output_dir_art_range + "mem_wiki_art_range.csv";
-std::ofstream output_mem_wiki_art_range;
-static const std::string file_stats_wiki_art_range = output_dir_art_range + "stats_wiki_art_range.csv";
-std::ofstream output_stats_wiki_art_range;
+static const std::string file_lat_wiki_btree_range = output_dir_btree_range + "lat_wiki_btree_range.csv";
+std::ofstream output_lat_wiki_btree_range;
+static const std::string file_mem_wiki_btree_range = output_dir_btree_range + "mem_wiki_btree_range.csv";
+std::ofstream output_mem_wiki_btree_range;
 
-static const std::string file_lat_url_art_range = output_dir_art_range + "lat_url_art_range.csv";
-std::ofstream output_lat_url_art_range;
-static const std::string file_mem_url_art_range = output_dir_art_range + "mem_url_art_range.csv";
-std::ofstream output_mem_url_art_range;
-static const std::string file_stats_url_art_range = output_dir_art_range + "stats_url_art_range.csv";
-std::ofstream output_stats_url_art_range;
+static const std::string file_lat_url_btree_range = output_dir_btree_range + "lat_url_btree_range.csv";
+std::ofstream output_lat_url_btree_range;
+static const std::string file_mem_url_btree_range = output_dir_btree_range + "mem_url_btree_range.csv";
+std::ofstream output_mem_url_btree_range;
 
 double getNow() {
     struct timeval tv;
     gettimeofday(&tv, 0);
     return tv.tv_sec + tv.tv_usec / 1000000.0;
-}
-
-void loadKey(TID tid, Key &key) {
-    std::string* key_str = (std::string*)tid;
-    key.set(key_str->c_str(), key_str->length());
 }
 
 void loadKeysFromFile(const std::string& file_name, const uint64_t num_records,
@@ -155,9 +129,9 @@ void loadWorkload(int wkld_id,
 
     load_keys.clear();
     std::random_shuffle(insert_keys.begin(), insert_keys.end());  
-    
-    double current_percent = wkld_id == kUrl ? kUrlSamplePercent : kSamplePercent; 
-    for (int i = 0; i < (int)insert_keys.size(); i += int(100 / current_percent)) {
+
+    int percent = (wkld_id == kUrl) ? kUrlSamplePercent : kSamplePercent; 
+    for (int i = 0; i < (int)insert_keys.size(); i += (100 / percent)) {
 	insert_keys_sample.push_back(insert_keys[i]);
     }
 
@@ -189,6 +163,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     uint8_t* buffer_r = new uint8_t[8192];
     std::vector<std::string> enc_insert_keys;
 
+    int64_t total_key_size = 0;
     double start_time = getNow();
     if (is_compressed) {
 	encoder = ope::EncoderFactory::createEncoder(encoder_type);
@@ -197,47 +172,38 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
 	    int enc_len = encoder->encode(insert_keys[i], buffer);
 	    int enc_len_round = (enc_len + 7) >> 3;
 	    enc_insert_keys.push_back(std::string((const char*)buffer, enc_len_round));
+	    total_key_size += enc_len_round;
 	}
     } else {
 	for (int i = 0; i < (int)insert_keys.size(); i++) {
 	    enc_insert_keys.push_back(insert_keys[i]);
+	    total_key_size += insert_keys[i].size();
 	}
     }
 
-    ART_ROWEX::Tree* art = new ART_ROWEX::Tree(loadKey);
-    auto t = art->getThreadInfo();
+    typedef tlx::btree_map<std::string, uint64_t, std::less<std::string> > btree_type;
+    btree_type* bt = new btree_type();
     for (int i = 0; i < (int)enc_insert_keys.size(); i++) {
-	Key key;
-	loadKey((TID)&(enc_insert_keys[i]), key);
-	art->insert(key, (TID)&(enc_insert_keys[i]), t);
+	bt->insert2(enc_insert_keys[i], (uint64_t)&(enc_insert_keys[i]));
     }
 
     double end_time = getNow();
-    double bt = end_time - start_time;
-    std::cout << "Build time = " << bt << std::endl;
+    double build_time = end_time - start_time;
+    std::cout << "Build time = " << build_time << std::endl;
 
-    // traverse ART to get stats ==================================
-    double mem = 0;
-    double art_mem = 0;
-    double avg_height = 0;
-    int cnt_N4 = 0;
-    int cnt_N16 = 0;
-    int cnt_N48 = 0;
-    int cnt_N256 = 0;
-    uint64_t waste_child_mem = 0;
-    uint64_t skip_prefix_mem = 0;
-    uint64_t waste_prefix_mem = 0;
-    art->traverse(mem, avg_height, cnt_N4, cnt_N16, cnt_N48, cnt_N256,
-                  waste_child_mem, skip_prefix_mem, waste_prefix_mem);
-    art_mem = mem;
-    if (encoder != nullptr)
-	mem += (encoder->memoryUse() / 1000000.0);
-    std::cout << "Mem = " << mem << std::endl;
-    std::cout << "Avg Trie Height = " << avg_height << std::endl;
+    std::cout << "size = " << bt->get_stats().size << std::endl;
+    std::cout << "leaves = " << bt->get_stats().leaves << std::endl;
+    std::cout << "inner_nodes = " << bt->get_stats().inner_nodes << std::endl;
+    std::cout << "avgfill = " << bt->get_stats().avgfill_leaves() << std::endl;
+    std::cout << "btree size = " << (256 * bt->get_stats().nodes()) << std::endl;
+    std::cout << "total key size = " << total_key_size << std::endl;
+
+    int64_t btree_size = 256 * bt->get_stats().nodes();
+    double mem = (btree_size + total_key_size + encoder->memoryUse()) / 1000000.0;
+    std::cout << kGreen << "Mem = " << kNoColor << mem << std::endl;
 
     // execute transactions =======================================
     uint64_t sum = 0;
-    auto t2 = art->getThreadInfo();
     start_time = getNow();
     if (is_point) { // point query
 	if (is_compressed) {
@@ -245,21 +211,16 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
 		int enc_len = encoder->encode(txn_keys[i], buffer);
 		int enc_len_round = (enc_len + 7) >> 3;
 		std::string enc_key = std::string((const char*)buffer, enc_len_round);
-		Key key;
-		loadKey((TID)&(enc_key), key);
-		sum += art->lookup(key, t2);
+		btree_type::const_iterator iter = bt->find(enc_key);
+		sum += (iter->second);
 	    }
 	} else {
 	    for (int i = 0; i < (int)txn_keys.size(); i++) {
-		Key key;
-		loadKey((TID)&(txn_keys[i]), key);
-		sum += art->lookup(key, t2);
+		btree_type::const_iterator iter = bt->find(txn_keys[i]);
+		sum += (iter->second);
 	    }
 	}
     } else { // range query
-	TID result[100];
-	std::size_t result_size = 100;
-	std::size_t results_found = 0;
 	if (is_compressed) {
 	    for (int i = 0; i < (int)txn_keys.size(); i++) {
 		int enc_len = 0, enc_len_r = 0;
@@ -274,23 +235,21 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
 		std::string left_key = std::string((const char*)buffer, enc_len_round);
 		std::string right_key = std::string((const char*)buffer_r, enc_len_r_round);
 
-		Key start_key;
-		loadKey((TID)&(left_key), start_key);
-		Key end_key;
-		loadKey((TID)&(right_key), end_key);
-		Key continue_key;
-		
-		sum += (int)art->lookupRange(start_key, end_key, continue_key, result, result_size, results_found, t2);
+		btree_type::const_iterator iter = bt->lower_bound(left_key);
+		while (iter != bt->end()
+		       && iter.key().compare(right_key) < 0) {
+		    ++iter;
+		}
+		sum += (iter->second);
 	    }
 	} else {
 	    for (int i = 0; i < (int)txn_keys.size(); i++) {
-		Key start_key;
-		loadKey((TID)&(txn_keys[i]), start_key);
-		Key end_key;
-		loadKey((TID)&(upper_bound_keys[i]), end_key);
-		Key continue_key;
-		
-		sum += (int)art->lookupRange(start_key, end_key, continue_key, result, result_size, results_found, t2);
+		btree_type::const_iterator iter = bt->lower_bound(txn_keys[i]);
+		while (iter != bt->end()
+		       && iter.key().compare(upper_bound_keys[i]) < 0) {
+		    ++iter;
+		}
+		sum += (iter->second);
 	    }
 	}
     }
@@ -301,35 +260,29 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     double lat = (exec_time * 1000000) / txn_keys.size(); // us
     std::cout << kGreen << "Latency = " << kNoColor << lat << "\n";
 
+    delete bt;
+
     if (expt_id == 0) {
 	if (wkld_id == kEmail) {
-	    output_lat_email_art << lat << "\n";
-	    output_mem_email_art << mem << "\n";
-	    output_height_email_art << avg_height << "\n";
-            output_stats_email_art << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << "," << waste_child_mem << "," << skip_prefix_mem << "," << waste_prefix_mem << "," << art_mem << "," << mem << "\n";
+	    output_lat_email_btree << lat << "\n";
+	    output_mem_email_btree << mem << "\n";
 	} else if (wkld_id == kWiki) {
-	    output_lat_wiki_art << lat << "\n";
-	    output_mem_wiki_art << mem << "\n";
-	    output_height_wiki_art << avg_height << "\n";
-            output_stats_wiki_art << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << "," << waste_child_mem << "," << skip_prefix_mem << "," << waste_prefix_mem << "," << art_mem << "," << mem << "\n";
+	    output_lat_wiki_btree << lat << "\n";
+	    output_mem_wiki_btree << mem << "\n";
 	} else if (wkld_id == kUrl) {
-	    output_lat_url_art << lat << "\n";
-	    output_mem_url_art << mem << "\n";
-	    output_height_url_art << avg_height << "\n";
-            output_stats_url_art << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << "," << waste_child_mem << "," << skip_prefix_mem << "," << waste_prefix_mem << "," << art_mem << "," << mem << "\n";
+	    output_lat_url_btree << lat << "\n";
+	    output_mem_url_btree << mem << "\n";
 	}
     } else if (expt_id == 1) {
 	if (wkld_id == kEmail) {
-	    output_lat_email_art_range << lat << "\n";
-	    output_mem_email_art_range << mem << "\n";
-            output_stats_email_art_range << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << "," << waste_child_mem << "," << skip_prefix_mem << "," << waste_prefix_mem << "," << art_mem << "," << mem << "\n";
+	    output_lat_email_btree_range << lat << "\n";
+	    output_mem_email_btree_range << mem << "\n";
 	} else if (wkld_id == kWiki) {
-	    output_lat_wiki_art_range << lat << "\n";
-	    output_mem_wiki_art_range << mem << "\n";
-            output_stats_wiki_art_range << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << "," << waste_child_mem << "," << skip_prefix_mem << "," << waste_prefix_mem << "," << art_mem << "," << mem << "\n";
+	    output_lat_wiki_btree_range << lat << "\n";
+	    output_mem_wiki_btree_range << mem << "\n";
 	} else if (wkld_id == kUrl) {
-	    output_lat_url_art_range << lat << "\n";
-	    output_mem_url_art_range << mem << "\n";            output_stats_url_art_range << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << "," << waste_child_mem << "," << skip_prefix_mem << "," << waste_prefix_mem << "," << art_mem << "," << mem << "\n";
+	    output_lat_url_btree_range << lat << "\n";
+	    output_mem_url_btree_range << mem << "\n";
 	}
     }
 }
@@ -348,7 +301,7 @@ void exec_group(const int expt_id, const bool is_point,
 		const std::vector<std::string>& insert_urls_sample,
 		const std::vector<std::string>& txn_urls,
 		const std::vector<std::string>& upper_bound_urls) {
-    int dict_size[2] = {8192, 65536};
+    int dict_size[2] = {10000, 65536};
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
     exec(expt_id, kEmail, is_point, false, 0, 0,
 	 insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
@@ -410,7 +363,7 @@ void exec_group(const int expt_id, const bool is_point,
 	     insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 	expt_num++;
     }
-
+    
     for (int j = 0; j < 2; j++) {
 	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
 	exec(expt_id, kEmail, is_point, true, 4, dict_size[j],
@@ -426,21 +379,22 @@ void exec_group(const int expt_id, const bool is_point,
 	exec(expt_id, kUrl, is_point, true, 4, dict_size[j],
 	     insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 	expt_num++;
-    }    
-  
+    }
+
+    int dict_size_5[2] = {8192, 65536};
     for (int j = 0; j < 2; j++) {
 	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-	exec(expt_id, kEmail, is_point, true, 5, dict_size[j],
+	exec(expt_id, kEmail, is_point, true, 5, dict_size_5[j],
 	     insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
 	expt_num++;
 
 	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-	exec(expt_id, kWiki, is_point, true, 5, dict_size[j],
+	exec(expt_id, kWiki, is_point, true, 5, dict_size_5[j],
 	     insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
 	expt_num++;
 
 	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-	exec(expt_id, kUrl, is_point, true, 5, dict_size[j],
+	exec(expt_id, kUrl, is_point, true, 5, dict_size_5[j],
 	     insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 	expt_num++;
     } 
@@ -469,20 +423,14 @@ int main(int argc, char *argv[]) {
 	std::cout << "Point Queries; Expt ID = 0" << std::endl;
 	std::cout << "====================================" << std::endl;
 
-	output_lat_email_art.open(file_lat_email_art);
-	output_mem_email_art.open(file_mem_email_art);
-	output_height_email_art.open(file_height_email_art);
-	output_stats_email_art.open(file_stats_email_art);
+	output_lat_email_btree.open(file_lat_email_btree);
+	output_mem_email_btree.open(file_mem_email_btree);
 
-	output_lat_wiki_art.open(file_lat_wiki_art);
-	output_mem_wiki_art.open(file_mem_wiki_art);
-	output_height_wiki_art.open(file_height_wiki_art);
-	output_stats_wiki_art.open(file_stats_wiki_art);
+	output_lat_wiki_btree.open(file_lat_wiki_btree);
+	output_mem_wiki_btree.open(file_mem_wiki_btree);
 
-	output_lat_url_art.open(file_lat_url_art);
-	output_mem_url_art.open(file_mem_url_art);
-	output_height_url_art.open(file_height_url_art);
-	output_stats_url_art.open(file_stats_url_art);
+	output_lat_url_btree.open(file_lat_url_btree);
+	output_mem_url_btree.open(file_mem_url_btree);
 
 	bool is_point = true;
 	int expt_num = 1;
@@ -492,20 +440,14 @@ int main(int argc, char *argv[]) {
 		   insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis,
 		   insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 	
-	output_lat_email_art.close();
-	output_mem_email_art.close();
-	output_height_email_art.close();
-	output_stats_email_art.close();
+	output_lat_email_btree.close();
+	output_mem_email_btree.close();
 
-	output_lat_wiki_art.close();
-	output_mem_wiki_art.close();
-	output_height_wiki_art.close();
-	output_stats_wiki_art.close();
+	output_lat_wiki_btree.close();
+	output_mem_wiki_btree.close();
 
-	output_lat_url_art.close();
-	output_mem_url_art.close();
-	output_height_url_art.close();
-	output_stats_url_art.close();
+	output_lat_url_btree.close();
+	output_mem_url_btree.close();
     }
     else if (expt_id == 1) {
 	//-------------------------------------------------------------
@@ -515,17 +457,14 @@ int main(int argc, char *argv[]) {
 	std::cout << "Range Queries; Expt ID = 1" << std::endl;
 	std::cout << "====================================" << std::endl;
 
-	output_lat_email_art_range.open(file_lat_email_art_range);
-	output_mem_email_art_range.open(file_mem_email_art_range);
-	output_stats_email_art_range.open(file_stats_email_art_range);
+	output_lat_email_btree_range.open(file_lat_email_btree_range);
+	output_mem_email_btree_range.open(file_mem_email_btree_range);
 
-	output_lat_wiki_art_range.open(file_lat_wiki_art_range);
-	output_mem_wiki_art_range.open(file_mem_wiki_art_range);
-	output_stats_wiki_art_range.open(file_stats_wiki_art_range);
+	output_lat_wiki_btree_range.open(file_lat_wiki_btree_range);
+	output_mem_wiki_btree_range.open(file_mem_wiki_btree_range);
 
-	output_lat_url_art_range.open(file_lat_url_art_range);
-	output_mem_url_art_range.open(file_mem_url_art_range);
-	output_stats_url_art_range.open(file_stats_url_art_range);
+	output_lat_url_btree_range.open(file_lat_url_btree_range);
+	output_mem_url_btree_range.open(file_mem_url_btree_range);
 
 	bool is_point = false;
 	int expt_num = 1;
@@ -535,17 +474,14 @@ int main(int argc, char *argv[]) {
 		   insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis,
 		   insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 	
-	output_lat_email_art_range.close();
-	output_mem_email_art_range.close();
-	output_stats_email_art_range.close();
+	output_lat_email_btree_range.close();
+	output_mem_email_btree_range.close();
 
-	output_lat_wiki_art_range.close();
-	output_mem_wiki_art_range.close();
-	output_stats_wiki_art_range.close();
+	output_lat_wiki_btree_range.close();
+	output_mem_wiki_btree_range.close();
 
-	output_lat_url_art_range.close();
-	output_mem_url_art_range.close();
-	output_stats_url_art_range.close();
+	output_lat_url_btree_range.close();
+	output_mem_url_btree_range.close();
     }
 
     return 0;

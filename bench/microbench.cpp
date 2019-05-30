@@ -319,7 +319,6 @@ int main(int argc, char *argv[]) {
 
 	int percent = 10;
         double url_percent = 1;
-	//int percent = 10;
 	int dict_size_list[9] = {1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144};
 	//int dict_size_list[3] = {1024, 2048, 4096};
 	int expt_num = 1;

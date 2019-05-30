@@ -122,4 +122,16 @@ python plot/SuRF/point/mem_email_surf.py
 python plot/SuRF/point/mem_wiki_surf.py
 python plot/SuRF/point/mem_url_surf.py
 
+############################################################
+# Btree point
+############################################################
+python plot/btree/point/lat_mem_email_btree.py
+python plot/btree/point/lat_mem_wiki_btree.py
+python plot/btree/point/lat_mem_url_btree.py
 
+############################################################
+# Btree range
+############################################################
+python plot/btree/range/lat_mem_email_btree.py
+python plot/btree/range/lat_mem_wiki_btree.py
+python plot/btree/range/lat_mem_url_btree.py
