@@ -1,0 +1,9 @@
+.idea
+cmake-build-*
+release-build
+coverageReport
+coverage-build
+build
+setup.sh
+out
+third-party/*

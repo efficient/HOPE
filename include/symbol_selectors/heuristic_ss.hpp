@@ -12,6 +12,7 @@
 
 #define BLEND_FILE_NAME  "./blend_result_"
 //#define WRITE_BLEND_RESULT 1 
+#define PRINT_TIME_BREAKDOWN
 
 namespace ope {
 
@@ -143,7 +144,9 @@ namespace ope {
             // Build Trie
             BlendTrie tree;
             tree.build(key_list);
-            std::cout << "Finish building trie, use:" << getNow() - curtime << std::endl;
+#ifdef PRINT_TIME_BREAKDOWN
+            std::cout << "Build trie = " << getNow() - curtime << std::endl;
+#endif
             // Blending
             tree.blendingAndGetLeaves(blend_freq_table);
             // Write blending results  to file
@@ -151,8 +154,9 @@ namespace ope {
             writeIntervals(blend_freq_table, key_list[0]);
 #endif
         }
-        std::cout << "Finish blending, use:" << getNow() - curtime << std::endl;
-
+#ifdef PRINT_TIME_BREAKDOWN
+        std::cout << "Blending = " << getNow() - curtime << std::endl;
+#endif
         // Search for best W
         int64_t last_w = 0;
         while (abs(num_limit - (int)intervals_.size()) > (int)(0.05 * num_limit)) {
@@ -185,7 +189,9 @@ namespace ope {
         curtime = getNow();
         // simulate encode process to get Frequency
         getIntervalFreq(symbol_freq_list, key_list);
-        std::cout << "Finish simulating encode process, use:" << getNow() - curtime << std::endl;
+#ifdef PRINT_TIME_BREAKDOWN
+        std::cout << "Simulate encode process = " << getNow() - curtime << std::endl;
+#endif
         curtime = getNow();
         return true;
     }

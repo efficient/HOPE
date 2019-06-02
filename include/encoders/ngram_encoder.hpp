@@ -42,6 +42,7 @@ bool NGramEncoder::build (const std::vector<std::string>& key_list,
     std::vector<SymbolFreq> symbol_freq_list;
     SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(n_);
     symbol_selector->selectSymbols(key_list, dict_size_limit, &symbol_freq_list);
+   delete symbol_selector;
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
     double time_end = getNow();
     double time_diff = time_end - time_start;
@@ -55,6 +56,7 @@ bool NGramEncoder::build (const std::vector<std::string>& key_list,
     CodeGenerator* code_generator = CodeGeneratorFactory::createCodeGenerator(kCgType);
     code_generator->genCodes(symbol_freq_list, &symbol_code_list);
     code_len_ = code_generator->getCodeLen();
+    delete code_generator;
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
     time_end = getNow();
     time_diff = time_end - time_start;

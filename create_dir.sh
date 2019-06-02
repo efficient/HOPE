@@ -1,4 +1,4 @@
-#!bin/bash
+!bin/bash
 
 mkdir datasets
 mkdir workloads
@@ -23,6 +23,9 @@ mkdir results/ART/range
 mkdir results/btree
 mkdir results/btree/point
 mkdir results/btree/range
+mkdir results/hot
+mkdir results/hot/point
+mkdir results/hot/range
 
 mkdir figures
 mkdir figures/microbench
@@ -44,3 +47,6 @@ mkdir figures/ART/range
 mkdir figures/btree
 mkdir figures/btree/point
 mkdir figures/btree/range
+mkdir figures/hot
+mkdir figures/hot/point
+mkdir figures/hot/range

@@ -7,9 +7,10 @@
 #ifdef USE_CUCKOO
 #include "cuckoohash_map.hh"
 #else
-#include <unordered_map>
+//#include <unordered_map>
+#include <map>
 #endif
-
+//#define PRINT_BUILD_TIME_BREAKDOWN
 #include "symbol_selector.hpp"
 
 namespace ope {
@@ -17,7 +18,9 @@ namespace ope {
 class NGramSS : public SymbolSelector {
 public:
     NGramSS(int n) : n_(n) {};
-    ~NGramSS() {};
+    ~NGramSS() {
+        freq_map_.clear();
+    };
 
     bool selectSymbols (const std::vector<std::string>& key_list,
                         const int64_t num_limit,
@@ -37,7 +40,8 @@ private:
 #ifdef USE_CUCKOO
     cuckoohash_map<std::string, int64_t> freq_map_;
 #else
-    std::unordered_map<std::string, int64_t> freq_map_;
+    //std::unordered_map<std::string, int64_t> freq_map_;
+    std::map<std::string, int64_t> freq_map_;
 #endif
     std::vector<std::string> interval_prefixes_;
     std::vector<std::string> interval_boundaries_;
@@ -52,9 +56,9 @@ bool NGramSS::selectSymbols (const std::vector<std::string>& key_list,
 #ifdef USE_CUCKOO
     freq_map_.reserve(key_list.size());
 #endif
+    std::cout << "Freq Map:" << freq_map_.size() << std::endl;
     countSymbolFreq(key_list);
     std::vector<std::string> most_freq_symbols;
-    //std::cout << freq_map_.size() << std::endl;
     pickMostFreqSymbols((num_limit / 2), &most_freq_symbols);
     fillInGap(most_freq_symbols);
     assert(interval_prefixes_.size() == interval_boundaries_.size());
@@ -74,9 +78,24 @@ void NGramSS::countSymbolFreq (const std::vector<std::string>& key_list) {
 #ifdef USE_CUCKOO
     auto updatefn = [](int64_t &num) { ++num; };
 #else
-    std::unordered_map<std::string, int64_t>::iterator iter;
+    freq_map_.clear();
+//    std::unordered_map<std::string, int64_t>::iterator iter;
+    std::map<std::string, int64_t>::iterator iter;
 #endif
     for (int i = 0; i < (int)key_list.size(); i++) {
+/*
+    if ( i % 10000 ==  0) {
+        std::cout << "Count Frequency: " << i << "/" << key_list.size() << std::endl;
+        std::cout << "map size = " << freq_map_.size() << std::endl;
+        std::cout << "insert time = " << insert_time << std::endl;
+        std::cout << "update time = " << update_time << std::endl;
+        std::cout << "find time = " << find_time << std::endl;
+        insert_time = 0;
+        update_time = 0;
+        find_time = 0;
+    } 
+*/  
+    // std::cout << i << "/" << key_list.size() << std::endl;
         //for (int j = 0; j < (int)key_list[i].length() - 2; j++) {
 	for (int j = 0; j < (int)key_list[i].length() - n_ + 1; j++) {
 	    std::string ngram = key_list[i].substr(j, n_);
@@ -84,10 +103,11 @@ void NGramSS::countSymbolFreq (const std::vector<std::string>& key_list) {
 	    freq_map_.upsert(ngram, updatefn, 1);
 #else
 	    iter = freq_map_.find(ngram);
-	    if (iter == freq_map_.end())
-		freq_map_.insert(std::pair<std::string, int64_t>(ngram, 1));
-	    else
-		iter->second += 1;
+	    if (iter == freq_map_.end()) {
+		    freq_map_.insert(std::pair<std::string, int64_t>(ngram, 1));
+	    } else {
+		    iter->second += 1;
+        }
 #endif
         }
     }
@@ -110,7 +130,8 @@ void NGramSS::pickMostFreqSymbols (const int64_t num_limit,
 	symbol_freqs.push_back(std::make_pair(it.first, it.second));
     }
 #else
-    std::unordered_map<std::string, int64_t>::iterator iter;
+    //std::unordered_map<std::string, int64_t>::iterator iter;
+    std::map<std::string, int64_t>::iterator iter;
     for (iter = freq_map_.begin(); iter != freq_map_.end(); ++iter) {
 	symbol_freqs.push_back(std::make_pair(iter->first, iter->second));
     }
