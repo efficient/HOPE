@@ -6,4 +6,3 @@ coverage-build
 build
 setup.sh
 out
-third-party/*
