@@ -7,13 +7,17 @@
 
 #include "code_generator_factory.hpp"
 #include "symbol_selector_factory.hpp"
+#include "sbt.hpp"
 
 namespace ope {
 
 class SingleCharEncoder : public Encoder {
 public:
     SingleCharEncoder() {};
-    ~SingleCharEncoder() {};
+    ~SingleCharEncoder() {
+	if (decode_dict_)
+	    delete decode_dict_;
+    }
 
     bool build (const std::vector<std::string>& key_list,
                 const int64_t dict_size_limit);
@@ -24,6 +28,8 @@ public:
 		     uint8_t* l_buffer, uint8_t* r_buffer,
 		     int& l_enc_len, int& r_enc_len) const;
 
+    int decode (const std::string& enc_key, uint8_t* buffer) const;
+
     int numEntries () const;
     int64_t memoryUse () const;
 
@@ -31,6 +37,7 @@ private:
     bool buildDict(const std::vector<SymbolCode>& symbol_code_list);
 
     Code dict_[256];
+    SBT* decode_dict_;
 };
 
 bool SingleCharEncoder::build (const std::vector<std::string>& key_list,
@@ -139,13 +146,38 @@ void SingleCharEncoder::encodePair(const std::string& l_key, const std::string& 
     r_enc_len = (idx_r << 6) + int_buf_len_r;
 }
 
+int SingleCharEncoder::decode (const std::string& enc_key, uint8_t* buffer) const {
+#ifdef INCLUDE_DECODE
+    int buf_pos = 0;
+    int key_bit_pos = 0;
+    int idx = 0;
+    while (key_bit_pos < (int)enc_key.size() * 8) {
+	if (!decode_dict_->lookup(enc_key, key_bit_pos, &idx)) {
+	    if (key_bit_pos < (int)enc_key.size() * 8)
+		return 0;
+	    else
+		return buf_pos;
+	}
+	if (idx == 0) return buf_pos;
+	buffer[buf_pos] = (uint8_t)(unsigned)idx;
+	buf_pos++;
+    }
+    return buf_pos;
+#else
+    return 0;
+#endif
+}
+
 int SingleCharEncoder::numEntries () const {
     return 256;
 }
 
 int64_t SingleCharEncoder::memoryUse () const {
-    //return (4 + 1) * 256;
+#ifdef INCLUDE_DECODE
+    return sizeof(Code) * 256 + decode_dict_->memory();
+#else
     return sizeof(Code) * 256;
+#endif
 }
 
 bool SingleCharEncoder::buildDict(const std::vector<SymbolCode>& symbol_code_list) {
@@ -154,6 +186,17 @@ bool SingleCharEncoder::buildDict(const std::vector<SymbolCode>& symbol_code_lis
     for (int i = 0; i < 256; i++) {
         dict_[i] = symbol_code_list[i].second;
     }
+
+#ifdef INCLUDE_DECODE
+    std::vector<Code> codes;
+    for (int i = 0; i < 256; i++) {
+	codes.push_back(dict_[i]);
+    }
+    decode_dict_ = new SBT(codes);
+#else
+    decode_dict_ = nullptr;
+#endif
+    
     return true;
 }
 

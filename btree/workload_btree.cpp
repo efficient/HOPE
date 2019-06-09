@@ -6,6 +6,8 @@
 #include <fstream>
 #include <map>
 
+#include <valgrind/callgrind.h>
+
 #include "encoder_factory.hpp"
 #include "btree_map.hpp"
 
@@ -155,6 +157,9 @@ int main(int argc, char *argv[]) {
     // execute transactions =======================================
     double start_time = getNow();
 
+    CALLGRIND_START_INSTRUMENTATION;
+    CALLGRIND_TOGGLE_COLLECT;
+
     uint64_t sum = 0;
     if (query_type.compare(std::string("point")) == 0) {
 	if (is_compressed) {
@@ -201,6 +206,9 @@ int main(int argc, char *argv[]) {
 	    }
 	}
     }
+
+    CALLGRIND_TOGGLE_COLLECT;
+    CALLGRIND_STOP_INSTRUMENTATION;
 
     double end_time = getNow();
 

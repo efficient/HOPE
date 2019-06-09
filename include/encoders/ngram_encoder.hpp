@@ -25,6 +25,8 @@ public:
 		     uint8_t* l_buffer, uint8_t* r_buffer,
 		     int& l_enc_len, int& r_enc_len) const;
 
+    int decode (const std::string& enc_key, uint8_t* buffer) const;
+
     int numEntries () const;
     int64_t memoryUse () const;
 
@@ -243,6 +245,10 @@ void NGramEncoder::encodePair (const std::string& l_key, const std::string& r_ke
     int_buf_r[idx_r] <<= (64 - int_buf_len_r);
     int_buf_r[idx_r] = __builtin_bswap64(int_buf_r[idx_r]);
     r_enc_len = (idx_r << 6) + int_buf_len_r;
+}
+
+int NGramEncoder::decode (const std::string& enc_key, uint8_t* buffer) const {
+    return 0;
 }
 
 int NGramEncoder::numEntries () const {

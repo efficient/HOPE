@@ -10,6 +10,7 @@
 static const std::string file_email = "../../datasets/emails.txt";
 static const std::string file_wiki = "../../datasets/wikis.txt";
 static const std::string file_url = "../../datasets/urls.txt";
+static const std::string file_ts = "../../datasets/poisson_timestamps.csv";
 
 static const int kLongestCodeLen = 4096;
 
@@ -17,6 +18,10 @@ double getNow() {
   struct timeval tv;
   gettimeofday(&tv, 0);
   return tv.tv_sec + tv.tv_usec / 1000000.0;
+}
+
+int getByteLen(const int bitlen) {
+    return ((bitlen + 7) & ~7) / 8;
 }
 
 int64_t loadKeys(const std::string& file_name,
@@ -30,6 +35,35 @@ int64_t loadKeys(const std::string& file_name,
     int count = 0;
     while (infile.good()) {
 	infile >> key;
+	if (count % step_size == 0) {
+	    keys.push_back(key);
+	    keys_shuffle.push_back(key);
+	    total_len += key.length();
+	}
+	count++;
+    }
+    std::random_shuffle(keys_shuffle.begin(), keys_shuffle.end());
+    return total_len;
+}
+
+std::string uint64ToString(uint64_t key) {
+    uint64_t endian_swapped_key = __builtin_bswap64(key);
+    return std::string(reinterpret_cast<const char*>(&endian_swapped_key), 8);
+}
+
+int64_t loadKeysInt(const std::string& file_name,
+		    const int sample_percent,
+		    std::vector<std::string> &keys,
+		    std::vector<std::string> &keys_shuffle) {
+    std::ifstream infile(file_name);
+    int step_size = 100 / sample_percent;
+    std::string key;
+    int64_t total_len = 0;
+    int count = 0;
+    while (infile.good()) {
+	uint64_t int_key;
+	infile >> int_key;
+	key = uint64ToString(int_key);
 	if (count % step_size == 0) {
 	    keys.push_back(key);
 	    keys_shuffle.push_back(key);
@@ -65,6 +99,34 @@ void exec(const int encoder_type, const int64_t dict_size_limit,
     std::cout << "Latency = " << lat << " ns/char" << std::endl;
     std::cout << "CPR = " << cpr << std::endl;
     std::cout << "Memory = " << mem << std::endl;
+
+#ifdef INCLUDE_DECODE
+    int64_t total_key_len = 0;
+    int64_t total_dec_len = 0;
+    std::vector<std::string> enc_keys;
+    for (int i = 0; i < (int)keys_shuffle.size(); i++) {
+	total_key_len += (int)keys_shuffle[i].size();
+	int len = encoder->encode(keys_shuffle[i], buffer);
+	std::string enc_str = std::string((const char*)buffer, getByteLen(len));
+	enc_keys.push_back(enc_str);
+    }
+
+    time_start = getNow();
+    for (int i = 0; i < (int)enc_keys.size(); i++) {
+	total_dec_len += encoder->decode(enc_keys[i], buffer);
+    }
+    time_end = getNow();
+    time_diff = time_end - time_start;
+    tput = keys_shuffle.size() / time_diff / 1000000; // in Mops/s
+    lat = time_diff * 1000000000 / total_len; // in ns
+
+    std::cout << "total_key_len = " << total_key_len << std::endl;
+    std::cout << "total_dec_len = " << total_dec_len << std::endl;
+
+    std::cout << "Decode Throughput = " << tput << " Mops/s" << std::endl;
+    std::cout << "Decode Latency = " << lat << " ns/char" << std::endl;
+#endif
+    
     delete[] buffer;
     delete encoder;
 
@@ -137,6 +199,22 @@ int main(int argc, char *argv[]) {
 	    exec(5, 65536, urls, urls_shuffle, total_len_url);
 	else
 	    exec(2, 65536, urls, urls_shuffle, total_len_url);
+    } else if (wkld == 3) {
+	std::vector<std::string> tss;
+	std::vector<std::string> tss_shuffle;
+	int64_t total_len_ts = loadKeys(file_ts, percent, tss, tss_shuffle);
+	if (dict_type == 1)
+	    exec(1, 1000, tss, tss_shuffle, total_len_ts);
+	else if (dict_type == 2)
+	    exec(2, 65536, tss, tss_shuffle, total_len_ts);
+	else if (dict_type == 3)
+	    exec(3, 2000, tss, tss_shuffle, total_len_ts);
+	else if (dict_type == 4)
+	    exec(4, 20000, tss, tss_shuffle, total_len_ts);
+	else if (dict_type == 5)
+	    exec(5, 65536, tss, tss_shuffle, total_len_ts);
+	else
+	    exec(2, 65536, tss, tss_shuffle, total_len_ts);
     }
 
     // std::vector<std::string> emails;
