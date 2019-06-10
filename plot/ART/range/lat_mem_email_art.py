@@ -34,8 +34,8 @@ LEGEND_POS = 'upper left'
 GRAPH_HEIGHT = 5 #inches
 GRAPH_WIDTH = 8 #inches
 
-CSV_X_FILE_PATH = "results_old/ART/range/lat_email_art_range.csv"
-CSV_Y_FILE_PATH = "results_old/ART/range/mem_email_art_range.csv"
+CSV_X_FILE_PATH = "results/ART/range/lat_email_art_range.csv"
+CSV_Y_FILE_PATH = "results/ART/range/mem_email_art_range.csv"
 GRAPH_OUTPUT_PATH = "figures/ART/range/lat_mem_email_art_range.pdf"
 
 f_in_x = open(CSV_X_FILE_PATH)

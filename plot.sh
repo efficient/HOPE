@@ -1,4 +1,4 @@
-#!bin/bash
+!bin/bash
 
 ############################################################
 # Sample Size Sweep
@@ -14,17 +14,17 @@
 ############################################################
 # CPR Latency
 ############################################################
-#python plot/microbench/cpr_latency/cpr_email.py
-#python plot/microbench/cpr_latency/cpr_wiki.py
-#python plot/microbench/cpr_latency/cpr_url.py
+python plot/microbench/cpr_latency/cpr_email.py
+python plot/microbench/cpr_latency/cpr_wiki.py
+python plot/microbench/cpr_latency/cpr_url.py
 
-#python plot/microbench/cpr_latency/lat_email.py
-#python plot/microbench/cpr_latency/lat_wiki.py
-#python plot/microbench/cpr_latency/lat_url.py
+python plot/microbench/cpr_latency/lat_email.py
+python plot/microbench/cpr_latency/lat_wiki.py
+python plot/microbench/cpr_latency/lat_url.py
 
-#python plot/microbench/cpr_latency/mem_email.py
-#python plot/microbench/cpr_latency/mem_wiki.py
-#python plot/microbench/cpr_latency/mem_url.py
+python plot/microbench/cpr_latency/mem_email.py
+python plot/microbench/cpr_latency/mem_wiki.py
+python plot/microbench/cpr_latency/mem_url.py
 
 ############################################################
 # Hu-Tucker
@@ -53,24 +53,24 @@
 ############################################################
 # SuRF point
 ############################################################
-#python plot/SuRF/point/lat_mem_email_surf.py
-#python plot/SuRF/point/lat_mem_wiki_surf.py
-#python plot/SuRF/point/lat_mem_url_surf.py
+python plot/SuRF/point/lat_mem_email_surf.py
+python plot/SuRF/point/lat_mem_wiki_surf.py
+python plot/SuRF/point/lat_mem_url_surf.py
 
 #python plot/SuRF/point/fpr_email_surf.py
 #python plot/SuRF/point/fpr_wiki_surf.py
 #python plot/SuRF/point/fpr_url_surf.py
 
-#python plot/SuRF/point/height_email_surf.py
-#python plot/SuRF/point/height_wiki_surf.py
-#python plot/SuRF/point/height_url_surf.py
+python plot/SuRF/point/height_email_surf.py
+python plot/SuRF/point/height_wiki_surf.py
+python plot/SuRF/point/height_url_surf.py
 
 ############################################################
 # SuRF range
 ############################################################
-#python plot/SuRF/range/lat_mem_email_surf.py
-#python plot/SuRF/range/lat_mem_wiki_surf.py
-#python plot/SuRF/range/lat_mem_url_surf.py
+python plot/SuRF/range/lat_mem_email_surf.py
+python plot/SuRF/range/lat_mem_wiki_surf.py
+python plot/SuRF/range/lat_mem_url_surf.py
 
 #python plot/SuRF/range/fpr_email_surf.py
 #python plot/SuRF/range/fpr_wiki_surf.py
@@ -93,20 +93,20 @@
 ############################################################
 # ART point
 ############################################################
-#python plot/ART/point/lat_mem_email_art.py
-#python plot/ART/point/lat_mem_wiki_art.py
-#python plot/ART/point/lat_mem_url_art.py
+python plot/ART/point/lat_mem_email_art.py
+python plot/ART/point/lat_mem_wiki_art.py
+python plot/ART/point/lat_mem_url_art.py
 
-#python plot/ART/point/height_email_art.py
-#python plot/ART/point/height_wiki_art.py
-#python plot/ART/point/height_url_art.py
+python plot/ART/point/height_email_art.py
+python plot/ART/point/height_wiki_art.py
+python plot/ART/point/height_url_art.py
 
 ############################################################
 # ART range
 ############################################################
-#python plot/ART/range/lat_mem_email_art.py
-#python plot/ART/range/lat_mem_wiki_art.py
-#python plot/ART/range/lat_mem_url_art.py
+python plot/ART/range/lat_mem_email_art.py
+python plot/ART/range/lat_mem_wiki_art.py
+python plot/ART/range/lat_mem_url_art.py
 
 ############################################################
 # ART Node Stats
@@ -125,27 +125,34 @@
 ############################################################
 # Btree point
 ############################################################
-#python plot/btree/point/lat_mem_email_btree.py
-#python plot/btree/point/lat_mem_wiki_btree.py
-#python plot/btree/point/lat_mem_url_btree.py
+python plot/btree/point/lat_mem_email_btree.py
+python plot/btree/point/lat_mem_wiki_btree.py
+python plot/btree/point/lat_mem_url_btree.py
 
 ############################################################
 # Btree range
 ############################################################
-#python plot/btree/range/lat_mem_email_btree.py
-#python plot/btree/range/lat_mem_wiki_btree.py
-#python plot/btree/range/lat_mem_url_btree.py
+python plot/btree/range/lat_mem_email_btree.py
+python plot/btree/range/lat_mem_wiki_btree.py
+python plot/btree/range/lat_mem_url_btree.py
 
 ############################################################
-# Btree point
+# hot point
 ############################################################
-#python plot/hot/range/lat_mem_email_hot.py
-#python plot/hot/range/lat_mem_wiki_hot.py
-#python plot/hot/range/lat_mem_url_hot.py
+python plot/hot/point/lat_mem_email_hot.py
+python plot/hot/point/lat_mem_wiki_hot.py
+python plot/hot/point/lat_mem_url_hot.py
 
 ############################################################
-# Btree range
+# hot range
 ############################################################
-#python plot/hot/range/lat_mem_email_hot.py
-#python plot/hot/range/lat_mem_wiki_hot.py
-#python plot/hot/range/lat_mem_url_hot.py
+python plot/hot/range/lat_mem_email_hot.py
+python plot/hot/range/lat_mem_wiki_hot.py
+python plot/hot/range/lat_mem_url_hot.py
+
+############################################################
+# hot height
+############################################################
+python plot/hot/point/height_mem_email_hot.py
+python plot/hot/point/height_mem_wiki_hot.py
+python plot/hot/point/height_mem_url_hot.py

@@ -199,7 +199,10 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     std::cout << "total key size = " << total_key_size << std::endl;
 
     int64_t btree_size = 256 * bt->get_stats().nodes();
-    double mem = (btree_size + total_key_size + encoder->memoryUse()) / 1000000.0;
+    double encoder_mem = 0;
+    if (encoder != nullptr)
+        encoder_mem = encoder->memoryUse();
+    double mem = (btree_size + total_key_size + encoder_mem) / 1000000.0;
     std::cout << kGreen << "Mem = " << kNoColor << mem << std::endl;
 
     // execute transactions =======================================
@@ -316,6 +319,7 @@ void exec_group(const int expt_id, const bool is_point,
     exec(expt_id, kUrl, is_point, false, 0, 0,
 	 insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
     expt_num++;
+
     //=================================================
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
     exec(expt_id, kEmail, is_point, true, 1, 1000,
@@ -331,6 +335,7 @@ void exec_group(const int expt_id, const bool is_point,
     exec(expt_id, kUrl, is_point, true, 1, 1000,
 	 insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
     expt_num++;
+
     //=================================================
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
     exec(expt_id, kEmail, is_point, true, 2, 65536,
@@ -363,13 +368,13 @@ void exec_group(const int expt_id, const bool is_point,
 	     insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 	expt_num++;
     }
-    
+ 
     for (int j = 0; j < 2; j++) {
 	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
 	exec(expt_id, kEmail, is_point, true, 4, dict_size[j],
 	     insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
 	expt_num++;
-
+ 
 	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
 	exec(expt_id, kWiki, is_point, true, 4, dict_size[j],
 	     insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);

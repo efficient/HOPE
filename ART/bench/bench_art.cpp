@@ -14,7 +14,7 @@ static const uint64_t kNumEmailRecords = 25000000;
 static const uint64_t kNumWikiRecords = 14000000;
 static const uint64_t kNumTxns = 10000000;
 static const int kSamplePercent = 10;
-static const double kUrlSamplePercent = 0.1;
+static const double kUrlSamplePercent = 1;
 
 static const std::string file_load_email = "workloads/load_email";
 static const std::string file_load_wiki = "workloads/load_wiki";
@@ -329,7 +329,8 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
             output_stats_wiki_art_range << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << "," << waste_child_mem << "," << skip_prefix_mem << "," << waste_prefix_mem << "," << art_mem << "," << mem << "\n";
 	} else if (wkld_id == kUrl) {
 	    output_lat_url_art_range << lat << "\n";
-	    output_mem_url_art_range << mem << "\n";            output_stats_url_art_range << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << "," << waste_child_mem << "," << skip_prefix_mem << "," << waste_prefix_mem << "," << art_mem << "," << mem << "\n";
+	    output_mem_url_art_range << mem << "\n";
+            output_stats_url_art_range << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << "," << waste_child_mem << "," << skip_prefix_mem << "," << waste_prefix_mem << "," << art_mem << "," << mem << "\n";
 	}
     }
 }
