@@ -38,8 +38,11 @@ reader = csv.reader(f_in)
 csvrows = list(reader)
 data = []
 for row in csvrows :
-    for item in row :
-        data.append(float(item))
+    h_sum = 0
+    for i,item in enumerate(row) :
+	print(item)
+        h_sum += float(item) * (i+1)
+    data.append(h_sum/len(row))
 
 #========================================================================================
 mpl.rcParams['ps.useafm'] = True

@@ -153,6 +153,6 @@ python plot/hot/range/lat_mem_url_hot.py
 ############################################################
 # hot height
 ############################################################
-python plot/hot/point/height_mem_email_hot.py
-python plot/hot/point/height_mem_wiki_hot.py
-python plot/hot/point/height_mem_url_hot.py
+python plot/hot/point/height_email_hot.py
+python plot/hot/point/height_wiki_hot.py
+python plot/hot/point/height_url_hot.py

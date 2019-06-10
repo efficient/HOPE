@@ -114,7 +114,7 @@ ax.set_xlim(X_START, X_LIMIT)
 
 y_ticks = [0, 20, 40, 60, 80, 100, 120]
 ax.set_yticks(y_ticks)
-ax.set_ylim(0, 120)
+ax.set_ylim(0, 125)
 
 ax.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
 

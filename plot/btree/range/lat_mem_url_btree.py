@@ -25,7 +25,7 @@ Y_LABEL_FONT_SIZE = 20
 X_TICK_FONT_SIZE = 18
 Y_TICK_FONT_SIZE = 18
 
-X_LIMIT = 14
+X_LIMIT = 18
 Y_LIMIT = 5000
 
 LEGEND_FONT_SIZE = 10
@@ -108,7 +108,7 @@ ax.set_xlim(0, X_LIMIT)
 ax.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
 ax.set_ylim(0, Y_LIMIT)
 
-x_ticks = [0, 3, 6, 9, 12]
+x_ticks = [0, 3, 6, 9, 12, 15, 18]
 ax.set_xticks(x_ticks)
 ax.tick_params(axis='x', labelsize=X_TICK_FONT_SIZE)
 
@@ -118,12 +118,12 @@ ax.tick_params(axis='y', labelsize=Y_TICK_FONT_SIZE)
 
 #ax.grid()
 
-ax.annotate(LABELS[0], (data_x[0], data_y[0] * 1.08), ha='center', va='center', size=12)
-ax.annotate(LABELS[1], (data_x[1], data_y[1] * 1.08), ha='center', va='center', size=12)
-ax.annotate(LABELS[2], (data_x[2] * 0.92, data_y[2] * 0.92), ha='center', va='center', size=12)
-ax.annotate(LABELS[3], ((data_x[3] + data_x[4])/2, data_y[4] * 0.88), ha='center', va='center', size=12)
-ax.annotate(LABELS[4], ( data_x[5], data_y[6] * 0.92), ha='center', va='center', size=12)
-ax.annotate(LABELS[5], ((data_x[7] + data_x[8])/2, data_y[8] * 0.92), ha='center', va='center', size=12)
+#ax.annotate(LABELS[0], (data_x[0], data_y[0] * 1.08), ha='center', va='center', size=12)
+#ax.annotate(LABELS[1], (data_x[1], data_y[1] * 1.08), ha='center', va='center', size=12)
+#ax.annotate(LABELS[2], (data_x[2] * 0.92, data_y[2] * 0.92), ha='center', va='center', size=12)
+#ax.annotate(LABELS[3], ((data_x[3] + data_x[4])/2, data_y[4] * 0.88), ha='center', va='center', size=12)
+#ax.annotate(LABELS[4], ( data_x[5], data_y[6] * 0.92), ha='center', va='center', size=12)
+#ax.annotate(LABELS[5], ((data_x[7] + data_x[8])/2, data_y[8] * 0.92), ha='center', va='center', size=12)
 
 # ax.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left",
 #                mode="expand", borderaxespad=0, ncol=4,
