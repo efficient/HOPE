@@ -15,7 +15,7 @@ class bcolors:
 
 if (len(sys.argv) < 3) :
     print bcolors.FAIL + 'Usage:'
-    print 'arg 1, key type: randint, email, url, wiki' 
+    print 'arg 1, key type: randint, email, url, wiki, timestamp' 
     print 'arg 2, distribution: uniform, zipfian, latest' + bcolors.ENDC
     sys.exit()
 
@@ -45,7 +45,11 @@ wiki_titles = dataset_dir + 'wikis.txt'
 wiki_titles_size = 14000000
 wiki_keymap_file = output_dir + 'wiki_keymap.txt'
 
-if key_type != 'randint' and key_type != 'email' and key_type != 'url' and key_type != 'wiki' :
+timestamp_list = dataset_dir + 'poisson_timestamps.csv'
+timestamp_list_size = 100000000
+timestamp_keymap_file = output_dir + 'timestamp_keymap.txt'
+
+if key_type != 'randint' and key_type != 'email' and key_type != 'url' and key_type != 'wiki' and key_type  != 'timestamp' :
     print bcolors.FAIL + 'Incorrect key_type: please pick from randint, email, url, and wiki' + bcolors.ENDC
     sys.exit()
 
@@ -130,6 +134,22 @@ elif key_type == 'wiki' :
         if len(cols) > 0 :
             f_txn_out.write (wiki_keymap[int(cols[0])] + '\n')
     f_wiki_keymap.close()
+
+elif key_type == 'timestamp' :
+    timestamp_keymap = {}
+    f_timestamp_keymap = open (timestamp_keymap_file, 'r')
+    for line in f_timestamp_keymap :
+        cols = line.split()
+        timestamp_keymap[int(cols[0])] = cols[1]
+
+    count = 0
+    f_txn = open (out_txn_ycsbkey, 'r')
+    f_txn_out = open (out_txn, 'w')
+    for line in f_txn :
+        cols = line.split()
+        if len(cols) > 0 :
+            f_txn_out.write (timestamp_keymap[int(cols[0])] + '\n')
+    f_timestamp_keymap.close()
 
 f_txn.close()
 f_txn_out.close()

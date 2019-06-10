@@ -56,6 +56,19 @@ TEST_F (DoubleCharEncoderTest, wordTest) {
 	std::string str2 = std::string((const char*)buffer, getByteLen(len));
 	int cmp = str1.compare(str2);
 	ASSERT_TRUE(cmp < 0);
+
+#ifdef INCLUDE_DECODE
+	len = encoder->decode(str1, buffer);
+	std::string dec_str1 = std::string((const char*)buffer, len);
+	cmp = dec_str1.compare(words[i]);
+	
+	ASSERT_TRUE(cmp == 0);
+
+	len = encoder->decode(str2, buffer);
+	std::string dec_str2 = std::string((const char*)buffer, len);
+	cmp = dec_str2.compare(words[i + 1]);
+	ASSERT_TRUE(cmp == 0);
+#endif
     }
 }
 

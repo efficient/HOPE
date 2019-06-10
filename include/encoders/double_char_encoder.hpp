@@ -5,6 +5,7 @@
 
 #include "code_generator_factory.hpp"
 #include "symbol_selector_factory.hpp"
+#include "sbt.hpp"
 
 namespace ope {
 
@@ -22,6 +23,8 @@ public:
 		     uint8_t* l_buffer, uint8_t* r_buffer,
 		     int& l_enc_len, int& r_enc_len) const;
 
+    int decode (const std::string& enc_key, uint8_t* buffer) const;
+
     int numEntries () const;
     int64_t memoryUse () const;
 
@@ -29,6 +32,7 @@ private:
     bool buildDict(const std::vector<SymbolCode>& symbol_code_list);
 
     Code dict_[65536];
+    SBT* decode_dict_;
 };
 
 bool DoubleCharEncoder::build (const std::vector<std::string>& key_list,
@@ -152,13 +156,43 @@ void DoubleCharEncoder::encodePair (const std::string& l_key, const std::string&
     r_enc_len = (idx_r << 6) + int_buf_len_r;
 }
 
+int DoubleCharEncoder::decode (const std::string& enc_key, uint8_t* buffer) const {
+#ifdef INCLUDE_DECODE
+    int buf_pos = 0;
+    int key_bit_pos = 0;
+    int idx = 0;
+    while (key_bit_pos < (int)enc_key.size() * 8) {
+	if (!decode_dict_->lookup(enc_key, key_bit_pos, &idx)) {
+	    if (key_bit_pos < (int)enc_key.size() * 8) {
+		return 0;
+	    } else {
+		if (buffer[buf_pos - 1] == 0)
+		    buf_pos--;
+		return buf_pos;
+	    }
+	}
+	buffer[buf_pos] = (uint8_t)(unsigned)((idx >> 8) & 0xFF);
+	buffer[buf_pos + 1] = (uint8_t)(unsigned)(idx & 0xFF);
+	buf_pos += 2;
+    }
+    if (buffer[buf_pos - 1] == 0)
+	buf_pos--;
+    return buf_pos;
+#else
+    return 0;
+#endif
+}
+
 int DoubleCharEncoder::numEntries () const {
     return 65536;
 }
 
 int64_t DoubleCharEncoder::memoryUse () const {
-    //return (4 + 1) * 65536;
+#ifdef INCLUDE_DECODE
+    return sizeof(Code) * 65536 + decode_dict_->memory();
+#else
     return sizeof(Code) * 65536;
+#endif
 }
 
 bool DoubleCharEncoder::buildDict(const std::vector<SymbolCode>& symbol_code_list) {
@@ -167,6 +201,17 @@ bool DoubleCharEncoder::buildDict(const std::vector<SymbolCode>& symbol_code_lis
     for (int i = 0; i < 65536; i++) {
         dict_[i] = symbol_code_list[i].second;
     }
+
+#ifdef INCLUDE_DECODE
+    std::vector<Code> codes;
+    for (int i = 0; i < 65536; i++) {
+	codes.push_back(dict_[i]);
+    }
+    decode_dict_ = new SBT(codes);
+#else
+    decode_dict_ = nullptr;
+#endif
+    
     return true;
 }
 

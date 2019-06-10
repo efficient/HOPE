@@ -25,7 +25,7 @@ def reverseHostName ( email ) :
 
 if (len(sys.argv) < 3) :
     print bcolors.FAIL + 'Usage:'
-    print 'arg 1, key type: randint, email, url, wiki' 
+    print 'arg 1, key type: randint, email, url, wiki, timestamp' 
     print 'arg 2, distribution: uniform, zipfian, latest' + bcolors.ENDC
     sys.exit()
 
@@ -55,8 +55,12 @@ wiki_titles = dataset_dir + 'wikis.txt'
 wiki_titles_size = 14000000
 wiki_keymap_file = output_dir + 'wiki_keymap.txt'
 
-if key_type != 'randint' and key_type != 'email' and key_type != 'url' and key_type != 'wiki' :
-    print bcolors.FAIL + 'Incorrect key_type: please pick from randint, email, url, and wiki' + bcolors.ENDC
+timestamp_list = dataset_dir + 'poisson_timestamps.csv'
+timestamp_list_size = 100000000
+timestamp_keymap_file = output_dir + 'timestamp_keymap.txt'
+
+if key_type != 'randint' and key_type != 'email' and key_type != 'url' and key_type != 'wiki' and key_type != 'timestamp':
+    print bcolors.FAIL + 'Incorrect key_type: please pick from randint, email, url, wiki, and timestamp' + bcolors.ENDC
     sys.exit()
 
 if distribution != 'uniform' and distribution != 'zipfian' and distribution != 'latest' :
@@ -165,6 +169,30 @@ elif key_type == 'wiki' :
         f_wiki_keymap.write (cols[0] + ' ' + title)
         count += 1
     f_wiki_keymap.close()
+
+elif key_type == 'timestamp' :
+    timestamp_keymap = {}
+    f_timestamp_keymap = open (timestamp_keymap_file, 'w')
+
+    f_timestamp = open (timestamp_list, 'r')
+    timestamps = f_timestamp.readlines()
+
+    f_load = open (out_load_ycsbkey, 'r')
+    f_load_out = open (out_load, 'w')
+
+    sample_size = len(f_load.readlines())
+    gap = timestamp_list_size / sample_size
+
+    f_load.close()
+    f_load = open (out_load_ycsbkey, 'r')
+    count = 0
+    for line in f_load :
+        cols = line.split()
+        timestamp = timestamps[count * gap].rstrip()
+        f_load_out.write (timestamp + '\n')
+        f_timestamp_keymap.write (cols[0] + ' ' + timestamp + '\n')
+        count += 1
+    f_timestamp_keymap.close()
 
 f_load.close()
 f_load_out.close()

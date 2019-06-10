@@ -27,6 +27,8 @@ namespace ope {
                         uint8_t *l_buffer, uint8_t *r_buffer,
                         int &l_enc_len, int &r_enc_len) const;
 
+	int decode (const std::string& enc_key, uint8_t* buffer) const;
+
         int numEntries() const;
 
         int64_t memoryUse() const;
@@ -131,6 +133,10 @@ namespace ope {
         l_enc_len = encode(l_key,l_buffer);
         r_enc_len = encode(r_key,r_buffer);
         return;
+    }
+
+    int HeuristicEncoder::decode(const std::string& enc_key, uint8_t* buffer) const {
+	return 0;
     }
 
     int HeuristicEncoder::numEntries() const {
