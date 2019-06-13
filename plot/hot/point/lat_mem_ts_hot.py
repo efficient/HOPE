@@ -25,8 +25,8 @@ Y_LABEL_FONT_SIZE = 20
 X_TICK_FONT_SIZE = 18
 Y_TICK_FONT_SIZE = 18
 
-X_LIMIT = 14
-Y_LIMIT = 5000
+X_LIMIT = 2.0
+Y_LIMIT = 500
 
 LEGEND_FONT_SIZE = 10
 LEGEND_POS = 'upper left'
@@ -34,9 +34,9 @@ LEGEND_POS = 'upper left'
 GRAPH_HEIGHT = 5 #inches
 GRAPH_WIDTH = 8 #inches
 
-CSV_X_FILE_PATH = "results/btree/range/lat_url_btree_range.csv"
-CSV_Y_FILE_PATH = "results/btree/range/mem_url_btree_range.csv"
-GRAPH_OUTPUT_PATH = "figures/btree/range/lat_mem_url_btree_range.pdf"
+CSV_X_FILE_PATH = "results/hot/point/lat_ts_hot.csv"
+CSV_Y_FILE_PATH = "results/hot/point/mem_ts_hot.csv"
+GRAPH_OUTPUT_PATH = "figures/hot/point/lat_mem_ts_hot_point.pdf"
 
 f_in_x = open(CSV_X_FILE_PATH)
 reader = csv.reader(f_in_x)
@@ -76,10 +76,10 @@ product_min = 3
 product_diff = product_max - product_min
 
 x_array = []
-x = 0.01
+x = 0.005
 while x < X_LIMIT :
     x_array.append(x)
-    x += 0.01
+    x += 0.005
 x_list = np.array(x_array)
 
 y_lists = []
@@ -95,12 +95,12 @@ for i in range(0, len(y_lists)-1) :
 ax.scatter(data_x[0], data_y[0], s=SIZE, c=COLORS[0], marker='o', label=NAMES[0])
 ax.scatter(data_x[1], data_y[1], s=SIZE, c=COLORS[1], marker='o', label=NAMES[1])
 ax.scatter(data_x[2], data_y[2], s=SIZE, c=COLORS[2], marker='o', label=NAMES[2])
-ax.scatter(data_x[3], data_y[3], s=SIZE, c=COLORS[3], marker='o', label=NAMES[3])
-ax.scatter(data_x[4], data_y[4], s=SIZE, c=COLORS[3], marker='s', label=NAMES[4])
-ax.scatter(data_x[5], data_y[5], s=SIZE, c=COLORS[4], marker='o', label=NAMES[5])
-ax.scatter(data_x[6], data_y[6], s=SIZE, c=COLORS[4], marker='s', label=NAMES[6])
-ax.scatter(data_x[7], data_y[7], s=SIZE, c=COLORS[5], marker='o', label=NAMES[7])
-ax.scatter(data_x[8], data_y[8], s=SIZE, c=COLORS[5], marker='s', label=NAMES[8])
+#ax.scatter(data_x[3], data_y[3], s=SIZE, c=COLORS[3], marker='o', label=NAMES[3])
+#ax.scatter(data_x[4], data_y[4], s=SIZE, c=COLORS[3], marker='s', label=NAMES[4])
+#ax.scatter(data_x[5], data_y[5], s=SIZE, c=COLORS[4], marker='o', label=NAMES[5])
+#ax.scatter(data_x[6], data_y[6], s=SIZE, c=COLORS[4], marker='s', label=NAMES[6])
+#ax.scatter(data_x[7], data_y[7], s=SIZE, c=COLORS[5], marker='o', label=NAMES[7])
+#ax.scatter(data_x[8], data_y[8], s=SIZE, c=COLORS[5], marker='s', label=NAMES[8])
 
 ax.set_xlabel(X_LABEL, fontsize=X_LABEL_FONT_SIZE)
 ax.set_xlim(0, X_LIMIT)
@@ -108,22 +108,22 @@ ax.set_xlim(0, X_LIMIT)
 ax.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
 ax.set_ylim(0, Y_LIMIT)
 
-x_ticks = [0, 3, 6, 9, 12]
+x_ticks = [0, 0.4, 0.8, 1.2, 1.6, 2.0]
 ax.set_xticks(x_ticks)
 ax.tick_params(axis='x', labelsize=X_TICK_FONT_SIZE)
 
-y_ticks = [0, 1000, 2000, 3000, 4000, 5000]
+y_ticks = [0, 100, 200, 300, 400, 500]
 ax.set_yticks(y_ticks)
 ax.tick_params(axis='y', labelsize=Y_TICK_FONT_SIZE)
 
 #ax.grid()
 
-ax.annotate(LABELS[0], (data_x[0], data_y[0] * 1.08), ha='center', va='center', size=12)
-ax.annotate(LABELS[1], (data_x[1], data_y[1] * 1.08), ha='center', va='center', size=12)
-ax.annotate(LABELS[2], (data_x[2] * 0.92, data_y[2] * 0.92), ha='center', va='center', size=12)
-ax.annotate(LABELS[3], ((data_x[3] + data_x[4])/2, data_y[4] * 0.88), ha='center', va='center', size=12)
-ax.annotate(LABELS[4], ( data_x[5], data_y[6] * 0.92), ha='center', va='center', size=12)
-ax.annotate(LABELS[5], ((data_x[7] + data_x[8])/2, data_y[8] * 0.92), ha='center', va='center', size=12)
+#ax.annotate(LABELS[0], (data_x[0], data_y[0] * 1.08), ha='center', va='center', size=12)
+#ax.annotate(LABELS[1], (data_x[1], data_y[1] * 1.08), ha='center', va='center', size=12)
+#ax.annotate(LABELS[2], (data_x[2] * 0.92, data_y[2] * 0.92), ha='center', va='center', size=12)
+#ax.annotate(LABELS[3], ((data_x[3] + data_x[4])/2, data_y[4] * 0.88), ha='center', va='center', size=12)
+#ax.annotate(LABELS[4], ( data_x[5], data_y[6] * 0.92), ha='center', va='center', size=12)
+#ax.annotate(LABELS[5], ((data_x[7] + data_x[8])/2, data_y[8] * 0.92), ha='center', va='center', size=12)
 
 # ax.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left",
 #                mode="expand", borderaxespad=0, ncol=4,
