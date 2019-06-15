@@ -36,16 +36,27 @@ public:
 	    return bits_;
 	}
 
-	int getOnesBefore() const {
-	    return ones_before_;
+	int32_t getOnesBefore() const {
+	    return (ones_before_ & 0x7FFFFFFF);
 	}
 
-	void setOnesBefore(int num) {
-	    ones_before_ = num;
+	void setOnesBefore(int32_t num) {
+	    ones_before_ &= 0x80000000;
+	    ones_before_ += num;
+	}
+
+	bool hasPrefixKey() const {
+	    return (ones_before_ < 0);
+	}
+
+	void setPrefixKey() {
+	    ones_before_ |= 0x80000000;
 	}
 
 	void copyNode(const TrieNode* node) {
 	    ones_before_ = node->getOnesBefore();
+	    if (node->hasPrefixKey())
+		setPrefixKey();
 	    for (int i = 0; i < 4; i++) {
 		bits_[i] = node->getBits()[i];
 	    }
@@ -53,8 +64,11 @@ public:
 
 	int countBits(int pos) {
 	    assert(pos < 256);
-	    //if (pos == 0) return 0;
 	    int count = 0;
+	    if (hasPrefixKey())
+		count = 1;
+	    if (pos < 0)
+		return count;
 	    int last_word_id = pos >> 6;
 	    int offset = pos & 63;
 	    for (int i = 0; i < last_word_id; i++) {
@@ -67,7 +81,7 @@ public:
 	}
 
     private:
-	int ones_before_;
+	int32_t ones_before_;
 	uint64_t bits_[4];
     };
 
@@ -133,10 +147,10 @@ void Trie3GramDict::buildTrie(const std::vector<SymbolCode>& symbol_code_list,
 	std::string symbol = symbol_code_list[i].first;
 	int symbol_len = symbol.length();
 	int char_idx_0 = (uint8_t)symbol[0];
-	int char_idx_1 = 0;
+	int char_idx_1 = -1;
 	if (symbol_len > 1)
 	    char_idx_1 = (uint8_t)symbol[1];
-	int char_idx_2 = 0;
+	int char_idx_2 = -1;
 	if (symbol_len > 2)
 	    char_idx_2 = (uint8_t)symbol[2];
 
@@ -153,8 +167,14 @@ void Trie3GramDict::buildTrie(const std::vector<SymbolCode>& symbol_code_list,
 	}
 
 	root_->setBit(char_idx_0);
-	level_1[level_1.size() - 1].setBit(char_idx_1);
-	level_2[level_2.size() - 1].setBit(char_idx_2);
+	if (char_idx_1 < 0)
+	    level_1[level_1.size() - 1].setPrefixKey();
+	else
+	    level_1[level_1.size() - 1].setBit(char_idx_1);
+	if (char_idx_2 < 0)
+	    level_2[level_2.size() - 1].setPrefixKey();
+	else
+	    level_2[level_2.size() - 1].setBit(char_idx_2);
 
 	IntervalCode leaf;
 	leaf.common_prefix_len = 0;
@@ -207,12 +227,12 @@ void Trie3GramDict::copyNodesToArray(const std::vector<TrieNode>& level_1,
 }
 
 void Trie3GramDict::fillinOnesBefore() {
-    int level_1_ones = level_1_[0].countBits(255);
+    int32_t level_1_ones = level_1_[0].countBits(255);
     for (int i = 1; i < level_1_num_nodes_; i++) {
 	level_1_[i].setOnesBefore(level_1_ones);
 	level_1_ones += level_1_[i].countBits(255);
     }
-    int level_2_ones = level_2_[0].countBits(255);
+    int32_t level_2_ones = level_2_[0].countBits(255);
     for (int i = 1; i < level_2_num_nodes_; i++) {
 	level_2_[i].setOnesBefore(level_2_ones);
 	level_2_ones += level_2_[i].countBits(255);
@@ -222,10 +242,10 @@ void Trie3GramDict::fillinOnesBefore() {
 Code Trie3GramDict::lookup (const char* symbol, const int symbol_len,
 			    int& prefix_len) const {
     int char_idx_0 = (uint8_t)symbol[0];
-    int char_idx_1 = 0;
+    int char_idx_1 = -1;
     if (symbol_len > 1)
 	char_idx_1 = (uint8_t)symbol[1];
-    int char_idx_2 = 0;
+    int char_idx_2 = -1;
     if (symbol_len > 2)
 	char_idx_2 = (uint8_t)symbol[2];
 
@@ -240,6 +260,7 @@ Code Trie3GramDict::lookup (const char* symbol, const int symbol_len,
     else
 	leaf_num += level_2_node.countBits(255);
     prefix_len = leafs_[leaf_num].common_prefix_len;
+    //assert(prefix_len > 0);
     return leafs_[leaf_num].code;
 }
     
@@ -250,7 +271,6 @@ int Trie3GramDict::numEntries () const {
 int64_t Trie3GramDict::memoryUse () const {
     return (sizeof(Trie3GramDict)
 	    + sizeof(TrieNode) * (1 + level_1_num_nodes_ + level_2_num_nodes_)
-	    //+ (4 + 1) * num_leafs_);
 	    + sizeof(Code) * num_leafs_);
 }
 

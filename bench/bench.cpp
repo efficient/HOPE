@@ -87,6 +87,7 @@ void exec(const int encoder_type, const int64_t dict_size_limit,
     double time_start = getNow();
     int64_t mem = encoder->memoryUse();
     for (int i = 0; i < (int)keys_shuffle.size(); i++) {
+	//std::cout << "i = " << i << std::endl;
 	total_enc_len += encoder->encode(keys_shuffle[i], buffer);
     }
     double time_end = getNow();
@@ -202,15 +203,15 @@ int main(int argc, char *argv[]) {
     } else if (wkld == 3) {
 	std::vector<std::string> tss;
 	std::vector<std::string> tss_shuffle;
-	int64_t total_len_ts = loadKeys(file_ts, percent, tss, tss_shuffle);
+	int64_t total_len_ts = loadKeysInt(file_ts, percent, tss, tss_shuffle);
 	if (dict_type == 1)
 	    exec(1, 1000, tss, tss_shuffle, total_len_ts);
 	else if (dict_type == 2)
 	    exec(2, 65536, tss, tss_shuffle, total_len_ts);
 	else if (dict_type == 3)
-	    exec(3, 2000, tss, tss_shuffle, total_len_ts);
+	    exec(3, 8192, tss, tss_shuffle, total_len_ts);
 	else if (dict_type == 4)
-	    exec(4, 20000, tss, tss_shuffle, total_len_ts);
+	    exec(4, 65536, tss, tss_shuffle, total_len_ts);
 	else if (dict_type == 5)
 	    exec(5, 65536, tss, tss_shuffle, total_len_ts);
 	else

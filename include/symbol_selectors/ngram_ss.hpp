@@ -56,7 +56,6 @@ bool NGramSS::selectSymbols (const std::vector<std::string>& key_list,
 #ifdef USE_CUCKOO
     freq_map_.reserve(key_list.size());
 #endif
-    std::cout << "Freq Map:" << freq_map_.size() << std::endl;
     countSymbolFreq(key_list);
     std::vector<std::string> most_freq_symbols;
     pickMostFreqSymbols((num_limit / 2), &most_freq_symbols);
@@ -146,6 +145,7 @@ void NGramSS::pickMostFreqSymbols (const int64_t num_limit,
 	most_freq_symbols->push_back(symbol_freqs[i].first);
     }
     std::sort(most_freq_symbols->begin(), most_freq_symbols->end());
+    
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
     double time_end = getNow();
     double time_diff = time_end - time_start;
@@ -167,14 +167,25 @@ void NGramSS::fillInGap (const std::vector<std::string>& most_freq_symbols) {
 	interval_boundaries_.push_back(str1);
 
 	std::string str1_right_bound = str1;
-	str1_right_bound[n_ - 1] += 1;
+	for (int j = n_ - 1; j >= 0; j--) {
+	    if ((int)(uint8_t)str1_right_bound[j] < 255) {
+		str1_right_bound[j] += 1;
+		str1_right_bound = str1_right_bound.substr(0, j + 1);
+		break;
+	    }
+	}
 	if (str1_right_bound.compare(str2) != 0) {
 	    interval_boundaries_.push_back(str1_right_bound);
-	    if (str1[0] != str2[0]) {
+	    if (str1_right_bound[0] != str2[0]) {
 		interval_prefixes_.push_back(std::string(1, str1[0]));
 		fillInSingleChar((int)(uint8_t)(str1[0] + 1), (int)(uint8_t)str2[0]);
 	    } else {
-		std::string common_str = commonPrefix(str1, str2);
+		std::string common_str;
+		if (str1[0] != str1_right_bound[0])
+		    common_str = str1_right_bound;
+		else
+		    common_str = commonPrefix(str1, str2);
+		assert(common_str.size() > 0);
 		interval_prefixes_.push_back(common_str);
 	    }
 	}
@@ -184,11 +195,18 @@ void NGramSS::fillInGap (const std::vector<std::string>& most_freq_symbols) {
     interval_prefixes_.push_back(last_str);
     interval_boundaries_.push_back(last_str);
     std::string last_str_right_bound = last_str;
-    last_str_right_bound[n_ - 1] += 1;
+    for (int j = n_ - 1; j >= 0; j--) {
+	if ((int)(uint8_t)last_str_right_bound[j] < 255) {
+	    last_str_right_bound[j] += 1;
+	    last_str_right_bound = last_str_right_bound.substr(0, j + 1);
+	    break;
+	}
+    }
     interval_boundaries_.push_back(last_str_right_bound);
     interval_prefixes_.push_back(std::string(1, last_str[0]));
 
-    fillInSingleChar((int)(uint8_t)(last_str[0] + 1), 255);
+    if ((int)(uint8_t)last_str[0] < 255)
+	fillInSingleChar((int)(uint8_t)(last_str[0] + 1), 255);
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
     double time_end = getNow();
     double time_diff = time_end - time_start;
@@ -208,6 +226,10 @@ std::string NGramSS::commonPrefix(const std::string& str1,
     if (str1[0] != str2[0])
 	return std::string();
     for (int i = 1; i < n_; i++) {
+	if ((int)str1.size() < i)
+	    return str1.substr(0, i);
+	if ((int)str2.size() < i)
+	    return str2.substr(0, i);
 	if (str1[i] != str2[i])
 	    return str1.substr(0, i);
     }
@@ -222,7 +244,6 @@ void NGramSS::countIntervalFreq (const std::vector<std::string>& key_list) {
     for (int i = 0; i < (int)interval_prefixes_.size(); i++) {
 	interval_freqs_.push_back(1);
     }
-    
     for (int i = 0; i < (int)key_list.size(); i++) {
 	int pos = 0;
 	while (pos < (int)key_list[i].length()) {
