@@ -749,6 +749,8 @@ namespace ope {
     }
 
     N *N4::getPrevChild(uint8_t k) {
+        if (count == 0 && prefix_leaf != nullptr)
+            return prefix_leaf;
         if (count == 0)
             return nullptr;
         for (uint8_t i = k; i <= k; i--) {
@@ -756,8 +758,6 @@ namespace ope {
             if (child != nullptr)
                 return child;
         }
-        if (prefix_leaf != nullptr)
-            return prefix_leaf;
         return nullptr;
     }
 
@@ -873,6 +873,8 @@ namespace ope {
     }
 
     N *N16::getPrevChild(uint8_t k) {
+        if (count == 0 && prefix_leaf != nullptr)
+            return prefix_leaf;
         if (count == 0)
             return nullptr;
         for (uint8_t i = k; i <= k; i--) {
@@ -975,6 +977,8 @@ namespace ope {
     }
 
     N *N48::getPrevChild(uint8_t k) {
+        if (count == 0 && prefix_leaf != nullptr)
+            return prefix_leaf;
         if (count == 0)
             return nullptr;
         for (uint8_t i = k; i <= k; i--) {
@@ -982,8 +986,6 @@ namespace ope {
             if (child != nullptr)
                 return child;
         }
-        if (prefix_leaf != nullptr)
-            return prefix_leaf;
         return nullptr;
     }
 
@@ -1072,6 +1074,8 @@ namespace ope {
     }
 
     N *N256::getPrevChild(uint8_t k) {
+        if (count == 0 && prefix_leaf != nullptr)
+            return prefix_leaf;
         if (count == 0)
             return nullptr;
         for (uint8_t i = k; i <= k; i--) {
@@ -1079,8 +1083,6 @@ namespace ope {
             if (child != nullptr)
                 return child;
         }
-        if (prefix_leaf != nullptr)
-            return prefix_leaf;
         return nullptr;
     }
 
