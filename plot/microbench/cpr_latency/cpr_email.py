@@ -1,5 +1,6 @@
 import sys
 import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plot
 import matplotlib.ticker as ticker
 import numpy as np
@@ -30,9 +31,9 @@ LEGEND_POS = 'upper left'
 GRAPH_HEIGHT = 4.5 #inches
 GRAPH_WIDTH = 8 #inches
 
-CSV_X_FILE_PATH = "results/microbench/cpr_latency/x_email_dict_size.csv"
-CSV_Y_FILE_PATH = "results/microbench/cpr_latency/cpr_email_dict_size.csv"
-GRAPH_OUTPUT_PATH = "figures/microbench/cpr_latency/cpr_email_dict_size.pdf"
+CSV_X_FILE_PATH = "results/microbench/cpr_latency/final_x_email_dict_size.csv"
+CSV_Y_FILE_PATH = "results/microbench/cpr_latency/final_cpr_email_dict_size.csv"
+GRAPH_OUTPUT_PATH = "figures/microbench/cpr_latency/final_cpr_email_dict_size.pdf"
 
 f_in_x = open(CSV_X_FILE_PATH)
 reader = csv.reader(f_in_x)

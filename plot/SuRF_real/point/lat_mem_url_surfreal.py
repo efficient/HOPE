@@ -1,5 +1,6 @@
 import sys
 import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plot
 import matplotlib.ticker as ticker
 import matplotlib.cm as cm
@@ -57,7 +58,8 @@ for row in csvrows :
 #========================================================================================
 mpl.rcParams['ps.useafm'] = True
 mpl.rcParams['pdf.use14corefonts'] = True
-mpl.rcParams['text.usetex'] = True
+#mpl.rcParams['text.usetex'] = True
+mpl.rcParams['text.usetex'] = False
 
 mpl.rcParams['text.latex.preamble'] = [
        r'\usepackage{siunitx}',   # i need upright \micro symbols, but you need...

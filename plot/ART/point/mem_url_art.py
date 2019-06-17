@@ -50,7 +50,6 @@ for row in csvrows :
     N256.append(record[3])
 
 data = [N4, N16, N48, N256]
-print data
 #========================================================================================
 mpl.rcParams['ps.useafm'] = True
 mpl.rcParams['pdf.use14corefonts'] = True

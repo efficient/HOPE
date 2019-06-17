@@ -13,6 +13,7 @@
 #define BLEND_FILE_NAME  "./blend_result_"
 //#define WRITE_BLEND_RESULT 1 
 #define PRINT_TIME_BREAKDOWN
+#define MAX_KEY_LEN 50
 
 namespace ope {
 
@@ -184,7 +185,7 @@ namespace ope {
             }
         }
         std::string start = std::string(1, char(0));
-        std::string end = std::string(50, char(255));
+        std::string end = std::string(MAX_KEY_LEN, char(255));
         checkIntervals(start, end);
         curtime = getNow();
         // simulate encode process to get Frequency
@@ -273,7 +274,7 @@ namespace ope {
         auto next_start = blend_freq_table.begin();
         bool is_first_peak = (next_start->second * (int)(next_start->first.size()) > W);
         for (auto iter = blend_freq_table.begin(); iter != blend_freq_table.end(); iter++) {
-            if (iter->second * (int)(iter->first.size()) > W) {
+            if (iter->second * (int)(iter->first.length()) > W) {
                 intervals_.emplace_back(std::make_pair(iter->first, getNextString(iter->first)));
                 mergeIntervals(next_start, iter);
                 next_start = iter;
@@ -287,7 +288,7 @@ namespace ope {
         fillGap(std::string(1, char(0)), start_string);
         std::string end_string = next_start == blend_freq_table_end ? getNextString(blend_freq_table_end->first)
                                                                     : blend_freq_table_end->first;
-        fillGap(end_string, std::string(50, char(255)));
+        fillGap(end_string, std::string(MAX_KEY_LEN, char(255)));
     }
 
     void HeuristicSS::fillGap(std::string start_include, std::string end_exclude) {
@@ -302,7 +303,11 @@ namespace ope {
         uint8_t end_chr = static_cast<uint8_t >(end_exclude[0]);
         for (int i = 0; i <= int(end_chr - start_chr); i++) {
             std::string cur_start = std::string(1, start_chr + i);
-            std::string cur_end = std::string(1, start_chr + i + 1);
+            std::string cur_end;
+            if (int(start_chr) + i >= 255)
+                cur_end = std::string(MAX_KEY_LEN, char(255));
+            else
+                cur_end = std::string(1, start_chr + i + 1);
             if (i == 0 && strCompare(cur_start, start_include) < 0)
                 cur_start = start_include;
             if (i == end_chr - start_chr && strCompare(cur_end, end_exclude) > 0)
@@ -331,7 +336,7 @@ namespace ope {
             } else {
                 prefix = commonPrefix(prefix, cur_key);
             }
-            if ((int)prefix.size() * cnt > W) {
+            if ((int)prefix.length() * cnt > W) {
                 std::string cur_start = max(prefix, next_start);
                 std::string cur_end = min(getNextString(prefix), (iter + 1)->first);
                 intervals_.emplace_back(cur_start, cur_end);
@@ -376,15 +381,20 @@ namespace ope {
     }
 
     std::string HeuristicSS::getNextString(const std::string &str) {
-        for (int i = int(str.size() - 1); i >= 0; i--) {
-            if (uint8_t (str[i]) != 127) {
+        assert(str.length() > 0);
+        for (int i = int(str.length() - 1); i >= 0; i--) {
+            if (uint8_t (str[i]) != 255) {
                 char next_chr = str[i] + 1;
                 return str.substr(0, i) + std::string(1, next_chr);
             }
         }
-        assert(false);
-        return std::string();
+        return std::string(MAX_KEY_LEN, 255);
     }
+
+void printString(std::string str) {
+    for (int i = 0; i < (int)str.length();i++)
+        std::cout << std::hex << (int)str[i] << " ";
+}
 
     void HeuristicSS::checkIntervals(std::string& start_str, std::string& end_str) {
         if (strCompare(start_str, end_str) >= 0)
@@ -404,14 +414,30 @@ namespace ope {
             }
             cnt++;
             if (strCompare(iter->first, iter->second) >= 0) {
-                std::cout << "[Error] Start boundary : " << iter->first
-                          << " End boundary : " << iter->second << std::endl;
+                std::cout << "[Error] Start boundary : ";
+                printString(iter->first);
+                std::cout << std::endl << " End boundary : ";
+                printString(iter->second);
+                std::cout << std::endl;
                 assert(false);
             }
             if ((int)end.size() > 0 && strCompare(end, iter->first) != 0) {
                 std::cout << "[Error] intervals not connected," << std::endl
-                          << " Current interval : " << iter->first << " " << iter->second << std::endl
-                          << " Correct start :  " << end << std::endl;
+                          << " Current interval : ";
+                printString(iter->first);
+                std::cout << " ";
+                printString(iter->second);
+                std::cout << std::endl
+                          << " Correct start :  ";
+                printString(end);
+                std::cout << std::endl;
+                auto nit = iter - 5;
+                for (; nit != iter + 5 && nit != intervals_.end(); nit++) {
+                    printString(nit->first);
+                    std::cout << "|";
+                    printString(nit->second);
+                    std::cout << std::endl;
+                }
 		        assert(false);
             }
             end = iter->second;

@@ -1,5 +1,6 @@
 import sys
 import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plot
 import matplotlib.ticker as ticker
 import numpy as np
@@ -40,7 +41,6 @@ data = []
 for row in csvrows :
     h_sum = 0
     for i,item in enumerate(row) :
-	print(item)
         h_sum += float(item) * (i+1)
     data.append(h_sum/len(row))
 

@@ -1,16 +1,92 @@
-#!bin/bash
+#!/bin/bash
 
-#./build/bench/microbench 0
-#./build/bench/microbench 1
-#./build/bench/microbench 4
-./build/bench/microbench 5
+PROJECT_DIR=$(pwd)
 
-#./build/SuRF/bench/bench_surf 0
-#./build/SuRF/bench/bench_surf 1
+##################################################
+# Initialize modules
+##################################################
+# Install boost 1.66.0 for hot
+#wget --directory-prefix=hot/third-party/ https://www.boost.org/users/history/version_1_66_0.html
+#tar --bzip2 -xf hot/third-party/boost_1_66_0.tar.bz2
+#mkdir hot/third-party/boost_install
+#cd hot/third-party/boost_1_66_0
+#./bootstrap.sh --prefix=./boost_install
+#./b2 install
+#cd ${PROJECT_DIR}
+# Add boost to include path
+#export LD_LIBRARY_PATH=${PROJECT_DIR}/hot/third-party/boost_install/lib:$LD_LIBRARY_PATH
 
-#./build/ART/bench/bench_art 0
-#./build/ART/bench/bench_art 1
+#git submodule update --init --recursive
 
-#./build/bench/microbench 2
-#./build/bench/microbench 3
-#./build/bench/microbench 6
+###################################################
+# Generate worklaods
+##################################################
+# Download YCSB if the directory not exists
+cd workload_gen
+[ ! -d "./YCSB" ] && ./ycsb_download.sh
+
+#./gen_workload.sh
+cd ..
+
+##################################################
+# Run experiments
+##################################################
+
+
+# Experiment Arguments
+run_alm=1
+repeat_times=$1
+
+run_microbench=0
+
+run_surf=0
+run_art=0
+run_btree=0
+run_hot=1
+PYTHON=python
+
+function remove_old_results() {
+    if [ $1 == 1 ]
+    then
+        rm -r $2
+    fi
+}
+
+function run_experiment() {
+    if [ $1 == 1 ]
+    then
+        eval $2
+    fi
+}
+
+remove_old_results ${run_microbench} "results/microbench/cpr_latency/"
+remove_old_results ${run_surf} "results/SuRF"
+remove_old_results ${run_art} "results/ART"
+remove_old_results ${run_hot} "results/hot"
+remove_old_results ${run_btree} "results/btree"
+
+./create_dir.sh
+
+cnt=0
+while [ ${cnt} -lt ${repeat_times} ]
+do
+    run_experiment ${run_microbench} "./build/bench/microbench 1 ${run_alm}" 
+    run_experiment ${run_surf} "./build/SuRF/bench/bench_surf 0 ${run_alm}"
+    run_experiment ${run_surf} "./build/SuRF/bench/bench_surf 1 ${run_alm}"
+    run_experiment ${run_art} "./build/ART/bench/bench_art 0 ${run_alm}"
+    run_experiment ${run_art} "./build/ART/bench/bench_art 1 ${run_alm}"
+    run_experiment ${run_hot} "./build/hot/bench_hot 0 ${run_alm}"
+    run_experiment ${run_hot} "./build/hot/bench_hot 1 ${run_alm}"
+    run_experiment ${run_btree} "./build/btree/bench_btree 0 ${run_alm}"
+    run_experiment ${run_btree} "./build/btree/bench_btree 1 ${run_alm}"
+
+    let "cnt+=1"
+done
+
+# Get the average result
+${PYTHON} generate_result.py
+
+#################################################
+# Generate plots
+################################################
+./plot.sh ${run_microbench} ${run_surf} ${run_art} ${run_hot} ${run_btree}

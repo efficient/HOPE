@@ -1,5 +1,6 @@
 import sys
 import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plot
 import matplotlib.ticker as ticker
 import numpy as np

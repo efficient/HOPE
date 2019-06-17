@@ -11,29 +11,32 @@
 
 //#define NOT_USE_ENCODE_PAIR 1
 #define WRITE_TO_FILE
-#define BREAKDOWN_TIME
+//#define RUN_TIMESTAMP
+//#define BREAKDOWN_TIME
 
 static const uint64_t kNumEmailRecords = 25000000;
-//static const uint64_t kNumEmailRecords = 250000;
 static const uint64_t kNumWikiRecords = 14000000;
-//static const uint64_t kNumWikiRecords = 140000;
+static const uint64_t kNumTsRecords = 25000000;
 static const uint64_t kNumTxns = 10000000;
-//static const uint64_t kNumTxns = 10000;
 static const int kSamplePercent = 10;
-static const int kUrlSamplePercent = 1;
+static const double kUrlSamplePercent = 0.1;
 
 static const std::string file_load_email = "workloads/load_email";
 static const std::string file_load_wiki = "workloads/load_wiki";
 static const std::string file_load_url = "workloads/load_url";
+static const std::string file_load_ts = "workloads/load_timestamp";
 
 static const std::string file_txn_email = "workloads/txn_email_zipfian";
 static const std::string file_txn_wiki = "workloads/txn_wiki_zipfian";
 static const std::string file_txn_url = "workloads/txn_url_zipfian";
+static const std::string file_txn_ts = "workloads/txn_timestamp_zipfian";
 
 // for pretty print
 static const char* kGreen ="\033[0;32m";
 //static const char* kRed ="\033[0;31m";
 static const char* kNoColor ="\033[0;0m";
+
+static int runALM = 1;
 
 //-------------------------------------------------------------
 // Workload IDs
@@ -41,44 +44,71 @@ static const char* kNoColor ="\033[0;0m";
 static const int kEmail = 0;
 static const int kWiki = 1;
 static const int kUrl = 2;
+static const int kTs = 3;
 
 //-------------------------------------------------------------
 // Expt ID = 0
 //-------------------------------------------------------------
 static const std::string output_dir_hot_point = "results/hot/point/";
-static const std::string file_lat_email_hot = output_dir_hot_point + "lat_email_hot.csv";
-std::ofstream output_lat_email_hot;
+static const std::string file_lookuplat_email_hot = output_dir_hot_point + "lookuplat_email_hot.csv";
+std::ofstream output_lookuplat_email_hot;
+static const std::string file_insertlat_email_hot = output_dir_hot_point + "insertlat_email_hot.csv";
+std::ofstream output_insertlat_email_hot;
 static const std::string file_mem_email_hot = output_dir_hot_point + "mem_email_hot.csv";
 std::ofstream output_mem_email_hot;
 static const std::string file_height_email_hot = output_dir_hot_point + "height_email_hot.csv";
 std::ofstream output_height_email_hot;
 static const std::string file_time_email_hot = output_dir_hot_point + "time_email_hot.csv";
 std::ofstream output_time_email_hot;
+static const std::string file_stats_email_hot = output_dir_hot_point + "stats_email_hot.csv";
+std::ofstream output_stats_email_hot;
 
-static const std::string file_lat_wiki_hot = output_dir_hot_point + "lat_wiki_hot.csv";
-std::ofstream output_lat_wiki_hot;
+static const std::string file_lookuplat_wiki_hot = output_dir_hot_point + "lookuplat_wiki_hot.csv";
+std::ofstream output_lookuplat_wiki_hot;
+static const std::string file_insertlat_wiki_hot = output_dir_hot_point + "insertlat_wiki_hot.csv";
+std::ofstream output_insertlat_wiki_hot;
 static const std::string file_mem_wiki_hot = output_dir_hot_point + "mem_wiki_hot.csv";
 std::ofstream output_mem_wiki_hot;
 static const std::string file_height_wiki_hot = output_dir_hot_point + "height_wiki_hot.csv";
 std::ofstream output_height_wiki_hot;
 static const std::string file_time_wiki_hot = output_dir_hot_point + "time_wiki_hot.csv";
 std::ofstream output_time_wiki_hot;
+static const std::string file_stats_wiki_hot = output_dir_hot_point + "stats_wiki_hot.csv";
+std::ofstream output_stats_wiki_hot;
 
-static const std::string file_lat_url_hot = output_dir_hot_point + "lat_url_hot.csv";
-std::ofstream output_lat_url_hot;
+static const std::string file_lookuplat_url_hot = output_dir_hot_point + "lookuplat_url_hot.csv";
+std::ofstream output_lookuplat_url_hot;
+static const std::string file_insertlat_url_hot = output_dir_hot_point + "insertlat_url_hot.csv";
+std::ofstream output_insertlat_url_hot;
 static const std::string file_mem_url_hot = output_dir_hot_point + "mem_url_hot.csv";
 std::ofstream output_mem_url_hot;
 static const std::string file_height_url_hot = output_dir_hot_point + "height_url_hot.csv";
 std::ofstream output_height_url_hot;
 static const std::string file_time_url_hot = output_dir_hot_point + "time_url_hot.csv";
 std::ofstream output_time_url_hot;
+static const std::string file_stats_url_hot = output_dir_hot_point + "stats_url_hot.csv";
+std::ofstream output_stats_url_hot;
 
+static const std::string file_lookuplat_ts_hot = output_dir_hot_point + "lookuplat_ts_hot.csv";
+std::ofstream output_lookuplat_ts_hot;
+static const std::string file_insertlat_ts_hot = output_dir_hot_point + "insertlat_ts_hot.csv";
+std::ofstream output_insertlat_ts_hot;
+static const std::string file_mem_ts_hot = output_dir_hot_point + "mem_ts_hot.csv";
+std::ofstream output_mem_ts_hot;
+static const std::string file_height_ts_hot = output_dir_hot_point + "height_ts_hot.csv";
+std::ofstream output_height_ts_hot;
+static const std::string file_time_ts_hot = output_dir_hot_point + "time_ts_hot.csv";
+std::ofstream output_time_ts_hot;
+static const std::string file_stats_ts_hot = output_dir_hot_point + "stats_ts_hot.csv";
+std::ofstream output_stats_ts_hot;
 //-------------------------------------------------------------
 // Expt ID = 1
 //-------------------------------------------------------------
 static const std::string output_dir_hot_range = "results/hot/range/";
-static const std::string file_lat_email_hot_range = output_dir_hot_range + "lat_email_hot_range.csv";
-std::ofstream output_lat_email_hot_range;
+static const std::string file_lookuplat_email_hot_range = output_dir_hot_range + "lookuplat_email_hot_range.csv";
+std::ofstream output_lookuplat_email_hot_range;
+static const std::string file_insertlat_email_hot_range = output_dir_hot_range + "insertlat_email_hot_range.csv";
+std::ofstream output_insertlat_email_hot_range;
 static const std::string file_mem_email_hot_range = output_dir_hot_range + "mem_email_hot_range.csv";
 std::ofstream output_mem_email_hot_range;
 static const std::string file_height_email_hot_range = output_dir_hot_range + "height_email_hot_range.csv";
@@ -86,8 +116,10 @@ std::ofstream output_height_email_hot_range;
 static const std::string file_time_email_hot_range = output_dir_hot_range + "time_email_hot_range.csv";
 std::ofstream output_time_email_hot_range;
 
-static const std::string file_lat_wiki_hot_range = output_dir_hot_range + "lat_wiki_hot_range.csv";
-std::ofstream output_lat_wiki_hot_range;
+static const std::string file_lookuplat_wiki_hot_range = output_dir_hot_range + "lookuplat_wiki_hot_range.csv";
+std::ofstream output_lookuplat_wiki_hot_range;
+static const std::string file_insertlat_wiki_hot_range = output_dir_hot_range + "insertlat_wiki_hot_range.csv";
+std::ofstream output_insertlat_wiki_hot_range;
 static const std::string file_mem_wiki_hot_range = output_dir_hot_range + "mem_wiki_hot_range.csv";
 std::ofstream output_mem_wiki_hot_range;
 static const std::string file_height_wiki_hot_range = output_dir_hot_range + "height_wiki_hot_range.csv";
@@ -95,8 +127,10 @@ std::ofstream output_height_wiki_hot_range;
 static const std::string file_time_wiki_hot_range = output_dir_hot_range + "time_wiki_hot_range.csv";
 std::ofstream output_time_wiki_hot_range;
 
-static const std::string file_lat_url_hot_range = output_dir_hot_range + "lat_url_hot_range.csv";
-std::ofstream output_lat_url_hot_range;
+static const std::string file_lookuplat_url_hot_range = output_dir_hot_range + "lookuplat_url_hot_range.csv";
+std::ofstream output_lookuplat_url_hot_range;
+static const std::string file_insertlat_url_hot_range = output_dir_hot_range + "insertlat_url_hot_range.csv";
+std::ofstream output_insertlat_url_hot_range;
 static const std::string file_mem_url_hot_range = output_dir_hot_range + "mem_url_hot_range.csv";
 std::ofstream output_mem_url_hot_range;
 static const std::string file_height_url_hot_range = output_dir_hot_range + "height_url_hot_range.csv";
@@ -104,6 +138,16 @@ std::ofstream output_height_url_hot_range;
 static const std::string file_time_url_hot_range = output_dir_hot_range + "time_url_hot_range.csv";
 std::ofstream output_time_url_hot_range;
 
+static const std::string file_lookuplat_ts_hot_range = output_dir_hot_range + "lookuplat_ts_hot_range.csv";
+std::ofstream output_lookuplat_ts_hot_range;
+static const std::string file_insertlat_ts_hot_range = output_dir_hot_range + "insertlat_ts_hot_range.csv";
+std::ofstream output_insertlat_ts_hot_range;
+static const std::string file_mem_ts_hot_range = output_dir_hot_range + "mem_ts_hot_range.csv";
+std::ofstream output_mem_ts_hot_range;
+static const std::string file_height_ts_hot_range = output_dir_hot_range + "height_ts_hot_range.csv";
+std::ofstream output_height_ts_hot_range;
+static const std::string file_time_ts_hot_range = output_dir_hot_range + "time_ts_hot_range.csv";
+std::ofstream output_time_ts_hot_range;
 
 
 double getNow() {
@@ -127,6 +171,24 @@ void loadKeysFromFile(const std::string& file_name, const uint64_t num_records,
     }
 }
 
+std::string uint64ToString(uint64_t key) {
+    uint64_t endian_swapped_key = __builtin_bswap64(key);
+    return std::string(reinterpret_cast<const char*>(&endian_swapped_key), 8);
+}
+
+void loadKeysInt(const std::string& file_name, const uint64_t num_records,
+                 std::vector<std::string>& keys) {
+    std::ifstream infile(file_name);
+    uint64_t int_key;
+    uint64_t count = 0;
+    while (count < num_records && infile.good()) {
+        infile >> int_key;
+        std::string key = uint64ToString(int_key);
+        keys.push_back(key);
+        count++;
+    }
+}
+
 std::string getUpperBoundKey(const std::string& key) {
     std::string ret_str = key;
     ret_str[ret_str.size() - 1] = (char)'\255';
@@ -145,8 +207,10 @@ void loadWorkload(int wkld_id,
 	loadKeysFromFile(file_load_wiki, kNumWikiRecords, load_keys);
     else if (wkld_id == kUrl)
 	loadKeysFromFile(file_load_url, kNumEmailRecords, load_keys);
+    else if (wkld_id == kTs)
+    loadKeysInt(file_load_ts, kNumTsRecords, load_keys);
     else
-	return;
+        return;
 
     std::sort(load_keys.begin(), load_keys.end());
     for (int i = 0; i < (int)load_keys.size() - 1; i++) {
@@ -165,8 +229,8 @@ void loadWorkload(int wkld_id,
     load_keys.clear();
     std::random_shuffle(insert_keys.begin(), insert_keys.end());  
 
-    int percent = (wkld_id == kUrl) ? kUrlSamplePercent : kSamplePercent; 
-    for (int i = 0; i < (int)insert_keys.size(); i += (100 / percent)) {
+    double percent = (wkld_id == kUrl) ? kUrlSamplePercent : kSamplePercent; 
+    for (int i = 0; i < (int)insert_keys.size(); i += int(100 / percent)) {
 	insert_keys_sample.push_back(insert_keys[i]);
     }
 
@@ -176,6 +240,8 @@ void loadWorkload(int wkld_id,
 	loadKeysFromFile(file_txn_wiki, kNumTxns, txn_keys);
     else if (wkld_id == kUrl)
 	loadKeysFromFile(file_txn_url, kNumTxns, txn_keys);
+    else if (wkld_id == kTs)
+    loadKeysInt(file_txn_ts, kNumTxns, txn_keys);
     
     for (int i = 0; i < (int)txn_keys.size(); i++) {
 	upper_bound_keys.push_back(getUpperBoundKey(txn_keys[i]));
@@ -184,6 +250,29 @@ void loadWorkload(int wkld_id,
     std::cout << "insert_keys_sample size = " << insert_keys_sample.size() << std::endl;
     std::cout << "txn_keys size = " << txn_keys.size() << std::endl;
     std::cout << "upper_bound_keys size = " << upper_bound_keys.size() << std::endl;
+}
+
+
+double getStatsDefault(std::map<std::string, double>& stats_map, std::string name) {
+    map<std::string,double>::iterator it =  stats_map.find(name);
+    if (it != stats_map.end()) {
+        return it->second;
+    }
+    return 0;
+}
+
+bool unit8CompareBeq(const uint8_t* s1, const uint8_t* s2) {
+    int len1 = sizeof(s1)/sizeof(uint8_t);
+    int len2 = sizeof(s2)/sizeof(uint8_t);
+    for (int i = 0; i < len1 && i < len2; i++) {
+        if (s1[i] > s2[i])
+            return true;
+        if (s1[i] < s2[i])
+            return false;
+    }
+    if (len1 >= len2)
+        return true;
+    return false;
 }
 
 void exec(const int expt_id, const int wkld_id, const bool is_point,
@@ -218,13 +307,22 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
 
     typedef hot::singlethreaded::HOTSingleThreaded<const char*, idx::contenthelpers::IdentityKeyExtractor> hot_type;
     hot_type* ht = new hot_type();
+    double insert_start_time = getNow();
     for (int i = 0; i < (int)enc_insert_keys.size(); i++) {
-        ht->insert(enc_insert_keys[i].c_str());
+        /*if (i % 100000 == 0) { 
+            for (int j = 0; j < (int)enc_insert_keys[i].size(); j++) {
+                std::cout << sizeof(reinterpret_cast<const uint8_t*>(enc_insert_keys[i].c_str()))/sizeof(uint8_t) << " ";
+            }
+            std::cout << std::endl;
+        }*/
+        ht->insert(reinterpret_cast<const char*>(enc_insert_keys[i].c_str()));
     }
 
     double end_time = getNow();
     double build_time = end_time - start_time;
+    double insert_time = end_time - insert_start_time;
     std::cout << "Build time = " << build_time << std::endl;
+    std::cout << "Insert time = " << insert_time << std::endl;
 
     int64_t htree_size = ht->getStatistics().first;
     std::map<std::string, double> stats_map =  ht->getStatistics().second;
@@ -241,9 +339,26 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
         std::cout << std::endl;
     }
 
+    std::vector<double> node_stats;
+    node_stats.push_back(getStatsDefault(stats_map, "SINGLE_MASK_8_BIT_PARTIAL_KEYS "));
+    node_stats.push_back(getStatsDefault(stats_map, "SINGLE_MASK_16_BIT_PARTIAL_KEYS "));
+    node_stats.push_back(getStatsDefault(stats_map, "SINGLE_MASK_32_BIT_PARTIAL_KEYS "));
+    node_stats.push_back(getStatsDefault(stats_map, "MULTI_MASK_8_BYTES_AND_8_BIT_PARTIAL_KEYS "));
+    node_stats.push_back(getStatsDefault(stats_map, "MULTI_MASK_8_BYTES_AND_16_BIT_PARTIAL_KEYS "));
+    node_stats.push_back(getStatsDefault(stats_map, "MULTI_MASK_8_BYTES_AND_32_BIT_PARTIAL_KEYS "));
+    node_stats.push_back(getStatsDefault(stats_map, "MULTI_MASK_16_BYTES_AND_16_BIT_PARTIAL_KEYS "));
+    node_stats.push_back(getStatsDefault(stats_map, "MULTI_MASK_32_BYTES_AND_32_BIT_PARTIAL_KEYS "));
+    uint64_t node_total = 0;
+    for (int i = 0; i < 8; i++) {
+        node_total += node_stats[i];
+    }
+    node_stats.push_back(getStatsDefault(stats_map, "fanout") * 1.0 / node_total);
+
     for  (auto i : stats_map) {
         std::cout << i.first << " = " << i.second << std::endl;
     } 
+
+
     double mem = htree_size;
 #ifdef BREAKDOWN_TIME
     double encode_time = 0;
@@ -273,18 +388,20 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
                 encode_time += getNow() - now;
                 now = getNow();
 #endif
-                idx::contenthelpers::OptionalValue<const char*> result = ht->lookup(enc_key.c_str());
+                int height;
+                idx::contenthelpers::OptionalValue<const char*> result = ht->lookup(reinterpret_cast<const char*>(enc_key.c_str()), height);
 #ifdef BREAKDOWN_TIME
                 lookup_time += getNow() - now;
 #endif
-                //assert(strcmp(result.mValue, enc_key.c_str()) == 0);
+                assert(strcmp(result.mValue, enc_key.c_str()) == 0);
 	        }
 	    } else {
 	        for (int i = 0; i < (int)txn_keys.size(); i++) {
 #ifdef BREAKDOWN_TIME
                 now = getNow();
 #endif
-                idx::contenthelpers::OptionalValue<const char*> result = ht->lookup(txn_keys[i].c_str());
+                int height;
+                idx::contenthelpers::OptionalValue<const char*> result = ht->lookup(reinterpret_cast<const char*>(txn_keys[i].c_str()), height);
 #ifdef BREAKDOWN_TIME
                 lookup_time += getNow() - now;
 #endif
@@ -313,9 +430,9 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
                 encode_time += getNow() - now;
                 now = getNow();
 #endif
-                hot_type::const_iterator iter = ht->lower_bound(left_key.c_str());
+                hot_type::const_iterator iter = ht->lower_bound(reinterpret_cast<const char*>(left_key.c_str()));
                 while (iter != ht->end()
-		            && strcmp((*iter), right_key.c_str()) < 0) {
+                    && (unit8CompareBeq(reinterpret_cast<const uint8_t*>(*iter), reinterpret_cast<const uint8_t*>(right_key.c_str())) == false)) {
 		            ++iter;
 		        }
 		        //sum += (iter->second);
@@ -330,7 +447,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
             for (int i = 0; i < (int)txn_keys.size(); i++) {
                 hot_type::const_iterator iter = ht->lower_bound(txn_keys[i].c_str());
                 while (iter != ht->end()
-                    && strcmp((*iter), upper_bound_keys[i].c_str()) < 0) {
+                     && (unit8CompareBeq(reinterpret_cast<const uint8_t*>(*iter), reinterpret_cast<const uint8_t*>(upper_bound_keys[i].c_str())) == false)) {
 		            ++iter;
                 }
 		    //sum += (iter->second);
@@ -344,12 +461,14 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     double exec_time = end_time - start_time;
     double tput = txn_keys.size() / exec_time / 1000000; // Mops/sec
     std::cout << kGreen << "Throughput = " << kNoColor << tput << "\n";
-    double lat = (exec_time * 1000000) / txn_keys.size(); // us
+    double lookup_lat = (exec_time * 1000000) / txn_keys.size(); // us
+    double insert_lat = (insert_time * 1000000) / enc_insert_keys.size(); // us
 #ifdef BREAKDOWN_TIME
     encode_time = encode_time * 1000000 / txn_keys.size();
     lookup_time = lookup_time * 1000000 / txn_keys.size();
 #endif
-    std::cout << kGreen << "Latency = " << kNoColor << lat << "\n";
+    std::cout << kGreen << "Lookup Latency = " << kNoColor << lookup_lat << "\n";
+    std::cout << kGreen << "Insert Latency = " << kNoColor << insert_lat << "\n";
 
     delete ht;
     delete encoder;
@@ -359,44 +478,76 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     if (expt_id == 0) {
         if (wkld_id == kEmail) {
 #ifdef BREAKDOWN_TIME
-            output_time_email_hot << lat << "," << encode_time << "," << lookup_time << "\n";
+            output_time_email_hot << lookup_lat << "," << insert_lat << "," << encode_time << "," << lookup_time << "\n";
 #else
-            output_lat_email_hot << lat << std::endl;
+            output_lookuplat_email_hot << lookup_lat << "\n";
+            output_insertlat_email_hot << insert_lat << "\n";
 #endif
 	        output_mem_email_hot << mem << "\n";
             for (int i = 0; i < int(height); i++) {
                 output_height_email_hot << std::fixed << heights[i] << ",";
             }
             output_height_email_hot << std::endl;
+            for (int i = 0; i < int(node_stats.size()); i++) {
+                output_stats_email_hot << node_stats[i] << ",";
+            }
+            output_stats_email_hot << std::endl;
 	    } else if (wkld_id == kWiki) {
 #ifdef BREAKDOWN_TIME
-            output_time_wiki_hot << lat <<  "," << encode_time << "," << lookup_time << "\n";
+            output_time_wiki_hot << lookup_lat <<  "," << insert_lat << "," << encode_time << "," << lookup_time << "\n";
 #else
-            output_lat_wiki_hot << lat << std::endl;
+            output_lookuplat_wiki_hot << lookup_lat << "\n";
+            output_insertlat_wiki_hot << insert_lat << "\n";
 #endif
             output_mem_wiki_hot << mem << "\n";
             for (int i = 0; i < int(height); i++) {
                 output_height_wiki_hot << std::fixed << heights[i] << ",";
             }
             output_height_wiki_hot << std::endl;
+            for (int i = 0; i < int(node_stats.size()); i++) {
+                output_stats_wiki_hot << node_stats[i] << ",";
+            }
+            output_stats_wiki_hot << std::endl; 
 	    } else if (wkld_id == kUrl) {
 #ifdef BREAKDOWN_TIME
-	        output_time_url_hot << lat <<  "," << encode_time << "," << lookup_time <<"\n";
+	        output_time_url_hot << lookup_lat <<  "," << insert_lat << "," << encode_time << "," << lookup_time <<"\n";
 #else
-            output_lat_url_hot << lat << std::endl;
+            output_lookuplat_url_hot << lookup_lat << "\n";
+            output_insertlat_url_hot << insert_lat << "\n";
 #endif
 	        output_mem_url_hot << mem << "\n";
             for (int i = 0; i < int(height); i++) {
                 output_height_url_hot << std::fixed << heights[i] << ",";
             }
             output_height_url_hot << std::endl;
+            for (int i = 0; i < int(node_stats.size()); i++) {
+                output_stats_url_hot << node_stats[i] << ",";
+            }
+            output_stats_url_hot << std::endl;
+	    }  else if (wkld_id == kTs) {
+#ifdef BREAKDOWN_TIME
+	        output_time_ts_hot << lookup_lat <<  "," << insert_lat << encode_time << "," << lookup_time <<"\n";
+#else
+            output_lookuplat_ts_hot << lookup_lat << "\n";
+            output_insertlat_ts_hot << insert_lat << "\n";
+#endif
+	        output_mem_ts_hot << mem << "\n";
+            for (int i = 0; i < int(height); i++) {
+                output_height_ts_hot << std::fixed << heights[i] << ",";
+            }
+            output_height_ts_hot << std::endl;
+            for (int i = 0; i < int(node_stats.size()); i++) {
+                output_stats_ts_hot << node_stats[i] << ",";
+            }
+            output_stats_ts_hot << std::endl;
 	    }
     } else if (expt_id == 1) {
         if (wkld_id == kEmail) {
 #ifdef BREAKDOWN_TIME
-            output_time_email_hot_range << lat <<  "," << encode_time << "," << lookup_time << "\n";
+            output_time_email_hot_range << lookup_lat <<  "," << insert_lat << "," << encode_time << "," << lookup_time << "\n";
 #else
-            output_lat_email_hot_range << lat << std::endl;
+            output_lookuplat_email_hot_range << lookup_lat << "\n";
+            output_insertlat_email_hot_range << insert_lat << "\n";
 #endif
             output_mem_email_hot_range << mem << "\n";
             for (int i = 0; i < int(height); i++) {
@@ -405,9 +556,10 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
             output_height_email_hot_range << std::endl;
         } else if (wkld_id == kWiki) {
 #ifdef BREAKDOWN_TIME
-            output_time_wiki_hot_range << lat <<  "," << encode_time << "," << lookup_time << "\n";
+            output_time_wiki_hot_range << lookup_lat <<  "," << insert_lat << "," << encode_time << "," << lookup_time << "\n";
 #else
-            output_lat_wiki_hot_range << lat << std::endl;
+            output_lookuplat_wiki_hot_range << lookup_lat << "\n";
+            output_insertlat_wiki_hot_range << insert_lat << "\n";
 #endif
             output_mem_wiki_hot_range << mem << "\n";
             for (int i = 0; i < int(height); i++) {
@@ -416,15 +568,28 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
             output_height_wiki_hot_range << std::endl;
     	} else if (wkld_id == kUrl) {
 #ifdef BREAKDOWN_TIME
-	        output_time_url_hot_range << lat <<  "," << encode_time << "," << lookup_time << "\n";
+	        output_time_url_hot_range << lookup_lat <<  "," << insert_lat << "," << encode_time << "," << lookup_time << "\n";
 #else
-             output_lat_url_hot_range << lat << std::endl;
+            output_lookuplat_url_hot_range << lookup_lat << "\n";
+            output_insertlat_url_hot_range << insert_lat << "\n";
 #endif
 	        output_mem_url_hot_range << mem << "\n";
             for (int i = 0; i < int(height); i++) {
                 output_height_url_hot_range << std::fixed << heights[i] << ",";
             }
             output_height_url_hot_range << std::endl;
+	    } else if (wkld_id == kTs) {
+#ifdef BREAKDOWN_TIME
+	        output_time_ts_hot_range << lookup_lat << "," << insert_lat << "," << encode_time << "," << lookup_time << "\n";
+#else
+            output_lookuplat_ts_hot_range << lookup_lat << "\n";
+            output_insertlat_ts_hot_range << insert_lat << "\n";
+#endif
+	        output_mem_ts_hot_range << mem << "\n";
+            for (int i = 0; i < int(height); i++) {
+                output_height_ts_hot_range << std::fixed << heights[i] << ",";
+            }
+            output_height_ts_hot_range << std::endl;
 	    }
     }
 #endif
@@ -443,7 +608,11 @@ void exec_group(const int expt_id, const bool is_point,
 		const std::vector<std::string>& insert_urls,
 		const std::vector<std::string>& insert_urls_sample,
 		const std::vector<std::string>& txn_urls,
-		const std::vector<std::string>& upper_bound_urls) {
+		const std::vector<std::string>& upper_bound_urls,
+        const std::vector<std::string>& insert_tss,
+		const std::vector<std::string>& insert_tss_sample,
+		const std::vector<std::string>& txn_tss,
+		const std::vector<std::string>& upper_bound_tss){
     int dict_size[2] = {10000, 65536};
 
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
@@ -460,6 +629,13 @@ void exec_group(const int expt_id, const bool is_point,
     exec(expt_id, kUrl, is_point, false, 0, 0,
 	 insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
     expt_num++;
+
+#ifdef RUN_TIMESTAMP
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kTs, is_point, false, 0, 0,
+     insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
+    expt_num++;
+#endif
     //=================================================
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
     exec(expt_id, kEmail, is_point, true, 1, 1000,
@@ -475,6 +651,13 @@ void exec_group(const int expt_id, const bool is_point,
     exec(expt_id, kUrl, is_point, true, 1, 1000,
 	 insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
     expt_num++;
+
+#ifdef RUN_TIMESTAMP
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kTs, is_point, true, 1, 1000,
+     insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
+    expt_num++;
+#endif
     //=================================================
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
     exec(expt_id, kEmail, is_point, true, 2, 65536,
@@ -490,8 +673,15 @@ void exec_group(const int expt_id, const bool is_point,
     exec(expt_id, kUrl, is_point, true, 2, 65536,
 	 insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
     expt_num++;
+
+#ifdef RUN_TIMESTAMP
+    exec(expt_id, kTs, is_point, true, 2, 65536,
+     insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
+    expt_num++;
+#endif
 	    
    for (int j = 0; j < 2; j++) {
+
 	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
 	exec(expt_id, kEmail, is_point, true, 3, dict_size[j],
 	     insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
@@ -506,9 +696,17 @@ void exec_group(const int expt_id, const bool is_point,
 	exec(expt_id, kUrl, is_point, true, 3, dict_size[j],
 	     insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 	expt_num++;
+
+#ifdef RUN_TIMESTAMP
+	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kTs, is_point, true, 3, dict_size[j],
+     insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
+    expt_num++;
+#endif
     }
-    
+
     for (int j = 0; j < 2; j++) {
+
 	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
 	exec(expt_id, kEmail, is_point, true, 4, dict_size[j],
 	     insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
@@ -523,29 +721,38 @@ void exec_group(const int expt_id, const bool is_point,
 	exec(expt_id, kUrl, is_point, true, 4, dict_size[j],
 	     insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 	expt_num++;
+
+#ifdef RUN_TIMESTAMP
+ 	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+	exec(expt_id, kTs, is_point, true, 4, dict_size[j],
+	     insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
+	expt_num++;
+#endif
     }
+    if (runALM == 1) {
+        int dict_size_5[2] = {8192, 65536};
+        for (int j = 0; j < 2; j++) {
+            std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+            exec(expt_id, kEmail, is_point, true, 5, dict_size_5[j],
+                    insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
+            expt_num++;
 
-    int dict_size_5[2] = {8192, 65536};
-    for (int j = 0; j < 2; j++) {
-	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-	exec(expt_id, kEmail, is_point, true, 5, dict_size_5[j],
-	     insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
-	expt_num++;
+            std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+            exec(expt_id, kWiki, is_point, true, 5, dict_size_5[j],
+                   insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
+            expt_num++;
 
-	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-	exec(expt_id, kWiki, is_point, true, 5, dict_size_5[j],
-	     insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
-	expt_num++;
-
-	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-	exec(expt_id, kUrl, is_point, true, 5, dict_size_5[j],
-	     insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
-	expt_num++;
+            std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+            exec(expt_id, kUrl, is_point, true, 5, dict_size_5[j],
+	                insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
+            expt_num++;
+        }
     }
 }
 
 int main(int argc, char *argv[]) {
     int expt_id = (int)atoi(argv[1]);
+    runALM = (int)atoi(argv[2]);
 
     //-------------------------------------------------------------
     // Init Workloads
@@ -559,6 +766,11 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> insert_urls, insert_urls_sample, txn_urls, upper_bound_urls;
     loadWorkload(kUrl, insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 
+    std::vector<std::string> insert_tss, insert_tss_sample, txn_tss, upper_bound_tss;
+#ifdef RUN_TIMESTAMP
+    loadWorkload(kTs, insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
+#endif
+
     if (expt_id == 0) {
 	//-------------------------------------------------------------
 	// Point Queries; Expt ID = 0
@@ -567,23 +779,39 @@ int main(int argc, char *argv[]) {
 	std::cout << "Point Queries; Expt ID = 0" << std::endl;
 	std::cout << "====================================" << std::endl;
 #ifdef WRITE_TO_FILE
-	output_lat_email_hot.open(file_lat_email_hot);
-	output_mem_email_hot.open(file_mem_email_hot);
-	output_height_email_hot.open(file_height_email_hot);
+	output_lookuplat_email_hot.open(file_lookuplat_email_hot, std::ofstream::app);
+	output_insertlat_email_hot.open(file_insertlat_email_hot, std::ofstream::app);
+	output_mem_email_hot.open(file_mem_email_hot, std::ofstream::app);
+	output_height_email_hot.open(file_height_email_hot, std::ofstream::app);
+    output_stats_email_hot.open(file_stats_email_hot, std::ofstream::app);
 
-	output_lat_wiki_hot.open(file_lat_wiki_hot);
-	output_mem_wiki_hot.open(file_mem_wiki_hot);
-	output_height_wiki_hot.open(file_height_wiki_hot);
+	output_lookuplat_wiki_hot.open(file_lookuplat_wiki_hot, std::ofstream::app);
+	output_insertlat_wiki_hot.open(file_insertlat_wiki_hot, std::ofstream::app);
+	output_mem_wiki_hot.open(file_mem_wiki_hot, std::ofstream::app);
+	output_height_wiki_hot.open(file_height_wiki_hot, std::ofstream::app);
+    output_stats_wiki_hot.open(file_stats_wiki_hot, std::ofstream::app);
 
-	output_lat_url_hot.open(file_lat_url_hot);
-	output_mem_url_hot.open(file_mem_url_hot);
-	output_height_url_hot.open(file_height_url_hot);
-
+	output_lookuplat_url_hot.open(file_lookuplat_url_hot, std::ofstream::app);
+	output_insertlat_url_hot.open(file_insertlat_url_hot, std::ofstream::app);
+	output_mem_url_hot.open(file_mem_url_hot, std::ofstream::app);
+	output_height_url_hot.open(file_height_url_hot, std::ofstream::app);
+    output_stats_url_hot.open(file_stats_url_hot, std::ofstream::app);
 #endif
+
+#ifdef RUN_TIMESTAMP
+    output_lookuplat_ts_hot.open(file_lookuplat_ts_hot, std::ofstream::app);
+    output_insertlat_ts_hot.open(file_insertlat_ts_hot, std::ofstream::app);
+	output_mem_ts_hot.open(file_mem_ts_hot, std::ofstream::app);
+	output_height_ts_hot.open(file_height_ts_hot, std::ofstream::app);
+    output_stats_ts_hot.open(file_stats_ts_hot, std::ofstream::app);
+#endif
+
 #ifdef BREAKDOWN_TIME
-   output_time_email_hot.open(file_time_email_hot);
-   output_time_wiki_hot.open(file_time_wiki_hot);
-   output_time_url_hot.open(file_time_url_hot);
+   output_time_email_hot.open(file_time_email_hot, std::ofstream::app);
+   output_time_wiki_hot.open(file_time_wiki_hot, std::ofstream::app);
+   output_time_url_hot.open(file_time_url_hot, std::ofstream::app);
+
+   output_time_ts_hot.open(file_time_ts_hot, std::ofstream::app);
 #endif
 
 	bool is_point = true;
@@ -592,25 +820,71 @@ int main(int argc, char *argv[]) {
 	exec_group(expt_id, is_point, expt_num, total_num_expt,
 		   insert_emails, insert_emails_sample, txn_emails, upper_bound_emails,
 		   insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis,
-		   insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
+		   insert_urls, insert_urls_sample, txn_urls, upper_bound_urls,
+		   insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
 #ifdef WRITE_TO_FILE	
-	output_lat_email_hot.close();
-	output_mem_email_hot.close();
-	output_height_email_hot.close();
+    output_lookuplat_email_hot << "-" << "\n";
+    output_insertlat_email_hot << "-" << "\n";
+	output_mem_email_hot << "-" << "\n";
+    output_height_email_hot << "-" << "\n";
+	output_stats_email_hot << "-" << "\n";
 
-	output_lat_wiki_hot.close();
+	output_lookuplat_email_hot.close();
+	output_insertlat_email_hot.close();
+	output_mem_email_hot.close();
+    output_height_email_hot.close();
+	output_stats_email_hot.close();
+
+    output_lookuplat_wiki_hot << "-" << "\n";
+    output_insertlat_wiki_hot << "-" << "\n";
+	output_mem_wiki_hot << "-" << "\n";
+	output_height_wiki_hot << "-" << "\n";
+	output_stats_wiki_hot << "-" << "\n";
+
+	output_lookuplat_wiki_hot.close();
+	output_insertlat_wiki_hot.close();
 	output_mem_wiki_hot.close();
 	output_height_wiki_hot.close();
+	output_stats_wiki_hot.close();
 
-	output_lat_url_hot.close();
+    output_lookuplat_url_hot << "-" << "\n";
+    output_insertlat_url_hot << "-" << "\n";
+	output_mem_url_hot << "-" << "\n";
+	output_height_url_hot << "-" << "\n";
+	output_stats_url_hot << "-" << "\n";
+
+	output_lookuplat_url_hot.close();
+	output_insertlat_url_hot.close();
 	output_mem_url_hot.close();
 	output_height_url_hot.close();
+	output_stats_url_hot.close();
+
+#endif
+
+#ifdef RUN_TIMESTAMP
+    output_lookuplat_ts_hot << "-" << "\n";
+    output_insertlat_ts_hot << "-" << "\n";
+	output_mem_ts_hot << "-" << "\n";
+	output_height_ts_hot << "-" << "\n";
+	output_stats_ts_hot << "-" << "\n";
+
+    output_lookuplat_ts_hot.close();
+    output_insertlat_ts_hot.close();
+	output_mem_ts_hot.close();
+	output_height_ts_hot.close();
+	output_stats_ts_hot.close();
 #endif
 
 #ifdef BREAKDOWN_TIME
+    output_time_email_hot << "-" << "\n";
+    output_time_wiki_hot << "-" << "\n";
+    output_time_url_hot << "-" << "\n";
+    output_time_ts_hot << "-" << "\n";
+
     output_time_email_hot.close();
     output_time_wiki_hot.close();
     output_time_url_hot.close();
+    output_time_ts_hot.close();
 #endif
     }
     else if (expt_id == 1) {
@@ -621,22 +895,35 @@ int main(int argc, char *argv[]) {
 	std::cout << "Range Queries; Expt ID = 1" << std::endl;
 	std::cout << "====================================" << std::endl;
 #ifdef WRITE_TO_FILE
-	output_lat_email_hot_range.open(file_lat_email_hot_range);
-	output_mem_email_hot_range.open(file_mem_email_hot_range);
-	output_height_email_hot_range.open(file_height_email_hot_range);
+	output_lookuplat_email_hot_range.open(file_lookuplat_email_hot_range, std::ofstream::app);
+	output_insertlat_email_hot_range.open(file_insertlat_email_hot_range, std::ofstream::app);
+	output_mem_email_hot_range.open(file_mem_email_hot_range, std::ofstream::app);
+	output_height_email_hot_range.open(file_height_email_hot_range, std::ofstream::app);
 
-	output_lat_wiki_hot_range.open(file_lat_wiki_hot_range);
-	output_mem_wiki_hot_range.open(file_mem_wiki_hot_range);
-	output_height_wiki_hot_range.open(file_height_wiki_hot_range);
+	output_lookuplat_wiki_hot_range.open(file_lookuplat_wiki_hot_range, std::ofstream::app);
+	output_insertlat_wiki_hot_range.open(file_insertlat_wiki_hot_range, std::ofstream::app);
+	output_mem_wiki_hot_range.open(file_mem_wiki_hot_range, std::ofstream::app);
+	output_height_wiki_hot_range.open(file_height_wiki_hot_range, std::ofstream::app);
 
-	output_lat_url_hot_range.open(file_lat_url_hot_range);
-	output_mem_url_hot_range.open(file_mem_url_hot_range);
-	output_height_url_hot_range.open(file_height_url_hot_range);
+	output_lookuplat_url_hot_range.open(file_lookuplat_url_hot_range, std::ofstream::app);
+	output_insertlat_url_hot_range.open(file_insertlat_url_hot_range, std::ofstream::app);
+	output_mem_url_hot_range.open(file_mem_url_hot_range, std::ofstream::app);
+	output_height_url_hot_range.open(file_height_url_hot_range, std::ofstream::app);
 #endif
+
+#ifdef RUN_TIMESTAMP
+    output_lookuplat_ts_hot_range.open(file_lookuplat_ts_hot_range, std::ofstream::app);
+    output_insertlat_ts_hot_range.open(file_insertlat_ts_hot_range, std::ofstream::app);
+	output_mem_ts_hot_range.open(file_mem_ts_hot_range, std::ofstream::app);
+	output_height_ts_hot_range.open(file_height_ts_hot_range, std::ofstream::app);
+#endif
+
 #ifdef BREAKDOWN_TIME
-   output_time_email_hot_range.open(file_time_email_hot);
-   output_time_wiki_hot_range.open(file_time_wiki_hot);
-   output_time_url_hot_range.open(file_time_url_hot);
+   output_time_email_hot_range.open(file_time_email_hot, std::ofstream::app);
+   output_time_wiki_hot_range.open(file_time_wiki_hot, std::ofstream::app);
+   output_time_url_hot_range.open(file_time_url_hot, std::ofstream::app);
+
+   output_time_ts_hot_range.open(file_time_ts_hot, std::ofstream::app);
 #endif
 	bool is_point = false;
 	int expt_num = 1;
@@ -644,24 +931,60 @@ int main(int argc, char *argv[]) {
 	exec_group(expt_id, is_point, expt_num, total_num_expt,
 		   insert_emails, insert_emails_sample, txn_emails, upper_bound_emails,
 		   insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis,
-		   insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
+		   insert_urls, insert_urls_sample, txn_urls, upper_bound_urls,
+		   insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
 #ifdef WRITE_TO_FILE	
-	output_lat_email_hot_range.close();
+    output_lookuplat_email_hot_range << "-" << "\n";
+    output_insertlat_email_hot_range << "-" << "\n";
+	output_mem_email_hot_range << "-" << "\n";
+	output_height_email_hot_range << "-" << "\n";
+
+	output_lookuplat_email_hot_range.close();
+	output_insertlat_email_hot_range.close();
 	output_mem_email_hot_range.close();
 	output_height_email_hot_range.close();
 
-	output_lat_wiki_hot_range.close();
+    output_lookuplat_wiki_hot_range << "-" << "\n";
+    output_insertlat_wiki_hot_range << "-" << "\n";
+	output_mem_wiki_hot_range << "-" << "\n";
+	output_height_wiki_hot_range << "-" << "\n";
+
+	output_lookuplat_wiki_hot_range.close();
+	output_insertlat_wiki_hot_range.close();
 	output_mem_wiki_hot_range.close();
 	output_height_wiki_hot_range.close();
 
-	output_lat_url_hot_range.close();
+    output_lookuplat_url_hot_range << "-" << "\n";
+	output_mem_url_hot_range << "-" << "\n";
+	output_height_url_hot_range << "-" << "\n";
+
+	output_lookuplat_url_hot_range.close();
 	output_mem_url_hot_range.close();
 	output_height_url_hot_range.close();
 #endif
+
+#ifdef RUN_TIMESTAMP
+    output_lookuplat_ts_hot_range << "-" << "\n";
+    output_insertlat_ts_hot_range << "-" << "\n";
+	output_mem_ts_hot_range << "-" << "\n";
+	output_height_ts_hot_range << "-" << "\n";
+
+    output_lookuplat_ts_hot_range.close();
+    output_insertlat_ts_hot_range.close();
+	output_mem_ts_hot_range.close();
+	output_height_ts_hot_range.close();
+#endif
+
 #ifdef BREAKDOWN_TIME
+    output_time_email_hot_range << "-" << "\n";
+    output_time_wiki_hot_range << "-" << "\n";
+    output_time_url_hot_range << "-" << "\n";
+    output_time_ts_hot_range << "-" << "\n";
+
     output_time_email_hot_range.close();
     output_time_wiki_hot_range.close();
     output_time_url_hot_range.close();
+    output_time_ts_hot_range.close();
 #endif
     }
     return 0;

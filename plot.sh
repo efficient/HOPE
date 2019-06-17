@@ -1,158 +1,206 @@
-!bin/bash
+#!/bin/bash
 
-############################################################
-# Sample Size Sweep
-############################################################
-#python plot/microbench/sample_size_sweep/cpr_email.py
-#python plot/microbench/sample_size_sweep/cpr_wiki.py
-#python plot/microbench/sample_size_sweep/cpr_url.py
+run_microbench=$1
+run_surf=$2
+run_art=$3
+run_hot=$4
+run_btree=$5
 
-#python plot/microbench/sample_size_sweep/bt_email.py
-#python plot/microbench/sample_size_sweep/bt_wiki.py
-#python plot/microbench/sample_size_sweep/bt_url.py
+PYTHON='/usr/local/bin/python3.5'
+if [ ${run_microbench} == 1 ]
+then
+    ############################################################
+    # Sample Size Sweep
+    ############################################################
+    #${PYTHON} plot/microbench/sample_size_sweep/cpr_email.py
+    #${PYTHON} plot/microbench/sample_size_sweep/cpr_wiki.py
+    #${PYTHON} plot/microbench/sample_size_sweep/cpr_url.py
 
-############################################################
-# CPR Latency
-############################################################
-python plot/microbench/cpr_latency/cpr_email.py
-python plot/microbench/cpr_latency/cpr_wiki.py
-python plot/microbench/cpr_latency/cpr_url.py
+    #${PYTHON} plot/microbench/sample_size_sweep/bt_email.py
+    #${PYTHON} plot/microbench/sample_size_sweep/bt_wiki.py
+    #${PYTHON} plot/microbench/sample_size_sweep/bt_url.py
 
-python plot/microbench/cpr_latency/lat_email.py
-python plot/microbench/cpr_latency/lat_wiki.py
-python plot/microbench/cpr_latency/lat_url.py
+    ############################################################
+    # CPR Latency
+    ############################################################
+    ${PYTHON} plot/microbench/cpr_latency/cpr_email.py
+    ${PYTHON} plot/microbench/cpr_latency/cpr_wiki.py
+    ${PYTHON} plot/microbench/cpr_latency/cpr_url.py
 
-python plot/microbench/cpr_latency/mem_email.py
-python plot/microbench/cpr_latency/mem_wiki.py
-python plot/microbench/cpr_latency/mem_url.py
+    ${PYTHON} plot/microbench/cpr_latency/lat_email.py
+    ${PYTHON} plot/microbench/cpr_latency/lat_wiki.py
+    ${PYTHON} plot/microbench/cpr_latency/lat_url.py
 
-############################################################
-# Hu-Tucker
-############################################################
-#python plot/microbench/hu_tucker/hu_tucker_email.py
+    ${PYTHON} plot/microbench/cpr_latency/mem_email.py
+    ${PYTHON} plot/microbench/cpr_latency/mem_wiki.py
+    ${PYTHON} plot/microbench/cpr_latency/mem_url.py
 
-############################################################
-# Array vs. Trie
-############################################################
-#python plot/microbench/array_trie/array_trie_email.py
+    ############################################################
+    # Hu-Tucker
+    ############################################################
+    #${PYTHON} plot/microbench/hu_tucker/hu_tucker_email.py
 
-############################################################
-# Hu-Tucker vs. Fixed-Len Dict
-############################################################
-#python plot/microbench/ht_vs_dc/cpr_email_ht_vs_dc.py
-#python plot/microbench/ht_vs_dc/lat_email_ht_vs_dc.py
-#python plot/microbench/ht_vs_dc/bt_email_ht_vs_dc.py
+    ############################################################
+    # Array vs. Trie
+    ############################################################
+    #${PYTHON} plot/microbench/array_trie/array_trie_email.py
 
-############################################################
-# Build Time Breakdown
-############################################################
-#python plot/microbench/build_time_breakdown/bt_100_breakdown.py
-#python plot/microbench/build_time_breakdown/bt_10_breakdown.py
-#python plot/microbench/build_time_breakdown/bt_1_breakdown.py
+    ############################################################
+    # Hu-Tucker vs. Fixed-Len Dict
+    ############################################################
+    #${PYTHON} plot/microbench/ht_vs_dc/cpr_email_ht_vs_dc.py
+    #${PYTHON} plot/microbench/ht_vs_dc/lat_email_ht_vs_dc.py
+    #${PYTHON} plot/microbench/ht_vs_dc/bt_email_ht_vs_dc.py
 
-############################################################
-# SuRF point
-############################################################
-python plot/SuRF/point/lat_mem_email_surf.py
-python plot/SuRF/point/lat_mem_wiki_surf.py
-python plot/SuRF/point/lat_mem_url_surf.py
+    ############################################################
+    # Build Time Breakdown
+    ############################################################
+    #${PYTHON} plot/microbench/build_time_breakdown/bt_100_breakdown.py
+    #${PYTHON} plot/microbench/build_time_breakdown/bt_10_breakdown.py
+    #${PYTHON} plot/microbench/build_time_breakdown/bt_1_breakdown.py
+fi
 
-#python plot/SuRF/point/fpr_email_surf.py
-#python plot/SuRF/point/fpr_wiki_surf.py
-#python plot/SuRF/point/fpr_url_surf.py
+if [ ${run_surf} == 1 ]
+then
+    ############################################################
+    # SuRF point
+    ############################################################
+    ${PYTHON} plot/SuRF/point/lat_mem_email_surf.py
+    ${PYTHON} plot/SuRF/point/lat_mem_wiki_surf.py
+    ${PYTHON} plot/SuRF/point/lat_mem_url_surf.py
 
-python plot/SuRF/point/height_email_surf.py
-python plot/SuRF/point/height_wiki_surf.py
-python plot/SuRF/point/height_url_surf.py
+    ${PYTHON} plot/SuRF/point/fpr_email_surf.py
+    ${PYTHON} plot/SuRF/point/fpr_wiki_surf.py
+    ${PYTHON} plot/SuRF/point/fpr_url_surf.py
 
-############################################################
-# SuRF range
-############################################################
-python plot/SuRF/range/lat_mem_email_surf.py
-python plot/SuRF/range/lat_mem_wiki_surf.py
-python plot/SuRF/range/lat_mem_url_surf.py
+    ${PYTHON} plot/SuRF/point/height_email_surf.py
+    ${PYTHON} plot/SuRF/point/height_wiki_surf.py
+    ${PYTHON} plot/SuRF/point/height_url_surf.py
 
-#python plot/SuRF/range/fpr_email_surf.py
-#python plot/SuRF/range/fpr_wiki_surf.py
-#python plot/SuRF/range/fpr_url_surf.py
+    ############################################################
+    # SuRF range
+    ############################################################
+    ${PYTHON} plot/SuRF/range/lat_mem_email_surf.py
+    ${PYTHON} plot/SuRF/range/lat_mem_wiki_surf.py
+    ${PYTHON} plot/SuRF/range/lat_mem_url_surf.py
 
-############################################################
-# SuRF-Real8 point
-############################################################
-#python plot/SuRF_real/point/lat_mem_email_surfreal.py
-#python plot/SuRF_real/point/lat_mem_wiki_surfreal.py
-#python plot/SuRF_real/point/lat_mem_url_surfreal.py
+    ${PYTHON} plot/SuRF/range/fpr_email_surf.py
+    ${PYTHON} plot/SuRF/range/fpr_wiki_surf.py
+    ${PYTHON} plot/SuRF/range/fpr_url_surf.py
 
-############################################################
-# SuRF-Real8 range
-############################################################
-#python plot/SuRF_real/range/lat_mem_email_surfreal.py
-#python plot/SuRF_real/range/lat_mem_wiki_surfreal.py
-#python plot/SuRF_real/range/lat_mem_url_surfreal.py
+    ############################################################
+    # SuRF-Real8 point
+    ############################################################
+    #${PYTHON} plot/SuRF_real/point/lat_mem_email_surfreal.py
+    #${PYTHON} plot/SuRF_real/point/lat_mem_wiki_surfreal.py
+    #${PYTHON} plot/SuRF_real/point/lat_mem_url_surfreal.py
 
-############################################################
-# ART point
-############################################################
-python plot/ART/point/lat_mem_email_art.py
-python plot/ART/point/lat_mem_wiki_art.py
-python plot/ART/point/lat_mem_url_art.py
+    ############################################################
+    # SuRF-Real8 range
+    ############################################################
+    #${PYTHON} plot/SuRF_real/range/lat_mem_email_surfreal.py
+    #${PYTHON} plot/SuRF_real/range/lat_mem_wiki_surfreal.py
+    #${PYTHON} plot/SuRF_real/range/lat_mem_url_surfreal.py
 
-python plot/ART/point/height_email_art.py
-python plot/ART/point/height_wiki_art.py
-python plot/ART/point/height_url_art.py
+    ############################################################
+    # SuRF Memory Stats
+    ############################################################
+    #${PYTHON} plot/SuRF/point/mem_email_surf.py
+    #${PYTHON} plot/SuRF/point/mem_wiki_surf.py
+    #${PYTHON} plot/SuRF/point/mem_url_surf.py
 
-############################################################
-# ART range
-############################################################
-python plot/ART/range/lat_mem_email_art.py
-python plot/ART/range/lat_mem_wiki_art.py
-python plot/ART/range/lat_mem_url_art.py
+fi
 
-############################################################
-# ART Node Stats
-############################################################
-#python plot/ART/point/mem_email_art.py
-#python plot/ART/point/mem_wiki_art.py
-#python plot/ART/point/mem_url_art.py
+if [ ${run_art} == 1 ]
+then
+    ############################################################
+    # ART point
+    ############################################################
+    ${PYTHON} plot/ART/point/lookuplat_mem_email_art.py
+    ${PYTHON} plot/ART/point/lookuplat_mem_wiki_art.py
+    ${PYTHON} plot/ART/point/lookuplat_mem_url_art.py
 
-############################################################
-# SuRF Memory Stats
-############################################################
-#python plot/SuRF/point/mem_email_surf.py
-#python plot/SuRF/point/mem_wiki_surf.py
-#python plot/SuRF/point/mem_url_surf.py
+    ${PYTHON} plot/ART/point/insertlat_mem_email_art.py
+    ${PYTHON} plot/ART/point/insertlat_mem_wiki_art.py
+    ${PYTHON} plot/ART/point/insertlat_mem_url_art.py
 
-############################################################
-# Btree point
-############################################################
-python plot/btree/point/lat_mem_email_btree.py
-python plot/btree/point/lat_mem_wiki_btree.py
-python plot/btree/point/lat_mem_url_btree.py
+    ${PYTHON} plot/ART/point/height_email_art.py
+    ${PYTHON} plot/ART/point/height_wiki_art.py
+    ${PYTHON} plot/ART/point/height_url_art.py
 
-############################################################
-# Btree range
-############################################################
-python plot/btree/range/lat_mem_email_btree.py
-python plot/btree/range/lat_mem_wiki_btree.py
-python plot/btree/range/lat_mem_url_btree.py
+    ############################################################
+    # ART range
+    ############################################################
+    ${PYTHON} plot/ART/range/lookuplat_mem_email_art.py
+    ${PYTHON} plot/ART/range/lookuplat_mem_wiki_art.py
+    ${PYTHON} plot/ART/range/lookuplat_mem_url_art.py
 
-############################################################
-# hot point
-############################################################
-python plot/hot/point/lat_mem_email_hot.py
-python plot/hot/point/lat_mem_wiki_hot.py
-python plot/hot/point/lat_mem_url_hot.py
+    ${PYTHON} plot/ART/range/insertlat_mem_email_art.py
+    ${PYTHON} plot/ART/range/insertlat_mem_wiki_art.py
+    ${PYTHON} plot/ART/range/insertlat_mem_url_art.py
 
-############################################################
-# hot range
-############################################################
-python plot/hot/range/lat_mem_email_hot.py
-python plot/hot/range/lat_mem_wiki_hot.py
-python plot/hot/range/lat_mem_url_hot.py
+    ############################################################
+    # ART Node Stats
+    ############################################################
+    ${PYTHON} plot/ART/point/mem_email_art.py
+    ${PYTHON} plot/ART/point/mem_wiki_art.py
+    ${PYTHON} plot/ART/point/mem_url_art.py
+fi
 
-############################################################
-# hot height
-############################################################
-python plot/hot/point/height_email_hot.py
-python plot/hot/point/height_wiki_hot.py
-python plot/hot/point/height_url_hot.py
+if [ ${run_btree} == 1 ]
+then
+    ############################################################
+    # Btree point
+    ############################################################
+    ${PYTHON} plot/btree/point/lookuplat_mem_email_btree.py
+    ${PYTHON} plot/btree/point/lookuplat_mem_wiki_btree.py
+    ${PYTHON} plot/btree/point/lookuplat_mem_url_btree.py
+
+    ${PYTHON} plot/btree/point/insertlat_mem_email_btree.py
+    ${PYTHON} plot/btree/point/insertlat_mem_wiki_btree.py
+    ${PYTHON} plot/btree/point/insertlat_mem_url_btree.py
+
+    ############################################################
+    # Btree range
+    ############################################################
+    ${PYTHON} plot/btree/range/lookuplat_mem_email_btree.py
+    ${PYTHON} plot/btree/range/lookuplat_mem_wiki_btree.py
+    ${PYTHON} plot/btree/range/lookuplat_mem_url_btree.py
+
+    ${PYTHON} plot/btree/range/insertlat_mem_email_btree.py
+    ${PYTHON} plot/btree/range/insertlat_mem_wiki_btree.py
+    ${PYTHON} plot/btree/range/insertlat_mem_url_btree.py
+
+fi
+
+if [ ${run_hot} == 1 ]
+then
+    ############################################################
+    # hot point
+    ############################################################
+    ${PYTHON} plot/hot/point/lookuplat_mem_email_hot.py
+    ${PYTHON} plot/hot/point/lookuplat_mem_wiki_hot.py
+    ${PYTHON} plot/hot/point/lookuplat_mem_url_hot.py
+
+    ${PYTHON} plot/hot/point/insertlat_mem_email_hot.py
+    ${PYTHON} plot/hot/point/insertlat_mem_wiki_hot.py
+    ${PYTHON} plot/hot/point/insertlat_mem_url_hot.py
+
+    ############################################################
+    # hot range
+    ############################################################
+    ${PYTHON} plot/hot/range/lookuplat_mem_email_hot.py
+    ${PYTHON} plot/hot/range/lookuplat_mem_wiki_hot.py
+    ${PYTHON} plot/hot/range/lookuplat_mem_url_hot.py
+
+    ${PYTHON} plot/hot/range/insertlat_mem_email_hot.py
+    ${PYTHON} plot/hot/range/insertlat_mem_wiki_hot.py
+    ${PYTHON} plot/hot/range/insertlat_mem_url_hot.py
+
+    ############################################################
+    # hot height
+    ############################################################
+    ${PYTHON} plot/hot/point/height_email_hot.py
+    ${PYTHON} plot/hot/point/height_wiki_hot.py
+    ${PYTHON} plot/hot/point/height_url_hot.py
+fi
