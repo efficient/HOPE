@@ -470,6 +470,11 @@ void exec_group(const int expt_id, const bool is_point,
 	exec(expt_id, kUrl, is_point, true, 3, dict_size[j],
 	     insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 	expt_num++;
+
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kTs, is_point, true, 3, dict_size[j],
+     insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
+    expt_num++;
     }
  
     for (int j = 0; j < 2; j++) {
@@ -487,6 +492,11 @@ void exec_group(const int expt_id, const bool is_point,
 	exec(expt_id, kUrl, is_point, true, 4, dict_size[j],
 	     insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 	expt_num++;
+
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kTs, is_point, true, 4, dict_size[j],
+     insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
+    expt_num++;
     }
 
     if (runALM == 1) {
@@ -506,6 +516,11 @@ void exec_group(const int expt_id, const bool is_point,
             exec(expt_id, kUrl, is_point, true, 5, dict_size_5[j],
                  insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
             expt_num++;
+
+//            std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+//            exec(expt_id, kTs, is_point, true, 5, dict_size_5[j],
+//                insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
+//             expt_num++;
         }
     }
 }

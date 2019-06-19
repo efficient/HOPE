@@ -380,7 +380,7 @@ int main(int argc, char *argv[]) {
 	int percent = 1;
     double url_percent = 0.1;
     int dict_size_list[9] = {1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144};
-	//int dict_size_list[3] = {1024, 2048, 4096};
+	//int dict_size_list[5] = {16384, 32768, 65536, 131072, 262144};
 	int expt_num = 1;
 	int total_num_expts = 81;
 
@@ -430,10 +430,11 @@ int main(int argc, char *argv[]) {
 		std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
 		exec(expt_id, kUrl, et, dict_size_limit, url_percent, urls_shuffle, total_len_url);
 		expt_num++;
-      
-//        std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-//		exec(expt_id, kTs, et, dict_size_limit, percent, tss_shuffle, total_len_ts);
-//		expt_num++;
+        if (et == 5)
+            continue;
+        std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
+		exec(expt_id, kTs, et, dict_size_limit, percent, tss_shuffle, total_len_ts);
+		expt_num++;
 	    }
 	}
 
@@ -450,6 +451,13 @@ int main(int argc, char *argv[]) {
             std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
             exec(expt_id, kUrl, et, dict_size_limit, url_percent, urls_shuffle, total_len_url);
             expt_num++;
+
+            if (et == 5)
+                continue;
+            std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
+            exec(expt_id, kTs, et, dict_size_limit, percent, tss_shuffle, total_len_ts);
+            expt_num++;
+
         }
     }
     
