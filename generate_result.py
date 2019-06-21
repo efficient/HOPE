@@ -3,10 +3,10 @@ import os
 import numpy as np
 RESULT_DIR = './results/'
 #PREFIX = ['ART', 'btree', 'hot', 'microbench/cpr_latency', 'SuRF', 'SuRF_real']
-PREFIX = ['microbench/cpr_latency']
+PREFIX = ['SuRF', 'SuRF_real']
 TYPE = ['point', 'range']
 DATASETS = ['email', 'ts', 'url', 'wiki']
-VAR = ['cpr','x','height', 'lat', 'insertlat', 'lookuplat', 'mem']
+VAR = ['cpr','x','height', 'fpr', 'lat', 'insertlat', 'lookuplat', 'mem']
 
 
 def generate_result(dirpath, filename):
@@ -33,7 +33,7 @@ def generate_result(dirpath, filename):
             #print([float(x) for x in line.split(',')])
             results[idx].append(np.array([float(x) for x in line.split(',')]))
             idx += 1
-        #print(np.asarray(results).shape)
+#        print(np.asarray(results).shape)
         results = (np.mean(np.asarray(results), axis=1))
 
     # Output results to file
@@ -58,6 +58,6 @@ for pre in PREFIX:
                 files = os.listdir(cur_dir)
                 for f in files:
                     if f.startswith(file_prefix):
-#                        print(f,file_prefix)
+                        print(f,file_prefix)
                         generate_result(cur_dir, f)
 

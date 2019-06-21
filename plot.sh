@@ -142,9 +142,9 @@ then
     ############################################################
     # ART Node Stats
     ############################################################
-    ${PYTHON} plot/ART/point/mem_email_art.py
-    ${PYTHON} plot/ART/point/mem_wiki_art.py
-    ${PYTHON} plot/ART/point/mem_url_art.py
+    #${PYTHON} plot/ART/point/mem_email_art.py
+    #${PYTHON} plot/ART/point/mem_wiki_art.py
+    #${PYTHON} plot/ART/point/mem_url_art.py
 fi
 
 if [ ${run_btree} == 1 ]
