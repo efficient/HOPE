@@ -1,4 +1,5 @@
 #include <sys/time.h>
+#include <set>
 #include <time.h>
 
 #include <algorithm>
@@ -154,8 +155,18 @@ int64_t loadKeysInt(const std::string& file_name,
     uint64_t int_key;
     int64_t total_len = 0;
     uint64_t count = 0;
-    while (infile.good()) {
+    std::set<uint64_t> int_keys;
+    int continue_cnt = 0;
+    uint64_t cnt = 0;
+    while (infile.good() && cnt < 100000000) {
         infile >> int_key;
+	if (int_keys.find(int_key) != int_keys.end()) {
+            continue_cnt++;
+            std::cout << "continue cnt:" << continue_cnt << std::endl;
+	    continue;
+        }
+        cnt += 1;
+        int_keys.insert(int_key);
         std::string key = uint64ToString(int_key);
         keys.push_back(key);
         keys_shuffle.push_back(key);
@@ -299,18 +310,22 @@ int main(int argc, char *argv[]) {
 
     std::vector<std::string> emails;
     std::vector<std::string> emails_shuffle;
-    int64_t total_len_email = loadKeys(file_email, emails, emails_shuffle);
+    int64_t total_len_email =  0;
+//    int64_t total_len_email = loadKeys(file_email, emails, emails_shuffle);
 
     std::vector<std::string> wikis;
     std::vector<std::string> wikis_shuffle;
-    int64_t total_len_wiki = loadKeys(file_wiki, wikis, wikis_shuffle);
+    int64_t total_len_wiki = 0;
+//  int64_t total_len_wiki = loadKeys(file_wiki, wikis, wikis_shuffle);
 
     std::vector<std::string> urls;
     std::vector<std::string> urls_shuffle;
-    int64_t total_len_url = loadKeys(file_url, urls, urls_shuffle);
+    int64_t total_len_url = 0;
+//    int64_t total_len_url = loadKeys(file_url, urls, urls_shuffle);
 
     std::vector<std::string> tss;
     std::vector<std::string> tss_shuffle;
+//    int64_t total_len_ts = 0;
     int64_t total_len_ts = loadKeysInt(file_ts, tss, tss_shuffle);
 
     if (expt_id == 0) {
@@ -379,11 +394,11 @@ int main(int argc, char *argv[]) {
 
 	int percent = 1;
     double url_percent = 0.1;
-    int dict_size_list[9] = {1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144};
-	//int dict_size_list[3] = {1024, 2048, 4096};
+    	int dict_size_list[9] = {1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144};
+	//int dict_size_list[3] = {16384, 32768, 65536};
 	int expt_num = 1;
 	int total_num_expts = 81;
-
+/*
 	// Single-Char
 	std::cout << "CPR and Latency (" << (expt_num++) << "/" << total_num_expts << ")" << std::endl;
 	exec(expt_id, kEmail, 1, 1000, percent, emails_shuffle, total_len_email);
@@ -409,7 +424,7 @@ int main(int argc, char *argv[]) {
     std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
 	exec(expt_id, kTs, 2, 65536, percent, tss_shuffle, total_len_ts);
 	expt_num++;
-
+*/
 
     int stop_method = 0;
     if (runALM == 1) {
@@ -420,8 +435,8 @@ int main(int argc, char *argv[]) {
 
 	for (int ds = 0; ds < 7; ds++) {
 	    int dict_size_limit = dict_size_list[ds];
-	    for (int et = 3; et < stop_method; et++) {
-		std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
+	    for (int et = 5; et < stop_method; et++) {
+	/*	std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
 		exec(expt_id, kEmail, et, dict_size_limit, percent, emails_shuffle, total_len_email);
 		expt_num++;
 		std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
@@ -430,14 +445,14 @@ int main(int argc, char *argv[]) {
 		std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
 		exec(expt_id, kUrl, et, dict_size_limit, url_percent, urls_shuffle, total_len_url);
 		expt_num++;
-      
-//        std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-//		exec(expt_id, kTs, et, dict_size_limit, percent, tss_shuffle, total_len_ts);
-//		expt_num++;
+      */
+	        std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
+		exec(expt_id, kTs, et, dict_size_limit, percent, tss_shuffle, total_len_ts);
+		expt_num++;
 	    }
 	}
 
-   
+/*   
     for (int ds = 7; ds < 9; ds++) {
         int dict_size_limit = dict_size_list[ds];
         for  (int et = 4; et < stop_method;et++) {
@@ -453,7 +468,7 @@ int main(int argc, char *argv[]) {
         }
     }
     
-
+*/
    	output_x_email_dict_size << "-" << "\n";
 	output_cpr_email_dict_size << "-" << "\n";
 	output_lat_email_dict_size << "-" << "\n";
