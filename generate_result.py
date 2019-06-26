@@ -2,11 +2,11 @@ import sys
 import os
 import numpy as np
 RESULT_DIR = './results/'
-PREFIX = ['ART', 'btree', 'hot', 'microbench/cpr_latency', 'SuRF', 'SuRF_real']
-#PREFIX = ['hot']
+#PREFIX = ['ART', 'btree', 'hot', 'microbench/cpr_latency', 'SuRF', 'SuRF_real']
+PREFIX = ['SuRF', 'SuRF_real']
 TYPE = ['point', 'range']
 DATASETS = ['email', 'ts', 'url', 'wiki']
-VAR = ['cpr','x','height', 'insertlat', 'lookuplat', 'mem']
+VAR = ['cpr','x','height', 'fpr', 'lat', 'insertlat', 'lookuplat', 'mem']
 
 
 def generate_result(dirpath, filename):
@@ -30,9 +30,11 @@ def generate_result(dirpath, filename):
             if line == '-':
                 idx = 0
                 continue
-            results[idx].append([float(x) for x in line.split(',')])
+            #print([float(x) for x in line.split(',')])
+            results[idx].append(np.array([float(x) for x in line.split(',')]))
             idx += 1
-        results = (np.mean(np.array(results), axis=1)).tolist()
+#        print(np.asarray(results).shape)
+        results = (np.mean(np.asarray(results), axis=1))
 
     # Output results to file
     with open(output_path, 'w') as of:
@@ -47,13 +49,15 @@ def generate_result(dirpath, filename):
 for pre in PREFIX:
     for t in TYPE:
         if pre == 'microbench/cpr_latency':
-            t = ''
-        cur_dir = RESULT_DIR + pre + '/' + t + '/'
+           cur_dir = RESULT_DIR + pre + '/'
+        else:
+            cur_dir = RESULT_DIR + pre + '/' + t + '/'
         for v in  VAR:
             for d in DATASETS:
                 file_prefix = v + '_' + d
                 files = os.listdir(cur_dir)
                 for f in files:
                     if f.startswith(file_prefix):
+                        print(f,file_prefix)
                         generate_result(cur_dir, f)
 

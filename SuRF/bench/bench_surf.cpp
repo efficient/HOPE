@@ -711,6 +711,12 @@ void exec_group(const int expt_id,
 	     true, 3, dict_size[j], url_point_tp, url_range_tp,
 	     insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 	expt_num++;
+
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kTs, is_point, filter_type, suffix_len,
+     true, 3, dict_size[j], ts_point_tp, ts_range_tp,
+     insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
+    expt_num++;
     }
 
     for (int j = 0; j < 2; j++) {
@@ -731,6 +737,12 @@ void exec_group(const int expt_id,
 	     true, 4, dict_size[j], url_point_tp, url_range_tp,
 	     insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 	expt_num++;
+
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kTs, is_point, filter_type, suffix_len,
+     true, 4, dict_size[j], ts_point_tp, ts_range_tp,
+     insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
+    expt_num++;
     }    
 
     for (int j = 0; j < 2; j++) {
@@ -751,6 +763,12 @@ void exec_group(const int expt_id,
 	     true, 5, dict_size[j], url_point_tp, url_range_tp,
 	     insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 	expt_num++;
+
+//    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+//    exec(expt_id, kTs, is_point, filter_type, suffix_len,
+//     true, 5, dict_size[j], ts_point_tp, ts_range_tp,
+//     insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
+//    expt_num++;
     } 
 }
 
@@ -797,49 +815,49 @@ int main(int argc, char *argv[]) {
 	std::cout << "Point Queries; Expt ID = 0" << std::endl;
 	std::cout << "====================================" << std::endl;
 
-	output_lat_email_surf.open(file_lat_email_surf);
-	output_mem_email_surf.open(file_mem_email_surf);
-	output_fpr_email_surf.open(file_fpr_email_surf);
-	output_height_email_surf.open(file_height_email_surf);
-	output_stats_email_surf.open(file_stats_email_surf);
+	output_lat_email_surf.open(file_lat_email_surf,std::ofstream::app);
+	output_mem_email_surf.open(file_mem_email_surf,std::ofstream::app);
+	output_fpr_email_surf.open(file_fpr_email_surf,std::ofstream::app);
+	output_height_email_surf.open(file_height_email_surf,std::ofstream::app);
+	output_stats_email_surf.open(file_stats_email_surf,std::ofstream::app);
 
-	output_lat_wiki_surf.open(file_lat_wiki_surf);
-	output_mem_wiki_surf.open(file_mem_wiki_surf);
-	output_fpr_wiki_surf.open(file_fpr_wiki_surf);
-	output_height_wiki_surf.open(file_height_wiki_surf);
-	output_stats_wiki_surf.open(file_stats_wiki_surf);
+	output_lat_wiki_surf.open(file_lat_wiki_surf,std::ofstream::app);
+	output_mem_wiki_surf.open(file_mem_wiki_surf,std::ofstream::app);
+	output_fpr_wiki_surf.open(file_fpr_wiki_surf,std::ofstream::app);
+	output_height_wiki_surf.open(file_height_wiki_surf,std::ofstream::app);
+	output_stats_wiki_surf.open(file_stats_wiki_surf,std::ofstream::app);
 
-	output_lat_url_surf.open(file_lat_url_surf);
-	output_mem_url_surf.open(file_mem_url_surf);
-	output_fpr_url_surf.open(file_fpr_url_surf);
-	output_height_url_surf.open(file_height_url_surf);
-	output_stats_url_surf.open(file_stats_url_surf);
+	output_lat_url_surf.open(file_lat_url_surf,std::ofstream::app);
+	output_mem_url_surf.open(file_mem_url_surf,std::ofstream::app);
+	output_fpr_url_surf.open(file_fpr_url_surf,std::ofstream::app);
+	output_height_url_surf.open(file_height_url_surf,std::ofstream::app);
+	output_stats_url_surf.open(file_stats_url_surf,std::ofstream::app);
 
-    output_lat_ts_surf.open(file_lat_ts_surf);
-	output_mem_ts_surf.open(file_mem_ts_surf);
-	output_fpr_ts_surf.open(file_fpr_ts_surf);
-	output_height_ts_surf.open(file_height_ts_surf);
-	output_stats_ts_surf.open(file_stats_ts_surf);
+    output_lat_ts_surf.open(file_lat_ts_surf,std::ofstream::app);
+	output_mem_ts_surf.open(file_mem_ts_surf,std::ofstream::app);
+	output_fpr_ts_surf.open(file_fpr_ts_surf,std::ofstream::app);
+	output_height_ts_surf.open(file_height_ts_surf,std::ofstream::app);
+	output_stats_ts_surf.open(file_stats_ts_surf,std::ofstream::app);
 
-	output_lat_email_surfreal.open(file_lat_email_surfreal);
-	output_mem_email_surfreal.open(file_mem_email_surfreal);
-	output_fpr_email_surfreal.open(file_fpr_email_surfreal);
-	output_stats_email_surfreal.open(file_stats_email_surfreal);
+	output_lat_email_surfreal.open(file_lat_email_surfreal,std::ofstream::app);
+	output_mem_email_surfreal.open(file_mem_email_surfreal,std::ofstream::app);
+	output_fpr_email_surfreal.open(file_fpr_email_surfreal,std::ofstream::app);
+	output_stats_email_surfreal.open(file_stats_email_surfreal,std::ofstream::app);
 
-	output_lat_wiki_surfreal.open(file_lat_wiki_surfreal);
-	output_mem_wiki_surfreal.open(file_mem_wiki_surfreal);
-	output_fpr_wiki_surfreal.open(file_fpr_wiki_surfreal);
-	output_stats_wiki_surfreal.open(file_stats_wiki_surfreal);
+	output_lat_wiki_surfreal.open(file_lat_wiki_surfreal,std::ofstream::app);
+	output_mem_wiki_surfreal.open(file_mem_wiki_surfreal,std::ofstream::app);
+	output_fpr_wiki_surfreal.open(file_fpr_wiki_surfreal,std::ofstream::app);
+	output_stats_wiki_surfreal.open(file_stats_wiki_surfreal,std::ofstream::app);
 
-    output_lat_url_surfreal.open(file_lat_url_surfreal);
-    output_mem_url_surfreal.open(file_mem_url_surfreal);
-    output_fpr_url_surfreal.open(file_fpr_url_surfreal);
-    output_stats_url_surfreal.open(file_stats_url_surfreal);
+    output_lat_url_surfreal.open(file_lat_url_surfreal,std::ofstream::app);
+    output_mem_url_surfreal.open(file_mem_url_surfreal,std::ofstream::app);
+    output_fpr_url_surfreal.open(file_fpr_url_surfreal,std::ofstream::app);
+    output_stats_url_surfreal.open(file_stats_url_surfreal,std::ofstream::app);
 
-    output_lat_ts_surfreal.open(file_lat_ts_surfreal);
-    output_mem_ts_surfreal.open(file_mem_ts_surfreal);
-    output_fpr_ts_surfreal.open(file_fpr_ts_surfreal);
-    output_stats_ts_surfreal.open(file_stats_ts_surfreal);
+    output_lat_ts_surfreal.open(file_lat_ts_surfreal,std::ofstream::app);
+    output_mem_ts_surfreal.open(file_mem_ts_surfreal,std::ofstream::app);
+    output_fpr_ts_surfreal.open(file_fpr_ts_surfreal,std::ofstream::app);
+    output_stats_ts_surfreal.open(file_stats_ts_surfreal,std::ofstream::app);
 
 	bool is_point = true;
 	int expt_num = 1;
@@ -863,6 +881,12 @@ int main(int argc, char *argv[]) {
 		   insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis,
 		   insert_urls, insert_urls_sample, txn_urls, upper_bound_urls,
 		   insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
+    
+    output_lat_email_surf << "-" << "\n";
+	output_mem_email_surf << "-" << "\n";
+	output_fpr_email_surf << "-" << "\n";
+	output_height_email_surf << "-" << "\n";
+	output_stats_email_surf << "-" << "\n";
 
 	output_lat_email_surf.close();
 	output_mem_email_surf.close();
@@ -870,11 +894,23 @@ int main(int argc, char *argv[]) {
 	output_height_email_surf.close();
 	output_stats_email_surf.close();
 
+    output_lat_wiki_surf << "-" << "\n";
+	output_mem_wiki_surf << "-" << "\n";
+	output_fpr_wiki_surf << "-" << "\n";
+	output_height_wiki_surf << "-" << "\n";
+	output_stats_wiki_surf << "-" << "\n";
+
 	output_lat_wiki_surf.close();
 	output_mem_wiki_surf.close();
 	output_fpr_wiki_surf.close();
 	output_height_wiki_surf.close();
 	output_stats_wiki_surf.close();
+
+    output_lat_url_surf << "-" << "\n";
+	output_mem_url_surf << "-" << "\n";
+	output_fpr_url_surf << "-" << "\n";
+	output_height_url_surf << "-" << "\n";
+	output_stats_url_surf << "-" << "\n";
 
 	output_lat_url_surf.close();
 	output_mem_url_surf.close();
@@ -882,26 +918,52 @@ int main(int argc, char *argv[]) {
 	output_height_url_surf.close();
 	output_stats_url_surf.close();
 
+    output_lat_ts_surf << "-" << "\n";
+	output_mem_ts_surf << "-" << "\n";
+	output_fpr_ts_surf << "-" << "\n";
+	output_height_ts_surf << "-" << "\n";
+	output_stats_ts_surf << "-" << "\n";
+
     output_lat_ts_surf.close();
 	output_mem_ts_surf.close();
 	output_fpr_ts_surf.close();
 	output_height_ts_surf.close();
 	output_stats_ts_surf.close();
 
+    output_lat_email_surfreal << "-" << "\n";
+	output_mem_email_surfreal << "-" << "\n";
+	output_fpr_email_surfreal << "-" << "\n";
+	output_stats_email_surfreal << "-" << "\n";
+
 	output_lat_email_surfreal.close();
 	output_mem_email_surfreal.close();
 	output_fpr_email_surfreal.close();
 	output_stats_email_surfreal.close();
+
+    output_lat_wiki_surfreal << "-" << "\n";
+	output_mem_wiki_surfreal << "-" << "\n";
+	output_fpr_wiki_surfreal << "-" << "\n";
+	output_stats_wiki_surfreal << "-" << "\n";
 
 	output_lat_wiki_surfreal.close();
 	output_mem_wiki_surfreal.close();
 	output_fpr_wiki_surfreal.close();
 	output_stats_wiki_surfreal.close();
 
+    output_lat_url_surfreal << "-" << "\n";
+	output_mem_url_surfreal << "-" << "\n";
+	output_fpr_url_surfreal << "-" << "\n";
+	output_stats_url_surfreal << "-" << "\n";
+
 	output_lat_url_surfreal.close();
 	output_mem_url_surfreal.close();
 	output_fpr_url_surfreal.close();
 	output_stats_url_surfreal.close();
+
+    output_lat_ts_surfreal << "-" << "\n";
+	output_mem_ts_surfreal << "-" << "\n";
+	output_fpr_ts_surfreal << "-" << "\n";
+	output_stats_ts_surfreal << "-" << "\n";
 
     output_lat_ts_surfreal.close();
 	output_mem_ts_surfreal.close();
@@ -916,45 +978,45 @@ int main(int argc, char *argv[]) {
 	std::cout << "Range Queries; Expt ID = 1" << std::endl;
 	std::cout << "====================================" << std::endl;
 
-	output_lat_email_surf_range.open(file_lat_email_surf_range);
-	output_mem_email_surf_range.open(file_mem_email_surf_range);
-	output_fpr_email_surf_range.open(file_fpr_email_surf_range);
-	output_stats_email_surf_range.open(file_stats_email_surf_range);
+	output_lat_email_surf_range.open(file_lat_email_surf_range,std::ofstream::app);
+	output_mem_email_surf_range.open(file_mem_email_surf_range,std::ofstream::app);
+	output_fpr_email_surf_range.open(file_fpr_email_surf_range,std::ofstream::app);
+	output_stats_email_surf_range.open(file_stats_email_surf_range,std::ofstream::app);
 
-	output_lat_wiki_surf_range.open(file_lat_wiki_surf_range);
-	output_mem_wiki_surf_range.open(file_mem_wiki_surf_range);
-	output_fpr_wiki_surf_range.open(file_fpr_wiki_surf_range);
-	output_stats_wiki_surf_range.open(file_stats_wiki_surf_range);
+	output_lat_wiki_surf_range.open(file_lat_wiki_surf_range,std::ofstream::app);
+	output_mem_wiki_surf_range.open(file_mem_wiki_surf_range,std::ofstream::app);
+	output_fpr_wiki_surf_range.open(file_fpr_wiki_surf_range,std::ofstream::app);
+	output_stats_wiki_surf_range.open(file_stats_wiki_surf_range,std::ofstream::app);
 
-	output_lat_url_surf_range.open(file_lat_url_surf_range);
-	output_mem_url_surf_range.open(file_mem_url_surf_range);
-	output_fpr_url_surf_range.open(file_fpr_url_surf_range);
-	output_stats_url_surf_range.open(file_stats_url_surf_range);
+	output_lat_url_surf_range.open(file_lat_url_surf_range,std::ofstream::app);
+	output_mem_url_surf_range.open(file_mem_url_surf_range,std::ofstream::app);
+	output_fpr_url_surf_range.open(file_fpr_url_surf_range,std::ofstream::app);
+	output_stats_url_surf_range.open(file_stats_url_surf_range,std::ofstream::app);
 
-    output_lat_ts_surf_range.open(file_lat_ts_surf_range);
-	output_mem_ts_surf_range.open(file_mem_ts_surf_range);
-	output_fpr_ts_surf_range.open(file_fpr_ts_surf_range);
-	output_stats_ts_surf_range.open(file_stats_ts_surf_range);
+    output_lat_ts_surf_range.open(file_lat_ts_surf_range,std::ofstream::app);
+	output_mem_ts_surf_range.open(file_mem_ts_surf_range,std::ofstream::app);
+	output_fpr_ts_surf_range.open(file_fpr_ts_surf_range,std::ofstream::app);
+	output_stats_ts_surf_range.open(file_stats_ts_surf_range,std::ofstream::app);
 
-	output_lat_email_surfreal_range.open(file_lat_email_surfreal_range);
-	output_mem_email_surfreal_range.open(file_mem_email_surfreal_range);
-	output_fpr_email_surfreal_range.open(file_fpr_email_surfreal_range);
-	output_stats_email_surfreal_range.open(file_stats_email_surfreal_range);
+	output_lat_email_surfreal_range.open(file_lat_email_surfreal_range,std::ofstream::app);
+	output_mem_email_surfreal_range.open(file_mem_email_surfreal_range,std::ofstream::app);
+	output_fpr_email_surfreal_range.open(file_fpr_email_surfreal_range,std::ofstream::app);
+	output_stats_email_surfreal_range.open(file_stats_email_surfreal_range,std::ofstream::app);
 
-	output_lat_wiki_surfreal_range.open(file_lat_wiki_surfreal_range);
-	output_mem_wiki_surfreal_range.open(file_mem_wiki_surfreal_range);
-	output_fpr_wiki_surfreal_range.open(file_fpr_wiki_surfreal_range);
-	output_stats_wiki_surfreal_range.open(file_stats_wiki_surfreal_range);
+	output_lat_wiki_surfreal_range.open(file_lat_wiki_surfreal_range,std::ofstream::app);
+	output_mem_wiki_surfreal_range.open(file_mem_wiki_surfreal_range,std::ofstream::app);
+	output_fpr_wiki_surfreal_range.open(file_fpr_wiki_surfreal_range,std::ofstream::app);
+	output_stats_wiki_surfreal_range.open(file_stats_wiki_surfreal_range,std::ofstream::app);
 
-	output_lat_url_surfreal_range.open(file_lat_url_surfreal_range);
-	output_mem_url_surfreal_range.open(file_mem_url_surfreal_range);
-	output_fpr_url_surfreal_range.open(file_fpr_url_surfreal_range);
-	output_stats_url_surfreal_range.open(file_stats_url_surfreal_range);
+	output_lat_url_surfreal_range.open(file_lat_url_surfreal_range,std::ofstream::app);
+	output_mem_url_surfreal_range.open(file_mem_url_surfreal_range,std::ofstream::app);
+	output_fpr_url_surfreal_range.open(file_fpr_url_surfreal_range,std::ofstream::app);
+	output_stats_url_surfreal_range.open(file_stats_url_surfreal_range,std::ofstream::app);
 
-    output_lat_ts_surfreal_range.open(file_lat_ts_surfreal_range);
-	output_mem_ts_surfreal_range.open(file_mem_ts_surfreal_range);
-	output_fpr_ts_surfreal_range.open(file_fpr_ts_surfreal_range);
-	output_stats_ts_surfreal_range.open(file_stats_ts_surfreal_range);
+    output_lat_ts_surfreal_range.open(file_lat_ts_surfreal_range,std::ofstream::app);
+	output_mem_ts_surfreal_range.open(file_mem_ts_surfreal_range,std::ofstream::app);
+	output_fpr_ts_surfreal_range.open(file_fpr_ts_surfreal_range,std::ofstream::app);
+	output_stats_ts_surfreal_range.open(file_stats_ts_surfreal_range,std::ofstream::app);
 
 	bool is_point = false;
 	int expt_num = 1;
@@ -979,40 +1041,80 @@ int main(int argc, char *argv[]) {
 		   insert_urls, insert_urls_sample, txn_urls, upper_bound_urls,
 		   insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
 
+    output_lat_email_surf_range << "-" << "\n";
+	output_mem_email_surf_range << "-" << "\n";
+	output_fpr_email_surf_range << "-" << "\n";
+	output_stats_email_surf_range << "-" << "\n";
+
 	output_lat_email_surf_range.close();
 	output_mem_email_surf_range.close();
 	output_fpr_email_surf_range.close();
 	output_stats_email_surf_range.close();
+
+    output_lat_wiki_surf_range << "-" << "\n";
+	output_mem_wiki_surf_range << "-" << "\n";
+	output_fpr_wiki_surf_range << "-" << "\n";
+	output_stats_wiki_surf_range << "-" << "\n";
 
 	output_lat_wiki_surf_range.close();
 	output_mem_wiki_surf_range.close();
 	output_fpr_wiki_surf_range.close();
 	output_stats_wiki_surf_range.close();
 
+    output_lat_url_surf_range << "-" << "\n";
+	output_mem_url_surf_range << "-" << "\n";
+	output_fpr_url_surf_range << "-" << "\n";
+	output_stats_url_surf_range << "-" << "\n";
+
 	output_lat_url_surf_range.close();
 	output_mem_url_surf_range.close();
 	output_fpr_url_surf_range.close();
 	output_stats_url_surf_range.close();
+
+    output_lat_ts_surf_range << "-" << "\n";
+	output_mem_ts_surf_range << "-" << "\n";
+	output_fpr_ts_surf_range << "-" << "\n";
+	output_stats_ts_surf_range << "-" << "\n";
 
    	output_lat_ts_surf_range.close();
 	output_mem_ts_surf_range.close();
 	output_fpr_ts_surf_range.close();
 	output_stats_ts_surf_range.close();
 
+    output_lat_email_surfreal_range << "-" << "\n";
+	output_mem_email_surfreal_range << "-" << "\n";
+	output_fpr_email_surfreal_range << "-" << "\n";
+	output_stats_email_surfreal_range << "-" << "\n";
+
 	output_lat_email_surfreal_range.close();
 	output_mem_email_surfreal_range.close();
 	output_fpr_email_surfreal_range.close();
 	output_stats_email_surfreal_range.close();
+
+    output_lat_wiki_surfreal_range << "-" << "\n";
+	output_mem_wiki_surfreal_range << "-" << "\n";
+	output_fpr_wiki_surfreal_range << "-" << "\n";
+	output_stats_wiki_surfreal_range << "-" << "\n";
 
 	output_lat_wiki_surfreal_range.close();
 	output_mem_wiki_surfreal_range.close();
 	output_fpr_wiki_surfreal_range.close();
 	output_stats_wiki_surfreal_range.close();
 
+    output_lat_url_surfreal_range << "-" << "\n";
+    output_mem_url_surfreal_range << "-" << "\n";
+    output_fpr_url_surfreal_range << "-" << "\n";
+    output_stats_url_surfreal_range << "-" << "\n";
+
     output_lat_url_surfreal_range.close();
     output_mem_url_surfreal_range.close();
     output_fpr_url_surfreal_range.close();
     output_stats_url_surfreal_range.close();
+
+    output_lat_ts_surfreal_range << "-" << "\n";
+    output_mem_ts_surfreal_range << "-" << "\n";
+    output_fpr_ts_surfreal_range << "-" << "\n";
+    output_stats_ts_surfreal_range << "-" << "\n";
 
     output_lat_ts_surfreal_range.close();
     output_mem_ts_surfreal_range.close();
