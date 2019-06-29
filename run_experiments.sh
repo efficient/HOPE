@@ -6,8 +6,8 @@ PROJECT_DIR=$(pwd)
 # Initialize modules
 ##################################################
 # Install boost 1.66.0 for hot
-wget --directory-prefix=hot/third-party/ https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.bz2
-tar --bzip2 -xf hot/third-party/boost_1_66_0.tar.bz2
+wget --directory-prefix=hot/third-party/ https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.gz
+tar -xvf hot/third-party/boost_1_66_0.tar.gz -C hot/third-party/
 mkdir hot/third-party/boost_install
 cd hot/third-party/boost_1_66_0
 ./bootstrap.sh --prefix=./boost_install
