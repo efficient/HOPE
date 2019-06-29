@@ -6,17 +6,17 @@ PROJECT_DIR=$(pwd)
 # Initialize modules
 ##################################################
 # Install boost 1.66.0 for hot
-#wget --directory-prefix=hot/third-party/ https://www.boost.org/users/history/version_1_66_0.html
-#tar --bzip2 -xf hot/third-party/boost_1_66_0.tar.bz2
-#mkdir hot/third-party/boost_install
-#cd hot/third-party/boost_1_66_0
-#./bootstrap.sh --prefix=./boost_install
-#./b2 install
-#cd ${PROJECT_DIR}
+wget --directory-prefix=hot/third-party/ https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.bz2
+tar --bzip2 -xf hot/third-party/boost_1_66_0.tar.bz2
+mkdir hot/third-party/boost_install
+cd hot/third-party/boost_1_66_0
+./bootstrap.sh --prefix=./boost_install
+./b2 install
+cd ${PROJECT_DIR}
 # Add boost to include path
-#export LD_LIBRARY_PATH=${PROJECT_DIR}/hot/third-party/boost_install/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=${PROJECT_DIR}/hot/third-party/boost_install/lib:$LD_LIBRARY_PATH
 
-#git submodule update --init --recursive
+git submodule update --init --recursive
 
 ###################################################
 # Generate worklaods
@@ -25,9 +25,15 @@ PROJECT_DIR=$(pwd)
 cd workload_gen
 [ ! -d "./YCSB" ] && ./ycsb_download.sh
 
-#./gen_workload.sh
+./gen_workload.sh
 cd ..
 
+cd ${PROJECT_DIR}
+mkdir build
+cd build
+cmake ..
+make -j
+cd ${PROJECT_DIR}
 ##################################################
 # Run experiments
 ##################################################
