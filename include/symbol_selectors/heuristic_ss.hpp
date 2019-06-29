@@ -200,7 +200,7 @@ namespace ope {
 
     int HeuristicSS::BinarySearch(const std::string& str, unsigned int pos, int &prefix_len) {
         int l = 0;
-        int r = static_cast<int>(intervals_.size());
+        int r = static_cast<int>(intervals_.size()) - 1;
         assert(pos <= str.size());
         std::string compare_str = str.substr(pos, str.size() - pos);
         while (l <= r) {

@@ -231,23 +231,27 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     if (is_compressed) {
 	encoder = ope::EncoderFactory::createEncoder(encoder_type);
 	encoder->build(insert_keys_sample, dict_size_limit);
-	for (int i = 0; i < (int)insert_keys.size(); i++) {
-	    int enc_len = encoder->encode(insert_keys[i], buffer);
-	    int enc_len_round = (enc_len + 7) >> 3;
-	    enc_insert_keys.push_back(std::string((const char*)buffer, enc_len_round));
-	    total_key_size += enc_len_round;
-	}
-    } else {
-	for (int i = 0; i < (int)insert_keys.size(); i++) {
-	    enc_insert_keys.push_back(insert_keys[i]);
-	    total_key_size += insert_keys[i].size();
-	}
+    }
+
+    for (int i = 0; i < (int)insert_keys.size(); i++) {
+        if (is_compressed) {
+            int enc_len = encoder->encode(insert_keys[i], buffer);
+            int enc_len_round = (enc_len + 7) >> 3;
+            enc_insert_keys.push_back(std::string((const char*)buffer, enc_len_round));
+            total_key_size += enc_len_round;
+        } else {
+            enc_insert_keys.push_back(insert_keys[i]);
+            total_key_size += insert_keys[i].size();
+        }
     }
 
     typedef tlx::btree_map<std::string, uint64_t, std::less<std::string> > btree_type;
     btree_type* bt = new btree_type();
     double insert_start_time = getNow();
-    for (int i = 0; i < (int)enc_insert_keys.size(); i++) {
+    for (int i = 0; i < (int)insert_keys.size(); i++) {
+    if (is_compressed) {
+        encoder->encode(insert_keys[i], buffer);
+    }
 	bt->insert2(enc_insert_keys[i], (uint64_t)&(enc_insert_keys[i]));
     }
 
