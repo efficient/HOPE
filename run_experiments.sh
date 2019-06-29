@@ -28,7 +28,6 @@ chmod 744 ./ycsb_download.sh
 
 ./gen_workload.sh
 
-
 ###################################################
 # Build Project
 ##################################################
@@ -46,11 +45,11 @@ cd ${PROJECT_DIR}
 run_alm=1
 repeat_times=$1
 
-run_microbench=0
+run_microbench=1
 
-run_surf=0
-run_art=0
-run_btree=0
+run_surf=1
+run_art=1
+run_btree=1
 run_hot=1
 PYTHON=python
 
