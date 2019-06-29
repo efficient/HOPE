@@ -23,11 +23,15 @@ git submodule update --init --recursive
 ##################################################
 # Download YCSB if the directory not exists
 cd workload_gen
+chmod 744 ./ycsb_download.sh
 [ ! -d "./YCSB" ] && ./ycsb_download.sh
 
 ./gen_workload.sh
-cd ..
 
+
+###################################################
+# Build Project
+##################################################
 cd ${PROJECT_DIR}
 mkdir build
 cd build
@@ -37,7 +41,6 @@ cd ${PROJECT_DIR}
 ##################################################
 # Run experiments
 ##################################################
-
 
 # Experiment Arguments
 run_alm=1
@@ -91,7 +94,7 @@ done
 
 # Get the average result
 ${PYTHON} generate_result.py
-
+echo "===========Finish Generating results============"
 #################################################
 # Generate plots
 ################################################

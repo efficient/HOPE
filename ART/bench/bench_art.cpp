@@ -264,7 +264,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
 	encoder->build(insert_keys_sample, dict_size_limit);
     }
 
-    for (int i = 0; i < (int)insert_keys.size(); i+++) {
+    for (int i = 0; i < (int)insert_keys.size(); i++) {
         if (is_compressed) {
             int enc_len = encoder->encode(insert_keys[i], buffer);
             int enc_len_round = (enc_len + 7) >> 3;
@@ -279,7 +279,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     double insert_start_time = getNow();
     for (int i = 0; i < (int)insert_keys.size(); i++) {
     if (is_compressed) {
-	    int enc_len = encoder->encode(insert_keys[i], buffer);
+	    encoder->encode(insert_keys[i], buffer);
     }
     Key key;
 	loadKey((TID)&(enc_insert_keys[i]), key);
