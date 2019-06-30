@@ -119,8 +119,9 @@ namespace ope {
    // Only calculate the frequency of suffix
    void BlendTrie::build(std::vector<std::string> key_list) {
         root_ = new TrieNode();
+        int maxkey_len = 100;
         for (int i = 0; i < (int)key_list.size(); i++) {
-            std::string key = key_list[i];
+            std::string key = key_list[i].substr(0, maxkey_len);
             int str_len = key.length();
             for (int j = 0; j < (int)key.size(); j++) {
                 std::string substring = key.substr(j, str_len - j);
@@ -164,7 +165,7 @@ namespace ope {
                 high_freq_child->setFreq(high_freq_child->getFreq() + top_node->getFreq());
                 top_node->setFreq(0);
             } else {
-                freq_vec.emplace_back(top_node->getPrefix(), top_node->getFreq());
+                freq_vec.push_back(std::make_pair(top_node->getPrefix(), top_node->getFreq()));
             }
         }
     }
