@@ -45,7 +45,7 @@ namespace ope {
             }
         public:
             static void printTs(std::string ts) {
-                for (int i = 0; i < ts.length(); i++) {
+                for (int i = 0; i < (int)ts.length(); i++) {
                     std::cout << std::hex << unsigned((uint8_t)ts[i]) << " ";
                 }
                 std::cout << std::endl;
