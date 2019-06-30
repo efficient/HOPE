@@ -6,42 +6,50 @@ PROJECT_DIR=$(pwd)
 # Initialize modules
 ##################################################
 # Install boost 1.66.0 for hot
-#wget --directory-prefix=hot/third-party/ https://www.boost.org/users/history/version_1_66_0.html
-#tar --bzip2 -xf hot/third-party/boost_1_66_0.tar.bz2
-#mkdir hot/third-party/boost_install
-#cd hot/third-party/boost_1_66_0
-#./bootstrap.sh --prefix=./boost_install
-#./b2 install
-#cd ${PROJECT_DIR}
+wget --directory-prefix=hot/third-party/ https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.gz
+tar -xvf hot/third-party/boost_1_66_0.tar.gz -C hot/third-party/
+mkdir hot/third-party/boost_install
+cd hot/third-party/boost_1_66_0
+./bootstrap.sh --prefix=./boost_install
+./b2 install
+cd ${PROJECT_DIR}
 # Add boost to include path
-#export LD_LIBRARY_PATH=${PROJECT_DIR}/hot/third-party/boost_install/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=${PROJECT_DIR}/hot/third-party/boost_install/lib:$LD_LIBRARY_PATH
 
-#git submodule update --init --recursive
+git submodule update --init --recursive
 
 ###################################################
 # Generate worklaods
 ##################################################
 # Download YCSB if the directory not exists
 cd workload_gen
+chmod 744 ./ycsb_download.sh
 [ ! -d "./YCSB" ] && ./ycsb_download.sh
 
-#./gen_workload.sh
-cd ..
+./gen_workload.sh
 
+###################################################
+# Build Project
+##################################################
+cd ${PROJECT_DIR}
+mkdir build
+cd build
+cmake ..
+make -j
+cd ${PROJECT_DIR}
 ##################################################
 # Run experiments
 ##################################################
-
 
 # Experiment Arguments
 run_alm=1
 repeat_times=$1
 
-run_microbench=0
+run_microbench=1
 
-run_surf=0
-run_art=0
-run_btree=0
+run_surf=1
+run_art=1
+run_btree=1
 run_hot=1
 PYTHON=python
 
@@ -85,7 +93,7 @@ done
 
 # Get the average result
 ${PYTHON} generate_result.py
-
+echo "===========Finish Generating results============"
 #################################################
 # Generate plots
 ################################################
