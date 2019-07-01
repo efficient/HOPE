@@ -198,7 +198,7 @@ std::string getUpperBoundKey(const std::string& key) {
 void checkTxnKeys(std::vector<std::string>& insert_keys, std::vector<std::string>& txn_keys) {
     for (int i = 0; i < (int)txn_keys.size(); i++) {
         std::string cur_key = txn_keys[i];
-        for (int j = 0; j < (int)insert_keys.size();j++) 
+        for (int j = 0; j < (int)insert_keys.size();j++)
             if (cur_key.compare(insert_keys[j]) == 0) return;
         std::cout << "Key " << cur_key << " dose not exist" << std::endl;
     }
@@ -227,9 +227,9 @@ void loadWorkload(int wkld_id,
     }
 
     load_keys.clear();
-    std::random_shuffle(insert_keys.begin(), insert_keys.end());  
+    std::random_shuffle(insert_keys.begin(), insert_keys.end());
 
-    double percent = (wkld_id == kUrl) ? kUrlSamplePercent : kSamplePercent; 
+    double percent = (wkld_id == kUrl) ? kUrlSamplePercent : kSamplePercent;
     for (int i = 0; i < (int)insert_keys.size(); i += int(100 / percent)) {
 	insert_keys_sample.push_back(insert_keys[i]);
     }
@@ -242,11 +242,11 @@ void loadWorkload(int wkld_id,
 	loadKeysFromFile(file_txn_url, kNumTxns, txn_keys);
     else if (wkld_id == kTs)
     loadKeysInt(file_txn_ts, kNumTxns, txn_keys);
-    
+
     for (int i = 0; i < (int)txn_keys.size(); i++) {
 	upper_bound_keys.push_back(getUpperBoundKey(txn_keys[i]));
     }
-    
+
     //checkTxnKeys(insert_keys, txn_keys);
 
     std::cout << "insert_keys size = " << insert_keys.size() << std::endl;
@@ -301,14 +301,14 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     ope::Encoder* encoder = nullptr;
     uint8_t* buffer = new uint8_t[8192];
     uint8_t* buffer_r = new uint8_t[8192];
-    std::vector<char*> cstr_enc_insert_keys;
+    std::vector<std::pair<std::string, char*> > cstr_enc_insert_keys;
 
     double start_time = getNow();
     if (is_compressed) {
 	    encoder = ope::EncoderFactory::createEncoder(encoder_type);
 	    encoder->build(insert_keys_sample, dict_size_limit);
     }
- 
+
     std::string tmp_str;
     for (int i = 0; i < (int)insert_keys.size(); i++) {
         if (is_compressed) {
@@ -321,17 +321,18 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
         char * cstr = new char [tmp_str.length()+1];
         memset(cstr, 0, tmp_str.length()+1);
         std::strcpy(cstr, tmp_str.c_str());
-        cstr_enc_insert_keys.push_back(cstr);
+        cstr_enc_insert_keys.push_back(std::make_pair(insert_keys[i], cstr));
     }
 
     typedef hot::singlethreaded::HOTSingleThreaded<const char*, idx::contenthelpers::IdentityKeyExtractor> hot_type;
     hot_type* ht = new hot_type();
     double insert_start_time = getNow();
     for (int i = 0; i < (int)cstr_enc_insert_keys.size(); i++) {
+        std::pair<std::string, char*>* tmp_pair = &cstr_enc_insert_keys[i];
         if (is_compressed) {
-            encoder->encode(insert_keys[i], buffer);
+            encoder->encode(tmp_pair->first, buffer);
         }
-        ht->insert(cstr_enc_insert_keys[i]);
+        ht->insert(tmp_pair->second);
     }
 
     double end_time = getNow();
@@ -446,7 +447,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
 #else
                 encoder->encodePair(txn_keys[i], upper_bound_keys[i], buffer, buffer_r, enc_len, enc_len_r);
 #endif
-            
+
                 int enc_len_round = (enc_len + 7) >> 3;
                 int enc_len_r_round = (enc_len_r + 7) >> 3;
                 std::string left_key = std::string((const char*)buffer, enc_len_round);
@@ -500,7 +501,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     delete[] buffer;
     delete[] buffer_r;
     for (int i = 0; i < (int)cstr_enc_insert_keys.size(); i++)
-        delete cstr_enc_insert_keys[i];
+        delete cstr_enc_insert_keys[i].second;
 #ifdef WRITE_TO_FILE
     if (expt_id == 0) {
         if (wkld_id == kEmail) {
@@ -533,7 +534,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
             for (int i = 0; i < int(node_stats.size()); i++) {
                 output_stats_wiki_hot << node_stats[i] << ",";
             }
-            output_stats_wiki_hot << std::endl; 
+            output_stats_wiki_hot << std::endl;
 	    } else if (wkld_id == kUrl) {
 #ifdef BREAKDOWN_TIME
 	        output_time_url_hot << lookup_lat <<  "," << insert_lat << "," << encode_time << "," << lookup_time <<"\n";
@@ -705,7 +706,7 @@ void exec_group(const int expt_id, const bool is_point,
      insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
     expt_num++;
 #endif
-	    
+
    for (int j = 0; j < 2; j++) {
 
 	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
@@ -716,7 +717,7 @@ void exec_group(const int expt_id, const bool is_point,
     exec(expt_id, kWiki, is_point, true, 3, dict_size[j],
 	     insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
 	expt_num++;
-   
+
 
 	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
 	exec(expt_id, kUrl, is_point, true, 3, dict_size[j],
@@ -849,7 +850,7 @@ int main(int argc, char *argv[]) {
 		   insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis,
 		   insert_urls, insert_urls_sample, txn_urls, upper_bound_urls,
 		   insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-#ifdef WRITE_TO_FILE	
+#ifdef WRITE_TO_FILE
     output_lookuplat_email_hot << "-" << "\n";
     output_insertlat_email_hot << "-" << "\n";
 	output_mem_email_hot << "-" << "\n";
@@ -957,7 +958,7 @@ int main(int argc, char *argv[]) {
 		   insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis,
 		   insert_urls, insert_urls_sample, txn_urls, upper_bound_urls,
 		   insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-#ifdef WRITE_TO_FILE	
+#ifdef WRITE_TO_FILE
     output_lookuplat_email_hot_range << "-" << "\n";
     output_insertlat_email_hot_range << "-" << "\n";
 	output_mem_email_hot_range << "-" << "\n";

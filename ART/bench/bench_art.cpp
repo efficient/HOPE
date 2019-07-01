@@ -257,7 +257,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     ope::Encoder* encoder = nullptr;
     uint8_t* buffer = new uint8_t[8192];
     uint8_t* buffer_r = new uint8_t[8192];
-    std::vector<std::string> enc_insert_keys;
+    std::vector<std::pair<std::string, std::string> > enc_insert_keys;
 
     double start_time = getNow();
     if (is_compressed) {
@@ -266,25 +266,29 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     }
 
     for (int i = 0; i < (int)insert_keys.size(); i++) {
+        std::string encode_str;
         if (is_compressed) {
             int enc_len = encoder->encode(insert_keys[i], buffer);
             int enc_len_round = (enc_len + 7) >> 3;
-            enc_insert_keys.push_back(std::string((const char*)buffer, enc_len_round));
+            encode_str = std::string((const char*)buffer, enc_len_round);
         } else {
-            enc_insert_keys.push_back(insert_keys[i]);
+            encode_str = insert_keys[i];
         }
+        enc_insert_keys.push_back(std::make_pair(insert_keys[i], encode_str));
     }
 
     ART_ROWEX::Tree* art = new ART_ROWEX::Tree(loadKey);
     auto t = art->getThreadInfo();
     double insert_start_time = getNow();
+    std::string enc_insert_str;
     for (int i = 0; i < (int)insert_keys.size(); i++) {
+        std::pair<std::string, std::string>* tmp_pair = &enc_insert_keys[i];
         if (is_compressed) {
-            encoder->encode(insert_keys[i], buffer);
+            encoder->encode(tmp_pair->first, buffer);
         }
         Key key;
-        loadKey((TID)&(enc_insert_keys[i]), key);
-        art->insert(key, (TID)&(enc_insert_keys[i]), t);
+        loadKey((TID)&(tmp_pair->second), key);
+        art->insert(key, (TID)&(tmp_pair->second), t);
     }
 
     double end_time = getNow();

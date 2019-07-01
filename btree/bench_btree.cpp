@@ -225,7 +225,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     ope::Encoder* encoder = nullptr;
     uint8_t* buffer = new uint8_t[8192];
     uint8_t* buffer_r = new uint8_t[8192];
-    std::vector<std::string> enc_insert_keys;
+    std::vector<std::pair<std::string, std::string> >enc_insert_keys;
 
     int64_t total_key_size = 0;
     double start_time = getNow();
@@ -235,25 +235,28 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     }
 
     for (int i = 0; i < (int)insert_keys.size(); i++) {
+        std::string encode_str;
         if (is_compressed) {
             int enc_len = encoder->encode(insert_keys[i], buffer);
             int enc_len_round = (enc_len + 7) >> 3;
-            enc_insert_keys.push_back(std::string((const char*)buffer, enc_len_round));
+            encode_str = std::string((const char*)buffer, enc_len_round);
             total_key_size += enc_len_round;
         } else {
-            enc_insert_keys.push_back(insert_keys[i]);
+            encode_str = insert_keys[i];
             total_key_size += insert_keys[i].size();
         }
+        enc_insert_keys.push_back(std::make_pair(insert_keys[i], encode_str));
     }
 
     typedef tlx::btree_map<std::string, uint64_t, std::less<std::string> > btree_type;
     btree_type* bt = new btree_type();
     double insert_start_time = getNow();
-    for (int i = 0; i < (int)insert_keys.size(); i++) {
+    for (int i = 0; i < (int)enc_insert_keys.size(); i++) {
+        std::pair<std::string, std::string>* tmp_pair = &enc_insert_keys[i];
         if (is_compressed) {
-            encoder->encode(insert_keys[i], buffer);
+            encoder->encode(tmp_pair->first, buffer);
         }
-        bt->insert2(enc_insert_keys[i], (uint64_t)&(enc_insert_keys[i]));
+        bt->insert2(tmp_pair->second, (uint64_t)&(tmp_pair->second));
     }
 
     double end_time = getNow();
