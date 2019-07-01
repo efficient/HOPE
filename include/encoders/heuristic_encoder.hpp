@@ -76,23 +76,23 @@ namespace ope {
 
     bool HeuristicEncoder::build(const std::vector<std::string> &key_list,
                                  const int64_t dict_size_limit) {
-        double curtime = getNow();
+//        double curtime = getNow();
         std::vector<SymbolFreq> symbol_freq_list;
         SymbolSelector *symbol_selector = SymbolSelectorFactory::createSymbolSelector(5);
         symbol_selector->selectSymbols(key_list, dict_size_limit, &symbol_freq_list);
-        std::cout << "Finish getting symbol frequency, use:" << getNow() - curtime << std::endl;
-        curtime = getNow();
+//        std::cout << "Finish getting symbol frequency, use:" << getNow() - curtime << std::endl;
+//        curtime = getNow();
         delete symbol_selector;
 
         CodeGenerator *code_generator = CodeGeneratorFactory::createCodeGenerator(1);
         code_generator->genCodes(symbol_freq_list, &symbol_code_list);
-        std::cout << "Finish getting code, use:" << getNow() - curtime << std::endl;
-        curtime = getNow();
+//        std::cout << "Finish getting code, use:" << getNow() - curtime << std::endl;
+//        curtime = getNow();
         delete code_generator;
 
         dict_ = DictionaryFactory::createDictionary(5);
         auto dic = dict_->build(symbol_code_list);
-        std::cout << "Finish building dic, use:" << getNow() - curtime << std::endl;
+//        std::cout << "Finish building dic, use:" << getNow() - curtime << std::endl;
         return dic;
     }
 

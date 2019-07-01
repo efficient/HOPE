@@ -318,7 +318,8 @@ namespace ope {
             }
         }
     }
-
+/*
+    // Correct interval generation version
     void HeuristicSS::mergeIntervals(std::vector<SymbolFreq>::iterator start_exclude_iter,
                                      std::vector<SymbolFreq>::iterator end_exclude_iter) {
         if (end_exclude_iter - start_exclude_iter <= 0)
@@ -345,9 +346,6 @@ namespace ope {
                 // Update current interval end
                 interval_end = getNextString(iter->first);
 
-//                std::string cur_start = max(prefix, next_start);
-//                std::string cur_end = min(getNextString(prefix), (iter + 1)->first);
-
                 intervals_.push_back(std::make_pair(interval_start, interval_end));
                 prefix.clear();
                 cnt = 0;
@@ -355,6 +353,39 @@ namespace ope {
             }
         }
         fillGap(interval_end, end_exclude_iter->first);
+    }
+*/
+
+    void HeuristicSS::mergeIntervals(std::vector<SymbolFreq>::iterator start_exclude_iter,
+                                     std::vector<SymbolFreq>::iterator end_exclude_iter) {
+        if (end_exclude_iter - start_exclude_iter <= 0)
+            return;
+        bool has_prefix = false;
+        std::string prefix = std::string();
+        std::string next_start = getNextString(start_exclude_iter->first);
+        int64_t cnt = 0;
+
+        for (auto iter = start_exclude_iter + 1; iter != end_exclude_iter; iter++) {
+            std::string cur_key = iter->first;
+            cnt += iter->second;
+            if (!has_prefix) {
+                prefix = cur_key;
+                has_prefix = true;
+            } else {
+                prefix = commonPrefix(prefix, cur_key);
+            }
+            if ((int)prefix.size() * cnt > W) {
+                std::string cur_start = max(prefix, next_start);
+                std::string cur_end = min(getNextString(prefix), (iter + 1)->first);
+                intervals_.emplace_back(cur_start, cur_end);
+                fillGap(next_start, cur_start);
+                next_start = cur_end;
+                prefix.clear();
+                cnt = 0;
+                has_prefix = false;
+            }
+        }
+        fillGap(next_start, end_exclude_iter->first);
     }
 
     std::string HeuristicSS::commonPrefix(const std::string &str1,
