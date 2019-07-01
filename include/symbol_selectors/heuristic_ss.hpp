@@ -11,7 +11,7 @@
 #include "blending_trie.hpp"
 
 #define BLEND_FILE_NAME  "./blend_result_"
-//#define WRITE_BLEND_RESULT 1 
+//#define WRITE_BLEND_RESULT 1
 #define PRINT_TIME_BREAKDOWN
 #define MAX_KEY_LEN 50
 
@@ -31,9 +31,9 @@ namespace ope {
 
         void setW(int64_t new_w);
 
-    private:
         void checkIntervals(std::string& start_str, std::string& end_str);
 
+    private:
         void getFrequencyTable(const std::vector<std::string> &key_list);
 
         void getInterval(std::vector<SymbolFreq> &blend_freq_table);
@@ -60,6 +60,7 @@ namespace ope {
 
         int64_t W;
         std::unordered_map<std::string, int64_t> freq_map_;
+    public:
         std::vector<std::pair<std::string, std::string>> intervals_;
 
     };
@@ -160,7 +161,7 @@ namespace ope {
 #endif
         // Search for best W
         int64_t last_w = 0;
-        while (abs(num_limit - (int)intervals_.size()) > (int)(0.05 * num_limit)) {
+        while (abs(num_limit - (int)intervals_.size()) > (int)(0.1 * num_limit)) {
             intervals_.clear();
             getInterval(blend_freq_table);
             // sort intervals
@@ -178,7 +179,7 @@ namespace ope {
                 setW(W * 2);
             } else  { // size < num_limit, W is too big
                 std::cout << "Not enough intervals " << intervals_.size();
-                int64_t new_w = W - (int64_t)(abs((W - last_w)/2.0 + 1));
+                int64_t new_w = W - 1 - (int64_t)(abs((W - last_w)/2.0 + 1));
                 std::cout << " Change new W to " << new_w << std::endl;
                 last_w = W;
                 setW(new_w);
@@ -200,7 +201,7 @@ namespace ope {
 
     int HeuristicSS::BinarySearch(const std::string& str, unsigned int pos, int &prefix_len) {
         int l = 0;
-        int r = static_cast<int>(intervals_.size());
+        int r = static_cast<int>(intervals_.size()) - 1;
         assert(pos <= str.size());
         std::string compare_str = str.substr(pos, str.size() - pos);
         while (l <= r) {
@@ -324,30 +325,36 @@ namespace ope {
             return;
         bool has_prefix = false;
         std::string prefix = std::string();
-        std::string next_start = getNextString(start_exclude_iter->first);
         int64_t cnt = 0;
+        std::string interval_start;
+        std::string interval_end = getNextString(start_exclude_iter->first);
 
         for (auto iter = start_exclude_iter + 1; iter != end_exclude_iter; iter++) {
             std::string cur_key = iter->first;
             cnt += iter->second;
             if (!has_prefix) {
                 prefix = cur_key;
+                interval_start = iter->first;
                 has_prefix = true;
             } else {
                 prefix = commonPrefix(prefix, cur_key);
             }
             if ((int)prefix.length() * cnt > W) {
-                std::string cur_start = max(prefix, next_start);
-                std::string cur_end = min(getNextString(prefix), (iter + 1)->first);
-                intervals_.emplace_back(cur_start, cur_end);
-                fillGap(next_start, cur_start);
-                next_start = cur_end;
+                // Fill gap between last end and current start
+                fillGap(interval_end, interval_start);
+                // Update current interval end
+                interval_end = getNextString(iter->first);
+
+//                std::string cur_start = max(prefix, next_start);
+//                std::string cur_end = min(getNextString(prefix), (iter + 1)->first);
+
+                intervals_.push_back(std::make_pair(interval_start, interval_end));
                 prefix.clear();
                 cnt = 0;
                 has_prefix = false;
             }
         }
-        fillGap(next_start, end_exclude_iter->first);
+        fillGap(interval_end, end_exclude_iter->first);
     }
 
     std::string HeuristicSS::commonPrefix(const std::string &str1,

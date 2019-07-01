@@ -71,7 +71,6 @@ template<typename ValueType, template <typename> typename KeyExtractor> inline b
 template<typename ValueType, template <typename> typename KeyExtractor>inline __attribute__((always_inline)) idx::contenthelpers::OptionalValue<ValueType> HOTSingleThreaded<ValueType, KeyExtractor>::lookup(HOTSingleThreaded<ValueType, KeyExtractor>::KeyType const &key) {
 	auto const & fixedSizeKey = idx::contenthelpers::toFixSizedKey(idx::contenthelpers::toBigEndianByteOrder(key));
 	uint8_t const* byteKey = idx::contenthelpers::interpretAsByteArray(fixedSizeKey);
-
 	HOTSingleThreadedChildPointer current =  mRoot;
 	while((!current.isLeaf()) & (current.getNode() != nullptr)) {
 		HOTSingleThreadedChildPointer const * const & currentChildPointer = current.search(byteKey);
@@ -560,6 +559,7 @@ template<typename ValueType, template <typename> typename KeyExtractor> inline v
 		subTreeRoot.executeForSpecificNodeType(true, [&, this](auto & node) -> void {
 			std::string nodeType = nodeAlgorithmToString(node.mNodeType);
 			stats["total"] += node.getNodeSizeInBytes();
+            stats["fanout"] += node.toChildPointer().getNumberEntries();
 			stats[nodeType] += 1.0;
 			for(HOTSingleThreadedChildPointer const & childPointer : node) {
 				this->collectStatsForSubtree(childPointer, stats);
@@ -596,6 +596,7 @@ template<typename ValueType, template <typename> typename KeyExtractor> std::pai
 	}
 
 	statistics["numberValues"] = overallLeafNodeCount;
+    statistics["fanout"] = 0;
 	collectStatsForSubtree(mRoot, statistics);
 
 	size_t totalSize = statistics["total"];

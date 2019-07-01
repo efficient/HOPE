@@ -1,7 +1,7 @@
 #!/bin/bash
 
-mkdir datasets
-mkdir workloads
+#mkdir datasets
+#mkdir workloads
 
 mkdir results
 mkdir results/microbench

@@ -66,13 +66,13 @@ namespace ope {
             HeuristicSS ss;
             std::vector<SymbolFreq> symbol_freq_list;
             ss.selectSymbols(emails, 65535, &symbol_freq_list);
-            //std::sort(ss.intervals_.begin(), ss.intervals_.end());
-            //for(auto iter = ss.intervals_.begin(); iter != ss.intervals_.end(); iter++) {
-            //    std::cout << iter->first << "\t" << iter->second << std::endl;
-            //}
-            //std::string start_str = std::string(1, char(0));
-            //std::string end_str = std::string(50, char(127));
-            //ss.checkIntervals(start_str, end_str);
+            std::sort(ss.intervals_.begin(), ss.intervals_.end());
+//            for(auto iter = ss.intervals_.begin(); iter != ss.intervals_.end(); iter++) {
+//                std::cout << iter->first << "\t" << iter->second << std::endl;
+//            }
+            std::string start_str = std::string(1, char(0));
+            std::string end_str = std::string(50, char(127));
+            ss.checkIntervals(start_str, end_str);
         }
 
         void loadWords() {
@@ -92,7 +92,6 @@ namespace ope {
             int count = 0;
             while (infile.good() && count < kEmailTestSize) {
                 infile >> key;
-                std::cout << key << std::endl;
                 emails.push_back(key);
                 count++;
             }
