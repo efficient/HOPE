@@ -513,7 +513,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
 #endif
 	        output_mem_email_hot << mem << "\n";
             for (int i = 0; i < int(height); i++) {
-                output_height_wiki_hot << std::fixed << heights[i] << ",";
+                output_height_email_hot << std::fixed << heights[i] << ",";
             }
             for (int i = 0; i < int(node_stats.size()); i++) {
                 output_stats_email_hot << node_stats[i] << ",";
