@@ -160,7 +160,7 @@ namespace ope {
 #endif
         // Search for best W
         int64_t last_w = 0;
-        while (abs(num_limit - (int)intervals_.size()) > (int)(0.05 * num_limit)) {
+        while (abs(num_limit - (int)intervals_.size()) > (int)(0.1 * num_limit)) {
             intervals_.clear();
             getInterval(blend_freq_table);
             // sort intervals
@@ -178,7 +178,7 @@ namespace ope {
                 setW(W * 2);
             } else  { // size < num_limit, W is too big
                 std::cout << "Not enough intervals " << intervals_.size();
-                int64_t new_w = W - (int64_t)(abs((W - last_w)/2.0 + 1));
+                int64_t new_w = W - 1 - (int64_t)(abs((W - last_w)/2.0 + 1));
                 std::cout << " Change new W to " << new_w << std::endl;
                 last_w = W;
                 setW(new_w);
