@@ -36,7 +36,7 @@ namespace ope {
             std::cout << std::endl;
         }
 
-/*
+
         TEST_F(HeuristicEnCoderTest, wordTest) {
                 HeuristicEncoder* encoder = new HeuristicEncoder();
                 encoder->build(words, 65535);
@@ -67,7 +67,7 @@ namespace ope {
                 delete encoder;
                 std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
         }
-*/
+
 
         TEST_F (HeuristicEnCoderTest, emailTest) {
             HeuristicEncoder* encoder = new HeuristicEncoder();

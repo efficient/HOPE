@@ -871,7 +871,7 @@ int main(int argc, char *argv[]) {
 #endif
         bool is_point = true;
         int expt_num = 1;
-        int total_num_expt = 42;
+        int total_num_expt = 54;
         exec_group(expt_id, 0, 0, is_point, expt_num, total_num_expt,
                email_point_tp, email_range_tp,
                wiki_point_tp, wiki_range_tp,

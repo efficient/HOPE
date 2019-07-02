@@ -11,7 +11,7 @@
 #include "blending_trie.hpp"
 
 #define BLEND_FILE_NAME  "./blend_result_"
-//#define WRITE_BLEND_RESULT 1 
+//#define WRITE_BLEND_RESULT 1
 #define PRINT_TIME_BREAKDOWN
 #define MAX_KEY_LEN 50
 
@@ -31,9 +31,9 @@ namespace ope {
 
         void setW(int64_t new_w);
 
-    private:
         void checkIntervals(std::string& start_str, std::string& end_str);
 
+    private:
         void getFrequencyTable(const std::vector<std::string> &key_list);
 
         void getInterval(std::vector<SymbolFreq> &blend_freq_table);
@@ -60,6 +60,7 @@ namespace ope {
 
         int64_t W;
         std::unordered_map<std::string, int64_t> freq_map_;
+    public:
         std::vector<std::pair<std::string, std::string>> intervals_;
 
     };
@@ -317,6 +318,43 @@ namespace ope {
             }
         }
     }
+/*
+    // Correct interval generation version
+    void HeuristicSS::mergeIntervals(std::vector<SymbolFreq>::iterator start_exclude_iter,
+                                     std::vector<SymbolFreq>::iterator end_exclude_iter) {
+        if (end_exclude_iter - start_exclude_iter <= 0)
+            return;
+        bool has_prefix = false;
+        std::string prefix = std::string();
+        int64_t cnt = 0;
+        std::string interval_start;
+        std::string interval_end = getNextString(start_exclude_iter->first);
+
+        for (auto iter = start_exclude_iter + 1; iter != end_exclude_iter; iter++) {
+            std::string cur_key = iter->first;
+            cnt += iter->second;
+            if (!has_prefix) {
+                prefix = cur_key;
+                interval_start = iter->first;
+                has_prefix = true;
+            } else {
+                prefix = commonPrefix(prefix, cur_key);
+            }
+            if ((int)prefix.length() * cnt > W) {
+                // Fill gap between last end and current start
+                fillGap(interval_end, interval_start);
+                // Update current interval end
+                interval_end = getNextString(iter->first);
+
+                intervals_.push_back(std::make_pair(interval_start, interval_end));
+                prefix.clear();
+                cnt = 0;
+                has_prefix = false;
+            }
+        }
+        fillGap(interval_end, end_exclude_iter->first);
+    }
+*/
 
     void HeuristicSS::mergeIntervals(std::vector<SymbolFreq>::iterator start_exclude_iter,
                                      std::vector<SymbolFreq>::iterator end_exclude_iter) {
@@ -336,7 +374,7 @@ namespace ope {
             } else {
                 prefix = commonPrefix(prefix, cur_key);
             }
-            if ((int)prefix.length() * cnt > W) {
+            if ((int)prefix.size() * cnt > W) {
                 std::string cur_start = max(prefix, next_start);
                 std::string cur_end = min(getNextString(prefix), (iter + 1)->first);
                 intervals_.emplace_back(cur_start, cur_end);

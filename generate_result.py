@@ -3,7 +3,7 @@ import os
 import numpy as np
 RESULT_DIR = './results/'
 PREFIX = ['ART', 'btree', 'hot', 'microbench/cpr_latency', 'SuRF', 'SuRF_real']
-#PREFIX = ['SuRF', 'SuRF_real']
+#PREFIX = ['SuRF', 'SuRF_real','ART_single']
 TYPE = ['point', 'range']
 DATASETS = ['email', 'ts', 'url', 'wiki']
 VAR = ['cpr','x','height', 'fpr', 'lat', 'insertlat', 'lookuplat', 'mem']
@@ -14,7 +14,7 @@ def generate_result(dirpath, filename):
     output_path = dirpath + filename
     results = []
     with open(full_path, 'r') as f:
-        #print(full_path)
+#        print(full_path)
         lines = f.readlines()
         cnt = 0
         for line in lines:
@@ -57,6 +57,6 @@ for pre in PREFIX:
                 files = os.listdir(cur_dir)
                 for f in files:
                     if f.startswith(file_prefix):
-                        #print(f,file_prefix)
+#                        print(f,file_prefix)
                         generate_result(cur_dir, f)
 
