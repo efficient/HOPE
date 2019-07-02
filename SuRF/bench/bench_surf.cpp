@@ -574,7 +574,7 @@ void exec(const int expt_id,
                 output_lat_wiki_surfreal_range << lat << "\n";
                 output_mem_wiki_surfreal_range << mem << "\n";
                 output_fpr_wiki_surfreal_range << fpr << "\n";
-                output_stats_wiki_surfreal << mem << "," << filter_mem <<  "," << encoder_mem <<"\n";
+                output_stats_wiki_surfreal_range << mem << "," << filter_mem <<  "," << encoder_mem <<"\n";
             } else if (wkld_id == kUrl) {
                 output_lat_url_surfreal_range << lat << "\n";
                 output_mem_url_surfreal_range << mem << "\n";
