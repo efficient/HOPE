@@ -11,7 +11,7 @@ VAR = ['cpr','x','height', 'fpr', 'lat', 'insertlat', 'lookuplat', 'mem']
 
 def generate_result(dirpath, filename):
     full_path = dirpath + filename
-    output_path = dirpath + filename
+    output_path = dirpath + 'final_' + filename
     results = []
     with open(full_path, 'r') as f:
 #        print(full_path)
@@ -20,7 +20,7 @@ def generate_result(dirpath, filename):
         for line in lines:
             line = line.strip('\n')
             if line == '-':
-               break 
+               break
             cnt += 1
         results = [[] for i in range(cnt)]
         idx = 0

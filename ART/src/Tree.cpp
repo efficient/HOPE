@@ -28,79 +28,79 @@ namespace ART_ROWEX {
                         int& cnt_N48, int& cnt_N256,
                         uint64_t&  waste_child_mem, uint64_t& skip_prefix_mem ,
                         uint64_t& waste_prefix_mem) const {
-	uint64_t mem = 0;
-	uint64_t height_sum = 0;
-	uint64_t node_count = 1;
-	std::queue<N*> node_queue;
-	node_queue.push(root);
-	int height = 0;
-	int node_count_cur_level = 0;
-	int node_count_next_level = 1;
-	while (!node_queue.empty()) {
-	    if (node_count_cur_level == 0) {
-		node_count_cur_level = node_count_next_level;
-		node_count_next_level = 0;
-		height++;
-	    }
-	    
-	    N* node = node_queue.front();
-	    
-	    NTypes type = node->getType();
-            uint64_t child_cnt = node->getCount();
-            uint64_t prefix_cnt = node->getPrefi().prefixCount;
-            //std::cout << "Prefix length:" << prefix_cnt << std::endl;
-            if (prefix_cnt < ART_ROWEX::maxStoredPrefixLength) {
-                waste_prefix_mem += (ART_ROWEX::maxStoredPrefixLength - prefix_cnt) * sizeof(uint8_t);
-	    } else {
-		skip_prefix_mem += (prefix_cnt - ART_ROWEX::maxStoredPrefixLength) * sizeof(uint8_t);
-            }
-	    if (type == NTypes::N4) {
-		mem += sizeof(N4);
-                waste_child_mem += (4 - child_cnt) * (sizeof(uint8_t) + sizeof(N*));
-		cnt_N4++;
-	    } else if (type == NTypes::N16) {
-		mem += sizeof(N16);
-                waste_child_mem += (16 - child_cnt) * (sizeof(uint8_t) + sizeof(N*));
-                cnt_N16++;
-	    } else if (type == NTypes::N48) {
-		mem += sizeof(N48);
-                waste_child_mem += (48 - child_cnt) * sizeof(N*) + (256 - child_cnt) * sizeof(uint8_t);
-                cnt_N48++;
-	    } else if (type == NTypes::N256) {
-		mem += sizeof(N256);
-                waste_child_mem += (256 - child_cnt) * (sizeof(N*));
-                cnt_N256++;
-            }
-	    
-	    std::tuple<uint8_t, N*> children[256];
-	    uint32_t children_count = 0;
-	    N::getChildren(node, 0u, 255u, children, children_count);
-	    for (uint32_t i = 0; i < children_count; ++i) {
-		N* n = std::get<1>(children[i]);
-		if (N::isLeaf(n)) {
-		    height_sum += height;
-		} else {
-		    node_queue.push(n);
-		    node_count_next_level++;
-		}
-		node_count++;
-	    }
+    uint64_t mem = 0;
+    uint64_t height_sum = 0;
+    uint64_t node_count = 1;
+    std::queue<N*> node_queue;
+    node_queue.push(root);
+    int height = 0;
+    int node_count_cur_level = 0;
+    int node_count_next_level = 1;
+    while (!node_queue.empty()) {
+        if (node_count_cur_level == 0) {
+            node_count_cur_level = node_count_next_level;
+            node_count_next_level = 0;
+            height++;
+        }
 
-	    node_queue.pop();
-	    node_count_cur_level--;
-	}
-        std::cout << "Waste prefix mem:" << waste_prefix_mem << std::endl;
-        std::cout << "Skip prefix mem:" << skip_prefix_mem << std::endl;
-        std::cout << "Waste child mem:" << waste_child_mem << std::endl;
-	memory = (mem + 0.0) / 1000000;
-	avg_height = (height_sum + 0.0) / node_count;
-	std::cout << "node count = " << node_count << std::endl;
-	std::cout << "mem = " << memory << " MB" << "(" << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << ")" << std::endl;
-	std::cout << "avg height = " << avg_height << std::endl;
+        N* node = node_queue.front();
+
+        NTypes type = node->getType();
+        uint64_t child_cnt = node->getCount();
+        uint64_t prefix_cnt = node->getPrefi().prefixCount;
+        //std::cout << "Prefix length:" << prefix_cnt << std::endl;
+        if (prefix_cnt < ART_ROWEX::maxStoredPrefixLength) {
+            waste_prefix_mem += (ART_ROWEX::maxStoredPrefixLength - prefix_cnt) * sizeof(uint8_t);
+        } else {
+            skip_prefix_mem += (prefix_cnt - ART_ROWEX::maxStoredPrefixLength) * sizeof(uint8_t);
+        }
+        if (type == NTypes::N4) {
+            mem += sizeof(N4);
+            waste_child_mem += (4 - child_cnt) * (sizeof(uint8_t) + sizeof(N*));
+            cnt_N4++;
+        } else if (type == NTypes::N16) {
+            mem += sizeof(N16);
+            waste_child_mem += (16 - child_cnt) * (sizeof(uint8_t) + sizeof(N*));
+            cnt_N16++;
+        } else if (type == NTypes::N48) {
+            mem += sizeof(N48);
+            waste_child_mem += (48 - child_cnt) * sizeof(N*) + (256 - child_cnt) * sizeof(uint8_t);
+            cnt_N48++;
+        } else if (type == NTypes::N256) {
+            mem += sizeof(N256);
+            waste_child_mem += (256 - child_cnt) * (sizeof(N*));
+            cnt_N256++;
+        }
+
+        std::tuple<uint8_t, N*> children[256];
+        uint32_t children_count = 0;
+        N::getChildren(node, 0u, 255u, children, children_count);
+        for (uint32_t i = 0; i < children_count; ++i) {
+            N* n = std::get<1>(children[i]);
+            if (N::isLeaf(n)) {
+                height_sum += height;
+            } else {
+                node_queue.push(n);
+                node_count_next_level++;
+            }
+                node_count++;
+            }
+
+            node_queue.pop();
+            node_count_cur_level--;
+        }
+//        std::cout << "Waste prefix mem:" << waste_prefix_mem << std::endl;
+//        std::cout << "Skip prefix mem:" << skip_prefix_mem << std::endl;
+//        std::cout << "Waste child mem:" << waste_child_mem << std::endl;
+        memory = (mem + 0.0) / 1000000;
+        avg_height = (height_sum + 0.0) / node_count;
+        std::cout << "node count = " << node_count << std::endl;
+        std::cout << "mem = " << memory << " MB" << "(" << cnt_N4 << "," << cnt_N16 << "," << cnt_N48 << "," << cnt_N256 << ")" << std::endl;
+        std::cout << "avg height = " << avg_height << std::endl;
     }
 
     TID Tree::lookup(const Key &k, ThreadInfo &threadEpocheInfo) const {
-        EpocheGuardReadonly epocheGuard(threadEpocheInfo);
+        //EpocheGuardReadonly epocheGuard(threadEpocheInfo);
         N *node = root;
         uint32_t level = 0;
         bool optimisticPrefixMatch = false;
@@ -136,7 +136,7 @@ namespace ART_ROWEX {
     }
 
     bool Tree::lookupRange(const Key &start, const Key &end, Key &continueKey, TID result[],
-			   std::size_t resultSize, std::size_t &resultsFound, ThreadInfo &threadEpocheInfo) const {
+               std::size_t resultSize, std::size_t &resultsFound, ThreadInfo &threadEpocheInfo) const {
         for (uint32_t i = 0; i < std::min(start.getKeyLen(), end.getKeyLen()); ++i) {
             if (start[i] > end[i]) {
                 resultsFound = 0;
@@ -145,7 +145,7 @@ namespace ART_ROWEX {
                 break;
             }
         }
-        EpocheGuard epocheGuard(threadEpocheInfo);
+       // EpocheGuard epocheGuard(threadEpocheInfo);
         TID toContinue = 0;
         bool restart;
         std::function<void(const N *)> copy = [&result, &resultSize, &resultsFound, &toContinue, &copy](const N *node) {
@@ -258,12 +258,11 @@ namespace ART_ROWEX {
         while (true) {
             node = nextNode;
 
-	    // huanchen
-	    if (node == nullptr)
-		return false;
-	    if (N::isLeaf(node))
-		return true;
-	    
+        // huanchen
+        if (node == nullptr)
+        return false;
+        if (N::isLeaf(node))
+        return true;
             PCEqualsResults prefixResult;
             prefixResult = checkPrefixEquals(node, level, start, end, loadKey);
             switch (prefixResult) {
@@ -329,7 +328,7 @@ namespace ART_ROWEX {
     }
 
     void Tree::insert(const Key &k, TID tid, ThreadInfo &epocheInfo) {
-        EpocheGuard epocheGuard(epocheInfo);
+//        EpocheGuard epocheGuard(epocheInfo);
         restart:
         bool needRestart = false;
 
@@ -426,7 +425,7 @@ namespace ART_ROWEX {
     }
 
     void Tree::remove(const Key &k, TID tid, ThreadInfo &threadInfo) {
-        EpocheGuard epocheGuard(threadInfo);
+ //       EpocheGuard epocheGuard(threadInfo);
         restart:
         bool needRestart = false;
 
@@ -602,15 +601,15 @@ namespace ART_ROWEX {
                 }
                 uint8_t kLevel = (k.getKeyLen() > level) ? k[level] : 0;
 
-		// huanchen
-		uint8_t curKey = 0;
-		if (i >= maxStoredPrefixLength) {
-		    if (kt.getKeyLen() <= level)
-			return PCCompareResults::Bigger;
-		    curKey = kt[level];
-		} else {
-		    curKey = p.prefix[i];
-		}
+        // huanchen
+        uint8_t curKey = 0;
+        if (i >= maxStoredPrefixLength) {
+            if (kt.getKeyLen() <= level)
+            return PCCompareResults::Bigger;
+            curKey = kt[level];
+        } else {
+            curKey = p.prefix[i];
+        }
 
                 //uint8_t curKey = i >= maxStoredPrefixLength ? kt[level] : p.prefix[i];
                 if (curKey < kLevel) {
