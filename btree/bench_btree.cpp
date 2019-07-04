@@ -17,8 +17,8 @@ static const uint64_t kNumWikiRecords = 14000000;
 static const uint64_t kNumTsRecords = 14000000;
 static const uint64_t kNumTxns = 10000000;
 
-static const int kSamplePercent = 10;
-static const double kUrlSamplePercent = 0.1;
+static const int kSamplePercent = 1;
+static const double kUrlSamplePercent = 1;
 
 static const std::string file_load_email = "workloads/load_email";
 static const std::string file_load_wiki = "workloads/load_wiki";
@@ -217,7 +217,7 @@ void loadWorkload(int wkld_id,
 
 void exec(const int expt_id, const int wkld_id, const bool is_point,
       const bool is_compressed,
-      const int encoder_type, const int64_t dict_size_limit,
+      const int encoder_type, const int64_t dict_size_id,
       const std::vector<std::string>& insert_keys,
       const std::vector<std::string>& insert_keys_sample,
       const std::vector<std::string>& txn_keys,
@@ -227,11 +227,21 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     uint8_t* buffer_r = new uint8_t[8192];
     std::vector<std::pair<std::string, std::string> >enc_insert_keys;
 
+    int64_t input_dict_size = dict_size_list[dict_size_id];
+    if (encoder_type == 3) {
+        input_dict_size = three_gram_input_dict_size[wkld_id][dict_size_id];
+    } else if (encoder_type == 4) {
+        input_dict_size = four_gram_input_dict_size[wkld_id][dict_size_id];
+    }
+    int W = 0;
+    if (encoder_type == 5)
+        W = ALM_W[wkld_id][dict_size_id];
+
     int64_t total_key_size = 0;
     double start_time = getNow();
     if (is_compressed) {
-        encoder = ope::EncoderFactory::createEncoder(encoder_type);
-        encoder->build(insert_keys_sample, dict_size_limit);
+        encoder = ope::EncoderFactory::createEncoder(encoder_type, W);
+        encoder->build(insert_keys_sample, input_dict_size);
     }
 
     for (int i = 0; i < (int)insert_keys.size(); i++) {
@@ -400,7 +410,6 @@ void exec_group(const int expt_id, const bool is_point,
         const std::vector<std::string>& insert_tss_sample,
         const std::vector<std::string>& txn_tss,
         const std::vector<std::string>& upper_bound_tss) {
-    int dict_size[2] = {10000, 65536};
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
     exec(expt_id, kEmail, is_point, false, 0, 0,
      insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
@@ -424,95 +433,90 @@ void exec_group(const int expt_id, const bool is_point,
 #endif
     //=================================================
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-    exec(expt_id, kEmail, is_point, true, 1, 1000,
+    exec(expt_id, kEmail, is_point, true, 1, 0,
      insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
     expt_num++;
 
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-    exec(expt_id, kWiki, is_point, true, 1, 1000,
+    exec(expt_id, kWiki, is_point, true, 1, 0,
      insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
     expt_num++;
 
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-    exec(expt_id, kUrl, is_point, true, 1, 1000,
+    exec(expt_id, kUrl, is_point, true, 1, 0,
      insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
     expt_num++;
 
 #ifdef RUN_TIMESTAMP
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-    exec(expt_id, kTs, is_point, true, 1, 1000,
+    exec(expt_id, kTs, is_point, true, 1, 0,
      insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
     expt_num++;
 #endif
     //=================================================
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-    exec(expt_id, kEmail, is_point, true, 2, 65536,
+    exec(expt_id, kEmail, is_point, true, 2, 6,
      insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
     expt_num++;
 
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-    exec(expt_id, kWiki, is_point, true, 2, 65536,
+    exec(expt_id, kWiki, is_point, true, 2, 6,
      insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
     expt_num++;
 
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-    exec(expt_id, kUrl, is_point, true, 2, 65536,
+    exec(expt_id, kUrl, is_point, true, 2, 6,
      insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
     expt_num++;
 #ifdef RUN_TIMESTAMP
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-    exec(expt_id, kTs, is_point, true, 2, 65536,
+    exec(expt_id, kTs, is_point, true, 2, 6,
      insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
     expt_num++;
 #endif
-    for (int j = 0; j < 2; j++) {
-        std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-        exec(expt_id, kEmail, is_point, true, 3, dict_size[j],
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kEmail, is_point, true, 3, 6,
              insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
-        expt_num++;
+    expt_num++;
 
-        std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-        exec(expt_id, kWiki, is_point, true, 3, dict_size[j],
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kWiki, is_point, true, 3, 6,
              insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
-        expt_num++;
+    expt_num++;
 
-        std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-        exec(expt_id, kUrl, is_point, true, 3, dict_size[j],
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kUrl, is_point, true, 3, 6,
              insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
-        expt_num++;
+    expt_num++;
 #ifdef RUN_TIMESTAMP
-        std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-        exec(expt_id, kTs, is_point, true, 3, dict_size[j],
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kTs, is_point, true, 3, 6,
          insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-        expt_num++;
+    expt_num++;
 #endif
-    }
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kEmail, is_point, true, 4, 6,
+        insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
+    expt_num++;
 
-    for (int j = 0; j < 2; j++) {
-        std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-        exec(expt_id, kEmail, is_point, true, 4, dict_size[j],
-             insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
-        expt_num++;
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kWiki, is_point, true, 4, 6,
+        insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
+    expt_num++;
 
-        std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-        exec(expt_id, kWiki, is_point, true, 4, dict_size[j],
-             insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
-        expt_num++;
-
-        std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-        exec(expt_id, kUrl, is_point, true, 4, dict_size[j],
-             insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
-        expt_num++;
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kUrl, is_point, true, 4, 6,
+        insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
+    expt_num++;
 #ifdef RUN_TIMESTAMP
-        std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-        exec(expt_id, kTs, is_point, true, 4, dict_size[j],
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kTs, is_point, true, 4, 6,
          insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-        expt_num++;
+    expt_num++;
 #endif
-    }
 
+    int dict_size_5[2] = {3, 6};
     if (runALM == 1) {
-        int dict_size_5[2] = {8192, 65536};
         for (int j = 0; j < 2; j++) {
             std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
             exec(expt_id, kEmail, is_point, true, 5, dict_size_5[j],

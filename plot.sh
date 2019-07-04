@@ -5,6 +5,7 @@ run_surf=$2
 run_art=$3
 run_hot=$4
 run_btree=$5
+run_breakdown=$6
 
 PYTHON='/usr/local/bin/python3.5'
 if [ ${run_microbench} == 1 ]
@@ -203,4 +204,10 @@ then
     ${PYTHON} plot/hot/point/height_email_hot.py
     ${PYTHON} plot/hot/point/height_wiki_hot.py
     ${PYTHON} plot/hot/point/height_url_hot.py
+fi
+
+
+if [ ${run_breakdown} == 1 ]
+then
+    ${PYTHON} plot/microbench//build_time_breakdown/bt_breakdown.py
 fi

@@ -7,6 +7,7 @@
 #include "symbol_selector_factory.hpp"
 #include "sbt.hpp"
 
+//#define PRINT_BUILD_TIME_BREAKDOWN
 namespace ope {
 
 class DoubleCharEncoder : public Encoder {
@@ -37,15 +38,30 @@ private:
 
 bool DoubleCharEncoder::build (const std::vector<std::string>& key_list,
                                const int64_t dict_size_limit) {
+#ifdef PRINT_BUILD_TIME_BREAKDOWN
+    std::cout << "-----------------------------Double Character Encoder------------------------------" << std::endl;
+    double cur_time = getNow();
+#endif
     std::vector<SymbolFreq> symbol_freq_list;
     SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(2);
     symbol_selector->selectSymbols(key_list, dict_size_limit, &symbol_freq_list);
+#ifdef PRINT_BUILD_TIME_BREAKDOWN
+    std::cout << "Symbol Select time = " << getNow() - cur_time << std::endl;
+    cur_time = getNow();
+#endif
 
     std::vector<SymbolCode> symbol_code_list;
     CodeGenerator* code_generator = CodeGeneratorFactory::createCodeGenerator(0);
     code_generator->genCodes(symbol_freq_list, &symbol_code_list);
-
-    return buildDict(symbol_code_list);
+#ifdef PRINT_BUILD_TIME_BREAKDOWN
+    std::cout << "Code Assign (Hu-Tucker) time = " << getNow() - cur_time << std::endl;
+    cur_time = getNow();
+#endif
+    bool br = buildDict(symbol_code_list);
+#ifdef PRINT_BUILD_TIME_BREAKDOWN
+    std::cout << "Build Dictionary time = " << getNow() - cur_time << std::endl;
+#endif
+    return br;
 }
 
 int DoubleCharEncoder::encode (const std::string& key, uint8_t* buffer) const {

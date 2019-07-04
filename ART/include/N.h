@@ -30,12 +30,12 @@ namespace ART_ROWEX {
         N256 = 3
     };
 
-    static constexpr uint32_t maxStoredPrefixLength = 4;
+    static constexpr uint32_t maxStoredPrefixLength = 16;
     struct Prefix {
         uint32_t prefixCount = 0;
         uint8_t prefix[maxStoredPrefixLength];
     };
-    static_assert(sizeof(Prefix) == 8, "Prefix should be 64 bit long");
+//    static_assert(sizeof(Prefix) == 8, "Prefix should be 64 bit long");
 
     class N {
     protected:

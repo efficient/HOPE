@@ -11,19 +11,19 @@ namespace ope {
 
 class EncoderFactory {
 public:
-    static Encoder* createEncoder(const int type) {
+    static Encoder* createEncoder(const int type, int W = 20000) {
         if (type == 1)
             return new SingleCharEncoder();
-	else if (type == 2)
+        else if (type == 2)
             return new DoubleCharEncoder();
-	else if (type == 3)
-	    return new NGramEncoder(3);
-	else if (type == 4)
-	    return new NGramEncoder(4);
-	else if (type == 5)
-            return new HeuristicEncoder();
-	else
-	    return new SingleCharEncoder();
+        else if (type == 3)
+            return new NGramEncoder(3);
+        else if (type == 4)
+            return new NGramEncoder(4);
+        else if (type == 5)
+            return new HeuristicEncoder(W);
+        else
+            return new SingleCharEncoder();
     }
 };
 

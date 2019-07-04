@@ -7,12 +7,14 @@
 #include "code_generator_factory.hpp"
 #include "symbol_selector_factory.hpp"
 
+//#define PRINT_BUILD_TIME_BREAKDOWN
+
 namespace ope {
 
 class NGramEncoder : public Encoder {
 public:
-    static const int kCgType = 0;    
-    
+    static const int kCgType = 0;
+
     NGramEncoder(int n) : n_(n) {};
     ~NGramEncoder() { delete dict_; };
 
@@ -39,16 +41,17 @@ private:
 bool NGramEncoder::build (const std::vector<std::string>& key_list,
 			  const int64_t dict_size_limit) {
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
+    std::cout << "------------------------" << n_ << " Gram Encoder-----------------------" << std::endl;
     double time_start = getNow();
 #endif
     std::vector<SymbolFreq> symbol_freq_list;
     SymbolSelector* symbol_selector = SymbolSelectorFactory::createSymbolSelector(n_);
     symbol_selector->selectSymbols(key_list, dict_size_limit, &symbol_freq_list);
-   delete symbol_selector;
+    delete symbol_selector;
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
     double time_end = getNow();
     double time_diff = time_end - time_start;
-    std::cout << "symbol select time = " << time_diff << std::endl;
+    std::cout << "Symbol Select time = " << time_diff << std::endl;
 #endif
 
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
@@ -58,11 +61,10 @@ bool NGramEncoder::build (const std::vector<std::string>& key_list,
     CodeGenerator* code_generator = CodeGeneratorFactory::createCodeGenerator(kCgType);
     code_generator->genCodes(symbol_freq_list, &symbol_code_list);
     code_len_ = code_generator->getCodeLen();
-    delete code_generator;
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
     time_end = getNow();
     time_diff = time_end - time_start;
-    std::cout << "hu-tucker time = " << time_diff << std::endl;
+    std::cout << "Code Assign (Hu-Tucker) time = " << time_diff << std::endl;
 #endif
 
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
@@ -74,7 +76,7 @@ bool NGramEncoder::build (const std::vector<std::string>& key_list,
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
     time_end = getNow();
     time_diff = time_end - time_start;
-    std::cout << "dict build time = " << time_diff << std::endl;
+    std::cout << "Build Dictionary time = " << time_diff << std::endl;
     std::cout << "num entries = " << dict_->numEntries() << std::endl;
 #endif
     return ret_val;
@@ -196,7 +198,7 @@ void NGramEncoder::encodePair (const std::string& l_key, const std::string& r_ke
 	    }
 	    found_mismatch = true;
 	}
-	
+
 	int prefix_len = 0;
 	Code code = dict_->lookup(l_key_str + pos, n_ + 1, prefix_len);
 	int64_t s_buf = code.code;

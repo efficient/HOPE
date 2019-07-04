@@ -9,10 +9,14 @@
 #include "code_generator_factory.hpp"
 #include "symbol_selector_factory.hpp"
 
+//#define PRINT_BUILD_TIME_BREAKDOWN
+
 namespace ope {
     class HeuristicEncoder : public Encoder {
     public:
-        HeuristicEncoder() {};
+        HeuristicEncoder(int _W = 10000) {
+            W = _W;
+        };
 
         ~HeuristicEncoder() {
             delete dict_;
@@ -36,6 +40,7 @@ namespace ope {
         void checkOrder(std::vector<SymbolCode> &symbol_code_list);
 
     private:
+        int W;
         Dictionary *dict_;
         std::vector<SymbolCode> symbol_code_list;
         std::string changeToBinary(int64_t num, int8_t len);
@@ -76,23 +81,30 @@ namespace ope {
 
     bool HeuristicEncoder::build(const std::vector<std::string> &key_list,
                                  const int64_t dict_size_limit) {
-//        double curtime = getNow();
+#ifdef PRINT_BUILD_TIME_BREAKDOWN
+        std::cout << "---------------------Heuristic Encoder-------------------------" << std::endl;
+        double curtime = getNow();
+#endif
         std::vector<SymbolFreq> symbol_freq_list;
         SymbolSelector *symbol_selector = SymbolSelectorFactory::createSymbolSelector(5);
-        symbol_selector->selectSymbols(key_list, dict_size_limit, &symbol_freq_list);
-//        std::cout << "Finish getting symbol frequency, use:" << getNow() - curtime << std::endl;
-//        curtime = getNow();
+        symbol_selector->selectSymbols(key_list, dict_size_limit, &symbol_freq_list, W);
         delete symbol_selector;
-
+#ifdef PRINT_BUILD_TIME_BREAKDOWN
+        std::cout << "Symbol Select time = " << getNow() - curtime << std::endl;
+        curtime = getNow();
+#endif
         CodeGenerator *code_generator = CodeGeneratorFactory::createCodeGenerator(1);
         code_generator->genCodes(symbol_freq_list, &symbol_code_list);
-//        std::cout << "Finish getting code, use:" << getNow() - curtime << std::endl;
-//        curtime = getNow();
         delete code_generator;
-
+#ifdef PRINT_BUILD_TIME_BREAKDOWN
+        std::cout << "Code Assign(Hu-Tucker) time = " << getNow() - curtime << std::endl;
+        curtime = getNow();
+#endif
         dict_ = DictionaryFactory::createDictionary(5);
-        auto dic = dict_->build(symbol_code_list);
-//        std::cout << "Finish building dic, use:" << getNow() - curtime << std::endl;
+        bool dic = dict_->build(symbol_code_list);
+#ifdef PRINT_BUILD_TIME_BREAKDOWN
+        std::cout << "Build Dictionary time = " << getNow() - curtime << std::endl;
+#endif
         return dic;
     }
 
