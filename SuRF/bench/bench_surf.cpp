@@ -401,6 +401,8 @@ void exec(const int expt_id,
     int W = 0;
     if (encoder_type == 5)
         W = ALM_W[wkld_id][dict_size_id];
+    if (encoder_type == 6)
+        W = ALM_W_improved[wkld_id][dict_size_id];
 
     double start_time = getNow();
     if (is_compressed) {
@@ -757,30 +759,26 @@ void exec_group(const int expt_id,
     expt_num++;
 #endif
 
-    for (int j = 0; j < 2; j++) {
-        std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-        exec(expt_id, kEmail, is_point, filter_type, suffix_len,
-             true, 5, dict_size[j], email_point_tp, email_range_tp,
-             insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
-        expt_num++;
+    for (int encoder_type = 6; encoder_type < 7; encoder_type++) {
+        for (int j = 0; j < 2; j++) {
+            std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+            exec(expt_id, kEmail, is_point, filter_type, suffix_len,
+                 true, encoder_type, dict_size[j], email_point_tp, email_range_tp,
+                 insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
+            expt_num++;
 
-        std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-        exec(expt_id, kWiki, is_point, filter_type, suffix_len,
-             true, 5, dict_size[j], wiki_point_tp, wiki_range_tp,
-             insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
-        expt_num++;
+            std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+            exec(expt_id, kWiki, is_point, filter_type, suffix_len,
+                 true, encoder_type, dict_size[j], wiki_point_tp, wiki_range_tp,
+                 insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
+            expt_num++;
 
-        std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-        exec(expt_id, kUrl, is_point, filter_type, suffix_len,
-             true, 5, dict_size[j], url_point_tp, url_range_tp,
-             insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
-        expt_num++;
-
-    //    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-    //    exec(expt_id, kTs, is_point, filter_type, suffix_len,
-    //     true, 5, dict_size[j], ts_point_tp, ts_range_tp,
-    //     insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-    //    expt_num++;
+            std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+            exec(expt_id, kUrl, is_point, filter_type, suffix_len,
+                 true, encoder_type, dict_size[j], url_point_tp, url_range_tp,
+                 insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
+            expt_num++;
+        }
     }
 }
 
@@ -792,21 +790,21 @@ int main(int argc, char *argv[]) {
     //-------------------------------------------------------------
     std::vector<std::string> load_emails, insert_emails, insert_emails_shuffle,
     insert_emails_sample, txn_emails, upper_bound_emails;
-    int64_t email_point_tp, email_range_tp;
+    int64_t email_point_tp=0, email_range_tp=0;
     loadWorkload(kEmail, email_point_tp, email_range_tp,
          load_emails, insert_emails, insert_emails_shuffle,
          insert_emails_sample, txn_emails, upper_bound_emails);
 
     std::vector<std::string> load_wikis, insert_wikis, insert_wikis_shuffle,
     insert_wikis_sample, txn_wikis, upper_bound_wikis;
-    int64_t wiki_point_tp, wiki_range_tp;
+    int64_t wiki_point_tp=0, wiki_range_tp=0;
     loadWorkload(kWiki, wiki_point_tp, wiki_range_tp,
          load_wikis, insert_wikis, insert_wikis_shuffle,
          insert_wikis_sample, txn_wikis, upper_bound_wikis);
 
     std::vector<std::string> load_urls, insert_urls, insert_urls_shuffle,
     insert_urls_sample, txn_urls, upper_bound_urls;
-    int64_t url_point_tp, url_range_tp;
+    int64_t url_point_tp=0, url_range_tp=0;
     loadWorkload(kUrl, url_point_tp, url_range_tp,
          load_urls, insert_urls, insert_urls_shuffle,
          insert_urls_sample, txn_urls, upper_bound_urls);

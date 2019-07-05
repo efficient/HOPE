@@ -27,26 +27,6 @@ static const int kWiki = 1;
 static const int kUrl = 2;
 static const int kTs = 3;
 
-//const int dict_size_list[9] = {1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144};
-//static const int64_t three_gram_input_dict_size[4][7] = {
-//{ 831, 1983, 4608, 10496, 24064, 52224, 80000},
-//{ 799, 1919, 4352, 9600, 20480, 41984, 80000},
-//{ 815, 1983, 4352, 9472, 19968, 41984, 80000},
-//{   0,    0,    0,    0,     0,     0,     0}};
-//
-//static const int64_t four_gram_input_dict_size[4][9] = {
-//{ 815, 1919, 4160, 8704, 18176, 37888, 79687, 168750, 351562},
-//{ 767, 1823, 3967, 8320, 17408, 35840, 75000, 151551, 309375},
-//{ 799, 1855, 3967, 8448, 17408, 35328, 71875, 147455, 0},
-//{   0,    0,    0,    0,     0,     0,     0, 0, 0}};
-//
-//static const int ALM_W[3][9] = {
-//{ 13274, 7726,  4788,  3436, 2071, 1131, 624,  359,   186},
-//{  7874, 4030,  2249,  1264,  725,  397, 215,  115,   65},
-//{ 42000,35000, 21875, 13436, 8436, 4999, 2889, 1717,  1014}
-//};
-//
-
 static const std::string output_dir = "results/microbench/";
 
 //-------------------------------------------------------------
@@ -239,6 +219,9 @@ void exec(const int expt_id, const int wkld_id,
     if (encoder_type == 5) {
         W = ALM_W[wkld_id][dict_size_id];
     }
+    if (encoder_type == 6) {
+        W = ALM_W_improved[wkld_id][dict_size_id];
+    }
 
     ope::Encoder* encoder = ope::EncoderFactory::createEncoder(encoder_type, W);
     double time_start = getNow();
@@ -421,8 +404,8 @@ int main(int argc, char *argv[]) {
         int total_num_expts = 0;
         int stop_method = 0;
         if (runALM == 1) {
-            stop_method = 6;
-            total_num_expts = 84;
+            stop_method = 7;
+            total_num_expts = 108;
         } else {
             stop_method = 5;
             total_num_expts = 57;
@@ -495,7 +478,6 @@ int main(int argc, char *argv[]) {
 #endif
             }
         }
-
 
         output_x_email_dict_size << "-" << "\n";
         output_cpr_email_dict_size << "-" << "\n";

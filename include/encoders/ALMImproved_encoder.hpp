@@ -1,5 +1,5 @@
-#ifndef HEURISTIC_ENCODER_H
-#define HEURISTIC_ENCODER_H
+#ifndef ALMIMPROVED_ENCODER_H
+#define ALMIMPROVED_ENCODER_H
 
 #include <string.h>
 
@@ -9,15 +9,14 @@
 #include "code_generator_factory.hpp"
 #include "symbol_selector_factory.hpp"
 
-
 namespace ope {
-    class HeuristicEncoder : public Encoder {
+    class ALMImprovedEncoder: public Encoder {
     public:
-        HeuristicEncoder(int _W = 10000) {
+        ALMImprovedEncoder(int _W = 10000) {
             W = _W;
         };
 
-        ~HeuristicEncoder() {
+        ~ALMImprovedEncoder() {
             delete dict_;
         };
 
@@ -46,7 +45,7 @@ namespace ope {
 
     };
 
-    std::string HeuristicEncoder::changeToBinary(int64_t num, int8_t len) {
+    std::string ALMImprovedEncoder::changeToBinary(int64_t num, int8_t len) {
         std::string result = std::string();
         int cnt = 0;
         while (num > 0) {
@@ -59,7 +58,7 @@ namespace ope {
         return result;
     }
 
-    void HeuristicEncoder::checkOrder(vector<SymbolCode> &symbol_code_list) {
+    void ALMImprovedEncoder::checkOrder(vector<SymbolCode> &symbol_code_list) {
         std::sort(symbol_code_list.begin(), symbol_code_list.end(),
                   [](SymbolCode& x, SymbolCode& y){
                       return x.first.compare(y.first) < 0;
@@ -78,22 +77,22 @@ namespace ope {
         }
     }
 
-    bool HeuristicEncoder::build(const std::vector<std::string> &key_list,
+    bool ALMImprovedEncoder::build(const std::vector<std::string> &key_list,
                                  const int64_t dict_size_limit) {
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
-        std::cout << "---------------------Heuristic Encoder-------------------------" << std::endl;
+        std::cout << "---------------------ALM Improved-------------------------" << std::endl;
         double curtime = getNow();
 #endif
         std::vector<SymbolFreq> symbol_freq_list;
-        SymbolSelector *symbol_selector = SymbolSelectorFactory::createSymbolSelector(5);
+        SymbolSelector *symbol_selector = SymbolSelectorFactory::createSymbolSelector(6);
         symbol_selector->selectSymbols(key_list, dict_size_limit, &symbol_freq_list, W);
         delete symbol_selector;
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
         std::cout << "Symbol Select time = " << getNow() - curtime << std::endl;
         curtime = getNow();
 #endif
-//        CodeGenerator *code_generator = CodeGeneratorFactory::createCodeGenerator(1);
-        CodeGenerator *code_generator = CodeGeneratorFactory::createCodeGenerator(0);
+        CodeGenerator *code_generator = CodeGeneratorFactory::createCodeGenerator(1);
+//        CodeGenerator *code_generator = CodeGeneratorFactory::createCodeGenerator(0);
         code_generator->genCodes(symbol_freq_list, &symbol_code_list);
         delete code_generator;
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
@@ -108,7 +107,7 @@ namespace ope {
         return dic;
     }
 
-    int HeuristicEncoder::encode(const std::string &key, uint8_t *buffer) const {
+    int ALMImprovedEncoder::encode(const std::string &key, uint8_t *buffer) const {
         int64_t *int_buf = (int64_t *) buffer;
         int idx = 0;
         int_buf[0] = 0;
@@ -140,22 +139,22 @@ namespace ope {
         return ((idx << 6) + int_buf_len);
     }
 
-    void HeuristicEncoder::encodePair(const std::string &l_key, const std::string &r_key, uint8_t *l_buffer,
+    void ALMImprovedEncoder::encodePair(const std::string &l_key, const std::string &r_key, uint8_t *l_buffer,
                                       uint8_t *r_buffer, int &l_enc_len, int &r_enc_len) const {
         l_enc_len = encode(l_key,l_buffer);
         r_enc_len = encode(r_key,r_buffer);
         return;
     }
 
-    int HeuristicEncoder::decode(const std::string& enc_key, uint8_t* buffer) const {
+    int ALMImprovedEncoder::decode(const std::string& enc_key, uint8_t* buffer) const {
 	return 0;
     }
 
-    int HeuristicEncoder::numEntries() const {
+    int ALMImprovedEncoder::numEntries() const {
         return dict_->numEntries();
     }
 
-    int64_t HeuristicEncoder::memoryUse() const {
+    int64_t ALMImprovedEncoder::memoryUse() const {
         return dict_->memoryUse();
     }
 }

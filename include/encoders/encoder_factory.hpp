@@ -6,6 +6,7 @@
 #include "double_char_encoder.hpp"
 #include "ngram_encoder.hpp"
 #include "heuristic_encoder.hpp"
+#include "ALMImproved_encoder.hpp"
 
 namespace ope {
 
@@ -22,6 +23,8 @@ public:
             return new NGramEncoder(4);
         else if (type == 5)
             return new HeuristicEncoder(W);
+        else  if (type == 6)
+            return new ALMImprovedEncoder(W);
         else
             return new SingleCharEncoder();
     }

@@ -128,7 +128,7 @@ void findAllInputSize(const int encoder_type, const int wkld, const std::vector<
     }
     if (encoder_type == 5) {
         for (int i = 0; i < 9; i++) {
-            ope::Encoder* encoder = ope::EncoderFactory::createEncoder(encoder_type, ALM_W[wkld][i]);
+            ope::Encoder* encoder = ope::EncoderFactory::createEncoder(encoder_type, 200000);
             encoder->build(keys_shuffle, dic[i]);
         }
     }
@@ -142,6 +142,8 @@ void exec(const int encoder_type, const int64_t dict_size_limit,
     int64_t cur_dict_size = 0;
     int64_t input_size = getInputSize(encoder_type, keys_shuffle, dict_size_limit, cur_dict_size);
     int W = 0;
+    if (encoder_type == 5 || encoder_type == 6)
+        W = 50000;
     ope::Encoder* encoder = ope::EncoderFactory::createEncoder(encoder_type, W);
     encoder->build(keys_shuffle, input_size);
 
@@ -150,7 +152,6 @@ void exec(const int encoder_type, const int64_t dict_size_limit,
     double time_start = getNow();
     int64_t mem = encoder->memoryUse();
     for (int i = 0; i < (int)keys.size(); i++) {
-    //std::cout << "i = " << i << std::endl;
         total_enc_len += encoder->encode(keys[i], buffer);
     }
     double time_end = getNow();
@@ -226,15 +227,15 @@ int main(int argc, char *argv[]) {
         else if (dict_type == 2)
             exec(2, 65536, emails, emails_shuffle, total_len_email);
         else if (dict_type == 3)
-            exec(3, 2048, emails, emails_shuffle, total_len_email);
+            exec(3, 8192, emails, emails_shuffle, total_len_email);
             //exec(3, 90000, emails, emails_shuffle, total_len_email);
         else if (dict_type == 4)
             exec(4, 65536, emails, emails_shuffle, total_len_email);
         else if (dict_type == 5)
             exec(5, 65536, emails, emails_shuffle, total_len_email);
-            //exec(5, 262144, emails, emails_shuffle, total_len_email);
-        else if (dict_type == 6) {
-                //exec(2, 65536, emails, emails_shuffle, total_len_email);
+        else if (dict_type == 6)
+            exec(6, 65536, emails, emails_shuffle, total_len_email);
+        else if (dict_type == 7) {
                 findAllInputSize(3, wkld, emails_shuffle);
                 std::cout << "------------------------------------" << std::endl;
                 findAllInputSize(4, wkld, emails_shuffle);
@@ -256,8 +257,9 @@ int main(int argc, char *argv[]) {
              exec(4, 65536, wikis, wikis_shuffle, total_len_wiki);
          else if (dict_type == 5)
              exec(5, 65536, wikis, wikis_shuffle, total_len_wiki);
-         else if (dict_type == 6) {
-                 //exec(2, 65536, wikis, wikis_shuffle, total_len_wiki);
+         else if (dict_type == 6)
+             exec(6, 65536, wikis, wikis_shuffle, total_len_wiki);
+        else if (dict_type == 7) {
                  findAllInputSize(3, wkld, wikis_shuffle);
                  std::cout << "------------------------------------" << std::endl;
                  findAllInputSize(4, wkld, wikis_shuffle);
@@ -279,8 +281,9 @@ int main(int argc, char *argv[]) {
             exec(4, 65536, urls, urls_shuffle, total_len_url);
         else if (dict_type == 5)
             exec(5, 65536, urls, urls_shuffle, total_len_url);
-        else if (dict_type == 6) {
-                //exec(2, 65536, urls, urls_shuffle, total_len_url);
+        else if (dict_type == 6)
+            exec(6, 65536, urls, urls_shuffle, total_len_url);
+        else if (dict_type == 7)  {
                 findAllInputSize(3, wkld, urls_shuffle);
                 std::cout << "------------------------------------" << std::endl;
                 findAllInputSize(4, wkld, urls_shuffle);

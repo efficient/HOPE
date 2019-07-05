@@ -58,7 +58,12 @@ bool NGramSS::selectSymbols (const std::vector<std::string>& key_list,
 #endif
     countSymbolFreq(key_list);
     std::vector<std::string> most_freq_symbols;
-    pickMostFreqSymbols((num_limit / 2), &most_freq_symbols);
+    int64_t adjust_num_limit = num_limit;
+    if (num_limit > (int64_t)freq_map_.size() * 2) {
+        adjust_num_limit = (int64_t)freq_map_.size() * 2 - 1;
+        std::cout << "3 Gram: Input dictionary Size is too big, change to " << adjust_num_limit<< std::endl;
+    }
+    pickMostFreqSymbols((adjust_num_limit / 2), &most_freq_symbols);
     fillInGap(most_freq_symbols);
     assert(interval_prefixes_.size() == interval_boundaries_.size());
     countIntervalFreq(key_list);

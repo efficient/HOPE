@@ -6,6 +6,7 @@
 #include "double_char_ss.hpp"
 #include "ngram_ss.hpp"
 #include "heuristic_ss.hpp"
+#include "ALMImproved_ss.hpp"
 
 namespace ope {
 
@@ -22,6 +23,8 @@ public:
             return new NGramSS(4);
         else if (type == 5)
             return new HeuristicSS();
+        else if (type == 6)
+            return new ALMImprovedSS();
         else
             return new SingleCharSS();
     }

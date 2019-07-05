@@ -71,10 +71,10 @@ namespace ope {
 
     class BlendTrie {
     public:
-        BlendTrie();
+        BlendTrie(int _blend_type = 1);
 
         ~BlendTrie();
-        
+
         void build(std::vector<std::string> key_list);
 //        void build(const std::unordered_map<std::string, int64_t> &freq_map);
 
@@ -88,18 +88,19 @@ namespace ope {
 
     private:
         TrieNode *root_;
-
+        int blend_type;
     };
 
-    BlendTrie::BlendTrie() {
+    BlendTrie::BlendTrie(int _blend_type) {
         root_ = nullptr;
+        blend_type = _blend_type;
     }
 
     BlendTrie::~BlendTrie() {
         // Delete all the nodes
         clear(root_);
     }
-/*  
+/*
     void BlendTrie::build(std::vector<std::string> key_list) {
         root_ = new TrieNode();
         int maxkey_len = 50;
@@ -119,13 +120,26 @@ namespace ope {
    // Only calculate the frequency of suffix
    void BlendTrie::build(std::vector<std::string> key_list) {
         root_ = new TrieNode();
-        int maxkey_len = 100;
-        for (int i = 0; i < (int)key_list.size(); i++) {
-            std::string key = key_list[i].substr(0, maxkey_len);
-            int str_len = key.length();
-            for (int j = 0; j < (int)key.size(); j++) {
-                std::string substring = key.substr(j, str_len - j);
-                insert(substring, 1);  
+        int maxkey_len = 50;
+        if (blend_type == 0) {
+            for (int i = 0; i < (int)key_list.size(); i++) {
+                std::string key = key_list[i];
+                for (int j = 0; j < (int)key.size(); j++) {
+                    for (int k = 1; k <= (int)key.size() - j && k < maxkey_len; k++) {
+                        std::string substring = key.substr(j, k);
+                        //std::cout << substring << "*" << std::endl;
+                        insert(substring, 1);
+                    }
+                }
+            }
+        } else if (blend_type == 1) {
+            for (int i = 0; i < (int)key_list.size(); i++) {
+                std::string key = key_list[i].substr(0, maxkey_len);
+                int str_len = key.length();
+                for (int j = 0; j < (int)key.size(); j++) {
+                    std::string substring = key.substr(j, str_len - j);
+                    insert(substring, 1);
+                }
             }
         }
     }

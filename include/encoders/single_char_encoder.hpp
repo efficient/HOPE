@@ -57,7 +57,7 @@ bool SingleCharEncoder::build (const std::vector<std::string>& key_list,
 #endif
 
     std::vector<SymbolCode> symbol_code_list;
-    CodeGenerator* code_generator = CodeGeneratorFactory::createCodeGenerator(0);
+    CodeGenerator* code_generator = CodeGeneratorFactory::createCodeGenerator(1);
     code_generator->genCodes(symbol_freq_list, &symbol_code_list);
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
     std::cout << "Code Assign(Hu-Tucker) time = " << getNow() - cur_time << std::endl;

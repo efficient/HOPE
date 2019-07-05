@@ -8,7 +8,7 @@
 
 //#define PRINT_BUILD_TIME_BREAKDOWN 1
 //#define USE_ARRAY_DICT 1
-//#define USE_FIXED_LEN_DICT_CODE 1
+#define USE_FIXED_LEN_DICT_CODE 1
 //#define INCLUDE_DECODE 1
 
 const int dict_size_list[9] = {1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144};
@@ -26,6 +26,12 @@ const int64_t four_gram_input_dict_size[4][9] = {
 {   0,    0,    0,    0,     0,     0,     0, 0, 0}};
 
 const int ALM_W[3][9] = {
+{399219, 206250, 99999, 49999, 25780, 13280, 6639, 3319, 1561},
+{137499, 70311, 37499, 20701, 11326, 6053, 3319, 2048, 1316},
+{4000000, 4000000, 4000000, 4000000, 4000000, 4000000, 4000000, 4000000, 4000000}
+};
+
+const int ALM_W_improved[3][9] = {
 { 13274, 7726,  4788,  3436, 2071, 1131, 624,  359,   186},
 {  7874, 4030,  2249,  1264,  725,  397, 215,  115,   65},
 { 42000,35000, 21875, 13436, 8436, 4999, 2889, 1717,  1014}
@@ -64,6 +70,31 @@ double getNow() {
   struct timeval tv;
   gettimeofday(&tv, 0);
   return tv.tv_sec + tv.tv_usec / 1000000.0;
+}
+
+void printString(std::string str) {
+    for (int i = 0; i < (int)str.length();i++)
+        std::cout << std::hex << (int)str[i] << " ";
+}
+
+int strCompare(std::string s1, std::string s2) {
+    int len1 = (int) s1.length();
+    int len2 = (int) s2.length();
+    int len = len1 < len2 ? len1 : len2;
+    for (int i = 0; i < len; i++) {
+        uint8_t c1 = static_cast<uint8_t >(s1[i]);
+        uint8_t c2 = static_cast<uint8_t >(s2[i]);
+        if (c1 < c2)
+            return -1;
+        if (c1 > c2)
+            return 1;
+    }
+    if (len1 < len2)
+        return -1;
+    else if (len1 == len2)
+        return 0;
+    else
+        return 1;
 }
 
 } // namespace ope

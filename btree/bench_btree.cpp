@@ -236,6 +236,8 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     int W = 0;
     if (encoder_type == 5)
         W = ALM_W[wkld_id][dict_size_id];
+    if (encoder_type == 6)
+        W = ALM_W_improved[wkld_id][dict_size_id];
 
     int64_t total_key_size = 0;
     double start_time = getNow();
@@ -517,26 +519,23 @@ void exec_group(const int expt_id, const bool is_point,
 
     int dict_size_5[2] = {3, 6};
     if (runALM == 1) {
-        for (int j = 0; j < 2; j++) {
-            std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-            exec(expt_id, kEmail, is_point, true, 5, dict_size_5[j],
-                 insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
-            expt_num++;
+        for (int encoder_type = 6; encoder_type < 7; encoder_type++) {
+           for (int j = 0; j < 2; j++) {
+               std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+               exec(expt_id, kEmail, is_point, true, encoder_type, dict_size_5[j],
+                    insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
+               expt_num++;
 
-            std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-            exec(expt_id, kWiki, is_point, true, 5, dict_size_5[j],
-                 insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
-            expt_num++;
+               std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+               exec(expt_id, kWiki, is_point, true, encoder_type, dict_size_5[j],
+                    insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
+               expt_num++;
 
-            std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-            exec(expt_id, kUrl, is_point, true, 5, dict_size_5[j],
-                 insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
-            expt_num++;
-
-//            std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-//            exec(expt_id, kTs, is_point, true, 5, dict_size_5[j],
-//                insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-//             expt_num++;
+               std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+               exec(expt_id, kUrl, is_point, true, encoder_type, dict_size_5[j],
+                    insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
+               expt_num++;
+           }
         }
     }
 }
@@ -588,7 +587,7 @@ int main(int argc, char *argv[]) {
 #endif
         bool is_point = true;
         int expt_num = 1;
-        int total_num_expt = 27;
+        int total_num_expt = 24;
         exec_group(expt_id, is_point, expt_num, total_num_expt,
                insert_emails, insert_emails_sample, txn_emails, upper_bound_emails,
                insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis,
@@ -653,7 +652,7 @@ int main(int argc, char *argv[]) {
 #endif
         bool is_point = false;
         int expt_num = 1;
-        int total_num_expt = 27;
+        int total_num_expt = 24;
         exec_group(expt_id, is_point, expt_num, total_num_expt,
                insert_emails, insert_emails_sample, txn_emails, upper_bound_emails,
                insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis,
