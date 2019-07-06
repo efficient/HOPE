@@ -15,17 +15,18 @@ def autolabel(rects, ax):
                 ha='center', va='bottom')
 
 GROUP_NUM = 2
-GROUP_NAMES = ["Range", "Insert"]
-Y_LABEL = "Latency(us)"
+GROUP_NAMES = ["Range", "Build Time"]
+Y_LABELS = ["Latency(us)", "Build Time(s)"]
 Y_LABEL_FONT_SIZE = 20
 
 GROUP_SIZE = 7
 #CATEGORY_NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 8192", "3-Grams, 65536", "4-Grams, 8192", "4-Grams, 65536"]
 CATEGORY_NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 65536", "4-Grams, 65536", "ALM 8192", "ALM 65536"]
 
-CSV_ART_LOOKUP_FILE_PATH = "results/SuRF/range/final_stats_wiki_SuRF_range.csv"
-CSV_ART_INS_FILE_PATH = "results/SuRF/range/final_insertlat_wiki_SuRF_range.csv"
-GRAPH_OUTPUT_PATH = "figures/ART/range/lat_wiki_SuRF.pdf"
+CSV_ART_LOOKUP_FILE_PATH = "results/SuRF/range/final_lat_email_surf_range.csv"
+CSV_ART_INS_FILE_PATH = "results/SuRF/range/final_stats_email_surf_range.csv"
+#CSV_ART_INS_FILE_PATH = "results/SuRF/point/final_stats_email_surf.csv"
+GRAPH_OUTPUT_PATH = "figures/SuRF/range/lat_email_surf.pdf"
 
 COLORS = ['#ffffff', '#fff7ec', '#fee8c8', '#fc8d59', '#d7301f', '#7f0000', '#4c0000']
 
@@ -85,17 +86,19 @@ ax2 = fig.add_axes([0.5, 0.1, 0.4, 0.9])
 ax1.set_xlim([0,1])
 ax2.set_xlim([0,1])
 
-ax1.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
+ax1.set_ylabel(Y_LABELS[0], fontsize=Y_LABEL_FONT_SIZE)
 y1_ticks = [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5]
 ax1.set_yticks(y1_ticks)
 ax1.set_ylim(0, 3.5)
-ax1.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
 
-ax2.set_ylim(0, 3.5)
-ax2.yaxis.set_ticks([])
+ax2.set_ylabel(Y_LABELS[1], fontsize=Y_LABEL_FONT_SIZE)
+ax2.set_ylim(0, 80)
+ax2.yaxis.set_ticks([0, 10, 20, 30, 40, 50, 60, 70, 80])
 
 ax1.yaxis.tick_left()
 ax1.yaxis.set_label_position('left')
+ax2.yaxis.tick_right()
+ax2.yaxis.set_label_position('right')
 
 ax=[ax1,ax2]
 for j in range(0, GROUP_NUM) :
