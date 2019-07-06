@@ -15,21 +15,19 @@ def autolabel(rects, ax):
                 ha='center', va='bottom')
 
 GROUP_NUM = 2
-GROUP_NAMES = ["Height", "FPR"]
-Y_LABELS = ["Average Trie Height", "False Positive Rate(%)"]
+GROUP_NAMES = ["Range", "Insert"]
+Y_LABEL = "Latency(us)"
+Y_LABEL_FONT_SIZE = 20
 
 GROUP_SIZE = 7
 #CATEGORY_NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 8192", "3-Grams, 65536", "4-Grams, 8192", "4-Grams, 65536"]
 CATEGORY_NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 65536", "4-Grams, 65536", "ALM 8192", "ALM 65536"]
 
-CSV_SURF_FPR_FILE_PATH = "results/SuRF/point/final_fpr_email_surf.csv"
-CSV_SURF_HEI_FILE_PATH = "results/SuRF/point/final_height_email_surf.csv"
-GRAPH_OUTPUT_PATH = "figures/SuRF/point/fpr_email_surf_point.pdf"
+CSV_ART_LOOKUP_FILE_PATH = "results/btree/range/final_lookuplat_wiki_btree_range.csv"
+CSV_ART_INS_FILE_PATH = "results/btree/range/final_insertlat_wiki_btree_range.csv"
+GRAPH_OUTPUT_PATH = "figures/btree/range/lat_wiki_btree.pdf"
 
 COLORS = ['#ffffff', '#fff7ec', '#fee8c8', '#fc8d59', '#d7301f', '#7f0000', '#4c0000']
-
-Y_LABEL = "False Positive Rate (\%)"
-Y_LABEL_FONT_SIZE = 20
 
 X_TICK_FONT_SIZE = 20
 Y_TICK_FONT_SIZE = 16
@@ -43,23 +41,23 @@ GRAPH_WIDTH = 8.0 #inches
 BORDER_SIZE = 0.5
 BORDER_COLOR = 'black'
 
-f_in_surf = open(CSV_SURF_FPR_FILE_PATH)
-reader = csv.reader(f_in_surf)
+lookup_in_art = open(CSV_ART_LOOKUP_FILE_PATH)
+reader = csv.reader(lookup_in_art)
 csvrows = list(reader)
-data_fpr = []
+data_lookup = []
 for row in csvrows :
     for item in row :
-        data_fpr.append(float(item) * 100)
+        data_lookup.append(float(item))
 
-h_in_surf= open(CSV_SURF_HEI_FILE_PATH)
-reader = csv.reader(h_in_surf)
+insert_in_art = open(CSV_ART_INS_FILE_PATH)
+reader = csv.reader(insert_in_art)
 csvrows = list(reader)
-data_height = []
+data_insert = []
 for row in csvrows :
     for item in row :
-        data_height.append(float(item))
+        data_insert.append(float(item))
 
-data = [data_height, data_fpr]
+data = [data_lookup, data_insert]
 
 #========================================================================================
 mpl.rcParams['ps.useafm'] = True
@@ -87,15 +85,17 @@ ax2 = fig.add_axes([0.5, 0.1, 0.4, 0.9])
 ax1.set_xlim([0,1])
 ax2.set_xlim([0,1])
 
-y1_ticks = [0, 5, 10, 15, 20, 25]
+ax1.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
+y1_ticks = [0, 2, 4, 6, 8, 10]
 ax1.set_yticks(y1_ticks)
-ax1.set_ylim(0, 25)
-ax1.set_ylabel(Y_LABELS[0], fontsize=Y_LABEL_FONT_SIZE)
+ax1.set_ylim(0, 10)
+ax1.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
 
-y2_ticks = [0, 10, 20, 30, 40, 50]
-ax2.set_yticks(y2_ticks)
-ax2.set_ylim(0, 50)
-ax2.set_ylabel(Y_LABELS[1], fontsize=Y_LABEL_FONT_SIZE)
+ax2.set_ylim(0, 10)
+ax2.yaxis.set_ticks([])
+
+ax1.yaxis.tick_left()
+ax1.yaxis.set_label_position('left')
 
 ax=[ax1,ax2]
 for j in range(0, GROUP_NUM) :
@@ -109,11 +109,6 @@ for j in range(0, GROUP_NUM) :
         rect.append(ax[j].bar(pos, data[j][i], width, linewidth = BORDER_SIZE, edgecolor = BORDER_COLOR, color=COLORS[i], hatch=hatch))
         autolabel(rect[i], ax[j])
 
-ax[0].yaxis.tick_left()
-ax[0].yaxis.set_label_position('left')
-
-ax[1].yaxis.tick_right()
-ax[1].yaxis.set_label_position('right')
 for j in range(0, GROUP_NUM) :
     xtick_pos = [(width * 1.5 + width * GROUP_SIZE) / 2.0]
     ax[j].set_xticks(xtick_pos)
@@ -122,16 +117,8 @@ for j in range(0, GROUP_NUM) :
     for label in ax[j].get_xticklabels():
         label.set_fontsize(X_TICK_FONT_SIZE)
 
-#    y_ticks = [0, 10, 20, 30, 40]
-#    ax[j].set_yticks(y_ticks)
-#    ax[j].set_ylim(0, 40)
-#
     for label in ax[j].get_yticklabels():
         label.set_fontsize(Y_TICK_FONT_SIZE)
-#
-#    ax1.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
-
-
 
 #ax.legend(loc=LEGEND_POS, prop={'size':LEGEND_FONT_SIZE})
 

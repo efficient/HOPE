@@ -74,20 +74,12 @@ then
     ${PYTHON} plot/SuRF/point/fpr_wiki_surf.py
     ${PYTHON} plot/SuRF/point/fpr_url_surf.py
 
-    ${PYTHON} plot/SuRF/point/height_email_surf.py
-    ${PYTHON} plot/SuRF/point/height_wiki_surf.py
-    ${PYTHON} plot/SuRF/point/height_url_surf.py
-
     ############################################################
     # SuRF range
     ############################################################
     ${PYTHON} plot/SuRF/range/lat_mem_email_surf.py
     ${PYTHON} plot/SuRF/range/lat_mem_wiki_surf.py
     ${PYTHON} plot/SuRF/range/lat_mem_url_surf.py
-
-    ${PYTHON} plot/SuRF/range/fpr_email_surf.py
-    ${PYTHON} plot/SuRF/range/fpr_wiki_surf.py
-    ${PYTHON} plot/SuRF/range/fpr_url_surf.py
 
     ############################################################
     # SuRF-Real8 point
@@ -121,10 +113,6 @@ then
     ${PYTHON} plot/ART/point/lookuplat_mem_wiki_art.py
     ${PYTHON} plot/ART/point/lookuplat_mem_url_art.py
 
-    ${PYTHON} plot/ART/point/insertlat_mem_email_art.py
-    ${PYTHON} plot/ART/point/insertlat_mem_wiki_art.py
-    ${PYTHON} plot/ART/point/insertlat_mem_url_art.py
-
     ${PYTHON} plot/ART/point/height_email_art.py
     ${PYTHON} plot/ART/point/height_wiki_art.py
     ${PYTHON} plot/ART/point/height_url_art.py
@@ -132,13 +120,9 @@ then
     ############################################################
     # ART range
     ############################################################
-    ${PYTHON} plot/ART/range/lookuplat_mem_email_art.py
-    ${PYTHON} plot/ART/range/lookuplat_mem_wiki_art.py
-    ${PYTHON} plot/ART/range/lookuplat_mem_url_art.py
-
-    ${PYTHON} plot/ART/range/insertlat_mem_email_art.py
-    ${PYTHON} plot/ART/range/insertlat_mem_wiki_art.py
-    ${PYTHON} plot/ART/range/insertlat_mem_url_art.py
+    ${PYTHON} plot/ART/range/lat_email.py
+    ${PYTHON} plot/ART/range/lat_wiki.py
+    ${PYTHON} plot/ART/range/lat_url.py
 
     ############################################################
     # ART Node Stats
@@ -157,21 +141,12 @@ then
     ${PYTHON} plot/btree/point/lookuplat_mem_wiki_btree.py
     ${PYTHON} plot/btree/point/lookuplat_mem_url_btree.py
 
-    ${PYTHON} plot/btree/point/insertlat_mem_email_btree.py
-    ${PYTHON} plot/btree/point/insertlat_mem_wiki_btree.py
-    ${PYTHON} plot/btree/point/insertlat_mem_url_btree.py
-
     ############################################################
     # Btree range
     ############################################################
-    ${PYTHON} plot/btree/range/lookuplat_mem_email_btree.py
-    ${PYTHON} plot/btree/range/lookuplat_mem_wiki_btree.py
-    ${PYTHON} plot/btree/range/lookuplat_mem_url_btree.py
-
-    ${PYTHON} plot/btree/range/insertlat_mem_email_btree.py
-    ${PYTHON} plot/btree/range/insertlat_mem_wiki_btree.py
-    ${PYTHON} plot/btree/range/insertlat_mem_url_btree.py
-
+    ${PYTHON} plot/btree/range/lat_email_btree.py
+    ${PYTHON} plot/btree/range/lat_wiki_btree.py
+    ${PYTHON} plot/btree/range/lat_url_btree.py
 fi
 
 if [ ${run_hot} == 1 ]
@@ -183,20 +158,12 @@ then
     ${PYTHON} plot/hot/point/lookuplat_mem_wiki_hot.py
     ${PYTHON} plot/hot/point/lookuplat_mem_url_hot.py
 
-    ${PYTHON} plot/hot/point/insertlat_mem_email_hot.py
-    ${PYTHON} plot/hot/point/insertlat_mem_wiki_hot.py
-    ${PYTHON} plot/hot/point/insertlat_mem_url_hot.py
-
     ############################################################
     # hot range
     ############################################################
-    ${PYTHON} plot/hot/range/lookuplat_mem_email_hot.py
-    ${PYTHON} plot/hot/range/lookuplat_mem_wiki_hot.py
-    ${PYTHON} plot/hot/range/lookuplat_mem_url_hot.py
-
-    ${PYTHON} plot/hot/range/insertlat_mem_email_hot.py
-    ${PYTHON} plot/hot/range/insertlat_mem_wiki_hot.py
-    ${PYTHON} plot/hot/range/insertlat_mem_url_hot.py
+#    ${PYTHON} plot/hot/range/lookuplat_mem_email_hot.py
+#    ${PYTHON} plot/hot/range/lookuplat_mem_wiki_hot.py
+#    ${PYTHON} plot/hot/range/lookuplat_mem_url_hot.py
 
     ############################################################
     # hot height

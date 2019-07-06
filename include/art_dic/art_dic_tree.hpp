@@ -56,7 +56,7 @@ namespace ope {
         LeafInfo* getRightBottom(N *node)const;
 
         std::string getPrevString(const std::string &str);
-   
+
         void printTree(N *node);
     };
 
@@ -67,8 +67,8 @@ namespace ope {
     ArtDicTree::~ArtDicTree() {
         N::deleteChildren(root);
         N::deleteNode(root);
-        std::cout << "Number of nodes after deletion" << std::endl;
-        std::cout << cnt_N4 << " " << cnt_N16 << " " << cnt_N48 << " " << cnt_N256 << std::endl;
+//        std::cout << "Number of nodes after deletion" << std::endl;
+//        std::cout << cnt_N4 << " " << cnt_N16 << " " << cnt_N48 << " " << cnt_N256 << std::endl;
     }
 
     Code ArtDicTree::lookup(const char *symbol, const int symbol_len, int &prefix_len) const {
