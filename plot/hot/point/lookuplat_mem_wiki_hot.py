@@ -39,7 +39,7 @@ GRAPH_WIDTH = 8 #inches
 
 CSV_X_FILE_PATH = "results/hot/point/final_lookuplat_wiki_hot.csv"
 CSV_Y_FILE_PATH = "results/hot/point/final_mem_wiki_hot.csv"
-GRAPH_OUTPUT_PATH = "figures/hot/point/lat_mem_wiki_art_hot.pdf"
+GRAPH_OUTPUT_PATH = "figures/hot/point/lat_mem_wiki_hot.pdf"
 
 f_in_x = open(CSV_X_FILE_PATH)
 reader = csv.reader(f_in_x)

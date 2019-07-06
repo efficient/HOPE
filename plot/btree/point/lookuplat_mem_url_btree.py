@@ -39,7 +39,7 @@ GRAPH_WIDTH = 8 #inches
 
 CSV_X_FILE_PATH = "results/btree/point/final_lookuplat_url_btree.csv"
 CSV_Y_FILE_PATH = "results/btree/point/final_mem_url_btree.csv"
-GRAPH_OUTPUT_PATH = "figures/btree/point/lat_mem_url_art_btree.pdf"
+GRAPH_OUTPUT_PATH = "figures/btree/point/lat_mem_url_btree_point.pdf"
 
 f_in_x = open(CSV_X_FILE_PATH)
 reader = csv.reader(f_in_x)
