@@ -7,7 +7,7 @@ import numpy as np
 import csv
 
 NUM_LINES = 4
-LINE_NAMES = ["Single", "Double", "ALM", "3-Grams", "4-Grams", "ALM-Improved"]
+LINE_NAMES = ["Single-Char", "Double-Char", "ALM", "3-Grams", "4-Grams", "ALM-Improved"]
 NUM_3_POINTS = 7
 NUM_4_EXTRA_POINTS = 2
 

@@ -509,47 +509,47 @@ void exec(const int expt_id,
                 output_mem_email_surf << mem << "\n";
                 output_fpr_email_surf << fpr << "\n";
                 output_height_email_surf << height << "\n";
-                output_stats_email_surf << mem << "," << filter_mem << "," << encoder_mem << "\n";
+                output_stats_email_surf << bt << "\n";
             } else if (wkld_id == kWiki) {
                 output_lat_wiki_surf << lat << "\n";
                 output_mem_wiki_surf << mem << "\n";
                 output_fpr_wiki_surf << fpr << "\n";
                 output_height_wiki_surf << height << "\n";
-                output_stats_wiki_surf << mem << "," << filter_mem << "," << encoder_mem << "\n";
+                output_stats_wiki_surf << bt << "\n";
             } else if (wkld_id == kUrl) {
                 output_lat_url_surf << lat << "\n";
                 output_mem_url_surf << mem << "\n";
                 output_fpr_url_surf << fpr << "\n";
                 output_height_url_surf << height << "\n";
-                output_stats_url_surf << mem << "," << filter_mem << "," << encoder_mem << "\n";
+                output_stats_url_surf << bt << "\n";
             } else if (wkld_id == kTs) {
                 output_lat_ts_surf << lat << "\n";
                 output_mem_ts_surf << mem << "\n";
                 output_fpr_ts_surf << fpr << "\n";
                 output_height_ts_surf << height << "\n";
-                output_stats_ts_surf << mem << "," << filter_mem << "," << encoder_mem << "\n";
+                output_stats_ts_surf << bt << "\n";
             }
         } else if (filter_type == 2) {
             if (wkld_id == kEmail) {
                 output_lat_email_surfreal << lat << "\n";
                 output_mem_email_surfreal << mem << "\n";
                 output_fpr_email_surfreal << fpr << "\n";
-                output_stats_email_surfreal << mem << "," << filter_mem <<  "," << encoder_mem <<"\n";
+                output_stats_email_surfreal << bt <<"\n";
             } else if (wkld_id == kWiki) {
                 output_lat_wiki_surfreal << lat << "\n";
                 output_mem_wiki_surfreal << mem << "\n";
                 output_fpr_wiki_surfreal << fpr << "\n";
-                output_stats_wiki_surfreal << mem << "," << filter_mem <<  "," << encoder_mem <<"\n";
+                output_stats_wiki_surfreal << bt <<"\n";
             } else if (wkld_id == kUrl) {
                 output_lat_url_surfreal << lat << "\n";
                 output_mem_url_surfreal << mem << "\n";
                 output_fpr_url_surfreal << fpr << "\n";
-                output_stats_url_surfreal << mem << "," << filter_mem <<  "," << encoder_mem <<"\n";
+                output_stats_url_surfreal << bt <<"\n";
             } else if (wkld_id == kTs) {
                 output_lat_ts_surfreal << lat << "\n";
                 output_mem_ts_surfreal << mem << "\n";
                 output_fpr_ts_surfreal << fpr << "\n";
-                output_stats_ts_surfreal << mem << "," << filter_mem <<  "," << encoder_mem <<"\n";
+                output_stats_ts_surfreal << bt <<"\n";
             }
         }
     } else if (expt_id == 1) {
@@ -558,22 +558,22 @@ void exec(const int expt_id,
                 output_lat_email_surf_range << lat << "\n";
                 output_mem_email_surf_range << mem << "\n";
                 output_fpr_email_surf_range << fpr << "\n";
-                output_stats_email_surf_range << mem << "," << filter_mem <<  "," << encoder_mem <<"\n";
+                output_stats_email_surf_range << bt <<"\n";
             } else if (wkld_id == kWiki) {
                 output_lat_wiki_surf_range << lat << "\n";
                 output_mem_wiki_surf_range << mem << "\n";
                 output_fpr_wiki_surf_range << fpr << "\n";
-                output_stats_wiki_surf_range << mem << "," << filter_mem <<  "," << encoder_mem <<"\n";
+                output_stats_wiki_surf_range << bt <<"\n";
             } else if (wkld_id == kUrl) {
                 output_lat_url_surf_range << lat << "\n";
                 output_mem_url_surf_range << mem << "\n";
                 output_fpr_url_surf_range << fpr << "\n";
-                output_stats_url_surf_range << mem << "," << filter_mem <<  "," << encoder_mem <<"\n";
+                output_stats_url_surf_range << bt <<"\n";
             }  else if (wkld_id == kTs) {
                 output_lat_ts_surf_range << lat << "\n";
                 output_mem_ts_surf_range << mem << "\n";
                 output_fpr_ts_surf_range << fpr << "\n";
-                output_stats_ts_surf_range << mem << "," << filter_mem <<  "," << encoder_mem <<"\n";
+                output_stats_ts_surf_range << bt <<"\n";
             }
 
         } else if (filter_type == 2) {
@@ -581,22 +581,22 @@ void exec(const int expt_id,
                 output_lat_email_surfreal_range << lat << "\n";
                 output_mem_email_surfreal_range << mem << "\n";
                 output_fpr_email_surfreal_range << fpr << "\n";
-                output_stats_email_surfreal_range << mem << "," << filter_mem <<  "," << encoder_mem <<"\n";
+                output_stats_email_surfreal_range << bt <<"\n";
             } else if (wkld_id == kWiki) {
                 output_lat_wiki_surfreal_range << lat << "\n";
                 output_mem_wiki_surfreal_range << mem << "\n";
                 output_fpr_wiki_surfreal_range << fpr << "\n";
-                output_stats_wiki_surfreal_range << mem << "," << filter_mem <<  "," << encoder_mem <<"\n";
+                output_stats_wiki_surfreal_range << bt <<"\n";
             } else if (wkld_id == kUrl) {
                 output_lat_url_surfreal_range << lat << "\n";
                 output_mem_url_surfreal_range << mem << "\n";
                 output_fpr_url_surfreal_range << fpr << "\n";
-                output_stats_url_surfreal_range << mem << "," << filter_mem <<  "," << encoder_mem <<"\n";
+                output_stats_url_surfreal_range << bt <<"\n";
             }  else if (wkld_id == kTs) {
                 output_lat_ts_surfreal_range << lat << "\n";
                 output_mem_ts_surfreal_range << mem << "\n";
                 output_fpr_ts_surfreal_range << fpr << "\n";
-                output_stats_ts_surfreal_range << mem << "," << filter_mem <<  "," << encoder_mem <<"\n";
+                output_stats_ts_surfreal_range << bt <<"\n";
             }
         }
     }
@@ -886,7 +886,7 @@ int main(int argc, char *argv[]) {
                insert_urls, insert_urls_sample, txn_urls, upper_bound_urls,
                insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
 
-        exec_group(expt_id, 2, 8, is_point, expt_num, total_num_expt,
+ /*       exec_group(expt_id, 2, 8, is_point, expt_num, total_num_expt,
                email_point_tp, email_range_tp,
                wiki_point_tp, wiki_range_tp,
                url_point_tp, url_range_tp,
@@ -895,7 +895,7 @@ int main(int argc, char *argv[]) {
                insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis,
                insert_urls, insert_urls_sample, txn_urls, upper_bound_urls,
                insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-
+*/
         output_lat_email_surf << "-" << "\n";
         output_mem_email_surf << "-" << "\n";
         output_fpr_email_surf << "-" << "\n";
@@ -1045,7 +1045,7 @@ int main(int argc, char *argv[]) {
                insert_urls, insert_urls_sample, txn_urls, upper_bound_urls,
                insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
 
-        exec_group(expt_id, 2, 8, is_point, expt_num, total_num_expt,
+/*        exec_group(expt_id, 2, 8, is_point, expt_num, total_num_expt,
                email_point_tp, email_range_tp,
                wiki_point_tp, wiki_range_tp,
                url_point_tp, url_range_tp,
@@ -1054,7 +1054,7 @@ int main(int argc, char *argv[]) {
                insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis,
                insert_urls, insert_urls_sample, txn_urls, upper_bound_urls,
                insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-
+*/
         output_lat_email_surf_range << "-" << "\n";
         output_mem_email_surf_range << "-" << "\n";
         output_fpr_email_surf_range << "-" << "\n";
