@@ -23,9 +23,9 @@ GROUP_SIZE = 7
 #CATEGORY_NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 8192", "3-Grams, 65536", "4-Grams, 8192", "4-Grams, 65536"]
 CATEGORY_NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 65536", "4-Grams, 65536", "ALM 8192", "ALM 65536"]
 
-CSV_ART_LOOKUP_FILE_PATH = "results/SuRF/range/final_lat_email_surf_range.csv"
-CSV_ART_INS_FILE_PATH = "results/SuRF/range/final_stats_email_surf_range.csv"
-#CSV_ART_INS_FILE_PATH = "results/SuRF/point/final_stats_email_surf.csv"
+CSV_SuRF_LOOKUP_FILE_PATH = "results/SuRF/range/final_lat_email_surf_range.csv"
+CSV_SuRF_INS_FILE_PATH = "results/SuRF/range/final_stats_email_surf_range.csv"
+#CSV_SuRF_INS_FILE_PATH = "results/SuRF/point/final_stats_email_surf.csv"
 GRAPH_OUTPUT_PATH = "figures/SuRF/range/lat_email_surf.pdf"
 
 COLORS = ['#ffffff', '#fff7ec', '#fee8c8', '#fc8d59', '#d7301f', '#7f0000', '#4c0000']
@@ -42,7 +42,7 @@ GRAPH_WIDTH = 8.0 #inches
 BORDER_SIZE = 0.5
 BORDER_COLOR = 'black'
 
-lookup_in_art = open(CSV_ART_LOOKUP_FILE_PATH)
+lookup_in_art = open(CSV_SuRF_LOOKUP_FILE_PATH)
 reader = csv.reader(lookup_in_art)
 csvrows = list(reader)
 data_lookup = []
@@ -50,7 +50,7 @@ for row in csvrows :
     for item in row :
         data_lookup.append(float(item))
 
-insert_in_art = open(CSV_ART_INS_FILE_PATH)
+insert_in_art = open(CSV_SuRF_INS_FILE_PATH)
 reader = csv.reader(insert_in_art)
 csvrows = list(reader)
 data_insert = []
