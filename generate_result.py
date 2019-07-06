@@ -3,10 +3,10 @@ import os
 import numpy as np
 RESULT_DIR = './results/'
 PREFIX = ['ART', 'btree', 'hot', 'microbench/cpr_latency', 'SuRF', 'SuRF_real']
-#PREFIX = ['SuRF', 'SuRF_real','ART_single']
+#PREFIX = ['microbench/cpr_latency', 'SuRF', 'SuRF_real']
 TYPE = ['point', 'range']
 DATASETS = ['email', 'ts', 'url', 'wiki']
-VAR = ['cpr','x','height', 'fpr', 'lat', 'insertlat', 'lookuplat', 'mem']
+VAR = ['cpr','x','height', 'fpr', 'lat', 'insertlat', 'lookuplat', 'stats']
 
 
 def generate_result(dirpath, filename):

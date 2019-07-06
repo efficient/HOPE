@@ -77,9 +77,9 @@ then
     ############################################################
     # SuRF range
     ############################################################
-    ${PYTHON} plot/SuRF/range/lat_mem_email_surf.py
-    ${PYTHON} plot/SuRF/range/lat_mem_wiki_surf.py
-    ${PYTHON} plot/SuRF/range/lat_mem_url_surf.py
+    ${PYTHON} plot/SuRF/range/lat_email_surf.py
+    ${PYTHON} plot/SuRF/range/lat_wiki_surf.py
+    ${PYTHON} plot/SuRF/range/lat_url_surf.py
 
     ############################################################
     # SuRF-Real8 point
