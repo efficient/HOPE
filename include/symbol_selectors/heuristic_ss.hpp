@@ -225,28 +225,32 @@ namespace ope {
             encode(iter, cnt);
         }
 
+#ifdef CAL_ENTROPY
         std::vector<double> freq_len;
         double sum_fl = 0;
-
+#endif
         for (int i = 0; i < (int)intervals_.size(); i++) {
             std::string interval_start = intervals_[i].first;
             std::string interval_end = intervals_[i].second;
             std::string common_prefix = commonPrefix(interval_start, getPrevString(interval_end));
+#ifdef CAL_ENTROPY
             freq_len.push_back(common_prefix.length() * (cnt[i] + 1));
             sum_fl += common_prefix.length() * (cnt[i] + 1);
+#endif
             // plus one for each interval to avoid 0 frequency
             // Pass Frequencty to Hu-Tucker
             symbol_freq_list->push_back(std::make_pair(interval_start, cnt[i] + 1));
             // Pass Frequencty * length to Hu-Tucker
             //symbol_freq_list->push_back(std::make_pair(interval_start, (cnt[i] + 1) * common_prefix.length()));
         }
-
+#ifdef CAL_ENTROPY
         double entropy = 0;
         for (int i = 0; i < (int)freq_len.size(); i++) {
             double p = freq_len[i] / sum_fl;
             entropy += p * log2(p);
         }
         std::cout << "Entropy = " << -entropy << std::endl;
+#endif
     }
 
     void HeuristicSS::fillGap(std::string start_include, std::string end_exclude) {

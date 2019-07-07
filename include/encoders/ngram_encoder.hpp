@@ -64,7 +64,7 @@ bool NGramEncoder::build (const std::vector<std::string>& key_list,
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
     time_end = getNow();
     time_diff = time_end - time_start;
-    std::cout << "Code Assign (Hu-Tucker) time = " << time_diff << std::endl;
+    std::cout << "Code Assign(Hu-Tucker) time = " << time_diff << std::endl;
 #endif
 
 #ifdef PRINT_BUILD_TIME_BREAKDOWN

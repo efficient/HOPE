@@ -528,19 +528,20 @@ int main(int argc, char *argv[]) {
         std::cout << "Trie vs Array; Expt ID = 2" << std::endl;
         std::cout << "------------------------------------------------" << std::endl;
 
-        int percent = 10;
-        int expt_num = 1;
-        int total_num_expts = 16;
-        for (int ds = 0; ds < 7; ds++) {
+        int percent = 1;
+        //int expt_num = 1;
+        //int total_num_expts = 16;
+        /*for (int ds = 0; ds < 7; ds++) {
             std::cout << "Trie vs Array " << (expt_num++) << "/" << total_num_expts << std::endl;
-            exec(expt_id, kEmail, 3, ds, percent, emails_shuffle, total_len_email);
         }
 
         for (int ds = 0; ds < 9; ds++) {
             //int dict_size_limit = dict_size_list[ds];
             std::cout << "Trie vs Array " << (expt_num++) << "/" << total_num_expts << std::endl;
             exec(expt_id, kEmail, 4, ds, percent, emails_shuffle, total_len_email);
-        }
+        }*/
+        int ds = 4;
+        exec(expt_id, kEmail, 4, ds, percent, emails_shuffle, total_len_email);
     }
     else if (expt_id == 3) {
         //-------------------------------------------------------------
@@ -626,10 +627,10 @@ int main(int argc, char *argv[]) {
         std::cout << "------------------------------------------------" << std::endl;
 
         int percent = 1;
-        int ds = 6;
+        int ds = 5;
         int expt_num = 0;
         int total_num_expts = 6;
-        for (int encoder_type = 1; encoder_type < 6; encoder_type++) {
+        for (int encoder_type = 1; encoder_type < 7; encoder_type++) {
             std::cout << "Build Time Breakdown " << (expt_num++) << "/" << total_num_expts << std::endl;
             exec(expt_id, kEmail, encoder_type, ds, percent, emails_shuffle, total_len_email);
         }

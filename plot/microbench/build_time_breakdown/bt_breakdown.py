@@ -6,12 +6,12 @@ import matplotlib.ticker as ticker
 import numpy as np
 import csv
 
-LABELS = ["Single", "Double", "3-Gram", "4-Gram", "ALM"]
+LABELS = ["Single", "Double", "3-Gram", "4-Gram", "ALM", "ALM-Improved"]
 XLABEL = "Compression Rate"
 YLABEL = "Build Time(s)"
 X_LABEL_FONT_SIZE = 15
 Y_LABEL_FONT_SIZE = 15
-X_TICK_FONT_SIZE = 10
+X_TICK_FONT_SIZE = 8
 Y_TICK_FONT_SIZE = 10
 
 TITLE = "Build Time Breakdown (dictionary size = 65536)"
@@ -24,6 +24,8 @@ LEGEND_POS = 'upper left'
 GRAPH_HEIGHT = 4.5 #inches
 GRAPH_WIDTH = 5 #inches
 
+BORDER_SIZE = 0.5
+BORDER_COLOR = 'black'
 WIDTH = 0.8 #Width of bars
 CSV_FILE_PATH = "results/microbench/build_time_breakdown/bt_breakdown.csv"
 GRAPH_OUTPUT_PATH = "figures/microbench/build_time_breakdown/bt_breakdown.pdf"
@@ -49,12 +51,12 @@ mpl.rcParams['text.latex.preamble'] = [
 ]
 #========================================================================================
 
-fig = plot.figure(figsize={GRAPH_HEIGHT, GRAPH_WIDTH})
+fig = plot.figure(figsize=(GRAPH_WIDTH, GRAPH_HEIGHT))
 ax = fig.add_subplot(111)
 
-ax.bar(xid, symbol_select_time, width=0.8, label="Symbol Select", color=COLORS[0], bottom=code_assign_time+build_dict_time)
-ax.bar(xid, code_assign_time, width=0.8, label="Code Assign(Hu-Tucker/Fixed Size)", color=COLORS[1], bottom=build_dict_time)
-ax.bar(xid, build_dict_time, width=0.8, label="Build Dictionary", color=COLORS[2])
+ax.bar(xid, symbol_select_time, width=WIDTH, linewidth = BORDER_SIZE, edgecolor = BORDER_COLOR, label="Symbol Select", color=COLORS[0], bottom=code_assign_time+build_dict_time)
+ax.bar(xid, code_assign_time, width=WIDTH, linewidth = BORDER_SIZE, edgecolor = BORDER_COLOR, label="Code Assign(Hu-Tucker/Fixed Size)", color=COLORS[1], bottom=build_dict_time)
+ax.bar(xid, build_dict_time, width=WIDTH, linewidth = BORDER_SIZE, edgecolor = BORDER_COLOR, label="Build Dictionary", color=COLORS[2])
 
 ax.tick_params(axis='x', labelsize=X_TICK_FONT_SIZE)
 ax.tick_params(axis='y', labelsize=Y_TICK_FONT_SIZE)

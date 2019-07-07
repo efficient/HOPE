@@ -34,7 +34,7 @@ BORDER_COLOR = 'black'
 
 CSV_FILE_PATH = "results/microbench/array_trie/lat_email_array.csv"
 GRAPH_OUTPUT_PATH = "figures/microbench/array_trie/lat_email_array_trie.pdf"
-DICT_ID = 0
+DICT_ID = 5
 
 data = np.genfromtxt(CSV_FILE_PATH, delimiter=',')
 print(data)

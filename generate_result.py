@@ -2,14 +2,15 @@ import sys
 import os
 import numpy as np
 RESULT_DIR = './results/'
-PREFIX = ['ART', 'btree', 'hot', 'microbench/cpr_latency', 'SuRF', 'SuRF_real']
-#PREFIX = ['microbench/cpr_latency', 'SuRF', 'SuRF_real']
-TYPE = ['point', 'range']
+#PREFIX = ['ART', 'btree', 'hot', 'microbench/cpr_latency', 'SuRF', 'SuRF_real']
+PREFIX = ['microbench/cpr_latency', 'SuRF', 'SuRF_real']
+#TYPE = ['point', 'range']
+TYPE = ['point']
 DATASETS = ['email', 'ts', 'url', 'wiki']
 VAR = ['cpr','x','height', 'fpr', 'lat', 'insertlat', 'lookuplat', 'stats']
+BT_OUTFILE = "results/microbench/build_time_breakdown/bt_breakdown.csv"
 
-
-def generate_result(dirpath, filename):
+def generate_result_single(dirpath, filename):
     full_path = dirpath + filename
     output_path = dirpath + 'final_' + filename
     results = []
@@ -45,18 +46,64 @@ def generate_result(dirpath, filename):
             line_result += '\n'
             of.write(line_result)
 
-for pre in PREFIX:
-    for t in TYPE:
-        if pre == 'microbench/cpr_latency':
-           cur_dir = RESULT_DIR + pre + '/'
-        else:
-            cur_dir = RESULT_DIR + pre + '/' + t + '/'
-        for v in  VAR:
-            for d in DATASETS:
-                file_prefix = v + '_' + d
-                files = os.listdir(cur_dir)
-                for f in files:
-                    if f.startswith(file_prefix):
-#                        print(f,file_prefix)
-                        generate_result(cur_dir, f)
+def microtree():
+    for pre in PREFIX:
+        for t in TYPE:
+            if pre == 'microbench/cpr_latency':
+               cur_dir = RESULT_DIR + pre + '/'
+            else:
+                cur_dir = RESULT_DIR + pre + '/' + t + '/'
+            for v in  VAR:
+                for d in DATASETS:
+                    file_prefix = v + '_' + d
+                    files = os.listdir(cur_dir)
+                    for f in files:
+                        if f.startswith(file_prefix):
+                            generate_result_single(cur_dir, f)
 
+
+def buildtime():
+    ss_time = []
+    encode_time = []
+    build_dict_time = []
+
+    with open("bt") as f:
+        lines = f.readlines()
+        for line in lines:
+            wl = line.split("=")
+            key = wl[0].strip()
+            if (key == "Symbol Select time"):
+                ss_time.append(wl[1].strip())
+            if (key == "Code Assign(Hu-Tucker) time"):
+                encode_time.append(wl[1].strip())
+            if (key == "Build Dictionary time"):
+                build_dict_time.append(wl[1].strip())
+
+#    print(ss_time)
+#    print(encode_time)
+#    print(build_dict_time)
+    with open(BT_OUTFILE, 'w') as f:
+        for i in range(0, len(ss_time)):
+            f.write(ss_time[i] + "," + encode_time[i] + "," + build_dict_time[i]+"\n")
+
+
+def triearray():
+    pass
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print(sys.argv)
+        print("Did not generate any results, return")
+        exit(0)
+
+    exp_type = sys.argv[1]
+
+    if exp_type == "micro-tree":
+        microtree()
+    elif exp_type == "bt":
+        buildtime()
+    elif exp_type == "ta":
+        triearray()
+    else:
+        print("Unkown experiment type")
