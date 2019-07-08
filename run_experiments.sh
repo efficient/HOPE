@@ -45,12 +45,14 @@ cd ${PROJECT_DIR}
 run_alm=1
 repeat_times=$1
 
-run_microbench=1
+run_microbench=0
 
 run_surf=1
-run_art=1
-run_btree=1
-run_hot=1
+run_art=0
+run_btree=0
+run_hot=0
+run_small_experiment=0
+
 PYTHON=python
 
 function remove_old_results() {
@@ -94,14 +96,28 @@ do
     run_experiment ${run_hot} "./build/hot/bench_hot 1 ${run_alm}"
     run_experiment ${run_btree} "./build/btree/bench_btree 0 ${run_alm}"
     run_experiment ${run_btree} "./build/btree/bench_btree 1 ${run_alm}"
-
     let "cnt+=1"
 done
 
 # Get the average result
-${PYTHON} generate_result.py
+${PYTHON} generate_result.py micro-tree
+
+if [ ${run_small_experiment} == 1 ]
+then
+    ./build/bench/microbench 6 1 > bt
+    ${PYTHON} generate_result.py bt
+    rm bt
+
+    #script ta
+    #./build/bench/microbench 5 1
+    #eval "exit"
+    #${PYTHON} generate_result.py ta
+    #rm ta
+fi
 echo "===========Finish Generating results============"
 #################################################
 # Generate plots
 ################################################
-./plot.sh ${run_microbench} ${run_surf} ${run_art} ${run_hot} ${run_btree} 0
+./plot.sh ${run_microbench} ${run_surf} ${run_art} ${run_hot} ${run_btree} ${run_small_experiment}
+
+

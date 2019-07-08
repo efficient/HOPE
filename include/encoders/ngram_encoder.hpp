@@ -64,7 +64,7 @@ bool NGramEncoder::build (const std::vector<std::string>& key_list,
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
     time_end = getNow();
     time_diff = time_end - time_start;
-    std::cout << "Code Assign (Hu-Tucker) time = " << time_diff << std::endl;
+    std::cout << "Code Assign(Hu-Tucker) time = " << time_diff << std::endl;
 #endif
 
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
@@ -195,8 +195,8 @@ void NGramEncoder::encodePair (const std::string& l_key, const std::string& r_ke
 		memcpy((void*)r_buffer, (const void*)l_buffer, 8 * (idx_l + 1));
 		idx_r = idx_l;
 		int_buf_len_r = int_buf_len_l;
-	    }
 	    found_mismatch = true;
+	    }
 	}
 
 	int prefix_len = 0;

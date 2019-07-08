@@ -54,7 +54,7 @@ bool DoubleCharEncoder::build (const std::vector<std::string>& key_list,
     CodeGenerator* code_generator = CodeGeneratorFactory::createCodeGenerator(1);
     code_generator->genCodes(symbol_freq_list, &symbol_code_list);
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
-    std::cout << "Code Assign (Hu-Tucker) time = " << getNow() - cur_time << std::endl;
+    std::cout << "Code Assign(Hu-Tucker) time = " << getNow() - cur_time << std::endl;
     cur_time = getNow();
 #endif
     bool br = buildDict(symbol_code_list);
@@ -111,19 +111,19 @@ void DoubleCharEncoder::encodePair (const std::string& l_key, const std::string&
 	unsigned s_idx = 256 * (uint8_t)l_key[i];
 	if (i + 1 < key_len_l)
 	    s_idx += (uint8_t)l_key[i + 1];
-	
+
 	if (!found_mismatch) {
 	    unsigned s_idx_r = 256 * (uint8_t)r_key[i];
 	    if (i + 1 < key_len_r)
 		s_idx_r += (uint8_t)r_key[i + 1];
-	    
+
 	    if (s_idx < s_idx_r) {
 		r_start_pos = i;
 		memcpy((void*)r_buffer, (const void*)l_buffer, 8 * (idx_l + 1));
 		idx_r = idx_l;
 		int_buf_len_r = int_buf_len_l;
-	    }
 	    found_mismatch = true;
+	    }
 	}
 	int64_t s_buf = dict_[s_idx].code;
 	int s_len = dict_[s_idx].len;
@@ -150,7 +150,7 @@ void DoubleCharEncoder::encodePair (const std::string& l_key, const std::string&
 	unsigned s_idx = 256 * (uint8_t)r_key[i];
 	if (i + 1 < key_len_r)
 	    s_idx += (uint8_t)r_key[i + 1];
-	
+
 	int64_t s_buf = dict_[s_idx].code;
 	int s_len = dict_[s_idx].len;
 	if (int_buf_len_r + s_len > 63) {
@@ -227,7 +227,7 @@ bool DoubleCharEncoder::buildDict(const std::vector<SymbolCode>& symbol_code_lis
 #else
     decode_dict_ = nullptr;
 #endif
-    
+
     return true;
 }
 

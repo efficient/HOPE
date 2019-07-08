@@ -489,12 +489,12 @@ void exec(const int expt_id,
     //double mem = (filter->getMemoryUsage() + 0.0) / 1000000; // MB
     double mem = filter->getMemoryUsage() + 0.0;
     double filter_mem = mem/1000000.0;
-    double encoder_mem = 0;
+//    double encoder_mem = 0;
     std::cout << "filter size:" << filter_mem << std::endl;
     if (encoder != nullptr) {
         std::cout << "encoder size:" << encoder->memoryUse() << std::endl;
         mem += encoder->memoryUse();
-        encoder_mem = encoder->memoryUse() / 1000000.0;
+//        encoder_mem = encoder->memoryUse() / 1000000.0;
     }
     mem /= 1000000; // MB
     std::cout << kGreen << "Memory = " << kNoColor << mem << "\n\n";
@@ -626,7 +626,7 @@ void exec_group(const int expt_id,
         const std::vector<std::string>& insert_tss_sample,
         const std::vector<std::string>& txn_tss,
         const std::vector<std::string>& upper_bound_tss) {
-    int dict_size[2] = {3, 6};
+    int dict_size[2] = {2, 6};
 
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
     exec(expt_id, kEmail, is_point, filter_type, suffix_len,
@@ -886,7 +886,7 @@ int main(int argc, char *argv[]) {
                insert_urls, insert_urls_sample, txn_urls, upper_bound_urls,
                insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
 
- /*       exec_group(expt_id, 2, 8, is_point, expt_num, total_num_expt,
+        exec_group(expt_id, 2, 8, is_point, expt_num, total_num_expt,
                email_point_tp, email_range_tp,
                wiki_point_tp, wiki_range_tp,
                url_point_tp, url_range_tp,
@@ -895,7 +895,7 @@ int main(int argc, char *argv[]) {
                insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis,
                insert_urls, insert_urls_sample, txn_urls, upper_bound_urls,
                insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-*/
+
         output_lat_email_surf << "-" << "\n";
         output_mem_email_surf << "-" << "\n";
         output_fpr_email_surf << "-" << "\n";
@@ -1044,8 +1044,8 @@ int main(int argc, char *argv[]) {
                insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis,
                insert_urls, insert_urls_sample, txn_urls, upper_bound_urls,
                insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-
-/*        exec_group(expt_id, 2, 8, is_point, expt_num, total_num_expt,
+/*
+        exec_group(expt_id, 2, 8, is_point, expt_num, total_num_expt,
                email_point_tp, email_range_tp,
                wiki_point_tp, wiki_range_tp,
                url_point_tp, url_range_tp,
