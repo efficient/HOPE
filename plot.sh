@@ -74,6 +74,7 @@ then
     ${PYTHON} plot/SuRF/point/height_wiki_surf.py
     ${PYTHON} plot/SuRF/point/height_url_surf.py
 
+    ${PYTHON} plot/SuRF/point/fprcompare_email_surf.py
     ############################################################
     # SuRF range
     ############################################################
