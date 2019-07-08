@@ -1,4 +1,7 @@
 import sys
+import os
+sys.path.append(os.path.abspath('./plot/'))
+from option import *
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plot
@@ -17,13 +20,9 @@ COLORS = ['#ffffff', '#fff7ec', '#fee8c8', '#fc8d59', '#d7301f', '#7f0000', '#4c
 BACKCOLORS = ['#fff7fb', '#ece7f2', '#d0d1e6', '#a6bddb', '#74a9cf', '#3690c0', '#0570b0', '#045a8d', '#023858']
 
 SIZE = 100
-SHAPE_BORDER = 0.5
-EDGE_COLOR = 'black'
 
 X_LABEL = "Latency (us)"
 Y_LABEL = "Memory(MB)"
-X_LABEL_FONT_SIZE = 20
-Y_LABEL_FONT_SIZE = 20
 
 X_TICK_FONT_SIZE = 18
 Y_TICK_FONT_SIZE = 18
@@ -95,13 +94,13 @@ ax.fill_between(x_list, 0, y_lists[0], facecolor=BACKCOLORS[0], edgecolor=BACKCO
 for i in range(0, len(y_lists)-1) :
     ax.fill_between(x_list, y_lists[i], y_lists[i+1], facecolor=BACKCOLORS[i+1], edgecolor=BACKCOLORS[i+1])
 
-ax.scatter(data_x[0], data_y[0], s=SIZE, c=COLORS[0], marker='o', linewidths = SHAPE_BORDER, edgecolors = EDGE_COLOR, label=NAMES[0], hatch='///////')
-ax.scatter(data_x[1], data_y[1], s=SIZE, c=COLORS[1], marker='o', linewidths = SHAPE_BORDER, edgecolors = EDGE_COLOR, label=NAMES[1])
-ax.scatter(data_x[2], data_y[2], s=SIZE, c=COLORS[2], marker='o', linewidths = SHAPE_BORDER, edgecolors = EDGE_COLOR, label=NAMES[2])
-ax.scatter(data_x[3], data_y[3], s=SIZE, c=COLORS[3], marker='o', linewidths = SHAPE_BORDER, edgecolors = EDGE_COLOR, label=NAMES[3])
-ax.scatter(data_x[4], data_y[4], s=SIZE, c=COLORS[4], marker='o', linewidths = SHAPE_BORDER, edgecolors = EDGE_COLOR, label=NAMES[4])
-ax.scatter(data_x[5], data_y[5], s=SIZE, c=COLORS[5], marker='o', linewidths = SHAPE_BORDER, edgecolors = EDGE_COLOR, label=NAMES[5])
-ax.scatter(data_x[6], data_y[6], s=SIZE, c=COLORS[6], marker='s', linewidths = SHAPE_BORDER, edgecolors = EDGE_COLOR, label=NAMES[6])
+ax.scatter(data_x[0], data_y[0], s=SIZE, c=COLORS[0], marker='o', linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[0], hatch='///////')
+ax.scatter(data_x[1], data_y[1], s=SIZE, c=COLORS[1], marker='o', linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[1])
+ax.scatter(data_x[2], data_y[2], s=SIZE, c=COLORS[2], marker='o', linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[2])
+ax.scatter(data_x[3], data_y[3], s=SIZE, c=COLORS[3], marker='o', linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[3])
+ax.scatter(data_x[4], data_y[4], s=SIZE, c=COLORS[4], marker='o', linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[4])
+ax.scatter(data_x[5], data_y[5], s=SIZE, c=COLORS[5], marker='o', linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[5])
+ax.scatter(data_x[6], data_y[6], s=SIZE, c=COLORS[6], marker='s', linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[6])
 
 ax.set_xlabel(X_LABEL, fontsize=X_LABEL_FONT_SIZE)
 ax.set_xlim(0, X_LIMIT)
@@ -126,12 +125,5 @@ ax.annotate(LABELS[3], (data_x[3], data_y[4] * 0.88), ha='center', va='center', 
 ax.annotate(LABELS[4], (data_x[4] * 1.1, data_y[4] * 0.92), ha='center', va='center', size=12)
 ax.annotate(LABELS[5], (data_x[5], data_y[5] * 0.94), ha='center', va='center', size=12)
 ax.annotate(LABELS[5], (data_x[6], data_y[6] * 1.06), ha='center', va='center', size=12)
-
-# ax.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left",
-#                mode="expand", borderaxespad=0, ncol=4,
-#                prop={'size':LEGEND_FONT_SIZE}, scatterpoints=1)
-
-#ax.text(160, 450, "better", size=26, va="center", ha="center", rotation=45,
-#        bbox=dict(boxstyle="larrow,pad=0.5", fc="w", ec="k", lw=2))
 
 plot.savefig(GRAPH_OUTPUT_PATH, bbox_inches='tight')

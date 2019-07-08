@@ -1,7 +1,4 @@
 import sys
-import os
-sys.path.append(os.path.abspath('./plot/'))
-from option import *
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plot
@@ -20,21 +17,29 @@ def autolabel(rects, ax):
 GROUP_NUM = 2
 GROUP_NAMES = ["Range", "Insert"]
 Y_LABEL = "Latency(us)"
-X_TICK_FONT_SIZE = 18
-Y_TICK_FONT_SIZE = 18
+Y_LABEL_FONT_SIZE = 20
 
 GROUP_SIZE = 7
 #CATEGORY_NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 8192", "3-Grams, 65536", "4-Grams, 8192", "4-Grams, 65536"]
 CATEGORY_NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 65536", "4-Grams, 65536", "ALM 8192", "ALM 65536"]
 
-CSV_ART_LOOKUP_FILE_PATH = "results/btree/range/final_lookuplat_wiki_btree_range.csv"
-CSV_ART_INS_FILE_PATH = "results/btree/range/final_insertlat_wiki_btree_range.csv"
-GRAPH_OUTPUT_PATH = "figures/btree/range/lat_wiki_btree.pdf"
+CSV_ART_LOOKUP_FILE_PATH = "results/hot/range/final_lookuplat_email_hot_range.csv"
+CSV_ART_INS_FILE_PATH = "results/hot/range/final_insertlat_email_hot_range.csv"
+GRAPH_OUTPUT_PATH = "figures/hot/range/lat_email_hot.pdf"
 
 COLORS = ['#ffffff', '#fff7ec', '#fee8c8', '#fc8d59', '#d7301f', '#7f0000', '#4c0000']
 
+X_TICK_FONT_SIZE = 20
+Y_TICK_FONT_SIZE = 16
+
 LEGEND_FONT_SIZE = 18
 LEGEND_POS = 'upper left'
+
+GRAPH_HEIGHT = 4.5 #inches
+GRAPH_WIDTH = 8.0 #inches
+
+BORDER_SIZE = 0.5
+BORDER_COLOR = 'black'
 
 lookup_in_art = open(CSV_ART_LOOKUP_FILE_PATH)
 reader = csv.reader(lookup_in_art)
@@ -81,12 +86,12 @@ ax1.set_xlim([0,1])
 ax2.set_xlim([0,1])
 
 ax1.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
-y1_ticks = [0, 2, 4, 6, 8, 10]
+y1_ticks = [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5]
 ax1.set_yticks(y1_ticks)
-ax1.set_ylim(0, 10)
+ax1.set_ylim(0, 3.5)
 ax1.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
 
-ax2.set_ylim(0, 10)
+ax2.set_ylim(0, 3.5)
 ax2.yaxis.set_ticks([])
 
 ax1.yaxis.tick_left()
