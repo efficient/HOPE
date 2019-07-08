@@ -517,7 +517,7 @@ void exec_group(const int expt_id, const bool is_point,
     expt_num++;
 #endif
 
-    int dict_size_5[2] = {3, 6};
+    int dict_size_5[2] = {2, 6};
     if (runALM == 1) {
         for (int encoder_type = 6; encoder_type < 7; encoder_type++) {
            for (int j = 0; j < 2; j++) {

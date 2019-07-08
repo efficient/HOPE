@@ -465,7 +465,7 @@ void exec_group(const int expt_id, const bool is_point,
         const std::vector<std::string>& insert_tss_sample,
         const std::vector<std::string>& txn_tss,
         const std::vector<std::string>& upper_bound_tss) {
-    int dict_size[2] = {3, 6}; // 8192, 65536
+    int dict_size[2] = {2, 6}; // 4096, 65536
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
     exec(expt_id, kEmail, is_point, false, 0, 0,
      insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);

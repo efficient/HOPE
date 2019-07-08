@@ -195,8 +195,8 @@ void NGramEncoder::encodePair (const std::string& l_key, const std::string& r_ke
 		memcpy((void*)r_buffer, (const void*)l_buffer, 8 * (idx_l + 1));
 		idx_r = idx_l;
 		int_buf_len_r = int_buf_len_l;
-	    }
 	    found_mismatch = true;
+	    }
 	}
 
 	int prefix_len = 0;

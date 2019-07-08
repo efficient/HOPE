@@ -87,7 +87,7 @@ ax1.set_xlim([0,1])
 ax2.set_xlim([0,1])
 
 ax1.set_ylabel(Y_LABELS[0], fontsize=Y_LABEL_FONT_SIZE)
-y1_ticks = [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4]
+y1_ticks = [0, 1, 2, 3, 4, 5]
 ax1.set_yticks(y1_ticks)
 ax1.set_ylim(0, 4)
 

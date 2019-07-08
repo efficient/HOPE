@@ -408,7 +408,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
                 encode_time += getNow() - now;
                 now = getNow();
 #endif
-                idx::contenthelpers::OptionalValue<const char*> result = ht->lookup(reinterpret_cast<const char*>(enc_key.c_str()));
+                ht->lookup(reinterpret_cast<const char*>(enc_key.c_str()));
 #ifdef BREAKDOWN_TIME
                 lookup_time += getNow() - now;
 #endif
@@ -767,7 +767,7 @@ void exec_group(const int expt_id, const bool is_point,
 
     if (runALM == 1) {
         for (int encoder_type = 6; encoder_type < 7; encoder_type++) {
-           int dict_size_5[2] = {3, 6};
+           int dict_size_5[2] = {2, 6};
            for (int j = 0; j < 2; j++) {
                std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
                exec(expt_id, kEmail, is_point, true, encoder_type, dict_size_5[j],
