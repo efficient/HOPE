@@ -1,4 +1,7 @@
 import sys
+import os
+sys.path.append(os.path.abspath('./plot/'))
+from option import *
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plot
@@ -25,19 +28,12 @@ GRAPH_OUTPUT_PATH = "figures/hot/point/height_wiki_hot.pdf"
 COLORS = ['#ffffff', '#fff7ec', '#fee8c8', '#fc8d59', '#d7301f', '#7f0000', '#4c0000']
 
 Y_LABEL = "Average Trie Height"
-Y_LABEL_FONT_SIZE = 20
 
 X_TICK_FONT_SIZE = 20
 Y_TICK_FONT_SIZE = 16
 
 LEGEND_FONT_SIZE = 18
 LEGEND_POS = 'upper left'
-
-GRAPH_HEIGHT = 4.5 #inches
-GRAPH_WIDTH = 8.0 #inches
-
-BORDER_SIZE = 0.5
-BORDER_COLOR = 'black'
 
 f_in = open(CSV_FILE_PATH)
 reader = csv.reader(f_in)
@@ -95,8 +91,6 @@ for label in ax.get_yticklabels():
     label.set_fontsize(Y_TICK_FONT_SIZE)
 
 ax.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
-#ax.set_xlabel('Test',  fontsize=Y_LABEL_FONT_SIZE)
-#ax.legend(loc=LEGEND_POS, prop={'size':LEGEND_FONT_SIZE})
 
 outFile = GRAPH_OUTPUT_PATH
 plot.savefig(outFile, bbox_inches='tight')

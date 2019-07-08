@@ -70,9 +70,9 @@ then
     ${PYTHON} plot/SuRF/point/lat_mem_wiki_surf.py
     ${PYTHON} plot/SuRF/point/lat_mem_url_surf.py
 
-    ${PYTHON} plot/SuRF/point/fpr_email_surf.py
-    ${PYTHON} plot/SuRF/point/fpr_wiki_surf.py
-    ${PYTHON} plot/SuRF/point/fpr_url_surf.py
+    ${PYTHON} plot/SuRF/point/height_email_surf.py
+    ${PYTHON} plot/SuRF/point/height_wiki_surf.py
+    ${PYTHON} plot/SuRF/point/height_url_surf.py
 
     ############################################################
     # SuRF range
@@ -176,5 +176,6 @@ fi
 
 if [ ${run_breakdown} == 1 ]
 then
-    ${PYTHON} plot/microbench//build_time_breakdown/bt_breakdown.py
+    ${PYTHON} plot/microbench/build_time_breakdown/bt_breakdown.py
+    ${PYTHON} plot/microbench/array_trie/array_trie_email_bar.py
 fi

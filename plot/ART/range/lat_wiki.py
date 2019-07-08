@@ -1,4 +1,7 @@
 import sys
+import os
+sys.path.append(os.path.abspath('./plot/'))
+from option import *
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plot
@@ -34,12 +37,6 @@ Y_TICK_FONT_SIZE = 16
 
 LEGEND_FONT_SIZE = 18
 LEGEND_POS = 'upper left'
-
-GRAPH_HEIGHT = 4.5 #inches
-GRAPH_WIDTH = 8.0 #inches
-
-BORDER_SIZE = 0.5
-BORDER_COLOR = 'black'
 
 lookup_in_art = open(CSV_ART_LOOKUP_FILE_PATH)
 reader = csv.reader(lookup_in_art)

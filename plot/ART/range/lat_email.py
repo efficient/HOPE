@@ -1,4 +1,7 @@
 import sys
+import os
+sys.path.append(os.path.abspath('./plot/'))
+from option import *
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plot
@@ -17,10 +20,8 @@ def autolabel(rects, ax):
 GROUP_NUM = 2
 GROUP_NAMES = ["Range", "Insert"]
 Y_LABEL = "Latency(us)"
-Y_LABEL_FONT_SIZE = 20
 
 GROUP_SIZE = 7
-#CATEGORY_NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 8192", "3-Grams, 65536", "4-Grams, 8192", "4-Grams, 65536"]
 CATEGORY_NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 65536", "4-Grams, 65536", "ALM 8192", "ALM 65536"]
 
 CSV_ART_LOOKUP_FILE_PATH = "results/ART/range/final_lookuplat_email_art_range.csv"
@@ -34,12 +35,6 @@ Y_TICK_FONT_SIZE = 16
 
 LEGEND_FONT_SIZE = 18
 LEGEND_POS = 'upper left'
-
-GRAPH_HEIGHT = 4.5 #inches
-GRAPH_WIDTH = 8.0 #inches
-
-BORDER_SIZE = 0.5
-BORDER_COLOR = 'black'
 
 lookup_in_art = open(CSV_ART_LOOKUP_FILE_PATH)
 reader = csv.reader(lookup_in_art)
@@ -74,10 +69,6 @@ mpl.rcParams['text.latex.preamble'] = [
 #========================================================================================
 
 width = 1.0 / ((GROUP_SIZE + 2))
-
-#fig, ax = plot.subplots(1, 2, figsize=(GRAPH_WIDTH*2, GRAPH_HEIGHT))
-#ax1 = plot.axes()  # standard axes
-#ax2 = plot.axes([1, 0, 1, 1])
 
 fig = plot.figure(figsize = (GRAPH_WIDTH, GRAPH_HEIGHT))
 ax1 = fig.add_axes([0.1, 0.1, 0.4, 0.9])

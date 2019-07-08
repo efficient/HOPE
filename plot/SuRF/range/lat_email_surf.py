@@ -1,4 +1,7 @@
 import sys
+import os
+sys.path.append(os.path.abspath('./plot/'))
+from option import *
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plot
@@ -17,30 +20,21 @@ def autolabel(rects, ax):
 GROUP_NUM = 2
 GROUP_NAMES = ["Range", "Build Time"]
 Y_LABELS = ["Latency(us)", "Build Time(s)"]
-Y_LABEL_FONT_SIZE = 20
+
+X_TICK_FONT_SIZE = 18
+Y_TICK_FONT_SIZE = 18
 
 GROUP_SIZE = 7
-#CATEGORY_NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 8192", "3-Grams, 65536", "4-Grams, 8192", "4-Grams, 65536"]
 CATEGORY_NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 65536", "4-Grams, 65536", "ALM 8192", "ALM 65536"]
 
 CSV_SuRF_LOOKUP_FILE_PATH = "results/SuRF/range/final_lat_email_surf_range.csv"
 CSV_SuRF_INS_FILE_PATH = "results/SuRF/range/final_stats_email_surf_range.csv"
-#CSV_SuRF_INS_FILE_PATH = "results/SuRF/point/final_stats_email_surf.csv"
 GRAPH_OUTPUT_PATH = "figures/SuRF/range/lat_email_surf.pdf"
 
 COLORS = ['#ffffff', '#fff7ec', '#fee8c8', '#fc8d59', '#d7301f', '#7f0000', '#4c0000']
 
-X_TICK_FONT_SIZE = 20
-Y_TICK_FONT_SIZE = 16
-
 LEGEND_FONT_SIZE = 18
 LEGEND_POS = 'upper left'
-
-GRAPH_HEIGHT = 4.5 #inches
-GRAPH_WIDTH = 8.0 #inches
-
-BORDER_SIZE = 0.5
-BORDER_COLOR = 'black'
 
 lookup_in_art = open(CSV_SuRF_LOOKUP_FILE_PATH)
 reader = csv.reader(lookup_in_art)
