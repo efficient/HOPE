@@ -45,7 +45,7 @@ namespace ope {
         return sizeof(N4) * tree->getN4Num() +
                 sizeof(N16) * tree->getN16Num() +
                 sizeof(N48) * tree->getN48Num() +
-                sizeof(N256) * tree->getN256Num();
+                sizeof(N256) * tree->getN256Num() + tree->getExtraSize();
     }
 
 } // namespace ope

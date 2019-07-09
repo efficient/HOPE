@@ -886,7 +886,7 @@ int main(int argc, char *argv[]) {
                insert_urls, insert_urls_sample, txn_urls, upper_bound_urls,
                insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
 
-        exec_group(expt_id, 2, 8, is_point, expt_num, total_num_expt,
+/*        exec_group(expt_id, 2, 8, is_point, expt_num, total_num_expt,
                email_point_tp, email_range_tp,
                wiki_point_tp, wiki_range_tp,
                url_point_tp, url_range_tp,
@@ -895,7 +895,7 @@ int main(int argc, char *argv[]) {
                insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis,
                insert_urls, insert_urls_sample, txn_urls, upper_bound_urls,
                insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-
+*/
         output_lat_email_surf << "-" << "\n";
         output_mem_email_surf << "-" << "\n";
         output_fpr_email_surf << "-" << "\n";
