@@ -13,7 +13,7 @@
 
 #define BLEND_FILE_NAME  "./blend_result_"
 //#define WRITE_BLEND_RESULT 1
-#define PRINT_TIME_BREAKDOWN
+//#define PRINT_TIME_BREAKDOWN
 #define MAX_KEY_LEN 50
 
 typedef struct SymbolFreqValid {
