@@ -6,9 +6,9 @@
 
 #include <string>
 
-//#define PRINT_BUILD_TIME_BREAKDOWN 1
+#define PRINT_BUILD_TIME_BREAKDOWN 1
 //#define USE_ARRAY_DICT 1
-//#define USE_FIXED_LEN_DICT_CODE 1
+#define USE_FIXED_LEN_DICT_CODE 1
 //#define INCLUDE_DECODE 1
 
 const int dict_size_list[9] = {1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144};
