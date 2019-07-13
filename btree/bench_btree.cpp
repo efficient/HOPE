@@ -1,4 +1,3 @@
-#include <time.h>
 #include <sys/time.h>
 
 #include <algorithm>
@@ -26,8 +25,11 @@ static const std::string file_load_url = "workloads/load_url";
 static const std::string file_load_ts = "workloads/load_timestamp";
 
 static const std::string file_txn_email = "workloads/txn_email_zipfian";
+static const std::string file_txn_email_len = "workloads/scan_len_email_zipfian";
 static const std::string file_txn_wiki = "workloads/txn_wiki_zipfian";
+static const std::string file_txn_wiki_len = "workloads/scan_len_wiki_zipfian";
 static const std::string file_txn_url = "workloads/txn_url_zipfian";
+static const std::string file_txn_url_len = "workloads/scan_len_url_zipfian";
 static const std::string file_txn_ts  = "workloads/txn_timestamp_zipfian";
 
 // for pretty print
@@ -126,6 +128,18 @@ void loadKeysFromFile(const std::string& file_name, const uint64_t num_records,
     }
 }
 
+void loadLensInt(const std::string& file_name, const uint64_t num_records,
+              std::vector<int> &keys) {
+    std::ifstream infile(file_name);
+    int key;
+    uint64_t count = 0;
+    while (count < num_records && infile.good()) {
+        infile >> key;
+        keys.push_back(key);
+        count++;
+    }
+}
+
 std::string uint64ToString(uint64_t key) {
     uint64_t endian_swapped_key = __builtin_bswap64(key);
     return std::string(reinterpret_cast<const char*>(&endian_swapped_key), 8);
@@ -162,7 +176,7 @@ void loadWorkload(int wkld_id,
           std::vector<std::string>& insert_keys,
           std::vector<std::string>& insert_keys_sample,
           std::vector<std::string>& txn_keys,
-          std::vector<std::string>& upper_bound_keys) {
+          std::vector<int>& scan_key_lens) {
     std::vector<std::string> load_keys;
     if (wkld_id == kEmail)
         loadKeysFromFile(file_load_email, kNumEmailRecords, load_keys);
@@ -197,22 +211,22 @@ void loadWorkload(int wkld_id,
         insert_keys_sample.push_back(insert_keys[i]);
     }
 
-    if (wkld_id == kEmail)
+    if (wkld_id == kEmail) {
         loadKeysFromFile(file_txn_email, kNumTxns, txn_keys);
-    else if (wkld_id == kWiki)
+        loadLensInt(file_txn_email_len, kNumTxns, scan_key_lens);
+    } else if (wkld_id == kWiki) {
         loadKeysFromFile(file_txn_wiki, kNumTxns, txn_keys);
-    else if (wkld_id == kUrl)
+        loadLensInt(file_txn_wiki_len, kNumTxns, scan_key_lens);
+    } else if (wkld_id == kUrl) {
         loadKeysFromFile(file_txn_url, kNumTxns, txn_keys);
-    else if (wkld_id == kTs)
+        loadLensInt(file_txn_url_len, kNumTxns, scan_key_lens);
+    } else if (wkld_id == kTs)
         loadKeysInt(file_txn_ts, kNumTxns, txn_keys);
 
-    for (int i = 0; i < (int)txn_keys.size(); i++) {
-        upper_bound_keys.push_back(getUpperBoundKey(txn_keys[i]));
-    }
     std::cout << "insert_keys size = " << insert_keys.size() << std::endl;
     std::cout << "insert_keys_sample size = " << insert_keys_sample.size() << std::endl;
     std::cout << "txn_keys size = " << txn_keys.size() << std::endl;
-    std::cout << "upper_bound_keys size = " << upper_bound_keys.size() << std::endl;
+    std::cout << "scan_key_lens size = " << scan_key_lens.size() << std::endl;
 }
 
 void exec(const int expt_id, const int wkld_id, const bool is_point,
@@ -221,10 +235,9 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
       const std::vector<std::string>& insert_keys,
       const std::vector<std::string>& insert_keys_sample,
       const std::vector<std::string>& txn_keys,
-      const std::vector<std::string>& upper_bound_keys) {
+      const std::vector<int>& scan_key_lens) {
     ope::Encoder* encoder = nullptr;
     uint8_t* buffer = new uint8_t[8192];
-    uint8_t* buffer_r = new uint8_t[8192];
     std::vector<std::pair<std::string, std::string> >enc_insert_keys;
 
     int64_t input_dict_size = dict_size_list[dict_size_id];
@@ -312,31 +325,33 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     } else { // range query
         if (is_compressed) {
             for (int i = 0; i < (int)txn_keys.size(); i++) {
-                int enc_len = 0, enc_len_r = 0;
-#ifdef NOT_USE_ENCODE_PAIR
+                int enc_len = 0;
                 enc_len = encoder->encode(txn_keys[i], buffer);
-                enc_len_r = encoder->encode(upper_bound_keys[i], buffer_r);
-#else
-                encoder->encodePair(txn_keys[i], upper_bound_keys[i], buffer, buffer_r, enc_len, enc_len_r);
-#endif
                 int enc_len_round = (enc_len + 7) >> 3;
-                int enc_len_r_round = (enc_len_r + 7) >> 3;
                 std::string left_key = std::string((const char*)buffer, enc_len_round);
-                std::string right_key = std::string((const char*)buffer_r, enc_len_r_round);
-
                 btree_type::const_iterator iter = bt->lower_bound(left_key);
+                int cnt = 0;
                 while (iter != bt->end()
-                       && iter.key().compare(right_key) < 0) {
+                       && cnt < scan_key_lens[i]) {
                     ++iter;
+                    ++cnt;
+                }
+                if (cnt != scan_key_lens[i]) {
+                    std::cout << "Input Size: " << scan_key_lens[i] << "\t" << "Result Size: " << cnt << std::endl;
                 }
                 sum += (iter->second);
             }
         } else {
             for (int i = 0; i < (int)txn_keys.size(); i++) {
                 btree_type::const_iterator iter = bt->lower_bound(txn_keys[i]);
+                int cnt = 0;
                 while (iter != bt->end()
-                       && iter.key().compare(upper_bound_keys[i]) < 0) {
+                       && cnt < scan_key_lens[i]) {
                     ++iter;
+                    ++cnt;
+                }
+                if (cnt != scan_key_lens[i]) {
+                    std::cout << "Input Size: " << scan_key_lens[i] << "\t" << "Result Size: " << cnt << std::endl;
                 }
                 sum += (iter->second);
             }
@@ -399,19 +414,19 @@ void exec_group(const int expt_id, const bool is_point,
         const std::vector<std::string>& insert_emails,
         const std::vector<std::string>& insert_emails_sample,
         const std::vector<std::string>& txn_emails,
-        const std::vector<std::string>& upper_bound_emails,
+        const std::vector<int>& upper_bound_emails,
         const std::vector<std::string>& insert_wikis,
         const std::vector<std::string>& insert_wikis_sample,
         const std::vector<std::string>& txn_wikis,
-        const std::vector<std::string>& upper_bound_wikis,
+        const std::vector<int>& upper_bound_wikis,
         const std::vector<std::string>& insert_urls,
         const std::vector<std::string>& insert_urls_sample,
         const std::vector<std::string>& txn_urls,
-        const std::vector<std::string>& upper_bound_urls,
+        const std::vector<int>& upper_bound_urls,
         const std::vector<std::string>& insert_tss,
         const std::vector<std::string>& insert_tss_sample,
         const std::vector<std::string>& txn_tss,
-        const std::vector<std::string>& upper_bound_tss) {
+        const std::vector<int>& upper_bound_tss) {
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
     exec(expt_id, kEmail, is_point, false, 0, 0,
      insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
@@ -547,16 +562,20 @@ int main(int argc, char *argv[]) {
     //-------------------------------------------------------------
     // Init Workloads
     //-------------------------------------------------------------
-    std::vector<std::string> insert_emails, insert_emails_sample, txn_emails, upper_bound_emails;
+    std::vector<std::string> insert_emails, insert_emails_sample, txn_emails;
+    std::vector<int> upper_bound_emails;
     loadWorkload(kEmail, insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
 
-    std::vector<std::string> insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis;
+    std::vector<std::string> insert_wikis, insert_wikis_sample, txn_wikis;
+    std::vector<int> upper_bound_wikis;
     loadWorkload(kWiki, insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
 
-    std::vector<std::string> insert_urls, insert_urls_sample, txn_urls, upper_bound_urls;
+    std::vector<std::string> insert_urls, insert_urls_sample, txn_urls;
+    std::vector<int> upper_bound_urls;
     loadWorkload(kUrl, insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 
-    std::vector<std::string> insert_tss, insert_tss_sample, txn_tss, upper_bound_tss;
+    std::vector<std::string> insert_tss, insert_tss_sample, txn_tss;
+    std::vector<int> upper_bound_tss;
 #ifdef RUN_TIMESTAMP
     loadWorkload(kTs, insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
 #endif

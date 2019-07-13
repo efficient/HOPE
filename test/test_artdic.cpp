@@ -15,10 +15,16 @@ namespace ope {
 
     namespace treetest {
         static const std::string kEmailFilePath = "../../datasets/emails.txt";
+        static const std::string kWikiFilePath = "../../datasets/wikis.txt";
+        static const std::string kUrlFilePath = "../../datasets/urls.txt";
         static const std::string kTsFilePath = "../../datasets/poisson_timestamps.csv";
-        static const int kEmailTestSize = 10000;
+        static const int kEmailTestSize = 100000;
+        static const int kWikiTestSize = 10000000;
+        static const int kUrlTestSize = 1000000;
         static const int kTsTestSize = 10000;
         static std::vector<std::string> emails;
+        static std::vector<std::string> wikis;
+        static std::vector<std::string> urls;
         static std::vector<std::string> timestamps;
 
 
@@ -86,12 +92,8 @@ namespace ope {
         TEST_F(ARTDICTest, pointLookupTest) {
             ArtDicTree *test = new ArtDicTree();
             std::vector<ope::SymbolCode> ls;
-            std::cout << "number of test emails:" << emails.size() << std::endl;
-            //std::sort(emails.begin(), emails.end());
 
             for (int i = 0; i < (int)emails.size() - 1; i++) {
-                // std::cout << emails[i] << std::endl;
-
                 ope::SymbolCode symbol_code = ope::SymbolCode();
                 symbol_code.first = emails[i];
                 symbol_code.second = ope::Code();
@@ -103,8 +105,6 @@ namespace ope {
 
             for (int i = 0; i < (int)emails.size() - 1; i++) {
                 int prefix_len = -1;
-                if (i == 75)
-                    std::cout << "";
                 ope::Code result = test->lookup(emails[i].c_str(), emails[i].size(), prefix_len);
                 if (result.code != i)
                     std::cout << "lookup:"<<result.code<<" answer:"<<i<<std::endl;
@@ -113,7 +113,55 @@ namespace ope {
             delete test;
         }
 
-        TEST_F(ARTDICTest, pointTsLookupTest) {
+        TEST_F(ARTDICTest, pointLookupWikiTest) {
+            ArtDicTree *test = new ArtDicTree();
+            std::vector<ope::SymbolCode> ls;
+
+            for (int i = 0; i < (int)wikis.size() - 1; i++) {
+                ope::SymbolCode symbol_code = ope::SymbolCode();
+                symbol_code.first = wikis[i];
+                symbol_code.second = ope::Code();
+                symbol_code.second.code = i;
+                ls.push_back(symbol_code);
+            }
+
+            test->build(ls);
+
+            for (int i = 0; i < (int)wikis.size() - 1; i++) {
+                int prefix_len = -1;
+                ope::Code result = test->lookup(wikis[i].c_str(), wikis[i].size(), prefix_len);
+                if (result.code != i)
+                    std::cout << "lookup:"<<result.code<<" answer:"<<i<<std::endl;
+                ASSERT_TRUE(result.code == i);
+            }
+            delete test;
+        }
+
+        TEST_F(ARTDICTest, pointLookupUrlTest) {
+            ArtDicTree *test = new ArtDicTree();
+            std::vector<ope::SymbolCode> ls;
+
+            for (int i = 0; i < (int)urls.size() - 1; i++) {
+                ope::SymbolCode symbol_code = ope::SymbolCode();
+                symbol_code.first = urls[i];
+                symbol_code.second = ope::Code();
+                symbol_code.second.code = i;
+                ls.push_back(symbol_code);
+            }
+
+            test->build(ls);
+
+            for (int i = 0; i < (int)urls.size() - 1; i++) {
+                int prefix_len = -1;
+                ope::Code result = test->lookup(urls[i].c_str(), urls[i].size(), prefix_len);
+                if (result.code != i)
+                    std::cout << "lookup:"<<result.code<<" answer:"<<i<<std::endl;
+                ASSERT_TRUE(result.code == i);
+            }
+            delete test;
+        }
+
+/*        TEST_F(ARTDICTest, pointTsLookupTest) {
             ArtDicTree *test = new ArtDicTree();
             std::vector<ope::SymbolCode> ls;
             std::cout << "number of test timestamps:" << timestamps.size() << std::endl;
@@ -143,11 +191,10 @@ namespace ope {
             }
             delete test;
         }
-
+*/
         TEST_F(ARTDICTest, withinRangeLookupTest) {
                 ArtDicTree *test = new ArtDicTree();
                 std::vector<ope::SymbolCode> ls;
-                std::cout << emails.size() << std::endl;
                 std::sort(emails.begin(), emails.end());
 
                 for (int i = 0; i < (int)emails.size(); i++) {
@@ -161,15 +208,12 @@ namespace ope {
             test->build(ls);
 
             for (int i = 0; i < (int)emails.size() - 1; i++) {
-                if (i%1000 == 0)
-                    std::cout << i << std::endl;
                 int prefix_len = -1;
                 std::string cur_str = getNextString(emails[i]);
                 std::string next_str = cur_str;
                 int next_idx = i;
                 getNextInterval(emails, i, cur_str, next_idx, next_str);
                 ope::Code result;
-                // next string <= cur_star
                 result = test->lookup(cur_str.c_str(), cur_str.size(), prefix_len);
 
                 if (result.code != next_idx) {
@@ -195,7 +239,7 @@ namespace ope {
             delete test;
         }
 
-
+/*
         TEST_F(ARTDICTest, withinRangeTsLookupTest) {
             ArtDicTree *test = new ArtDicTree();
             std::vector<ope::SymbolCode> ls;
@@ -236,7 +280,7 @@ namespace ope {
             }
             delete test;
         }
-
+*/
         int getCommonPrefixLen(std::string &str1, std::string &str2) {
             int min_len = (int) std::min(str1.size(), str2.size());
             int i = 0;
@@ -255,6 +299,28 @@ namespace ope {
             while (infile.good() && count < kEmailTestSize) {
                 infile >> key;
                 emails.push_back(key);
+                count++;
+            }
+        }
+
+        void loadWikis() {
+            std::ifstream infile(kWikiFilePath);
+            std::string key;
+            int count = 0;
+            while (infile.good() && count < kWikiTestSize) {
+                infile >> key;
+                wikis.push_back(key);
+                count++;
+            }
+        }
+
+        void loadUrls() {
+            std::ifstream infile(kUrlFilePath);
+            std::string key;
+            int count = 0;
+            while (infile.good() && count < kUrlTestSize) {
+                infile >> key;
+                urls.push_back(key);
                 count++;
             }
         }
@@ -291,6 +357,8 @@ int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
 
     ope::treetest::loadEmails();
+    ope::treetest::loadWikis();
+    ope::treetest::loadUrls();
     ope::treetest::loadTimestamp();
 
     return RUN_ALL_TESTS();
