@@ -679,20 +679,19 @@ int main(int argc, char *argv[]) {
         int percent = 1;
         //int repeat_time = 2;
         int batch_sizes[10] = { 1, 2, 4, 8, 16, 32, 64};
-        for (int encoder_type = 1; encoder_type < 2; encoder_type++) {
-            exec(expt_id, kEmail, encoder_type, ds, percent, emails_shuffle, total_len_email, 0);
-//            exec(expt_id, kEmail, encoder_type, ds, percent, emails_shuffle, total_len_email, 1);
+/*        for (int encoder_type = 1; encoder_type < 7; encoder_type++) {
+            exec(expt_id, kEmail, encoder_type, ds, percent, emails_shuffle, total_len_email, 2, 1);
+            exec(expt_id, kEmail, encoder_type, ds, percent, emails_shuffle, total_len_email, 2, 2);
         }
-
-//        exec(expt_id, kEmail, 1, ds, percent, emails_shuffle, total_len_email, 2, 32);
-/*        for (int bs = 0; bs < 7; bs++) {
+*/
+        for (int bs = 0; bs < 7; bs++) {
             int batch_size = batch_sizes[bs];
-            for (int encoder_type = 3; encoder_type < 5; encoder_type++) {
+            for (int encoder_type = 1; encoder_type < 5; encoder_type++) {
                 std::cout <<"-------Batch size--------"<< batch_size << "-----Encoder Type----" << encoder_type << std::endl;
                 exec(expt_id, kEmail, encoder_type, ds, percent, emails_shuffle, total_len_email, 2, batch_size);
             }
         }
-*/
+
         output_batch_lat.close();
     }
     return 0;
