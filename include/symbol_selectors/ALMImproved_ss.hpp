@@ -165,24 +165,25 @@ namespace ope {
         if (key_list.empty())
             return false;
 #ifdef PRINT_TIME_BREAKDOWN
-        double curtime = getNow();
+        //double curtime = getNow();
 #endif
 
 #ifdef PRINT_TIME_BREAKDOWN
-        curtime = getNow();
+        //curtime = getNow();
 #endif
         // Build Trie
-        BlendTrie tree(1);
-        tree.build(key_list);
+        BlendTrie *tree = new BlendTrie(1);
+        tree->build(key_list);
 #ifdef PRINT_TIME_BREAKDOWN
-        std::cout << "Build trie = " << getNow() - curtime << std::endl;
+        //std::cout << "Build trie = " << getNow() - curtime << std::endl;
 #endif
         std::vector<SymbolFreq> blend_freq_table;
         // Blending
-        tree.blendingAndGetLeaves(blend_freq_table);
+        tree->blendingAndGetLeaves(blend_freq_table);
+        delete tree;
         // Write blending results  to file
 #ifdef PRINT_TIME_BREAKDOWN
-        std::cout << "Blending = " << getNow() - curtime << std::endl;
+        //std::cout << "Blending = " << getNow() - curtime << std::endl;
 #endif
         // Search for best W
         int64_t l = 0;
@@ -212,18 +213,18 @@ namespace ope {
             }
         }
         if (l > r)
-            std::cout << "Best approoach W = " << _W <<", target = " << num_limit << ", current size = " << intervals_.size() << std::endl;
-        std::string start = std::string(1, char(0));
-        std::string end = std::string(MAX_KEY_LEN, char(255));
-        checkIntervals(start, end);
+            std::cout << "Best approoach W = " << W <<", target = " << num_limit << ", current size = " << intervals_.size() << std::endl;
+        //std::string start = std::string(1, char(0));
+        //std::string end = std::string(MAX_KEY_LEN, char(255));
+        //checkIntervals(start, end);
 #ifdef PRINT_TIME_BREAKDOWN
-        curtime = getNow();
+        //curtime = getNow();
 #endif
         // simulate encode process to get Frequency
         getIntervalFreqEntropy(symbol_freq_list, key_list);
 #ifdef PRINT_TIME_BREAKDOWN
-        std::cout << "Simulate encode process = " << getNow() - curtime << std::endl;
-        curtime = getNow();
+        //std::cout << "Simulate encode process = " << getNow() - curtime << std::endl;
+        //curtime = getNow();
 #endif
         return true;
     }

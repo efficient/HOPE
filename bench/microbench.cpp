@@ -5,9 +5,10 @@
 #include <fstream>
 #include <iostream>
 #include <set>
-
 #include "encoder_factory.hpp"
 #include "common.hpp"
+
+#define RUN_BATCH
 
 namespace microbench {
 
@@ -138,6 +139,14 @@ static const std::string file_bt_email_dc
 = output_dir + ht_vs_dc_subdir + "bt_email_dc.csv";
 std::ofstream output_bt_email_dc;
 
+//-------------------------------------------------------------
+// Batch Encode vs Non-batch
+//-------------------------------------------------------------
+static const std::string batch_subdir = "batch/";
+static const std::string file_batch_lat
+= output_dir + batch_subdir + "batch_lat.csv";
+std::ofstream output_batch_lat;
+
 double getNow() {
     struct timeval tv;
     gettimeofday(&tv, 0);
@@ -197,11 +206,13 @@ void printStr(std::string str) {
 void exec(const int expt_id, const int wkld_id,
       const int encoder_type, const int64_t dict_size_id,
       const double sample_percent,
-      const std::vector<std::string>& keys_shuffle,
-      const int64_t total_len) {
+      std::vector<std::string>& keys_shuffle,
+      const int64_t total_len, int encode_method = 0, int batch_size = 3) {
+ #ifdef RUN_BATCH
+    std::sort(keys_shuffle.begin(), keys_shuffle.end());
+#endif
     std::vector<std::string> sample_keys;
     int step_size = 100 / sample_percent;
-    //std::cout << "Step size:" << step_size << ", total size:" << keys_shuffle.size() << std::endl;
     for (int i = 0; i < (int)keys_shuffle.size(); i += step_size) {
         sample_keys.push_back(keys_shuffle[i]);
     }
@@ -233,13 +244,32 @@ void exec(const int expt_id, const int wkld_id,
     int64_t mem = encoder->memoryUse();
 
     uint8_t* buffer = new uint8_t[kLongestCodeLen];
+    uint8_t* lb = new uint8_t[kLongestCodeLen];
+    uint8_t* rb = new uint8_t[kLongestCodeLen];
     uint64_t total_enc_len = 0;
+
     time_start = getNow();
 
-    for (int i = 0; i < (int)keys_shuffle.size(); i++) {
-        total_enc_len += encoder->encode(keys_shuffle[i], buffer);
+    std::vector<std::string> enc_keys;
+    if (encode_method == 0) {
+        for (int i = 0; i < (int)keys_shuffle.size(); i++) {
+            total_enc_len += encoder->encode(keys_shuffle[i], buffer);
+        }
+    } else if (encode_method == 1) {
+        int l_len;
+        int r_len;
+        for (int i = 0; i < (int)keys_shuffle.size() - 1; i+=2) {
+            encoder->encodePair(keys_shuffle[i], keys_shuffle[i+1], lb, rb, l_len, r_len);
+            total_enc_len += l_len + r_len;
+        }
+    } else if (encode_method == 2) {
+        for (int i = 0; i <= (int)keys_shuffle.size() - batch_size; i += batch_size) {
+            total_enc_len += encoder->encodeBatch(keys_shuffle, i, batch_size, enc_keys);
+        }
     }
     delete[] buffer;
+    delete lb;
+    delete rb;
     delete encoder;
     time_end = getNow();
     double time_diff = time_end - time_start;
@@ -247,7 +277,7 @@ void exec(const int expt_id, const int wkld_id,
     double lat = time_diff * 1000000000 / total_len; // in ns
     double cpr = (total_len * 8.0) / total_enc_len;
 
-    if (expt_id < 0 || expt_id > 6)
+    if (expt_id < 0 || expt_id > 7)
         std::cout << "ERROR: INVALID EXPT ID!" << std::endl;
 
     if (wkld_id < 0 || wkld_id > 3)
@@ -300,6 +330,8 @@ void exec(const int expt_id, const int wkld_id,
             output_lat_email_dc << lat << "\n";
             output_bt_email_dc << bt << "\n";
         }
+    } else if (expt_id == 7) {
+        output_batch_lat << lat << "\n";
     }
 
     std::cout << "Throughput = " << tput << " Mops/s" << std::endl;
@@ -627,13 +659,41 @@ int main(int argc, char *argv[]) {
         std::cout << "------------------------------------------------" << std::endl;
 
         int percent = 1;
-        int ds = 5;
+        int ds = 6;
         int expt_num = 0;
         int total_num_expts = 6;
-        for (int encoder_type = 1; encoder_type < 7; encoder_type++) {
+        for (int encoder_type = 5; encoder_type < 7; encoder_type++) {
             std::cout << "Build Time Breakdown " << (expt_num++) << "/" << total_num_expts << std::endl;
             exec(expt_id, kEmail, encoder_type, ds, percent, emails_shuffle, total_len_email);
         }
+    }
+    else if (expt_id == 7) {
+        //-------------------------------------------------------------
+        // Batch Encoder vs Non-batch
+        //-------------------------------------------------------------
+        std::cout << "------------------------------------------------" << std::endl;
+        std::cout << "Batch Encoder vs Non-batch; Expt ID = 7" << std::endl;
+        std::cout << "------------------------------------------------" <<std::endl;
+        output_batch_lat.open(file_batch_lat);
+        int ds = 6;
+        int percent = 1;
+        //int repeat_time = 2;
+        int batch_sizes[10] = { 1, 2, 4, 8, 16, 32, 64};
+        for (int encoder_type = 1; encoder_type < 2; encoder_type++) {
+            exec(expt_id, kEmail, encoder_type, ds, percent, emails_shuffle, total_len_email, 0);
+//            exec(expt_id, kEmail, encoder_type, ds, percent, emails_shuffle, total_len_email, 1);
+        }
+
+//        exec(expt_id, kEmail, 1, ds, percent, emails_shuffle, total_len_email, 2, 32);
+/*        for (int bs = 0; bs < 7; bs++) {
+            int batch_size = batch_sizes[bs];
+            for (int encoder_type = 3; encoder_type < 5; encoder_type++) {
+                std::cout <<"-------Batch size--------"<< batch_size << "-----Encoder Type----" << encoder_type << std::endl;
+                exec(expt_id, kEmail, encoder_type, ds, percent, emails_shuffle, total_len_email, 2, batch_size);
+            }
+        }
+*/
+        output_batch_lat.close();
     }
     return 0;
 }

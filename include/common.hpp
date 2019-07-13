@@ -8,7 +8,7 @@
 
 //#define PRINT_BUILD_TIME_BREAKDOWN 1
 //#define USE_ARRAY_DICT 1
-//#define USE_FIXED_LEN_DICT_CODE 1
+#define USE_FIXED_LEN_DICT_CODE 1
 //#define INCLUDE_DECODE 1
 
 const int dict_size_list[9] = {1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144};
@@ -32,7 +32,7 @@ const int ALM_W[3][9] = {
 };
 
 const int ALM_W_improved[3][9] = {
-{ 13274, 7726,  4788,  3436, 2071, 1131, 624,  359,   186},
+{ 13274, 7726,  2462,  3436, 2071, 1131, 252,  359,   186},
 {  7874, 4030,  2249,  1264,  725,  397, 215,  115,   65},
 { 42000,35000, 21875, 13436, 8436, 4999, 2889, 1717,  1014}
 };

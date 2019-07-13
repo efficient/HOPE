@@ -12,6 +12,7 @@
 #include "blending_trie.hpp"
 
 #define BLEND_FILE_NAME  "./blend_result_"
+#define PRINT_TIME_BREAKDOWN 1
 //#define WRITE_BLEND_RESULT 1
 #define MAX_KEY_LEN 50
 
@@ -56,13 +57,14 @@ namespace ope {
         int BinarySearch(const std::string& str, unsigned int pos, int &prefix_len);
 
         int64_t W;
-    public:
+
         std::vector<std::pair<std::string, std::string>> intervals_;
 
     };
 
     HeuristicSS::HeuristicSS(){
         W = 20000;
+        intervals_.clear();
     }
 
     void HeuristicSS::setW(int64_t new_w) {
@@ -114,30 +116,33 @@ namespace ope {
         if (key_list.empty())
             return false;
 #ifdef PRINT_TIME_BREAKDOWN
-        double curtime = getNow();
+//        double curtime = getNow();
 #endif
         std::vector<SymbolFreq> blend_freq_table;
         if (readIntervals(blend_freq_table, key_list[0])) {
             std::cout << "Read blending results from file" << std::endl;
         } else {
 #ifdef PRINT_TIME_BREAKDOWN
-            curtime = getNow();
+//            curtime = getNow();
 #endif
             // Build Trie
-            BlendTrie tree(0);
-            tree.build(key_list);
+            BlendTrie *tree = new BlendTrie(0);
+            tree->build(key_list);
 #ifdef PRINT_TIME_BREAKDOWN
-            std::cout << "Build trie = " << getNow() - curtime << std::endl;
+//            std::cout << "Build trie = " << getNow() - curtime << std::endl;
+//            curtime = getNow();
 #endif
             // Blending
-            tree.blendingAndGetLeaves(blend_freq_table);
+            tree->blendingAndGetLeaves(blend_freq_table);
+            delete tree;
             // Write blending results  to file
 #ifdef WRITE_BLEND_RESULT
             writeIntervals(blend_freq_table, key_list[0]);
 #endif
         }
 #ifdef PRINT_TIME_BREAKDOWN
-        std::cout << "Blending = " << getNow() - curtime << std::endl;
+//        std::cout << "Blending = " << getNow() - curtime << std::endl;
+//        curtime = getNow();
 #endif
         // Search for best W
         int64_t l = 0;
@@ -146,15 +151,26 @@ namespace ope {
             setW((l+r)/2);
             intervals_.clear();
             getEqualInterval(blend_freq_table);
+#ifdef PRINT_TIME_BREAKDOWN
+//            std::cout << "Generate Interval = " << getNow() - curtime << std::endl;
+//            curtime = getNow();
+#endif
             std::cout << "W = " << W << "\t" << intervals_.size() << std::endl;
             // sort intervals
             std::sort(intervals_.begin(), intervals_.end(),
                       [](std::pair<std::string, std::string>& x, std::pair<std::string, std::string> y) {
                           return strCompare(x.first, y.first) < 0;
                       });
+#ifdef PRINT_TIME_BREAKDOWN
+//            std::cout << "Sort Interevals = " << getNow() - curtime << std::endl;
+//            curtime = getNow();
+#endif
             // Merge adjacent intervals with same prefix
             mergeAdjacentComPrefixIntervals();
-
+#ifdef PRINT_TIME_BREAKDOWN
+//            std::cout << "Merge Intervals = " << getNow() - curtime << std::endl;
+//            curtime = getNow();
+#endif
             if (abs(num_limit - (int)intervals_.size()) <= (int)(0.02 * num_limit)) {
 //                std::cout << "W = " << W << "\tNumber of intervals = "<< intervals_.size() << "\tTarget = " << num_limit << std::endl;
                 break;
@@ -168,18 +184,11 @@ namespace ope {
         }
         if (l > r)
             std::cout << "Best approoach W = " << W <<", target = " << num_limit << ", current size = " << intervals_.size() << std::endl;
-        std::string start = std::string(1, char(0));
-        std::string end = std::string(MAX_KEY_LEN, char(255));
-        checkIntervals(start, end);
-#ifdef PRINT_TIME_BREAKDOWN
-        curtime = getNow();
-#endif
+        //std::string start = std::string(1, char(0));
+        //std::string end = std::string(MAX_KEY_LEN, char(255));
+        //checkIntervals(start, end);
         // simulate encode process to get Frequency
         getIntervalFreqEntropy(symbol_freq_list, key_list);
-#ifdef PRINT_TIME_BREAKDOWN
-        std::cout << "Simulate encode process = " << getNow() - curtime << std::endl;
-        curtime = getNow();
-#endif
         return true;
     }
 

@@ -44,7 +44,7 @@ void print(std::string str) {
     }
     std::cout << std::endl;
 }
-
+/*
 TEST_F (SingleCharEncoderTest, wordTest) {
     SingleCharEncoder* encoder = new SingleCharEncoder();
     encoder->build(words, 1000);
@@ -84,8 +84,32 @@ TEST_F (SingleCharEncoderTest, wordPairTest) {
 	int cmp = str1.compare(str2);
 	ASSERT_TRUE(cmp < 0);
     }
-}
+}*/
 
+TEST_F (SingleCharEncoderTest, wordBatchTest) {
+    SingleCharEncoder* encoder = new SingleCharEncoder();
+    std::vector<std::string> enc_keys;
+    encoder->build(words, 1000);
+    int batch_size = 10;
+    int ls = (int)words.size();
+    for (int i = 0; i < ls - batch_size; i+=batch_size) {
+	encoder->encodeBatch(words, i, batch_size, enc_keys);
+    }
+//    std::cout << enc_keys.size() << std::endl;
+    for (int i = 0; i < (int)enc_keys.size() - 1; i+= 2) {
+//        std::cout << i << std::endl;
+//        std::cout << "1---";
+        std::string str1 = enc_keys[i];
+//        print(str1);
+        std::string str2 = enc_keys[i+1];
+//        std::cout << "2---";
+//        print(str2);
+//        std::cout <<"End---";
+	    int cmp = strCompare(str1,str2);
+//        std::cout << cmp << std::endl;
+	    ASSERT_TRUE(cmp < 0);
+    }
+}
     /*
 TEST_F (SingleCharEncoderTest, emailTest) {
     SingleCharEncoder* encoder = new SingleCharEncoder();
@@ -105,7 +129,7 @@ TEST_F (SingleCharEncoderTest, emailTest) {
 	    std::cout << emails[i + 1] << std::endl;
 	    print(str2);
 	}
-	
+
 	ASSERT_TRUE(cmp < 0);
     }
 }
@@ -148,7 +172,7 @@ void loadWords() {
 	count++;
     }
 }
-    
+
 void loadEmails() {
     std::ifstream infile(kEmailFilePath);
     std::string key;
