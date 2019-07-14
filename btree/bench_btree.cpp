@@ -338,9 +338,6 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
                     ++iter;
                     ++cnt;
                 }
-//                if (cnt != scan_key_lens[i]) {
-//                    std::cout << "Input Size: " << scan_key_lens[i] << "\t" << "Result Size: " << cnt << std::endl;
-//                }
             }
         } else {
             for (int i = 0; i < (int)txn_keys.size(); i++) {
@@ -351,9 +348,6 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
                     TIDs[cnt] = iter->second;
                     ++iter;
                     ++cnt;
-                }
-                if (cnt != scan_key_lens[i]) {
-                    std::cout << "Input Size: " << scan_key_lens[i] << "\t" << "Result Size: " << cnt << std::endl;
                 }
             }
         }

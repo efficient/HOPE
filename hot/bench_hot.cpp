@@ -469,9 +469,6 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
 		            ++iter;
                     ++cnt;
 		        }
-//                if (cnt != scan_key_lens[i]) {
-//                    std::cout << "Input Key Size: " << scan_key_lens[i] << "\t" << "Result Size: " << cnt << std::endl;
-//                }
 #ifdef BREAKDOWN_TIME
                 lookup_time += getNow() - now;
 #endif
@@ -489,11 +486,6 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
 		            ++iter;
                     ++cnt;
                 }
-//                if (cnt != scan_key_lens[i]) {
-//                    std::cout << "Input Key Size: " << scan_key_lens[i] << "\t" << "Result Size: " << cnt << std::endl;
-//                }
-
-		    //sum += (iter->second);
             }
 #ifdef BREAKDOWN_TIME
                 lookup_time += getNow() - now;
