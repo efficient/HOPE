@@ -331,15 +331,16 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
                 std::string left_key = std::string((const char*)buffer, enc_len_round);
                 btree_type::const_iterator iter = bt->lower_bound(left_key);
                 int cnt = 0;
+                int64_t sum = 0;
                 while (iter != bt->end()
                        && cnt < scan_key_lens[i]) {
+                    sum += (iter->second);
                     ++iter;
                     ++cnt;
                 }
-                if (cnt != scan_key_lens[i]) {
-                    std::cout << "Input Size: " << scan_key_lens[i] << "\t" << "Result Size: " << cnt << std::endl;
-                }
-                sum += (iter->second);
+//                if (cnt != scan_key_lens[i]) {
+//                    std::cout << "Input Size: " << scan_key_lens[i] << "\t" << "Result Size: " << cnt << std::endl;
+//                }
             }
         } else {
             for (int i = 0; i < (int)txn_keys.size(); i++) {
@@ -347,13 +348,13 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
                 int cnt = 0;
                 while (iter != bt->end()
                        && cnt < scan_key_lens[i]) {
+                    sum += (iter->second);
                     ++iter;
                     ++cnt;
                 }
                 if (cnt != scan_key_lens[i]) {
                     std::cout << "Input Size: " << scan_key_lens[i] << "\t" << "Result Size: " << cnt << std::endl;
                 }
-                sum += (iter->second);
             }
         }
     }
