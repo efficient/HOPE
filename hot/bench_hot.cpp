@@ -412,6 +412,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     // execute transactions =======================================
     //uint64_t sum = 0;
     start_time = getNow();
+    uint64_t TIDs[120];
 #ifdef BREAKDOWN_TIME
     double now = start_time;
 #endif
@@ -447,7 +448,6 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
 	        }
 	    }
     } else { // range query
-        uint64_t TIDs[120];
         if (is_compressed) {
             for (int i = 0; i < (int)txn_keys.size(); i++) {
                 int enc_len = 0;
@@ -463,7 +463,6 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
 #endif
                 hot_type::const_iterator iter = ht->lower_bound((const char*)(left_key.c_str()));
                 int cnt = 0;
-                int64_t sum = 0;
                 while (iter != ht->end()
                     && cnt < scan_key_lens[i]) {
 		            TIDs[cnt] = uint64_t(*iter);
@@ -511,6 +510,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     encode_time = encode_time * 1000000 / txn_keys.size();
     lookup_time = lookup_time * 1000000 / txn_keys.size();
 #endif
+    std::cout << TIDs[0] << std::endl;
     std::cout << kGreen << "Lookup Latency = " << kNoColor << lookup_lat << "\n";
     std::cout << kGreen << "Insert Latency = " << kNoColor << insert_lat << "\n";
 

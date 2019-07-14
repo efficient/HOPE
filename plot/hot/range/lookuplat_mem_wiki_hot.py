@@ -35,8 +35,8 @@ LEGEND_POS = 'upper left'
 GRAPH_HEIGHT = 5 #inches
 GRAPH_WIDTH = 8 #inches
 
-CSV_X_FILE_PATH = "results/hot/range/lookuplat_wiki_hot_range.csv"
-CSV_Y_FILE_PATH = "results/hot/range/mem_wiki_hot_range.csv"
+CSV_X_FILE_PATH = "results/hot/range/final_lookuplat_wiki_hot_range.csv"
+CSV_Y_FILE_PATH = "results/hot/range/final_mem_wiki_hot_range.csv"
 GRAPH_OUTPUT_PATH = "figures/hot/range/lookuplat_mem_wiki_hot_range.pdf"
 
 f_in_x = open(CSV_X_FILE_PATH)
@@ -97,11 +97,9 @@ ax.scatter(data_x[0], data_y[0], s=SIZE, c=COLORS[0], marker='o', label=NAMES[0]
 ax.scatter(data_x[1], data_y[1], s=SIZE, c=COLORS[1], marker='o', label=NAMES[1])
 ax.scatter(data_x[2], data_y[2], s=SIZE, c=COLORS[2], marker='o', label=NAMES[2])
 ax.scatter(data_x[3], data_y[3], s=SIZE, c=COLORS[3], marker='o', label=NAMES[3])
-ax.scatter(data_x[4], data_y[4], s=SIZE, c=COLORS[3], marker='s', label=NAMES[4])
-ax.scatter(data_x[5], data_y[5], s=SIZE, c=COLORS[4], marker='o', label=NAMES[5])
-ax.scatter(data_x[6], data_y[6], s=SIZE, c=COLORS[4], marker='s', label=NAMES[6])
-ax.scatter(data_x[7], data_y[7], s=SIZE, c=COLORS[5], marker='o', label=NAMES[7])
-ax.scatter(data_x[8], data_y[8], s=SIZE, c=COLORS[5], marker='s', label=NAMES[8])
+ax.scatter(data_x[4], data_y[4], s=SIZE, c=COLORS[4], marker='o', label=NAMES[4])
+ax.scatter(data_x[5], data_y[5], s=SIZE, c=COLORS[5], marker='o', label=NAMES[5])
+ax.scatter(data_x[6], data_y[6], s=SIZE, c=COLORS[5], marker='s', label=NAMES[6])
 
 ax.set_xlabel(X_LABEL, fontsize=X_LABEL_FONT_SIZE)
 ax.set_xlim(0, X_LIMIT)
