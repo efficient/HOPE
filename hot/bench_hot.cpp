@@ -462,15 +462,16 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
 #endif
                 hot_type::const_iterator iter = ht->lower_bound((const char*)(left_key.c_str()));
                 int cnt = 0;
+                int64_t sum = 0;
                 while (iter != ht->end()
                     && cnt < scan_key_lens[i]) {
+		            sum += int64_t(*iter);
 		            ++iter;
                     ++cnt;
 		        }
 //                if (cnt != scan_key_lens[i]) {
 //                    std::cout << "Input Key Size: " << scan_key_lens[i] << "\t" << "Result Size: " << cnt << std::endl;
 //                }
-		        //sum += (iter->second);
 #ifdef BREAKDOWN_TIME
                 lookup_time += getNow() - now;
 #endif
