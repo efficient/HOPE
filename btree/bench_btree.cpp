@@ -323,6 +323,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
             }
         }
     } else { // range query
+        uint64_t TIDs[120];
         if (is_compressed) {
             for (int i = 0; i < (int)txn_keys.size(); i++) {
                 int enc_len = 0;
@@ -334,7 +335,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
                 int64_t sum = 0;
                 while (iter != bt->end()
                        && cnt < scan_key_lens[i]) {
-                    sum += (iter->second);
+                    TIDs[cnt] = iter->second;
                     ++iter;
                     ++cnt;
                 }
@@ -348,7 +349,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
                 int cnt = 0;
                 while (iter != bt->end()
                        && cnt < scan_key_lens[i]) {
-                    sum += (iter->second);
+                    TIDs[cnt] = iter->second;
                     ++iter;
                     ++cnt;
                 }
