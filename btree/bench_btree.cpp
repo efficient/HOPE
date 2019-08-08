@@ -38,6 +38,7 @@ static const char* kGreen ="\033[0;32m";
 static const char* kNoColor ="\033[0;0m";
 
 static int runALM = 1;
+static std::string endStr = std::string(255, char(255));
 //-------------------------------------------------------------
 // Workload IDs
 //-------------------------------------------------------------
@@ -332,24 +333,26 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
                 std::string left_key = std::string((const char*)buffer, enc_len_round);
                 btree_type::const_iterator iter = bt->lower_bound(left_key);
                 int cnt = 0;
-                while (iter != bt->end()
+                while (iter != bt->end() &&  iter.key().compare(endStr) < 0
                        && cnt < scan_key_lens[i]) {
                     TIDs[cnt] = iter->second;
                     ++iter;
                     ++cnt;
                 }
             }
+            std::cout << "Finish Uncompressed Range Query" << std::endl;
         } else {
             for (int i = 0; i < (int)txn_keys.size(); i++) {
                 btree_type::const_iterator iter = bt->lower_bound(txn_keys[i]);
                 int cnt = 0;
-                while (iter != bt->end()
+                while (iter != bt->end() && iter.key().compare(endStr) < 0
                        && cnt < scan_key_lens[i]) {
                     TIDs[cnt] = iter->second;
                     ++iter;
                     ++cnt;
                 }
             }
+            std::cout << "Finish Uncompressed Range Query" << std::endl;
         }
     }
     end_time = getNow();
@@ -481,6 +484,7 @@ void exec_group(const int expt_id, const bool is_point,
     exec(expt_id, kUrl, is_point, true, 2, 6,
      insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
     expt_num++;
+
 #ifdef RUN_TIMESTAMP
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
     exec(expt_id, kTs, is_point, true, 2, 6,

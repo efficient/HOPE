@@ -40,7 +40,6 @@ static const char* kGreen ="\033[0;32m";
 static const char* kNoColor ="\033[0;0m";
 
 static int runALM = 1;
-
 //-------------------------------------------------------------
 // Workload IDs
 //-------------------------------------------------------------
@@ -298,7 +297,7 @@ bool unit8CompareBeq(const uint8_t* s1, const uint8_t* s2) {
     return false;
 }
 
-void printStr(char* str) {
+void printStr(const char* str) {
     for (int i = 0; i < (int)strlen(str); i++) {
         std::cout << std::hex << unsigned((uint8_t)str[i]) << " ";
     }
@@ -413,6 +412,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     //uint64_t sum = 0;
     start_time = getNow();
     uint64_t TIDs[120];
+    uint64_t sum = 0;
 #ifdef BREAKDOWN_TIME
     double now = start_time;
 #endif
@@ -429,7 +429,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
                 encode_time += getNow() - now;
                 now = getNow();
 #endif
-                ht->lookup(reinterpret_cast<const char*>(enc_key.c_str()));
+                sum += ht->lookup(reinterpret_cast<const char*>(enc_key.c_str())).mIsValid;
 #ifdef BREAKDOWN_TIME
                 lookup_time += getNow() - now;
 #endif
@@ -439,15 +439,14 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
 #ifdef BREAKDOWN_TIME
                 now = getNow();
 #endif
-                //idx::contenthelpers::OptionalValue<const char*> result = ht->lookup(reinterpret_cast<const char*>(txn_keys[i].c_str()));
-                ht->lookup(reinterpret_cast<const char*>(txn_keys[i].c_str()));
+                sum += ht->lookup(reinterpret_cast<const char*>(txn_keys[i].c_str())).mIsValid;
 #ifdef BREAKDOWN_TIME
                 lookup_time += getNow() - now;
 #endif
-		        //sum += (iter->second);
 	        }
 	    }
     } else { // range query
+        std::string endStr = std::string(255, char(255));
         if (is_compressed) {
             for (int i = 0; i < (int)txn_keys.size(); i++) {
                 int enc_len = 0;
@@ -463,7 +462,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
 #endif
                 hot_type::const_iterator iter = ht->lower_bound((const char*)(left_key.c_str()));
                 int cnt = 0;
-                while (iter != ht->end()
+                while (iter != ht->end() && endStr.compare(*iter) > 0
                     && cnt < scan_key_lens[i]) {
 		            TIDs[cnt] = uint64_t(*iter);
 		            ++iter;
@@ -480,12 +479,13 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
             for (int i = 0; i < (int)txn_keys.size(); i++) {
                 hot_type::const_iterator iter = ht->lower_bound(txn_keys[i].c_str());
                 int cnt = 0;
-                while (iter != ht->end()
+                while (iter != ht->end() && (endStr).compare(*iter) > 0
                      && cnt < scan_key_lens[i]) {
                     TIDs[cnt] = uint64_t(*iter);
 		            ++iter;
                     ++cnt;
                 }
+
             }
 #ifdef BREAKDOWN_TIME
                 lookup_time += getNow() - now;
