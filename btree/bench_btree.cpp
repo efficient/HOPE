@@ -1,4 +1,3 @@
-#include <time.h>
 #include <sys/time.h>
 
 #include <algorithm>
@@ -17,8 +16,8 @@ static const uint64_t kNumWikiRecords = 14000000;
 static const uint64_t kNumTsRecords = 14000000;
 static const uint64_t kNumTxns = 10000000;
 
-static const int kSamplePercent = 10;
-static const double kUrlSamplePercent = 0.1;
+static const int kSamplePercent = 1;
+static const double kUrlSamplePercent = 1;
 
 static const std::string file_load_email = "workloads/load_email";
 static const std::string file_load_wiki = "workloads/load_wiki";
@@ -26,8 +25,11 @@ static const std::string file_load_url = "workloads/load_url";
 static const std::string file_load_ts = "workloads/load_timestamp";
 
 static const std::string file_txn_email = "workloads/txn_email_zipfian";
+static const std::string file_txn_email_len = "workloads/scan_len_email_zipfian";
 static const std::string file_txn_wiki = "workloads/txn_wiki_zipfian";
+static const std::string file_txn_wiki_len = "workloads/scan_len_wiki_zipfian";
 static const std::string file_txn_url = "workloads/txn_url_zipfian";
+static const std::string file_txn_url_len = "workloads/scan_len_url_zipfian";
 static const std::string file_txn_ts  = "workloads/txn_timestamp_zipfian";
 
 // for pretty print
@@ -36,6 +38,7 @@ static const char* kGreen ="\033[0;32m";
 static const char* kNoColor ="\033[0;0m";
 
 static int runALM = 1;
+static std::string endStr = std::string(255, char(255));
 //-------------------------------------------------------------
 // Workload IDs
 //-------------------------------------------------------------
@@ -126,6 +129,18 @@ void loadKeysFromFile(const std::string& file_name, const uint64_t num_records,
     }
 }
 
+void loadLensInt(const std::string& file_name, const uint64_t num_records,
+              std::vector<int> &keys) {
+    std::ifstream infile(file_name);
+    int key;
+    uint64_t count = 0;
+    while (count < num_records && infile.good()) {
+        infile >> key;
+        keys.push_back(key);
+        count++;
+    }
+}
+
 std::string uint64ToString(uint64_t key) {
     uint64_t endian_swapped_key = __builtin_bswap64(key);
     return std::string(reinterpret_cast<const char*>(&endian_swapped_key), 8);
@@ -162,7 +177,7 @@ void loadWorkload(int wkld_id,
           std::vector<std::string>& insert_keys,
           std::vector<std::string>& insert_keys_sample,
           std::vector<std::string>& txn_keys,
-          std::vector<std::string>& upper_bound_keys) {
+          std::vector<int>& scan_key_lens) {
     std::vector<std::string> load_keys;
     if (wkld_id == kEmail)
         loadKeysFromFile(file_load_email, kNumEmailRecords, load_keys);
@@ -197,41 +212,52 @@ void loadWorkload(int wkld_id,
         insert_keys_sample.push_back(insert_keys[i]);
     }
 
-    if (wkld_id == kEmail)
+    if (wkld_id == kEmail) {
         loadKeysFromFile(file_txn_email, kNumTxns, txn_keys);
-    else if (wkld_id == kWiki)
+        loadLensInt(file_txn_email_len, kNumTxns, scan_key_lens);
+    } else if (wkld_id == kWiki) {
         loadKeysFromFile(file_txn_wiki, kNumTxns, txn_keys);
-    else if (wkld_id == kUrl)
+        loadLensInt(file_txn_wiki_len, kNumTxns, scan_key_lens);
+    } else if (wkld_id == kUrl) {
         loadKeysFromFile(file_txn_url, kNumTxns, txn_keys);
-    else if (wkld_id == kTs)
+        loadLensInt(file_txn_url_len, kNumTxns, scan_key_lens);
+    } else if (wkld_id == kTs)
         loadKeysInt(file_txn_ts, kNumTxns, txn_keys);
 
-    for (int i = 0; i < (int)txn_keys.size(); i++) {
-        upper_bound_keys.push_back(getUpperBoundKey(txn_keys[i]));
-    }
     std::cout << "insert_keys size = " << insert_keys.size() << std::endl;
     std::cout << "insert_keys_sample size = " << insert_keys_sample.size() << std::endl;
     std::cout << "txn_keys size = " << txn_keys.size() << std::endl;
-    std::cout << "upper_bound_keys size = " << upper_bound_keys.size() << std::endl;
+    std::cout << "scan_key_lens size = " << scan_key_lens.size() << std::endl;
 }
 
 void exec(const int expt_id, const int wkld_id, const bool is_point,
       const bool is_compressed,
-      const int encoder_type, const int64_t dict_size_limit,
+      const int encoder_type, const int64_t dict_size_id,
       const std::vector<std::string>& insert_keys,
       const std::vector<std::string>& insert_keys_sample,
       const std::vector<std::string>& txn_keys,
-      const std::vector<std::string>& upper_bound_keys) {
+      const std::vector<int>& scan_key_lens) {
     ope::Encoder* encoder = nullptr;
     uint8_t* buffer = new uint8_t[8192];
-    uint8_t* buffer_r = new uint8_t[8192];
     std::vector<std::pair<std::string, std::string> >enc_insert_keys;
+
+    int64_t input_dict_size = dict_size_list[dict_size_id];
+    if (encoder_type == 3) {
+        input_dict_size = three_gram_input_dict_size[wkld_id][dict_size_id];
+    } else if (encoder_type == 4) {
+        input_dict_size = four_gram_input_dict_size[wkld_id][dict_size_id];
+    }
+    int W = 0;
+    if (encoder_type == 5)
+        W = ALM_W[wkld_id][dict_size_id];
+    if (encoder_type == 6)
+        W = ALM_W_improved[wkld_id][dict_size_id];
 
     int64_t total_key_size = 0;
     double start_time = getNow();
     if (is_compressed) {
-        encoder = ope::EncoderFactory::createEncoder(encoder_type);
-        encoder->build(insert_keys_sample, dict_size_limit);
+        encoder = ope::EncoderFactory::createEncoder(encoder_type, W);
+        encoder->build(insert_keys_sample, input_dict_size);
     }
 
     for (int i = 0; i < (int)insert_keys.size(); i++) {
@@ -281,6 +307,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
 
     // execute transactions =======================================
     uint64_t sum = 0;
+    uint64_t TIDs[120];
     start_time = getNow();
     if (is_point) { // point query
         if (is_compressed) {
@@ -300,34 +327,32 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     } else { // range query
         if (is_compressed) {
             for (int i = 0; i < (int)txn_keys.size(); i++) {
-                int enc_len = 0, enc_len_r = 0;
-#ifdef NOT_USE_ENCODE_PAIR
+                int enc_len = 0;
                 enc_len = encoder->encode(txn_keys[i], buffer);
-                enc_len_r = encoder->encode(upper_bound_keys[i], buffer_r);
-#else
-                encoder->encodePair(txn_keys[i], upper_bound_keys[i], buffer, buffer_r, enc_len, enc_len_r);
-#endif
                 int enc_len_round = (enc_len + 7) >> 3;
-                int enc_len_r_round = (enc_len_r + 7) >> 3;
                 std::string left_key = std::string((const char*)buffer, enc_len_round);
-                std::string right_key = std::string((const char*)buffer_r, enc_len_r_round);
-
                 btree_type::const_iterator iter = bt->lower_bound(left_key);
-                while (iter != bt->end()
-                       && iter.key().compare(right_key) < 0) {
+                int cnt = 0;
+                while (iter != bt->end() &&  iter.key().compare(endStr) < 0
+                       && cnt < scan_key_lens[i]) {
+                    TIDs[cnt] = iter->second;
                     ++iter;
+                    ++cnt;
                 }
-                sum += (iter->second);
             }
+            std::cout << "Finish Uncompressed Range Query" << std::endl;
         } else {
             for (int i = 0; i < (int)txn_keys.size(); i++) {
                 btree_type::const_iterator iter = bt->lower_bound(txn_keys[i]);
-                while (iter != bt->end()
-                       && iter.key().compare(upper_bound_keys[i]) < 0) {
+                int cnt = 0;
+                while (iter != bt->end() && iter.key().compare(endStr) < 0
+                       && cnt < scan_key_lens[i]) {
+                    TIDs[cnt] = iter->second;
                     ++iter;
+                    ++cnt;
                 }
-                sum += (iter->second);
             }
+            std::cout << "Finish Uncompressed Range Query" << std::endl;
         }
     }
     end_time = getNow();
@@ -338,6 +363,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     std::cout << kGreen << "Lookup Throughput = " << kNoColor << tput << "\n";
     double lookup_lat = (exec_time * 1000000) / txn_keys.size(); // us
     double insert_lat = (insert_time * 1000000) / enc_insert_keys.size();
+    std::cout << TIDs[0] << std::endl;
     std::cout << kGreen << "Insert Latency = " << kNoColor << insert_lat << "\n";
     std::cout << kGreen << "Lookup Latency = " << kNoColor << lookup_lat << "\n";
 
@@ -387,20 +413,19 @@ void exec_group(const int expt_id, const bool is_point,
         const std::vector<std::string>& insert_emails,
         const std::vector<std::string>& insert_emails_sample,
         const std::vector<std::string>& txn_emails,
-        const std::vector<std::string>& upper_bound_emails,
+        const std::vector<int>& upper_bound_emails,
         const std::vector<std::string>& insert_wikis,
         const std::vector<std::string>& insert_wikis_sample,
         const std::vector<std::string>& txn_wikis,
-        const std::vector<std::string>& upper_bound_wikis,
+        const std::vector<int>& upper_bound_wikis,
         const std::vector<std::string>& insert_urls,
         const std::vector<std::string>& insert_urls_sample,
         const std::vector<std::string>& txn_urls,
-        const std::vector<std::string>& upper_bound_urls,
+        const std::vector<int>& upper_bound_urls,
         const std::vector<std::string>& insert_tss,
         const std::vector<std::string>& insert_tss_sample,
         const std::vector<std::string>& txn_tss,
-        const std::vector<std::string>& upper_bound_tss) {
-    int dict_size[2] = {10000, 65536};
+        const std::vector<int>& upper_bound_tss) {
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
     exec(expt_id, kEmail, is_point, false, 0, 0,
      insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
@@ -424,115 +449,108 @@ void exec_group(const int expt_id, const bool is_point,
 #endif
     //=================================================
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-    exec(expt_id, kEmail, is_point, true, 1, 1000,
+    exec(expt_id, kEmail, is_point, true, 1, 0,
      insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
     expt_num++;
 
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-    exec(expt_id, kWiki, is_point, true, 1, 1000,
+    exec(expt_id, kWiki, is_point, true, 1, 0,
      insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
     expt_num++;
 
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-    exec(expt_id, kUrl, is_point, true, 1, 1000,
+    exec(expt_id, kUrl, is_point, true, 1, 0,
      insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
     expt_num++;
 
 #ifdef RUN_TIMESTAMP
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-    exec(expt_id, kTs, is_point, true, 1, 1000,
+    exec(expt_id, kTs, is_point, true, 1, 0,
      insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
     expt_num++;
 #endif
     //=================================================
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-    exec(expt_id, kEmail, is_point, true, 2, 65536,
+    exec(expt_id, kEmail, is_point, true, 2, 6,
      insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
     expt_num++;
 
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-    exec(expt_id, kWiki, is_point, true, 2, 65536,
+    exec(expt_id, kWiki, is_point, true, 2, 6,
      insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
     expt_num++;
 
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-    exec(expt_id, kUrl, is_point, true, 2, 65536,
+    exec(expt_id, kUrl, is_point, true, 2, 6,
      insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
     expt_num++;
+
 #ifdef RUN_TIMESTAMP
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-    exec(expt_id, kTs, is_point, true, 2, 65536,
+    exec(expt_id, kTs, is_point, true, 2, 6,
      insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
     expt_num++;
 #endif
-    for (int j = 0; j < 2; j++) {
-        std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-        exec(expt_id, kEmail, is_point, true, 3, dict_size[j],
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kEmail, is_point, true, 3, 6,
              insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
-        expt_num++;
+    expt_num++;
 
-        std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-        exec(expt_id, kWiki, is_point, true, 3, dict_size[j],
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kWiki, is_point, true, 3, 6,
              insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
-        expt_num++;
+    expt_num++;
 
-        std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-        exec(expt_id, kUrl, is_point, true, 3, dict_size[j],
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kUrl, is_point, true, 3, 6,
              insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
-        expt_num++;
+    expt_num++;
 #ifdef RUN_TIMESTAMP
-        std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-        exec(expt_id, kTs, is_point, true, 3, dict_size[j],
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kTs, is_point, true, 3, 6,
          insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-        expt_num++;
+    expt_num++;
 #endif
-    }
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kEmail, is_point, true, 4, 6,
+        insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
+    expt_num++;
 
-    for (int j = 0; j < 2; j++) {
-        std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-        exec(expt_id, kEmail, is_point, true, 4, dict_size[j],
-             insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
-        expt_num++;
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kWiki, is_point, true, 4, 6,
+        insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
+    expt_num++;
 
-        std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-        exec(expt_id, kWiki, is_point, true, 4, dict_size[j],
-             insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
-        expt_num++;
-
-        std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-        exec(expt_id, kUrl, is_point, true, 4, dict_size[j],
-             insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
-        expt_num++;
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kUrl, is_point, true, 4, 6,
+        insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
+    expt_num++;
 #ifdef RUN_TIMESTAMP
-        std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-        exec(expt_id, kTs, is_point, true, 4, dict_size[j],
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kTs, is_point, true, 4, 6,
          insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-        expt_num++;
+    expt_num++;
 #endif
-    }
 
+    int dict_size_5[2] = {2, 6};
     if (runALM == 1) {
-        int dict_size_5[2] = {8192, 65536};
-        for (int j = 0; j < 2; j++) {
-            std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-            exec(expt_id, kEmail, is_point, true, 5, dict_size_5[j],
-                 insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
-            expt_num++;
+        for (int encoder_type = 6; encoder_type < 7; encoder_type++) {
+           for (int j = 0; j < 2; j++) {
+               std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+               exec(expt_id, kEmail, is_point, true, encoder_type, dict_size_5[j],
+                    insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
+               expt_num++;
 
-            std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-            exec(expt_id, kWiki, is_point, true, 5, dict_size_5[j],
-                 insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
-            expt_num++;
+               std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+               exec(expt_id, kWiki, is_point, true, encoder_type, dict_size_5[j],
+                    insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
+               expt_num++;
 
-            std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-            exec(expt_id, kUrl, is_point, true, 5, dict_size_5[j],
-                 insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
-            expt_num++;
-
-//            std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-//            exec(expt_id, kTs, is_point, true, 5, dict_size_5[j],
-//                insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-//             expt_num++;
+               std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+               exec(expt_id, kUrl, is_point, true, encoder_type, dict_size_5[j],
+                    insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
+               expt_num++;
+           }
         }
     }
 }
@@ -544,16 +562,20 @@ int main(int argc, char *argv[]) {
     //-------------------------------------------------------------
     // Init Workloads
     //-------------------------------------------------------------
-    std::vector<std::string> insert_emails, insert_emails_sample, txn_emails, upper_bound_emails;
+    std::vector<std::string> insert_emails, insert_emails_sample, txn_emails;
+    std::vector<int> upper_bound_emails;
     loadWorkload(kEmail, insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
 
-    std::vector<std::string> insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis;
+    std::vector<std::string> insert_wikis, insert_wikis_sample, txn_wikis;
+    std::vector<int> upper_bound_wikis;
     loadWorkload(kWiki, insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
 
-    std::vector<std::string> insert_urls, insert_urls_sample, txn_urls, upper_bound_urls;
+    std::vector<std::string> insert_urls, insert_urls_sample, txn_urls;
+    std::vector<int> upper_bound_urls;
     loadWorkload(kUrl, insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 
-    std::vector<std::string> insert_tss, insert_tss_sample, txn_tss, upper_bound_tss;
+    std::vector<std::string> insert_tss, insert_tss_sample, txn_tss;
+    std::vector<int> upper_bound_tss;
 #ifdef RUN_TIMESTAMP
     loadWorkload(kTs, insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
 #endif
@@ -584,7 +606,7 @@ int main(int argc, char *argv[]) {
 #endif
         bool is_point = true;
         int expt_num = 1;
-        int total_num_expt = 27;
+        int total_num_expt = 24;
         exec_group(expt_id, is_point, expt_num, total_num_expt,
                insert_emails, insert_emails_sample, txn_emails, upper_bound_emails,
                insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis,
@@ -649,7 +671,7 @@ int main(int argc, char *argv[]) {
 #endif
         bool is_point = false;
         int expt_num = 1;
-        int total_num_expt = 27;
+        int total_num_expt = 24;
         exec_group(expt_id, is_point, expt_num, total_num_expt,
                insert_emails, insert_emails_sample, txn_emails, upper_bound_emails,
                insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis,

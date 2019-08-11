@@ -6,10 +6,10 @@
 #include <fstream>
 #include <iostream>
 #include <set>
-
 #include "encoder_factory.hpp"
+#include "common.hpp"
 
-//#define RUN_TIMESTAMP
+#define RUN_BATCH
 
 namespace microbench {
 
@@ -140,6 +140,14 @@ static const std::string file_bt_email_dc
 = output_dir + ht_vs_dc_subdir + "bt_email_dc.csv";
 std::ofstream output_bt_email_dc;
 
+//-------------------------------------------------------------
+// Batch Encode vs Non-batch
+//-------------------------------------------------------------
+static const std::string batch_subdir = "batch/";
+static const std::string file_batch_lat
+= output_dir + batch_subdir + "batch_lat.csv";
+std::ofstream output_batch_lat;
+
 double getNow() {
     struct timeval tv;
     gettimeofday(&tv, 0);
@@ -207,20 +215,39 @@ void printStr(std::string str) {
 }
 
 void exec(const int expt_id, const int wkld_id,
-      const int encoder_type, const int64_t dict_size_limit,
+      const int encoder_type, const int64_t dict_size_id,
       const double sample_percent,
-      const std::vector<std::string>& keys_shuffle,
-      const int64_t total_len) {
+      std::vector<std::string>& keys_shuffle,
+      const int64_t total_len, int encode_method = 0, int batch_size = 3) {
+ #ifdef RUN_BATCH
+    std::sort(keys_shuffle.begin(), keys_shuffle.end());
+#endif
     std::vector<std::string> sample_keys;
     int step_size = 100 / sample_percent;
-    std::cout << "Step size:" << step_size << ", total size:" << keys_shuffle.size() << std::endl;
     for (int i = 0; i < (int)keys_shuffle.size(); i += step_size) {
         sample_keys.push_back(keys_shuffle[i]);
     }
 
-    ope::Encoder* encoder = ope::EncoderFactory::createEncoder(encoder_type);
+    int64_t input_dict_size = 0;
+    if (encoder_type == 3) {
+        input_dict_size = three_gram_input_dict_size[wkld_id][dict_size_id];
+    } else if (encoder_type == 4) {
+        input_dict_size = four_gram_input_dict_size[wkld_id][dict_size_id];
+    } else {
+        input_dict_size = dict_size_list[dict_size_id];
+    }
+
+    int  W = 0;
+    if (encoder_type == 5) {
+        W = ALM_W[wkld_id][dict_size_id];
+    }
+    if (encoder_type == 6) {
+        W = ALM_W_improved[wkld_id][dict_size_id];
+    }
+
+    ope::Encoder* encoder = ope::EncoderFactory::createEncoder(encoder_type, W);
     double time_start = getNow();
-    encoder->build(sample_keys, dict_size_limit);
+    encoder->build(sample_keys, input_dict_size);
     double time_end = getNow();
     double bt = time_end - time_start;
 
@@ -228,13 +255,32 @@ void exec(const int expt_id, const int wkld_id,
     int64_t mem = encoder->memoryUse();
 
     uint8_t* buffer = new uint8_t[kLongestCodeLen];
+    uint8_t* lb = new uint8_t[kLongestCodeLen];
+    uint8_t* rb = new uint8_t[kLongestCodeLen];
     uint64_t total_enc_len = 0;
+
     time_start = getNow();
 
-    for (int i = 0; i < (int)keys_shuffle.size(); i++) {
-        total_enc_len += encoder->encode(keys_shuffle[i], buffer);
+    std::vector<std::string> enc_keys;
+    if (encode_method == 0) {
+        for (int i = 0; i < (int)keys_shuffle.size(); i++) {
+            total_enc_len += encoder->encode(keys_shuffle[i], buffer);
+        }
+    } else if (encode_method == 1) {
+        int l_len;
+        int r_len;
+        for (int i = 0; i < (int)keys_shuffle.size() - 1; i+=2) {
+            encoder->encodePair(keys_shuffle[i], keys_shuffle[i+1], lb, rb, l_len, r_len);
+            total_enc_len += l_len + r_len;
+        }
+    } else if (encode_method == 2) {
+        for (int i = 0; i <= (int)keys_shuffle.size() - batch_size; i += batch_size) {
+            total_enc_len += encoder->encodeBatch(keys_shuffle, i, batch_size, enc_keys);
+        }
     }
     delete[] buffer;
+    delete lb;
+    delete rb;
     delete encoder;
     time_end = getNow();
     double time_diff = time_end - time_start;
@@ -242,7 +288,7 @@ void exec(const int expt_id, const int wkld_id,
     double lat = time_diff * 1000000000 / total_len; // in ns
     double cpr = (total_len * 8.0) / total_enc_len;
 
-    if (expt_id < 0 || expt_id > 6)
+    if (expt_id < 0 || expt_id > 7)
         std::cout << "ERROR: INVALID EXPT ID!" << std::endl;
 
     if (wkld_id < 0 || wkld_id > 3)
@@ -295,6 +341,8 @@ void exec(const int expt_id, const int wkld_id,
             output_lat_email_dc << lat << "\n";
             output_bt_email_dc << bt << "\n";
         }
+    } else if (expt_id == 7) {
+        output_batch_lat << lat << "\n";
     }
 
     std::cout << "Throughput = " << tput << " Mops/s" << std::endl;
@@ -345,7 +393,7 @@ int main(int argc, char *argv[]) {
         output_cpr_url_sample_size_sweep.open(file_cpr_url_sample_size_sweep);
         output_bt_url_sample_size_sweep.open(file_bt_url_sample_size_sweep);
 
-        int dict_size_limit = 65536;
+        int ds = 6; // 65536
         int percent_list[3] = {100, 10, 1};
         int expt_num = 0;
         int total_num_expts = 36;
@@ -353,11 +401,11 @@ int main(int argc, char *argv[]) {
             int percent = percent_list[p];
             for (int et = 1; et < 5; et++) {
             std::cout << "Sample Size Sweep " << (expt_num++) << "/" << total_num_expts << std::endl;
-            exec(expt_id, kEmail, et, dict_size_limit, percent, emails_shuffle, total_len_email);
+            exec(expt_id, kEmail, et, ds, percent, emails_shuffle, total_len_email);
             std::cout << "Sample Size Sweep " << (expt_num++) << "/" << total_num_expts << std::endl;
-            exec(expt_id, kWiki, et, dict_size_limit, percent, wikis_shuffle, total_len_wiki);
+            exec(expt_id, kWiki, et, ds, percent, wikis_shuffle, total_len_wiki);
             std::cout << "Sample Size Sweep " << (expt_num++) << "/" << total_num_expts << std::endl;
-            exec(expt_id, kUrl, et, dict_size_limit, percent, urls_shuffle, total_len_url);
+            exec(expt_id, kUrl, et, ds, percent, urls_shuffle, total_len_url);
             }
         }
 
@@ -398,87 +446,84 @@ int main(int argc, char *argv[]) {
 #endif
 
         int percent = 1;
-        double url_percent = 0.1;
-        int dict_size_list[9] = {1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144};
-        //int dict_size_list[5] = {16384, 32768, 65536, 131072, 262144};
         int expt_num = 1;
         int total_num_expts = 0;
 /*
-        // Single-Char
-        std::cout << "CPR and Latency (" << (expt_num++) << "/" << total_num_expts << ")" << std::endl;
-        exec(expt_id, kEmail, 1, 1000, percent, emails_shuffle, total_len_email);
-        std::cout << "CPR and Latency (" << (expt_num++) << "/" << total_num_expts << ")" << std::endl;
-        exec(expt_id, kWiki, 1, 1000, percent, wikis_shuffle, total_len_wiki);
-
-        std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-        exec(expt_id, kUrl, 1, 1000, url_percent, urls_shuffle, total_len_url);
-        expt_num++;
-#ifdef RUN_TIMESTAMP
-        std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-        exec(expt_id, kTs, 1, 1000, percent, tss_shuffle, total_len_ts);
-        expt_num++;
-#endif
-
-        // Double-Char
-        std::cout << "CPR and Latency (" << (expt_num++) << "/" << total_num_expts << ")" << std::endl;
-        exec(expt_id, kEmail, 2, 65536, percent, emails_shuffle, total_len_email);
-        std::cout << "CPR and Latency (" << (expt_num++) << "/" << total_num_expts << ")" << std::endl;
-        exec(expt_id, kWiki, 2, 65536, percent, wikis_shuffle, total_len_wiki);
-
-        std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-        exec(expt_id, kUrl, 2, 65536, url_percent, urls_shuffle, total_len_url);
-        expt_num++;
-#ifdef RUN_TIMESTAMP
-        std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-        exec(expt_id, kTs, 2, 65536, percent, tss_shuffle, total_len_ts);
-        expt_num++;
-#endif
-*/
         int stop_method = 0;
         if (runALM == 1) {
-            stop_method = 6;
-            total_num_expts = 84;
+            stop_method = 7;
+            total_num_expts = 108;
         } else {
             stop_method = 5;
             total_num_expts = 57;
         }
 
+        // Single-Char
+        std::cout << "CPR and Latency (" << (expt_num++) << "/" << total_num_expts << ")" << std::endl;
+        exec(expt_id, kEmail, 1, 0, percent, emails_shuffle, total_len_email);
+        std::cout << "CPR and Latency (" << (expt_num++) << "/" << total_num_expts << ")" << std::endl;
+        exec(expt_id, kWiki, 1, 0, percent, wikis_shuffle, total_len_wiki);
+
+        std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
+        exec(expt_id, kUrl, 1, 0, percent, urls_shuffle, total_len_url);
+        expt_num++;
+#ifdef RUN_TIMESTAMP
+        std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
+        exec(expt_id, kTs, 1, 0, percent, tss_shuffle, total_len_ts);
+        expt_num++;
+#endif
+
+        // Double-Char
+        std::cout << "CPR and Latency (" << (expt_num++) << "/" << total_num_expts << ")" << std::endl;
+        exec(expt_id, kEmail, 2, 6, percent, emails_shuffle, total_len_email);
+        std::cout << "CPR and Latency (" << (expt_num++) << "/" << total_num_expts << ")" << std::endl;
+        exec(expt_id, kWiki, 2, 6, percent, wikis_shuffle, total_len_wiki);
+
+        std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
+        exec(expt_id, kUrl, 2, 6, percent, urls_shuffle, total_len_url);
+        expt_num++;
+#ifdef RUN_TIMESTAMP
+        std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
+        exec(expt_id, kTs, 2, 6, percent, tss_shuffle, total_len_ts);
+        expt_num++;
+#endif
+*/
+
+
         for (int ds = 0; ds < 7; ds++) {
-            int dict_size_limit = dict_size_list[ds];
             for (int et = 3; et < stop_method; et++) {
                 std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-                exec(expt_id, kEmail, et, dict_size_limit, percent, emails_shuffle, total_len_email);
+                exec(expt_id, kEmail, et, ds, percent, emails_shuffle, total_len_email);
                 expt_num++;
                 std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-                exec(expt_id, kWiki, et, dict_size_limit, percent, wikis_shuffle, total_len_wiki);
+                exec(expt_id, kWiki, et, ds, percent, wikis_shuffle, total_len_wiki);
                 expt_num++;
                 std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-                exec(expt_id, kUrl, et, dict_size_limit, url_percent, urls_shuffle, total_len_url);
+                exec(expt_id, kUrl, et, ds, percent, urls_shuffle, total_len_url);
                 expt_num++;
 #ifdef RUN_TIMESTAMP
                 std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-                exec(expt_id, kTs, et, dict_size_limit, percent, tss_shuffle, total_len_ts);
+                exec(expt_id, kTs, et, ds, percent, tss_shuffle, total_len_ts);
                 expt_num++;
 #endif
             }
         }
 
         for (int ds = 7; ds < 9; ds++) {
-            int dict_size_limit = dict_size_list[ds];
             for  (int et = 4; et < stop_method;et++) {
                 std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-                exec(expt_id, kEmail, et, dict_size_limit, percent, emails_shuffle, total_len_email);
+                exec(expt_id, kEmail, et, ds, percent, emails_shuffle, total_len_email);
                 expt_num++;
                 std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-                exec(expt_id, kWiki, et, dict_size_limit, percent, wikis_shuffle, total_len_wiki);
+                exec(expt_id, kWiki, et, ds, percent, wikis_shuffle, total_len_wiki);
                 expt_num++;
                 std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-                exec(expt_id, kUrl, et, dict_size_limit, url_percent, urls_shuffle, total_len_url);
+                exec(expt_id, kUrl, et, ds, percent, urls_shuffle, total_len_url);
                 expt_num++;
 #ifdef RUN_TIMESTAMP
-            std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-            exec(expt_id, kTs, et, dict_size_limit, percent, tss_shuffle, total_len_ts);
-            expt_num++;
+                std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
+                exec(expt_id, kTs, et, ds, percent, tss_shuffle, total_len_ts);
+                expt_num++;
 #endif
             }
         }
@@ -531,21 +576,20 @@ int main(int argc, char *argv[]) {
         std::cout << "Trie vs Array; Expt ID = 2" << std::endl;
         std::cout << "------------------------------------------------" << std::endl;
 
-        int percent = 10;
-        int dict_size_list[9] = {1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144};
-        int expt_num = 1;
-        int total_num_expts = 16;
-        for (int ds = 0; ds < 7; ds++) {
-            int dict_size_limit = dict_size_list[ds];
+        int percent = 1;
+        //int expt_num = 1;
+        //int total_num_expts = 16;
+        /*for (int ds = 0; ds < 7; ds++) {
             std::cout << "Trie vs Array " << (expt_num++) << "/" << total_num_expts << std::endl;
-            exec(expt_id, kEmail, 3, dict_size_limit, percent, emails_shuffle, total_len_email);
         }
 
         for (int ds = 0; ds < 9; ds++) {
-            int dict_size_limit = dict_size_list[ds];
+            //int dict_size_limit = dict_size_list[ds];
             std::cout << "Trie vs Array " << (expt_num++) << "/" << total_num_expts << std::endl;
-            exec(expt_id, kEmail, 4, dict_size_limit, percent, emails_shuffle, total_len_email);
-        }
+            exec(expt_id, kEmail, 4, ds, percent, emails_shuffle, total_len_email);
+        }*/
+        int ds = 4;
+        exec(expt_id, kEmail, 4, ds, percent, emails_shuffle, total_len_email);
     }
     else if (expt_id == 3) {
         //-------------------------------------------------------------
@@ -556,14 +600,12 @@ int main(int argc, char *argv[]) {
         std::cout << "------------------------------------------------" << std::endl;
 
         int percent = 10;
-        int dict_size_list[9] = {1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144};
         int encoder_type = 4;
         int expt_num = 0;
         int total_num_expts = 9;
         for (int ds = 0; ds < 9; ds++) {
-            int dict_size_limit = dict_size_list[ds];
             std::cout << "Hu-Tucker Build Time " << (expt_num++) << "/" << total_num_expts << std::endl;
-            exec(expt_id, kEmail, encoder_type, dict_size_limit, percent, emails_shuffle, total_len_email);
+            exec(expt_id, kEmail, encoder_type, ds, percent, emails_shuffle, total_len_email);
         }
     }
     else if (expt_id == 4) {
@@ -580,15 +622,14 @@ int main(int argc, char *argv[]) {
         output_bt_email_ht.open(file_bt_email_ht);
 
         int percent = 10;
-        int dict_size_list[9] = {1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144};
         int encoder_type = 4;
         int expt_num = 0;
         int total_num_expts = 9;
         for (int ds = 0; ds < 9; ds++) {
-            int dict_size_limit = dict_size_list[ds];
+            //int dict_size_limit = dict_size_list[ds];
             std::cout << "Hu-Tucker vs. Fixed Length Dict Codes (Part 1: Hu-Tucker) "
                   << (expt_num++) << "/" << total_num_expts << std::endl;
-            exec(expt_id, kEmail, encoder_type, dict_size_limit, percent, emails_shuffle, total_len_email);
+            exec(expt_id, kEmail, encoder_type, ds, percent, emails_shuffle, total_len_email);
         }
 
         output_x_email_ht.close();
@@ -610,15 +651,14 @@ int main(int argc, char *argv[]) {
         output_bt_email_dc.open(file_bt_email_dc);
 
         int percent = 10;
-        int dict_size_list[9] = {1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144};
         int encoder_type = 4;
         int expt_num = 0;
         int total_num_expts = 9;
         for (int ds = 0; ds < 9; ds++) {
-            int dict_size_limit = dict_size_list[ds];
+            //int dict_size_limit = dict_size_list[ds];
             std::cout << "Hu-Tucker vs. Fixed Length Dict Codes (Part 2: Dict Codes) "
                   << (expt_num++) << "/" << total_num_expts << std::endl;
-            exec(expt_id, kEmail, encoder_type, dict_size_limit, percent, emails_shuffle, total_len_email);
+            exec(expt_id, kEmail, encoder_type, ds, percent, emails_shuffle, total_len_email);
         }
 
         output_x_email_dc.close();
@@ -634,15 +674,41 @@ int main(int argc, char *argv[]) {
         std::cout << "Build Time Breakdown; Expt ID = 6" << std::endl;
         std::cout << "------------------------------------------------" << std::endl;
 
-        int percent_list[3] = {100, 10, 1};
-        int dict_size_limit = 65536;
-        int encoder_type = 4;
+        int percent = 1;
+        int ds = 6;
         int expt_num = 0;
-        int total_num_expts = 3;
-        for (int p = 0; p < 3; p++) {
+        int total_num_expts = 6;
+        for (int encoder_type = 5; encoder_type < 7; encoder_type++) {
             std::cout << "Build Time Breakdown " << (expt_num++) << "/" << total_num_expts << std::endl;
-            exec(expt_id, kEmail, encoder_type, dict_size_limit, percent_list[p], emails_shuffle, total_len_email);
+            exec(expt_id, kEmail, encoder_type, ds, percent, emails_shuffle, total_len_email);
         }
+    }
+    else if (expt_id == 7) {
+        //-------------------------------------------------------------
+        // Batch Encoder vs Non-batch
+        //-------------------------------------------------------------
+        std::cout << "------------------------------------------------" << std::endl;
+        std::cout << "Batch Encoder vs Non-batch; Expt ID = 7" << std::endl;
+        std::cout << "------------------------------------------------" <<std::endl;
+        output_batch_lat.open(file_batch_lat);
+        int ds = 6;
+        int percent = 1;
+        //int repeat_time = 2;
+        int batch_sizes[10] = { 1, 2, 4, 8, 16, 32, 64};
+/*        for (int encoder_type = 1; encoder_type < 7; encoder_type++) {
+            exec(expt_id, kEmail, encoder_type, ds, percent, emails_shuffle, total_len_email, 2, 1);
+            exec(expt_id, kEmail, encoder_type, ds, percent, emails_shuffle, total_len_email, 2, 2);
+        }
+*/
+        for (int bs = 0; bs < 7; bs++) {
+            int batch_size = batch_sizes[bs];
+            for (int encoder_type = 1; encoder_type < 5; encoder_type++) {
+                std::cout <<"-------Batch size--------"<< batch_size << "-----Encoder Type----" << encoder_type << std::endl;
+                exec(expt_id, kEmail, encoder_type, ds, percent, emails_shuffle, total_len_email, 2, batch_size);
+            }
+        }
+
+        output_batch_lat.close();
     }
     return 0;
 }

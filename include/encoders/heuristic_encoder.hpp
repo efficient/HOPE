@@ -9,10 +9,13 @@
 #include "code_generator_factory.hpp"
 #include "symbol_selector_factory.hpp"
 
+
 namespace ope {
     class HeuristicEncoder : public Encoder {
     public:
-        HeuristicEncoder() {};
+        HeuristicEncoder(int _W = 10000) {
+            W = _W;
+        };
 
         ~HeuristicEncoder() {
             delete dict_;
@@ -27,7 +30,9 @@ namespace ope {
                         uint8_t *l_buffer, uint8_t *r_buffer,
                         int &l_enc_len, int &r_enc_len) const;
 
-	int decode (const std::string& enc_key, uint8_t* buffer) const;
+        int64_t encodeBatch(const std::vector<std::string>& org_keys, int start_id, int batch_size, std::vector<std::string>& enc_keys);
+
+	    int decode (const std::string& enc_key, uint8_t* buffer) const;
 
         int numEntries() const;
 
@@ -36,6 +41,7 @@ namespace ope {
         void checkOrder(std::vector<SymbolCode> &symbol_code_list);
 
     private:
+        int W;
         Dictionary *dict_;
         std::vector<SymbolCode> symbol_code_list;
         std::string changeToBinary(int64_t num, int8_t len);
@@ -76,23 +82,41 @@ namespace ope {
 
     bool HeuristicEncoder::build(const std::vector<std::string> &key_list,
                                  const int64_t dict_size_limit) {
-//        double curtime = getNow();
+#ifdef PRINT_BUILD_TIME_BREAKDOWN
+        std::cout << "---------------------Heuristic Encoder-------------------------" << std::endl;
+        double curtime = getNow();
+        double new_time = 0;
+        double symbol_select_time = 0;
+        double code_assign_time = 0;
+        double build_dict_time = 0;
+#endif
         std::vector<SymbolFreq> symbol_freq_list;
         SymbolSelector *symbol_selector = SymbolSelectorFactory::createSymbolSelector(5);
-        symbol_selector->selectSymbols(key_list, dict_size_limit, &symbol_freq_list);
-//        std::cout << "Finish getting symbol frequency, use:" << getNow() - curtime << std::endl;
-//        curtime = getNow();
-        delete symbol_selector;
-
-        CodeGenerator *code_generator = CodeGeneratorFactory::createCodeGenerator(1);
+        symbol_selector->selectSymbols(key_list, dict_size_limit, &symbol_freq_list, W);
+#ifdef PRINT_BUILD_TIME_BREAKDOWN
+        new_time = getNow();
+        symbol_select_time = new_time - curtime;
+        curtime = new_time;
+#endif
+//        CodeGenerator *code_generator = CodeGeneratorFactory::createCodeGenerator(1);
+        CodeGenerator *code_generator = CodeGeneratorFactory::createCodeGenerator(0);
         code_generator->genCodes(symbol_freq_list, &symbol_code_list);
-//        std::cout << "Finish getting code, use:" << getNow() - curtime << std::endl;
-//        curtime = getNow();
-        delete code_generator;
-
+#ifdef PRINT_BUILD_TIME_BREAKDOWN
+        new_time = getNow();
+        code_assign_time = new_time - curtime;
+        curtime = new_time;
+#endif
         dict_ = DictionaryFactory::createDictionary(5);
-        auto dic = dict_->build(symbol_code_list);
-//        std::cout << "Finish building dic, use:" << getNow() - curtime << std::endl;
+        bool dic = dict_->build(symbol_code_list);
+#ifdef PRINT_BUILD_TIME_BREAKDOWN
+        new_time = getNow();
+        build_dict_time = new_time - curtime;
+        std::cout << "Symbol Select time = " << symbol_select_time << std::endl;
+        std::cout << "Code Assign(Hu-Tucker) time = " << code_assign_time << std::endl;
+        std::cout << "Build Dictionary time = " << build_dict_time << std::endl;
+#endif
+        delete symbol_selector;
+        delete code_generator;
         return dic;
     }
 
@@ -135,8 +159,12 @@ namespace ope {
         return;
     }
 
+    int64_t HeuristicEncoder::encodeBatch(const std::vector<std::string>& org_keys, int start_id, int batch_size, std::vector<std::string>& enc_keys) {
+        return 0;
+    }
+
     int HeuristicEncoder::decode(const std::string& enc_key, uint8_t* buffer) const {
-	return 0;
+	    return 0;
     }
 
     int HeuristicEncoder::numEntries() const {

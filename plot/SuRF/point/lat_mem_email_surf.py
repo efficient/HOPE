@@ -1,4 +1,7 @@
 import sys
+import os
+sys.path.append(os.path.abspath('./plot/'))
+from option import *
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plot
@@ -8,11 +11,11 @@ import numpy as np
 
 import csv
 
-NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 8192", "3-Grams, 65536", "4-Grams, 8192", "4-Grams, 65536",  "ALM, 10000", "ALM, 65536"]
-LABELS = ["Uncompressed", "Single", "Double", "3-Grams", "4-Grams",  "ALM"]
+NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 65536", "4-Grams, 65536", "ALM-Improved, 8192", "ALM-Improved, 65536"]
+LABELS = ["Uncompressed", "Single", "Double", "3-Grams", "4-Grams", "ALM-Improved"]
 
-COLORS = ['#fef0d9', '#fdcc8a', '#fc8d59', '#e34a33', '#b30000','#350004']
-#COLORS = ['#fef0d9', '#fdd49e', '#fdbb84', '#fc8d59', '#e34a33', '#b30000']
+#COLORS = ['#fef0d9', '#fdcc8a', '#fc8d59', '#e34a33', '#b30000','#350004']
+COLORS = ['#ffffff', '#fff7ec', '#fee8c8', '#fc8d59', '#d7301f', '#7f0000', '#4c0000']
 
 BACKCOLORS = ['#fff7fb', '#ece7f2', '#d0d1e6', '#a6bddb', '#74a9cf', '#3690c0', '#0570b0', '#045a8d', '#023858']
 
@@ -20,8 +23,6 @@ SIZE = 100
 
 X_LABEL = "Latency (us)"
 Y_LABEL = "Memory(MB)"
-X_LABEL_FONT_SIZE = 20
-Y_LABEL_FONT_SIZE = 20
 
 X_TICK_FONT_SIZE = 18
 Y_TICK_FONT_SIZE = 18
@@ -32,11 +33,9 @@ Y_LIMIT = 60
 LEGEND_FONT_SIZE = 16
 LEGEND_POS = 'upper left'
 
-GRAPH_HEIGHT = 5 #inches
-GRAPH_WIDTH = 8 #inches
 
-CSV_X_FILE_PATH = "results/SuRF/point/lat_email_surf.csv"
-CSV_Y_FILE_PATH = "results/SuRF/point/mem_email_surf.csv"
+CSV_X_FILE_PATH = "results/SuRF/point/final_lat_email_surf.csv"
+CSV_Y_FILE_PATH = "results/SuRF/point/final_mem_email_surf.csv"
 GRAPH_OUTPUT_PATH = "figures/SuRF/point/lat_mem_email_surf_point.pdf"
 
 f_in_x = open(CSV_X_FILE_PATH)
@@ -93,15 +92,13 @@ ax.fill_between(x_list, 0, y_lists[0], facecolor=BACKCOLORS[0], edgecolor=BACKCO
 for i in range(0, len(y_lists)-1) :
     ax.fill_between(x_list, y_lists[i], y_lists[i+1], facecolor=BACKCOLORS[i+1], edgecolor=BACKCOLORS[i+1])
 
-ax.scatter(data_x[0], data_y[0], s=SIZE, c=COLORS[0], marker='o', label=NAMES[0])
-ax.scatter(data_x[1], data_y[1], s=SIZE, c=COLORS[1], marker='o', label=NAMES[1])
-ax.scatter(data_x[2], data_y[2], s=SIZE, c=COLORS[2], marker='o', label=NAMES[2])
-ax.scatter(data_x[3], data_y[3], s=SIZE, c=COLORS[3], marker='o', label=NAMES[3])
-ax.scatter(data_x[4], data_y[4], s=SIZE, c=COLORS[3], marker='s', label=NAMES[4])
-ax.scatter(data_x[5], data_y[5], s=SIZE, c=COLORS[4], marker='o', label=NAMES[5])
-ax.scatter(data_x[6], data_y[6], s=SIZE, c=COLORS[4], marker='s', label=NAMES[6])
-ax.scatter(data_x[7], data_y[7], s=SIZE, c=COLORS[5], marker='o', label=NAMES[7])
-ax.scatter(data_x[8], data_y[8], s=SIZE, c=COLORS[5], marker='s', label=NAMES[8])
+ax.scatter(data_x[0], data_y[0], s=SIZE, c=COLORS[0], marker='o', linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[0], hatch='///////')
+ax.scatter(data_x[1], data_y[1], s=SIZE, c=COLORS[1], marker='o', linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[1])
+ax.scatter(data_x[2], data_y[2], s=SIZE, c=COLORS[2], marker='o', linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[2])
+ax.scatter(data_x[3], data_y[3], s=SIZE, c=COLORS[3], marker='o', linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[3])
+ax.scatter(data_x[4], data_y[4], s=SIZE, c=COLORS[4], marker='o', linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[4])
+ax.scatter(data_x[5], data_y[5], s=SIZE, c=COLORS[5], marker='o', linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[5])
+ax.scatter(data_x[6], data_y[6], s=SIZE, c=COLORS[5], marker='s', linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[5])
 
 
 ax.set_xlabel(X_LABEL, fontsize=X_LABEL_FONT_SIZE)
@@ -120,13 +117,13 @@ ax.tick_params(axis='y', labelsize=Y_TICK_FONT_SIZE)
 
 #ax.grid()
 
-#ax.annotate(LABELS[0], (data_x[0], data_y[0] * 1.1), ha='center', va='center', size=12)
-#ax.annotate(LABELS[1], (data_x[1], data_y[1] * 0.8), ha='center', va='center', size=12)
-#ax.annotate(LABELS[2], (data_x[2] * 0.9, data_y[2] * 0.88), ha='center', va='center', size=12)
-#ax.annotate(LABELS[3], ((data_x[3] + data_x[4])/2, data_y[4] * 0.88), ha='center', va='center', size=12)
-#ax.annotate(LABELS[4], ((data_x[5] + data_x[6])/2, data_y[6] * 1.12), ha='center', va='center', size=12)
-#ax.annotate(LABELS[5], (data_x[7], data_y[7] * 0.90), ha='center', va='center', size=12)
-#ax.annotate(LABELS[5], (data_x[8], data_y[8] * 0.90), ha='center', va='center', size=12)
+ax.annotate(LABELS[0], (data_x[0], data_y[0] * 1.12), ha='center', va='center', size=12)
+ax.annotate(LABELS[1], (data_x[1] * 1.15, data_y[1]), ha='center', va='center', size=12)
+ax.annotate(LABELS[2], (data_x[2] * 0.8, data_y[2]), ha='center', va='center', size=12)
+ax.annotate(LABELS[3], (data_x[3], data_y[3] * 0.89), ha='center', va='center', size=12)
+ax.annotate(LABELS[4], (data_x[4], data_y[4] * 1.1), ha='center', va='center', size=12)
+ax.annotate(LABELS[5], (data_x[5], data_y[5] * 0.90), ha='center', va='center', size=12)
+ax.annotate(LABELS[5], (data_x[6], data_y[6] * 0.94), ha='center', va='center', size=12)
 
 #ax.legend(loc=LEGEND_POS, prop={'size':LEGEND_FONT_SIZE}, scatterpoints=1)
 

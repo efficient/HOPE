@@ -12,7 +12,7 @@ public:
 
     bool selectSymbols (const std::vector<std::string>& key_list,
                         const int64_t num_limit,
-                        std::vector<SymbolFreq>* symbol_freq_list);
+                        std::vector<SymbolFreq>* symbol_freq_list, int W);
 
 private:
     void countSymbolFreq (const std::vector<std::string>& key_list);
@@ -28,8 +28,10 @@ DoubleCharSS::DoubleCharSS() {
 
 bool DoubleCharSS::selectSymbols (const std::vector<std::string>& key_list,
                                   const int64_t num_limit,
-                                  std::vector<SymbolFreq>* symbol_freq_list) {
-    if (key_list.empty() || num_limit < 65536)
+                                  std::vector<SymbolFreq>* symbol_freq_list, int W) {
+    //if (key_list.empty() || num_limit < 65536)
+    //    return false;
+    if (key_list.empty())
         return false;
     countSymbolFreq(key_list);
     for (int i = 0; i < 65536; i++) {

@@ -24,7 +24,7 @@ public:
 
     bool selectSymbols (const std::vector<std::string>& key_list,
                         const int64_t num_limit,
-                        std::vector<SymbolFreq>* symbol_freq_list);
+                        std::vector<SymbolFreq>* symbol_freq_list, int W = 10000);
 
 private:
     void countSymbolFreq (const std::vector<std::string>& key_list);
@@ -50,7 +50,7 @@ private:
 
 bool NGramSS::selectSymbols (const std::vector<std::string>& key_list,
 			     const int64_t num_limit,
-			     std::vector<SymbolFreq>* symbol_freq_list) {
+			     std::vector<SymbolFreq>* symbol_freq_list, int W) {
     if (key_list.empty())
         return false;
 #ifdef USE_CUCKOO
@@ -58,7 +58,12 @@ bool NGramSS::selectSymbols (const std::vector<std::string>& key_list,
 #endif
     countSymbolFreq(key_list);
     std::vector<std::string> most_freq_symbols;
-    pickMostFreqSymbols((num_limit / 2), &most_freq_symbols);
+    int64_t adjust_num_limit = num_limit;
+    if (num_limit > (int64_t)freq_map_.size() * 2) {
+        adjust_num_limit = (int64_t)freq_map_.size() * 2 - 1;
+        std::cout << "3 Gram: Input dictionary Size is too big, change to " << adjust_num_limit<< std::endl;
+    }
+    pickMostFreqSymbols((adjust_num_limit / 2), &most_freq_symbols);
     fillInGap(most_freq_symbols);
     assert(interval_prefixes_.size() == interval_boundaries_.size());
     countIntervalFreq(key_list);
@@ -71,9 +76,10 @@ bool NGramSS::selectSymbols (const std::vector<std::string>& key_list,
 }
 
 void NGramSS::countSymbolFreq (const std::vector<std::string>& key_list) {
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
+/*#ifdef PRINT_BUILD_TIME_BREAKDOWN
     double time_start = getNow();
 #endif
+*/
 #ifdef USE_CUCKOO
     auto updatefn = [](int64_t &num) { ++num; };
 #else
@@ -82,20 +88,6 @@ void NGramSS::countSymbolFreq (const std::vector<std::string>& key_list) {
     std::map<std::string, int64_t>::iterator iter;
 #endif
     for (int i = 0; i < (int)key_list.size(); i++) {
-/*
-    if ( i % 10000 ==  0) {
-        std::cout << "Count Frequency: " << i << "/" << key_list.size() << std::endl;
-        std::cout << "map size = " << freq_map_.size() << std::endl;
-        std::cout << "insert time = " << insert_time << std::endl;
-        std::cout << "update time = " << update_time << std::endl;
-        std::cout << "find time = " << find_time << std::endl;
-        insert_time = 0;
-        update_time = 0;
-        find_time = 0;
-    } 
-*/  
-    // std::cout << i << "/" << key_list.size() << std::endl;
-        //for (int j = 0; j < (int)key_list[i].length() - 2; j++) {
 	for (int j = 0; j < (int)key_list[i].length() - n_ + 1; j++) {
 	    std::string ngram = key_list[i].substr(j, n_);
 #ifdef USE_CUCKOO
@@ -110,18 +102,19 @@ void NGramSS::countSymbolFreq (const std::vector<std::string>& key_list) {
 #endif
         }
     }
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
+//    std::cout << "Freq map =  " << freq_map_.size() << std::endl;
+/*#ifdef PRINT_BUILD_TIME_BREAKDOWN
     double time_end = getNow();
     double time_diff = time_end - time_start;
     std::cout << "count symbol freq time = " << time_diff << std::endl;
-#endif
+#endif*/
 }
 
 void NGramSS::pickMostFreqSymbols (const int64_t num_limit,
 				   std::vector<std::string>* most_freq_symbols) {
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
+/*#ifdef PRINT_BUILD_TIME_BREAKDOWN
     double time_start = getNow();
-#endif
+#endif*/
     std::vector<SymbolFreq> symbol_freqs;
 #ifdef USE_CUCKOO
     auto lt = freq_map_.lock_table();
@@ -145,20 +138,20 @@ void NGramSS::pickMostFreqSymbols (const int64_t num_limit,
 	most_freq_symbols->push_back(symbol_freqs[i].first);
     }
     std::sort(most_freq_symbols->begin(), most_freq_symbols->end());
-    
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
+
+/*#ifdef PRINT_BUILD_TIME_BREAKDOWN
     double time_end = getNow();
     double time_diff = time_end - time_start;
     std::cout << "pick most freq symbols time = " << time_diff << std::endl;
-#endif
+#endif*/
 }
 
 void NGramSS::fillInGap (const std::vector<std::string>& most_freq_symbols) {
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
+/*#ifdef PRINT_BUILD_TIME_BREAKDOWN
     double time_start = getNow();
-#endif
+#endif*/
     fillInSingleChar(0, (int)most_freq_symbols[0][0]);
-    
+
     int num_symbols = most_freq_symbols.size();
     for (int i = 0; i < num_symbols - 1; i++) {
 	std::string str1 = most_freq_symbols[i];
@@ -207,11 +200,11 @@ void NGramSS::fillInGap (const std::vector<std::string>& most_freq_symbols) {
 
     if ((int)(uint8_t)last_str[0] < 255)
 	fillInSingleChar((int)(uint8_t)(last_str[0] + 1), 255);
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
+/*#ifdef PRINT_BUILD_TIME_BREAKDOWN
     double time_end = getNow();
     double time_diff = time_end - time_start;
     std::cout << "fill in gap time = " << time_diff << std::endl;
-#endif
+#endif*/
 }
 
 void NGramSS::fillInSingleChar (const int first, const int last) {
@@ -219,7 +212,7 @@ void NGramSS::fillInSingleChar (const int first, const int last) {
 	interval_prefixes_.push_back(std::string(1, (char)c));
 	interval_boundaries_.push_back(std::string(1, (char)c));
     }
-}	
+}
 
 std::string NGramSS::commonPrefix(const std::string& str1,
 				  const std::string& str2) {
@@ -238,9 +231,9 @@ std::string NGramSS::commonPrefix(const std::string& str1,
 }
 
 void NGramSS::countIntervalFreq (const std::vector<std::string>& key_list) {
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
+/*#ifdef PRINT_BUILD_TIME_BREAKDOWN
     double time_start = getNow();
-#endif
+#endif*/
     for (int i = 0; i < (int)interval_prefixes_.size(); i++) {
 	interval_freqs_.push_back(1);
     }
@@ -253,11 +246,11 @@ void NGramSS::countIntervalFreq (const std::vector<std::string>& key_list) {
 	    pos += (int)interval_prefixes_[idx].length();
 	}
     }
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
+/*#ifdef PRINT_BUILD_TIME_BREAKDOWN
     double time_end = getNow();
     double time_diff = time_end - time_start;
     std::cout << "count interval freq time = " << time_diff << std::endl;
-#endif
+#endif*/
 }
 
 int NGramSS::binarySearch(const std::string& key) {

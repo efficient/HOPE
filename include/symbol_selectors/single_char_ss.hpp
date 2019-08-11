@@ -12,7 +12,7 @@ public:
 
     bool selectSymbols (const std::vector<std::string>& key_list,
                         const int64_t num_limit,
-                        std::vector<SymbolFreq>* symbol_freq_list);
+                        std::vector<SymbolFreq>* symbol_freq_list, int W);
 
 private:
     void countSymbolFreq (const std::vector<std::string>& key_list);
@@ -28,7 +28,7 @@ SingleCharSS::SingleCharSS() {
 
 bool SingleCharSS::selectSymbols (const std::vector<std::string>& key_list,
                                   const int64_t num_limit,
-                                  std::vector<SymbolFreq>* symbol_freq_list) {
+                                  std::vector<SymbolFreq>* symbol_freq_list, int W) {
     if (key_list.empty() || num_limit < 256)
         return false;
     countSymbolFreq(key_list);

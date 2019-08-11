@@ -17,8 +17,8 @@ namespace ope {
         static std::vector<std::string> words;
         static const int kLongestCodeLen = 4096;
 
-        static const std::string kEmailFilePath = "../../datasets/urls.txt";
-        static const int kEmailTestSize = 100000;
+        static const std::string kEmailFilePath = "../../datasets/emails.txt";
+        static const int kEmailTestSize = 1000;
         static std::vector<std::string> emails;
 
         class HeuristicEnCoderTest : public ::testing::Test {
@@ -35,8 +35,7 @@ namespace ope {
             }
             std::cout << std::endl;
         }
-
-
+/*
         TEST_F(HeuristicEnCoderTest, wordTest) {
                 HeuristicEncoder* encoder = new HeuristicEncoder();
                 encoder->build(words, 65535);
@@ -96,6 +95,45 @@ namespace ope {
             delete[] buffer;
             delete encoder;
             std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
+        }
+*/
+        TEST_F (HeuristicEnCoderTest, emailBatchTest) {
+            HeuristicEncoder* encoder = new HeuristicEncoder();
+            std::vector<std::string> org_enc_keys;
+            std::vector<std::string> enc_keys;
+            encoder->build(emails, 65536);
+            int batch_size = 10;
+            int ls = (int)emails.size();
+            for (int i = 0; i <= ls - batch_size; i+=batch_size) {
+                encoder->encodeBatch(emails, i, batch_size, enc_keys);
+            }
+            uint8_t* buffer = new uint8_t[8192];
+            for (int i = 0; i < ls; i++) {
+                int enc_len = encoder->encode(emails[i], buffer);
+                int enc_len_round = (enc_len + 7) >> 3;
+                org_enc_keys.push_back(std::string((const char*)buffer, enc_len_round));
+            }
+            ASSERT_TRUE(org_enc_keys.size() == enc_keys.size());
+            std::cout << "Encode Size :" << enc_keys.size() << std::endl;
+/*            for (int i = 0; i < (int)enc_keys.size() - 1; i+= 1) {
+                std::string str1 = enc_keys[i];
+                std::string str2 = enc_keys[i+1];
+                int cmp = str1.compare(str2);
+                ASSERT_TRUE(cmp < 0);
+            }*/
+            for (int i = 0; i < (int)enc_keys.size(); i++) {
+                std::string str1 = enc_keys[i];
+                std::string str2 = org_enc_keys[i];
+                int cmp = str1.compare(str2);
+                if (cmp != 0) {
+                    std::cout << i << "\t" << emails[i] << std::endl;
+                    printString(str1);
+                    std::cout << std::endl;
+                    printString(str2);
+                    std::cout << std::endl;
+                }
+                ASSERT_TRUE(cmp == 0);
+            }
         }
 
         void loadWords() {

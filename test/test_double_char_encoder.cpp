@@ -61,7 +61,7 @@ TEST_F (DoubleCharEncoderTest, wordTest) {
 	len = encoder->decode(str1, buffer);
 	std::string dec_str1 = std::string((const char*)buffer, len);
 	cmp = dec_str1.compare(words[i]);
-	
+
 	ASSERT_TRUE(cmp == 0);
 
 	len = encoder->decode(str2, buffer);
@@ -86,6 +86,25 @@ TEST_F (DoubleCharEncoderTest, wordPairTest) {
 	ASSERT_TRUE(cmp < 0);
     }
 }
+
+TEST_F (DoubleCharEncoderTest, emailBatchTest) {
+    std::vector<std::string> enc_keys;
+    DoubleCharEncoder* encoder = new DoubleCharEncoder();
+    encoder->build(emails, 65536);
+    int batch_size = 10;
+    int ls = (int)emails.size();
+    for (int i = 0; i < ls - batch_size; i+=batch_size) {
+        encoder->encodeBatch(emails, i, batch_size, enc_keys);
+    }
+    std::cout << enc_keys.size() << std::endl;
+    for (int i = 0; i < (int)enc_keys.size() - 1; i+= 2) {
+        std::string str1 = enc_keys[i];
+        std::string str2 = enc_keys[i+1];
+        int cmp = strCompare(str1,str2);
+        ASSERT_TRUE(cmp < 0);
+    }
+}
+
     /*
 TEST_F (DoubleCharEncoderTest, emailTest) {
     DoubleCharEncoder* encoder = new DoubleCharEncoder();
@@ -105,7 +124,7 @@ TEST_F (DoubleCharEncoderTest, emailTest) {
 	    std::cout << emails[i + 1] << std::endl;
 	    print(str2);
 	}
-	
+
 	ASSERT_TRUE(cmp < 0);
     }
 }
@@ -148,7 +167,7 @@ void loadWords() {
 	count++;
     }
 }
-    
+
 void loadEmails() {
     std::ifstream infile(kEmailFilePath);
     std::string key;
@@ -189,7 +208,7 @@ void loadUrls() {
 int main (int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);
     ope::doublecharencodertest::loadWords();
-    //ope::doublecharencodertest::loadEmails();
+    ope::doublecharencodertest::loadEmails();
     //ope::doublecharencodertest::loadWikis();
     //ope::doublecharencodertest::loadUrls();
     return RUN_ALL_TESTS();
