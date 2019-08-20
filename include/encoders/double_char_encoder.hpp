@@ -1,13 +1,16 @@
 #ifndef DOUBLE_CHAR_ENCODER_H
 #define DOUBLE_CHAR_ENCODER_H
 
+#include <boost/dynamic_bitset.hpp>
 #include "encoder.hpp"
 
 #include "code_generator_factory.hpp"
 #include "symbol_selector_factory.hpp"
-#include "sbt.hpp"
+#ifdef INCLUDE_DECODE
+//#include "sbt.hpp"
+#include "hash_dict_.hpp"
+#endif
 
-//#define PRINT_BUILD_TIME_BREAKDOWN
 namespace ope {
 
 class DoubleCharEncoder : public Encoder {
@@ -35,7 +38,10 @@ private:
     bool buildDict(const std::vector<SymbolCode>& symbol_code_list);
 
     Code dict_[65536];
-    SBT* decode_dict_;
+#ifdef INCLUDE_DECODE
+//    SBT* decode_dict_;
+    HashDict *decode_dict_;
+#endif
 };
 
 bool DoubleCharEncoder::build (const std::vector<std::string>& key_list,
@@ -264,26 +270,37 @@ int64_t DoubleCharEncoder::encodeBatch(const std::vector<std::string>& org_keys,
 
 int DoubleCharEncoder::decode (const std::string& enc_key, uint8_t* buffer) const {
 #ifdef INCLUDE_DECODE
-    int buf_pos = 0;
-    int key_bit_pos = 0;
-    int idx = 0;
-    while (key_bit_pos < (int)enc_key.size() * 8) {
-	if (!decode_dict_->lookup(enc_key, key_bit_pos, &idx)) {
-	    if (key_bit_pos < (int)enc_key.size() * 8) {
-		return 0;
-	    } else {
-		if (buffer[buf_pos - 1] == 0)
-		    buf_pos--;
-		return buf_pos;
-	    }
-	}
-	buffer[buf_pos] = (uint8_t)(unsigned)((idx >> 8) & 0xFF);
-	buffer[buf_pos + 1] = (uint8_t)(unsigned)(idx & 0xFF);
-	buf_pos += 2;
-    }
+//    int buf_pos = 0;
+//    int key_bit_pos = 0;
+//    int idx = 0;
+//    while (key_bit_pos < (int)enc_key.size() * 8) {
+//	if (!decode_dict_->lookup(enc_key, key_bit_pos, &idx)) {
+//	    if (key_bit_pos < (int)enc_key.size() * 8) {
+//		return 0;
+//	    } else {
+//		if (buffer[buf_pos - 1] == 0)
+//		    buf_pos--;
+//		return buf_pos;
+//	    }
+//	}
+//	buffer[buf_pos] = (uint8_t)(unsigned)((idx >> 8) & 0xFF);
+//	buffer[buf_pos + 1] = (uint8_t)(unsigned)(idx & 0xFF);
+//	buf_pos += 2;
+//    }
+//    if (buffer[buf_pos - 1] == 0)
+//	buf_pos--;
+//    return buf_pos;
+  int buf_pos = 0;
+  int key_bit_pos = 0;
+  while (key_bit_pos < (int)enc_key.size() * 8) {
+    std::string symbol;
+    decode_dict_->lookup(enc_key, key_bit_pos, symbol);
+    memcpy(buffer + buf_pos, symbol.c_str(), symbol.length());
+    buf_pos += symbol.length();
     if (buffer[buf_pos - 1] == 0)
-	buf_pos--;
-    return buf_pos;
+      buf_pos--;
+  }
+  return buf_pos;
 #else
     return 0;
 #endif
@@ -309,13 +326,12 @@ bool DoubleCharEncoder::buildDict(const std::vector<SymbolCode>& symbol_code_lis
     }
 
 #ifdef INCLUDE_DECODE
-    std::vector<Code> codes;
-    for (int i = 0; i < 65536; i++) {
-	codes.push_back(dict_[i]);
-    }
-    decode_dict_ = new SBT(codes);
-#else
-    decode_dict_ = nullptr;
+//    std::vector<Code> codes;
+//    for (int i = 0; i < 65536; i++) {
+//	codes.push_back(dict_[i]);
+//    }
+ //   decode_dict_ = new SBT(codes);
+      decode_dict_ = new HashDict(symbol_code_list);
 #endif
 
     return true;

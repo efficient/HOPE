@@ -5,7 +5,7 @@
 #include <time.h>
 
 #include <string>
-
+#define INCLUDE_DECODE 1
 //#define PRINT_BUILD_TIME_BREAKDOWN 1
 //#define USE_ARRAY_DICT 1
 #define USE_FIXED_LEN_DICT_CODE 1
@@ -39,11 +39,25 @@ const int ALM_W_improved[3][9] = {
 
 namespace ope {
 
-typedef struct {
-    //int64_t code;
-    int32_t code;
-    int8_t len;
+typedef struct Code {
+  //int64_t code;
+  int32_t code;
+  int8_t len;
+  bool operator==(const Code &other) const {
+      return (code == other.code
+          && len == other.len);
+  }
 } Code;
+
+typedef struct CodeHash {
+  std::size_t operator()(const Code& k) const
+  {
+      // Compute individual hash values for code,
+      // len and combine them using XOR
+      return (std::hash<int32_t >()(k.code)
+          ^ (std::hash<int8_t >()(k.len)));
+  }
+}CodeHash;
 
 typedef struct {
     uint8_t common_prefix_len;
