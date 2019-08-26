@@ -1,5 +1,4 @@
 #include "gtest/gtest.h"
-
 #include <assert.h>
 
 #include <bitset>
@@ -16,6 +15,7 @@ namespace doublecharencodertest {
 
 static const std::string kFilePath = "../../datasets/words.txt";
 static const int kWordTestSize = 234369;
+//static const int kWordTestSize = 10000;
 static std::vector<std::string> words;
 static const std::string kEmailFilePath = "../../datasets/emails.txt";
 static const int kEmailTestSize = 25000000;
@@ -61,9 +61,7 @@ TEST_F (DoubleCharEncoderTest, wordTest) {
 	len = encoder->decode(str1, buffer);
 	std::string dec_str1 = std::string((const char*)buffer, len);
 	cmp = dec_str1.compare(words[i]);
-
 	ASSERT_TRUE(cmp == 0);
-
 	len = encoder->decode(str2, buffer);
 	std::string dec_str2 = std::string((const char*)buffer, len);
 	cmp = dec_str2.compare(words[i + 1]);
@@ -208,7 +206,7 @@ void loadUrls() {
 int main (int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);
     ope::doublecharencodertest::loadWords();
-    ope::doublecharencodertest::loadEmails();
+    //ope::doublecharencodertest::loadEmails();
     //ope::doublecharencodertest::loadWikis();
     //ope::doublecharencodertest::loadUrls();
     return RUN_ALL_TESTS();

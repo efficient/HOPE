@@ -268,8 +268,8 @@ void exec(const int expt_id, const int wkld_id,
         }
     }
     delete[] buffer;
-    delete lb;
-    delete rb;
+    delete[] lb;
+    delete[] rb;
     delete encoder;
     time_end = getNow();
     double time_diff = time_end - time_start;
