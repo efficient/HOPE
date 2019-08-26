@@ -10,7 +10,7 @@ namespace ope {
 class HashDict {
 public:
   HashDict(const std::vector<SymbolCode> &keys);
-  void lookup(const std::string &in_key, int &key_bit_pos,
+  bool lookup(const std::string &in_key, int &key_bit_pos,
               std::string &symbol);
   int memory();
 
@@ -24,7 +24,7 @@ HashDict::HashDict(const std::vector<SymbolCode> &pairs) {
   }
 }
 
-void HashDict::lookup(const std::string &in_key, int &key_bit_pos,
+bool HashDict::lookup(const std::string &in_key, int &key_bit_pos,
                         std::string &symbol) {
   int key_bit_len = (int)in_key.size() * 8;
   int8_t code_len = 1;
@@ -39,13 +39,15 @@ void HashDict::lookup(const std::string &in_key, int &key_bit_pos,
     if (re != dict_.end()) {
       key_bit_pos = key_bit_pos + code_len;
       symbol = re->second;
-      return;
+      return true;
     }
     code_len++;
   }
   if (cur_code == 0) {
     key_bit_pos = key_bit_len;
+    return true;
   }
+  return false;
 }
 
 int HashDict::memory() {
