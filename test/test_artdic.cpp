@@ -35,8 +35,8 @@ namespace ope {
                 int len2 = (int)s2.size();
                 int len = min(len1, len2);
                 for(int i = 0; i < len ; i++) {
-                    uint8_t c1 = static_cast<uint8_t >(s1[i]);
-                    uint8_t c2 = static_cast<uint8_t >(s2[i]);
+                    auto c1 = static_cast<uint8_t >(s1[i]);
+                    auto c2 = static_cast<uint8_t >(s2[i]);
                     if (c1 < c2)
                         return -1;
                     if (c1 > c2)
@@ -57,30 +57,45 @@ namespace ope {
                 std::cout << std::endl;
             }
 
+            /**
+             * Get next string based on alphabetical order
+             * If all letters in the given string is 255, the next string is the string with one more letter
+             * @param str
+             * @return The next string based on alphabetical order
+             */
             static std::string getNextString(std::string str) {
                 for (int i = int(str.length() - 1); i >= 0; i--) {
-                    if (uint8_t (str[i]) != 255) {
-                        char next_chr = str[i] + 1;
-                        return str.substr(0, i) + std::string(1, next_chr);
-                    }
+                    if (uint8_t(str[i]) == 255)
+                        continue;
+                    char next_chr = str[i] + 1;
+                    return str.substr(0, i) + std::string(1, next_chr);
                 }
-                assert(false);
-                __builtin_unreachable();
+                // All characters are 255
+                assert(str.length() < MAX_STR_LEN);
+                return str + std::string(1, 1);
             }
 
+            /**
+             * Find the interval the given str belongs to. interval_start <= str
+             * @param sorted_intervals  Starting points of all intervals
+             * @param cur_idx           search from the cur_idx, this param is used to speed up search
+             * @param cur_str           the string that we want to find its interval
+             * @param out_next_idx      the index of the interval the string belongs to
+             * @param out_next_str      the start string of that interval
+             */
             static void getNextInterval(std::vector<std::string> sorted_intervals,
                                         int cur_idx, std::string& cur_str,
-                                        int& next_idx, std::string& next_str) {
+                                        int& out_next_idx, std::string& out_next_str) {
                 int i = cur_idx;
                 for (; i < (int)sorted_intervals.size(); i++) {
                     if (strCompare(sorted_intervals[i], cur_str) > 0) {
-                        next_idx = i - 1;
-                        next_str = sorted_intervals[i-1];
+                        out_next_idx = i - 1;
+                        out_next_str = sorted_intervals[i-1];
                         return;
                     }
                 }
-                next_idx = i - 1;
-                next_str = sorted_intervals[i-1];
+                out_next_idx = i - 1;
+                out_next_str = sorted_intervals[i-1];
             }
 
         };
@@ -89,8 +104,8 @@ namespace ope {
 
         }
 
-        TEST_F(ARTDICTest, pointLookupTest) {
-            ArtDicTree *test = new ArtDicTree();
+        TEST_F(ARTDICTest, pointLookupEmailTest) {
+            auto test = new ArtDicTree();
             std::vector<ope::SymbolCode> ls;
 
             for (int i = 0; i < (int)emails.size() - 1; i++) {
@@ -107,14 +122,14 @@ namespace ope {
                 int prefix_len = -1;
                 ope::Code result = test->lookup(emails[i].c_str(), emails[i].size(), prefix_len);
                 if (result.code != i)
-                    std::cout << "lookup:"<<result.code<<" answer:"<<i<<std::endl;
+                    std::cout << "lookup:" << result.code << " answer:" << i << std::endl;
                 ASSERT_TRUE(result.code == i);
             }
             delete test;
         }
 
         TEST_F(ARTDICTest, pointLookupWikiTest) {
-            ArtDicTree *test = new ArtDicTree();
+            auto test = new ArtDicTree();
             std::vector<ope::SymbolCode> ls;
 
             for (int i = 0; i < (int)wikis.size() - 1; i++) {
@@ -131,14 +146,14 @@ namespace ope {
                 int prefix_len = -1;
                 ope::Code result = test->lookup(wikis[i].c_str(), wikis[i].size(), prefix_len);
                 if (result.code != i)
-                    std::cout << "lookup:"<<result.code<<" answer:"<<i<<std::endl;
+                    std::cout << "lookup:" << result.code << " answer:" << i << std::endl;
                 ASSERT_TRUE(result.code == i);
             }
             delete test;
         }
 
         TEST_F(ARTDICTest, pointLookupUrlTest) {
-            ArtDicTree *test = new ArtDicTree();
+            auto test = new ArtDicTree();
             std::vector<ope::SymbolCode> ls;
 
             for (int i = 0; i < (int)urls.size() - 1; i++) {
@@ -155,7 +170,7 @@ namespace ope {
                 int prefix_len = -1;
                 ope::Code result = test->lookup(urls[i].c_str(), urls[i].size(), prefix_len);
                 if (result.code != i)
-                    std::cout << "lookup:"<<result.code<<" answer:"<<i<<std::endl;
+                    std::cout << "lookup:" << result.code << " answer:" << i << std::endl;
                 ASSERT_TRUE(result.code == i);
             }
             delete test;
@@ -193,17 +208,17 @@ namespace ope {
         }
 */
         TEST_F(ARTDICTest, withinRangeLookupTest) {
-                ArtDicTree *test = new ArtDicTree();
-                std::vector<ope::SymbolCode> ls;
-                std::sort(emails.begin(), emails.end());
+            auto test = new ArtDicTree();
+            std::vector<ope::SymbolCode> ls;
+            std::sort(emails.begin(), emails.end());
 
-                for (int i = 0; i < (int)emails.size(); i++) {
-                    ope::SymbolCode symbol_code = ope::SymbolCode();
-                    symbol_code.first = emails[i];
-                    symbol_code.second = ope::Code();
-                    symbol_code.second.code = i;
-                    ls.push_back(symbol_code);
-                }
+            for (int i = 0; i < (int)emails.size(); i++) {
+                ope::SymbolCode symbol_code = ope::SymbolCode();
+                symbol_code.first = emails[i];
+                symbol_code.second = ope::Code();
+                symbol_code.second.code = i;
+                ls.push_back(symbol_code);
+            }
 
             test->build(ls);
 
@@ -224,17 +239,6 @@ namespace ope {
                     std::cout << org.code <<std::endl;
                 }
                 ASSERT_TRUE(result.code == next_idx);
-//                if (cur_str.compare(next_str) < 0) {
-//                    //ASSERT_TRUE(prefix_len == getCommonPrefixLen(emails[i], emails[i+1]));
-//                    ASSERT_TRUE(result.code == i);
-//                }
-//                else {
-//                    std::cout << cur_str << "\t" << next_str << std::endl;
-//                    std::cout << result.code << "\t" << next_idx << std::endl;
-//                    std::cout << emails[next_idx+1] << std::endl;
-//                    ASSERT_TRUE(prefix_len == getCommonPrefixLen(emails[next_idx], emails[next_idx+1]));
-//                    ASSERT_TRUE(result.code == next_idx);
-//                }
             }
             delete test;
         }
