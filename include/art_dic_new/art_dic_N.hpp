@@ -53,7 +53,7 @@ namespace ope {
                 : type(_type), prefix_len(_prefix_len) {
 	    if (_prefix_len > maxPrefixLen) {
 	        std::cout << "[Error] Prefix length " << _prefix_len << " greater than max prefix length" << std::endl;
-		assert(false); 
+		assert(false);
 	    }
             prefix_len = _prefix_len;
             for (int i = 0; i < (int)_prefix_len; i++)
@@ -112,6 +112,8 @@ namespace ope {
 
         static void deleteNode(N *node);
 
+        static void checkNode(N *node);
+
 };
 
 
@@ -149,6 +151,8 @@ namespace ope {
 
         template<class NODE>
         void copyTo(NODE *n) const;
+
+        void checkNode();
     };
 
 
@@ -191,6 +195,8 @@ namespace ope {
 
         template<class NODE>
         void copyTo(NODE *n) const;
+
+        void checkNode();
     };
 
 
@@ -230,6 +236,8 @@ namespace ope {
 
         template<class NODE>
         void copyTo(NODE *n) const;
+
+        void checkNode();
     };
 
 
@@ -266,14 +274,16 @@ namespace ope {
 
         template<class NODE>
         void copyTo(NODE *n) const;
+
+        void checkNode();
     };
 
 
     void N::setPrefix(const uint8_t *_prefix, int length) {
-	if ((uint32_t)length > maxPrefixLen) {
+        if ((uint32_t)length > maxPrefixLen) {
             std::cout << "[Error] Prefix length " << length << " greater than max prefix length" << std::endl;
-            assert(false); 
-	}
+            assert(false);
+	    }
 
         for (int i = 0; i < length; i++) {
             prefix[i] = _prefix[i];
@@ -341,7 +351,6 @@ namespace ope {
         n->copyTo(nSmall);
         // replace old node with new node
         N::change(parent_node, key_par, nSmall);
-
         delete n;
     }
 
@@ -377,16 +386,19 @@ namespace ope {
             case NTypes::N4: {
                 auto n = static_cast<N4 *>(node);
                 insertGrow<N4, N16>(n, key, val, parent_key, parent_node);
+//		N::checkNode(N::getChild(parent_key, parent_node));
                 return;
             }
             case NTypes::N16: {
                 auto n = static_cast<N16 *>(node);
                 insertGrow<N16, N48>(n, key, val, parent_key, parent_node);
+//		N::checkNode(N::getChild(parent_key, parent_node));
                 return;
             }
             case NTypes::N48: {
                 auto n = static_cast<N48 *>(node);
                 insertGrow<N48, N256>(n, key, val, parent_key, parent_node);
+//		N::checkNode(N::getChild(parent_key, parent_node));
                 return;
             }
             case NTypes::N256: {
@@ -405,7 +417,6 @@ namespace ope {
             case NTypes::N4: {
                 auto n = static_cast<N4 *>(node);
                 removeAndShrink<N4, N4>(n, key, key_par, parent_node);
-                //n->remove(key);
                 return;
             }
             case NTypes::N16: {
@@ -610,7 +621,6 @@ namespace ope {
 
 
         if (N::isLeaf(node)) {
-            //deleteNode(node);
             return;
         }
 
@@ -668,24 +678,33 @@ namespace ope {
         assert(false);
     }
 
+    void N::checkNode(ope::N *node) {
+        switch (node->type) {
+            case NTypes::N4: {
+                reinterpret_cast<N4 *>(node)->checkNode();
+            }
+            case NTypes::N16: {
+                reinterpret_cast<N16 *>(node)->checkNode();
+            }
+            case NTypes::N48: {
+                reinterpret_cast<N48 *>(node)->checkNode();
+            }
+            case NTypes::N256: {
+                reinterpret_cast<N256 *>(node)->checkNode();
+            }
+        }
+    }
+
     bool N4::insert(uint8_t k, N *node) {
         if (count == 4)
             return false;
-        // deal with k = 0
-        if (k==0) {
-            memcpy(keys + 1, keys, count * sizeof(k));
-            memcpy(children + 1, children, count * sizeof(N *));
-            keys[0] = k;
-            children[0] = node;
-            count += 1;
-            return true;
-        }
-
         int i = 0;
-        while (i < count && k >= keys[i])
+        while (i < count && k > keys[i])
             i += 1;
-        memcpy(keys + i + 1, keys + i, (count - i) * sizeof(k));
-        memcpy(children + i + 1, children + i, (count - i) * sizeof(N *));
+        for (int j = count; j > i; j--) {
+            keys[j] = keys[j-1];
+            children[j] = children[j-1];
+        }
         keys[i] = k;
         children[i] = node;
         count += 1;
@@ -695,8 +714,10 @@ namespace ope {
     bool N4::remove(uint8_t k) {
         for (int i = 0; i < count; i++) {
             if (keys[i] == k) {
-                memcpy(keys + i, keys + i + 1, (count - i - 1) * sizeof(k));
-                memcpy(children + i, children + i + 1, (count - i - 1) * sizeof(N *));
+		        for (int j = (int)i; j < count - 1; j++) {
+                    keys[j] = keys[j+1];
+               	    children[j] = children[j+1];
+        	    }
                 count--;
                 return true;
             }
@@ -731,6 +752,7 @@ namespace ope {
     }
 
     N *N4::getLastChild() {
+        // count does not include prefix_leaf
         if (count == 0 && prefix_leaf != nullptr)
             return prefix_leaf;
         if (count == 0)
@@ -778,34 +800,31 @@ namespace ope {
         }
     }
 
+    void N4::checkNode() {
+        for (int i = 0; i < (int)count - 1; i++) {
+            assert(keys[i] != keys[i+1]);
+            assert(children[i] != nullptr);
+        }
+    }
+
 
     bool N16::insert(uint8_t k, N *node) {
         if (count == 16)
             return false;
-
-        // deal with k = 0
-        // deal with k = 0
-        if (k==0) {
-            memcpy(keys + 1, keys, count * sizeof(k));
-            memcpy(children + 1, children, count * sizeof(N *));
-            keys[0] = k;
-            children[0] = node;
-            count += 1;
-            return true;
-        }
-
         // TODO: use __mm__cmplt to speed up
         unsigned int i = 0;
-        while (i < count && k >= keys[i])
+        while (i < count && k > keys[i]) {
             i += 1;
+        }
 
 //        uint8_t keyByteFlipped = flipSign(k);
 //        __m128i cmp = _mm_cmplt_epi8(_mm_set1_epi8(keyByteFlipped), _mm_loadu_si128(reinterpret_cast<__m128i *>(keys)));
 //        uint16_t bitfield = _mm_movemask_epi8(cmp) & (0xFFFF >> (16 - count));
 //        unsigned i = bitfield ? __builtin_ctz(bitfield) : count;
-
-        memcpy(keys + i + 1, keys + i, (count - i) * sizeof(k));
-        memcpy(children + i + 1, children + i, (count - i) * sizeof(node));
+        for (int j = count; j > (int)i; j--) {
+            keys[j] = keys[j-1];
+            children[j] = children[j-1];
+        }
         keys[i] = k;
         children[i] = node;
         count += 1;
@@ -827,8 +846,10 @@ namespace ope {
 
         for (int i = 0; i < count; i++) {
             if (keys[i] == k) {
-                memcpy(keys + i, keys + i + 1, (count - i - 1) * sizeof(k));
-                memcpy(children + i, children + i + 1, (count - i - 1) * sizeof(N *));
+                for (int j = int(i); j < count - 1 ; j--) {
+                    keys[j] = keys[j+1];
+                    children[j] = children[j+1];
+                }
                 count--;
                 return true;
             }
@@ -901,6 +922,13 @@ namespace ope {
         }
         for (int i = 0; i < count; i++) {
             n->insert(keys[i], children[i]);
+        }
+    }
+
+    void N16::checkNode() {
+        for (int i = 0; i < (int)count - 1; i++) {
+            assert(keys[i] != keys[i+1]);
+            assert(children[i] != nullptr);
         }
     }
 
@@ -1010,9 +1038,14 @@ namespace ope {
         }
     }
 
+    void N48::checkNode() {
+    }
+
     bool N256::insert(uint8_t k, N *n) {
-//        if (count == 256)
-//            return false;
+        if (count == 256) {
+            std::cout << "[Error]Node full" << std::endl;
+            return false;
+        }
         children[k] = n;
         count++;
         return true;
@@ -1104,6 +1137,10 @@ namespace ope {
             if (children[i] != nullptr)
                 n->insert(i, children[i]);
         }
+    }
+
+    void N256::checkNode() {
+
     }
 }
 

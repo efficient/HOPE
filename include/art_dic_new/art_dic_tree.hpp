@@ -25,6 +25,8 @@ namespace ope {
         int getN48Num();
 
         int getN256Num();
+
+        int getExtraSize() {return 0;};
     private:
         N *root;
 
@@ -56,8 +58,9 @@ namespace ope {
         LeafInfo* getRightBottom(N *node)const;
 
         std::string getPrevString(const std::string &str);
-   
+
         void printTree(N *node);
+
     };
 
 
@@ -67,8 +70,6 @@ namespace ope {
     ArtDicTree::~ArtDicTree() {
         N::deleteChildren(root);
         N::deleteNode(root);
-        std::cout << "Number of nodes after deletion" << std::endl;
-        std::cout << cnt_N4 << " " << cnt_N16 << " " << cnt_N48 << " " << cnt_N256 << std::endl;
     }
 
     Code ArtDicTree::lookup(const char *symbol, const int symbol_len, int &prefix_len) const {
@@ -137,8 +138,7 @@ namespace ope {
 
         for (auto iter = symbol_code_list.begin(); iter != symbol_code_list.end(); iter++) {
             LeafInfo *lf = new LeafInfo();
-            if (iter - symbol_code_list.begin() == 22)
-                std::cout << "";
+            //std::cout << iter - symbol_code_list.begin() << std::endl; 
             std::string start_interval = iter->first;
             if (iter != symbol_code_list.end() - 1) {
                 std::string end_interval = getPrevString((iter + 1)->first);
@@ -150,6 +150,10 @@ namespace ope {
             }
             lf->prev_leaf = prev_leaf;
             lf->symbol_code = &(*iter);
+            if (iter - symbol_code_list.begin() == 86)
+		std::cout << "";
+            if (iter == symbol_code_list.end() - 1)
+                std::cout << "";
             insert(lf);
             prev_leaf = lf;
         }
@@ -241,6 +245,8 @@ namespace ope {
                        N *node, N *val, N *parent_node, uint8_t parent_key) {
         if (insertkey_level == (int)key.size()) {
             //N::insertOrUpdateNode(node, parent_node, parent_key, 0, val);
+	    if (node->prefix_len != 0)
+		std::cout << "[Error] Prefix is not empty" << std::endl;
             node->setPrefixLeaf(val);
             return;
         }
