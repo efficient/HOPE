@@ -18,11 +18,12 @@ namespace ope {
     };
 
 
-    static const unsigned maxPrefixLen = 255;
+    static const unsigned maxPrefixLen = 16;
     static int cnt_N4 = 0;
     static int cnt_N16 = 0;
     static int cnt_N48 = 0;
     static int cnt_N256 = 0;
+    static int64_t extra_size = 0;
 
     enum class NTypes : uint8_t {
         N4 = 0,
@@ -49,18 +50,24 @@ namespace ope {
         // store prefix key, value pairs
         N *prefix_leaf = nullptr;
 
+        uint8_t* long_prefix;
+
         N(NTypes _type, const uint8_t *_prefix, uint32_t _prefix_len)
                 : type(_type), prefix_len(_prefix_len) {
-	    if (_prefix_len > maxPrefixLen) {
-	        std::cout << "[Error] Prefix length " << _prefix_len << " greater than max prefix length" << std::endl;
-		assert(false);
-	    }
-            prefix_len = _prefix_len;
-            for (int i = 0; i < (int)_prefix_len; i++)
-                prefix[i] = _prefix[i];
+            if (_prefix_len > maxPrefixLen) {
+                long_prefix = new uint8_t[_prefix_len];
+                extra_size += _prefix_len;
+                for (int i = 0; i < (int)_prefix_len; i++)
+                    long_prefix[i] = _prefix[i];
+	        } else {
+                for (int i = 0; i < (int)_prefix_len; i++)
+                    prefix[i] = _prefix[i];
+            }
         };
 
         void setPrefix(const uint8_t *prefix, int length);
+
+        uint8_t *getPrefix();
 
         N *duplicate();
 
@@ -281,14 +288,26 @@ namespace ope {
 
     void N::setPrefix(const uint8_t *_prefix, int length) {
         if ((uint32_t)length > maxPrefixLen) {
-            std::cout << "[Error] Prefix length " << length << " greater than max prefix length" << std::endl;
-            assert(false);
-	    }
-
-        for (int i = 0; i < length; i++) {
-            prefix[i] = _prefix[i];
+            if (long_prefix != nullptr) {
+                delete long_prefix;
+                extra_size -= prefix_len;
+            }
+            long_prefix = new uint8_t[length];
+            extra_size += length;
+            for (int i = 0; i < length; i++)
+                long_prefix[i] = _prefix[i];
+	    } else {
+            for (int i = 0; i < length; i++) {
+                prefix[i] = _prefix[i];
+            }
         }
         prefix_len = length;
+    }
+
+    uint8_t *N::getPrefix() {
+        if (prefix_len > maxPrefixLen)
+            return long_prefix;
+        return prefix;
     }
 
     void N::setPrefixLeaf(N *leaf) {
@@ -327,7 +346,7 @@ namespace ope {
         if (n->insert(key, val))
             return;
         // initialize a bigger node
-        auto big_node = new biggerN(n->prefix, n->prefix_len);
+        auto big_node = new biggerN(n->getPrefix(), n->prefix_len);
         // copy original keys and children
         n->copyTo(big_node);
         // insert key,val to the new node
@@ -344,7 +363,7 @@ namespace ope {
             return;
         }
         // initialize a smaller node
-        auto nSmall = new smallerN(n->prefix, n->prefix_len);
+        auto nSmall = new smallerN(n->getPrefix(), n->prefix_len);
         // remove key
         n->remove(key);
         // copy to smaller node
@@ -653,6 +672,12 @@ namespace ope {
             delete(leaf);
             return;
         }
+
+        if (node->prefix_len > maxPrefixLen) {
+            delete(node->long_prefix);
+            extra_size -= node->prefix_len;
+        }
+
         switch (node->type) {
             case NTypes::N4: {
                 auto n = static_cast<N4 *>(node);

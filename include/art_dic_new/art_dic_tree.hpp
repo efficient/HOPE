@@ -41,12 +41,7 @@ namespace ope {
 
         void addLeaf(int insertkey_level, std::string key,
                      N *node, N *val, N *parent_node, uint8_t parent_key);
-/*
-        void changeStringToUint8(std::string org, uint8_t* des) {
-            for (int i = 0; i < (int)org.size(); i++)
-                des[i] = reinterpret_cast<uint8_t&>(org[i]);
-        }
-*/
+
         void skipIfEmpty(N *node_new, N *leaf_dup, uint8_t key);
 
         void subKey(int start, int end, uint8_t *subKey, uint8_t *org);
@@ -118,7 +113,7 @@ namespace ope {
             } else {
                 LeafInfo *leaf_info = NULL;
                 if (key_level == symbol_len ||
-                        static_cast<uint8_t >(symbol[key_level]) < static_cast<uint8_t >(node->prefix[node_level])) {
+                        static_cast<uint8_t >(symbol[key_level]) < static_cast<uint8_t >(node->getPrefix()[node_level])) {
                     N *prev = N::getFirstChild(node);
                     leaf_info = getLeftBottom(prev)->prev_leaf;
                 } else {
@@ -229,7 +224,7 @@ namespace ope {
         }
         std::cout <<"Prefix:";
         for (int i = 0; i < (int)node->prefix_len; i++)
-            std::cout << node->prefix[i];
+            std::cout << node->getPrefix()[i];
         std::cout << " Prefix_len:" << node->prefix_len << " Child cnt:" << (int)node->count << std::endl;
         uint8_t keys[300];
         N *children[300];
@@ -280,9 +275,9 @@ namespace ope {
         // Insert given value
         addLeaf(key_level, key, node_new, val, parent_node, parent_key);
         // The order of the next two lines cannot be changed!
-        node_new->insert(node->prefix[node_level], node);
+        node_new->insert(node->getPrefix()[node_level], node);
         assert(node_level < (int)node->prefix_len);
-        node->setPrefix(node->prefix + node_level + 1, node->prefix_len - node_level - 1);
+        node->setPrefix(node->getPrefix() + node_level + 1, node->prefix_len - node_level - 1);
 //        skipIfEmpty(node_new, node, node->prefix[node_level]);
         return node_new;
     }
@@ -304,7 +299,7 @@ namespace ope {
                            int key_size, int &key_level,
                            int &node_level, uint8_t *common_prefix) const {
         int i = 0;
-        uint8_t *node_prefix = node->prefix;
+        uint8_t *node_prefix = node->getPrefix();
         for (; i < (int)node->prefix_len; i++) {
             if (key_level + i >= key_size || key[key_level + i] != node_prefix[i]) {
                 node_level = i;
