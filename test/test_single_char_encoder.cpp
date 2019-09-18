@@ -1,11 +1,12 @@
-#include "gtest/gtest.h"
-
 #include <assert.h>
 
 #include <bitset>
 #include <fstream>
 #include <iostream>
+#include <vector>
+#include <string>
 
+#include "gtest/gtest.h"
 #include "code_generator_factory.hpp"
 #include "single_char_encoder.hpp"
 #include "symbol_selector_factory.hpp"
@@ -14,16 +15,16 @@ namespace ope {
 
 namespace singlecharencodertest {
 
-static const std::string kFilePath = "../../datasets/words.txt";
+static const char kFilePath[] = "../../datasets/words.txt";
 static const int kWordTestSize = 234369;
 static std::vector<std::string> words;
-static const std::string kEmailFilePath = "../../datasets/emails.txt";
+static const char kEmailFilePath[] = "../../datasets/emails.txt";
 static const int kEmailTestSize = 25000000;
 static std::vector<std::string> emails;
-static const std::string kWikiFilePath = "../../datasets/wikis.txt";
+static const char kWikiFilePath[] = "../../datasets/wikis.txt";
 static const int kWikiTestSize = 14000000;
 static std::vector<std::string> wikis;
-static const std::string kUrlFilePath = "../../datasets/urls.txt";
+static const char kUrlFilePath[] = "../../datasets/urls.txt";
 static const int kUrlTestSize = 25000000;
 static std::vector<std::string> urls;
 static const int kLongestCodeLen = 4096;
@@ -37,7 +38,7 @@ class SingleCharEncoderTest : public ::testing::Test {
 int getByteLen(const int bitlen) { return ((bitlen + 7) & ~7) / 8; }
 
 void print(std::string str) {
-  for (int i = 0; i < (int)str.size(); i++) {
+  for (int i = 0; i < static_cast<int>(str.size()); i++) {
     std::cout << std::bitset<8>(str[i]) << " ";
   }
   std::cout << std::endl;
@@ -88,12 +89,12 @@ TEST_F(SingleCharEncoderTest, wordBatchTest) {
   std::vector<std::string> enc_keys;
   encoder->build(words, 1000);
   int batch_size = 10;
-  int ls = (int)words.size();
+  int ls = static_cast<int>(words.size());
   for (int i = 0; i < ls - batch_size; i += batch_size) {
     encoder->encodeBatch(words, i, batch_size, enc_keys);
   }
   //    std::cout << enc_keys.size() << std::endl;
-  for (int i = 0; i < (int)enc_keys.size() - 1; i += 2) {
+  for (int i = 0; i < static_cast<int>(enc_keys.size()) - 1; i += 2) {
     //        std::cout << i << std::endl;
     //        std::cout << "1---";
     std::string str1 = enc_keys[i];
@@ -104,7 +105,7 @@ TEST_F(SingleCharEncoderTest, wordBatchTest) {
     //        std::cout <<"End---";
     int cmp = strCompare(str1, str2);
     //        std::cout << cmp << std::endl;
-    ASSERT_TRUE(cmp < 0);
+    ASSERT_LT(cmp, 0);
   }
 }
 /*
