@@ -11,19 +11,19 @@
 namespace ope {
 
 class CodeGeneratorFactory {
-public:
-    static CodeGenerator* createCodeGenerator(const int type) {
-        if (type == 0)
+ public:
+  static CodeGenerator *createCodeGenerator(const int type) {
+    if (type == 0)
 #ifdef USE_FIXED_LEN_DICT_CODE
-	    return new FixedLenDictCG();
+      return new FixedLenDictCG();
 #else
-            return new HuTuckerCG();
+      return new HuTuckerCG();
 #endif
-	else
-	    return new HuTuckerCG();
-    }
+    else
+      return new HuTuckerCG();
+  }
 };
 
-} // namespace ope
+}  // namespace ope
 
-#endif // CODE_GENERATOR_FACTORY_H
+#endif  // CODE_GENERATOR_FACTORY_H

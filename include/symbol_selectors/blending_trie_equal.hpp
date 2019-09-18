@@ -48,7 +48,7 @@ class TrieNode {
 
 class BlendTrie {
  public:
-  BlendTrie(int _blend_type = 1);
+  BlendTrie();
 
   ~BlendTrie();
 
@@ -65,13 +65,9 @@ class BlendTrie {
 
  private:
   TrieNode *root_;
-  int blend_type;
 };
 
-BlendTrie::BlendTrie(int _blend_type) {
-  root_ = nullptr;
-  blend_type = _blend_type;
-}
+BlendTrie::BlendTrie() { root_ = nullptr; }
 
 BlendTrie::~BlendTrie() {
   // Delete all the nodes
@@ -96,38 +92,14 @@ BlendTrie::~BlendTrie() {
 
 // Only calculate the frequency of suffix
 void BlendTrie::build(std::vector<std::string> key_list) {
-  std::cout << "Key list size:" << key_list.size() << std::endl;
   root_ = new TrieNode();
-  int maxkey_len = 50;
-  if (blend_type == 0) {
-    for (int i = 0; i < (int)key_list.size(); i++) {
-      std::string key = key_list[i].substr(0, maxkey_len);
-      for (int j = 0; j < (int)key.length(); j++) {
-        for (int k = 1; k <= (int)key.length() - j; k++) {
-          std::string substring = key.substr(j, k);
-          // std::cout << substring << "*" << std::endl;
-          insert(substring, 1);
-        }
-      }
-    }
-    /*for (int i = 0; i < (int)key_list.size(); i++) {
-        std::string key = key_list[i];
-        for (int j = 0; j < (int)key.size(); j++) {
-            for (int k = 1; k <= (int)key.size() - j && k < maxkey_len; k++) {
-                std::string substring = key.substr(j, k);
-                //std::cout << substring << "*" << std::endl;
-                insert(substring, 1);
-            }
-        }
-    }*/
-  } else if (blend_type == 1) {
-    for (int i = 0; i < (int)key_list.size(); i++) {
-      std::string key = key_list[i].substr(0, maxkey_len);
-      int str_len = key.length();
-      for (int j = 0; j < str_len; j++) {
-        std::string substring = key.substr(j, str_len - j);
-        insert(substring, 1);
-      }
+  int maxkey_len = 100;
+  for (int i = 0; i < (int)key_list.size(); i++) {
+    std::string key = key_list[i].substr(0, maxkey_len);
+    int str_len = key.length();
+    for (int j = 0; j < (int)key.size(); j++) {
+      std::string substring = key.substr(j, str_len - j);
+      insert(substring, 1);
     }
   }
 }
@@ -156,16 +128,18 @@ void BlendTrie::blendingAndGetLeaves(std::vector<SymbolFreq> &freq_vec) {
     TrieNode *high_freq_child = nullptr;
     int64_t high_freq = -1;
     for (auto iter = top_node->getBegin(); iter != top_node->getEnd(); iter++) {
+      int child_cnt = (int)top_node->getChildren().size();
       l.push_back(iter->second);
       iter->second->setPrefix(top_node->getPrefix() + std::string(1, iter->first));
+      iter->second->setFreq(top_node->getFreq() * 1.0 / child_cnt + iter->second->getFreq());
       if (iter->second->getFreq() > high_freq) {
         high_freq = iter->second->getFreq();
         high_freq_child = iter->second;
       }
     }
     if (top_node->hasChildren()) {
-      high_freq_child->setFreq(high_freq_child->getFreq() + top_node->getFreq());
-      top_node->setFreq(0);
+      // high_freq_child->setFreq(high_freq_child->getFreq() + top_node->getFreq());
+      // top_node->setFreq(0);
     } else {
       freq_vec.push_back(std::make_pair(top_node->getPrefix(), top_node->getFreq()));
     }
