@@ -17,6 +17,8 @@ static const std::string file_email = "datasets/emails.txt";
 static const std::string file_wiki = "datasets/wikis.txt";
 static const std::string file_url = "datasets/urls.txt";
 static const std::string file_ts = "datasets/poisson_timestamps.csv";
+static const std::string file_email1 = "datasets/email_1.txt";
+static const std::string file_email2 = "datasets/email_2.txt";
 static const int kLongestCodeLen = 4096;
 
 static int runALM = 1;
@@ -148,6 +150,13 @@ static const std::string file_batch_lat
 = output_dir + batch_subdir + "batch_lat.csv";
 std::ofstream output_batch_lat;
 
+//------------------------------------------------------------
+// Insert Percentage
+//-----------------------------------------------------------
+static const std::string per_subdir = "percentage/";
+static const std::string file_per_email = output_dir + per_subdir + "per_cpr_lat.csv";
+std::ofstream output_per_cpr_lat;
+
 double getNow() {
     struct timeval tv;
     gettimeofday(&tv, 0);
@@ -218,13 +227,70 @@ void printStr(std::string str) {
 /* Percent range [0, 100] */
 void getFirstSampleKeys(const double sample_percent,
                     std::vector<std::string> &sample_keys,
-                    const std::vector<std::string> &shuffle_keys) {
-    int sample_size = (int)(shuffle_keys.size() * sample_percent);
+                    const std::vector<std::string> &shuffle_keys,
+                    int64_t &enc_src_len) {
+    int sample_size = (int)(shuffle_keys.size() * sample_percent / 100);
+    enc_src_len = 0;
     for (int i = 0; i < sample_size; i++) {
         sample_keys.push_back(shuffle_keys[i]);
+        enc_src_len += shuffle_keys[i].size();
     }
 }
 
+void exec_helper(const int encoder_type, const int W, const int input_dict_size,
+                 const std::vector<std::string> sample_keys,
+                 const std::vector<std::string> enc_src_keys,
+                 const int64_t enc_src_len, int encode_method, const int batch_size,
+                 double &bt, double &tput, double &lat, double &cpr, double &dict_size, double &mem) {
+    ope::Encoder* encoder = ope::EncoderFactory::createEncoder(encoder_type, W);
+    double time_start = getNow();
+    encoder->build(sample_keys, input_dict_size);
+    double time_end = getNow();
+    bt = time_end - time_start;
+
+    dict_size = encoder->numEntries();
+    mem = encoder->memoryUse();
+
+    uint8_t* buffer = new uint8_t[kLongestCodeLen];
+    uint8_t* lb = new uint8_t[kLongestCodeLen];
+    uint8_t* rb = new uint8_t[kLongestCodeLen];
+    int64_t total_enc_len = 0;
+
+    time_start = getNow();
+    std::vector<std::string> enc_keys;
+
+    if (encode_method == 0) {
+        for (int i = 0; i < (int)enc_src_keys.size(); i++) {
+            total_enc_len += encoder->encode(enc_src_keys[i], buffer);
+        }
+    } else if (encode_method == 1) {
+        int l_len;
+        int r_len;
+        for (int i = 0; i < (int)enc_src_keys.size() - 1; i+=2) {
+            encoder->encodePair(enc_src_keys[i], enc_src_keys[i+1], lb, rb, l_len, r_len);
+            total_enc_len += l_len + r_len;
+        }
+    } else if (encode_method == 2) {
+        for (int i = 0; i <= (int)enc_src_keys.size() - batch_size; i += batch_size) {
+            total_enc_len += encoder->encodeBatch(enc_src_keys, i, batch_size, enc_keys);
+        }
+    }
+    time_end = getNow();
+    delete[] buffer;
+    delete lb;
+    delete rb;
+    delete encoder;
+    double time_diff = time_end - time_start;
+    tput = enc_src_keys.size() / time_diff / 1000000; // in Mops/s
+    lat = time_diff * 1000000000 / enc_src_len; // in ns
+    cpr = (enc_src_len * 8.0) / total_enc_len;
+
+    std::cout << "Throughput = " << tput << " Mops/s" << std::endl;
+    std::cout << "Latency = " << lat << " ns/char" << std::endl;
+    std::cout << "CPR = " << cpr << std::endl;
+    std::cout << "Dict Size = " << dict_size << std::endl;
+    std::cout << "Memory = " << mem << std::endl;
+}
 
 void exec(const int expt_id, const int wkld_id,
       const int encoder_type, const int64_t dict_size_id,
@@ -235,7 +301,8 @@ void exec(const int expt_id, const int wkld_id,
     std::sort(keys_shuffle.begin(), keys_shuffle.end());
 #endif
     std::vector<std::string> sample_keys;
-    getFirstSampleKeys(sample_percent, sample_keys, keys_shuffle);
+    int64_t sample_enc_src_len = 0;
+    getFirstSampleKeys(sample_percent, sample_keys, keys_shuffle, sample_enc_src_len);
 
     int64_t input_dict_size = 0;
     if (encoder_type == 3) {
@@ -254,52 +321,21 @@ void exec(const int expt_id, const int wkld_id,
         W = ALM_W_improved[wkld_id][dict_size_id];
     }
 
-    ope::Encoder* encoder = ope::EncoderFactory::createEncoder(encoder_type, W);
-    double time_start = getNow();
-    encoder->build(sample_keys, input_dict_size);
-    double time_end = getNow();
-    double bt = time_end - time_start;
-
-    int dict_size = encoder->numEntries();
-    int64_t mem = encoder->memoryUse();
-
-    uint8_t* buffer = new uint8_t[kLongestCodeLen];
-    uint8_t* lb = new uint8_t[kLongestCodeLen];
-    uint8_t* rb = new uint8_t[kLongestCodeLen];
-    uint64_t total_enc_len = 0;
-
-    time_start = getNow();
-
     std::vector<std::string> enc_src_keys;
-    std::vector<std::string> enc_keys;
-    getFirstSampleKeys(enc_percent, enc_src_keys, keys_shuffle);
-    if (encode_method == 0) {
-        for (int i = 0; i < (int)enc_src_keys.size(); i++) {
-            total_enc_len += encoder->encode(keys_shuffle[i], buffer);
-        }
-    } else if (encode_method == 1) {
-        int l_len;
-        int r_len;
-        for (int i = 0; i < (int)enc_src_keys.size() - 1; i+=2) {
-            encoder->encodePair(keys_shuffle[i], keys_shuffle[i+1], lb, rb, l_len, r_len);
-            total_enc_len += l_len + r_len;
-        }
-    } else if (encode_method == 2) {
-        for (int i = 0; i <= (int)enc_src_keys.size() - batch_size; i += batch_size) {
-            total_enc_len += encoder->encodeBatch(keys_shuffle, i, batch_size, enc_keys);
-        }
-    }
-    delete[] buffer;
-    delete lb;
-    delete rb;
-    delete encoder;
-    time_end = getNow();
-    double time_diff = time_end - time_start;
-    double tput = keys_shuffle.size() / time_diff / 1000000; // in Mops/s
-    double lat = time_diff * 1000000000 / total_len; // in ns
-    double cpr = (total_len * 8.0) / total_enc_len;
+    int64_t enc_src_len = 0;
+    getFirstSampleKeys(enc_percent, enc_src_keys, keys_shuffle, enc_src_len);
+    double tput = 0;
+    double lat = 0;
+    double cpr = 0;
+    double bt = 0;
+    double dict_size = 0;
+    double mem = 0;
+    exec_helper(encoder_type, W, input_dict_size,
+                 sample_keys, enc_src_keys,
+                 enc_src_len, encode_method,
+                 batch_size, bt, tput, lat, cpr, dict_size, mem);
 
-    if (expt_id < 0 || expt_id > 8)
+    if (expt_id < 0 || expt_id > 9)
         std::cout << "ERROR: INVALID EXPT ID!" << std::endl;
 
     if (wkld_id < 0 || wkld_id > 3)
@@ -354,13 +390,11 @@ void exec(const int expt_id, const int wkld_id,
         }
     } else if (expt_id == 7) {
         output_batch_lat << lat << "\n";
+    } else if (expt_id == 8) {
+        output_per_cpr_lat << cpr << "\n";
+        output_per_cpr_lat << lat << "\n";
     }
 
-    std::cout << "Throughput = " << tput << " Mops/s" << std::endl;
-    std::cout << "Latency = " << lat << " ns/char" << std::endl;
-    std::cout << "CPR = " << cpr << std::endl;
-    std::cout << "Dict Size = " << dict_size << std::endl;
-    std::cout << "Memory = " << mem << std::endl;
 }
 } // namespace microbench
 
@@ -371,9 +405,15 @@ int main(int argc, char *argv[]) {
     runALM = (int)atoi(argv[2]);
 
     std::vector<std::string> emails;
+    std::vector<std::string> emails1;
+    std::vector<std::string> emails2;
     std::vector<std::string> emails_shuffle;
-    int64_t total_len_email =  0;
-//    int64_t total_len_email = loadKeys(file_email, emails, emails_shuffle);
+    std::vector<std::string> emails1_shuffle;
+    std::vector<std::string> emails2_shuffle;
+    //int64_t total_len_email =  0;
+    int64_t total_len_email = loadKeys(file_email, emails, emails_shuffle);
+    int64_t total_len_email1 = loadKeys(file_email1, emails1, emails1_shuffle);
+    int64_t total_len_email2 = loadKeys(file_email2, emails2, emails2_shuffle);
 
     std::vector<std::string> wikis;
     std::vector<std::string> wikis_shuffle;
@@ -730,16 +770,54 @@ int main(int argc, char *argv[]) {
         //---------------------------------------------------------------
         // Compression Rate vs Insert percentage
         //---------------------------------------------------------------
+        output_per_cpr_lat.open(file_per_email);
         int enc_src_percents[10] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
         int sample_percent = 1;
         int ds = 6;
         for (int encoder_type = 1; encoder_type < 5; encoder_type++) {
+            std::cout << "Encode Method " << encoder_type << std::endl;
             for (int i = 0; i < 10; i++) {
                 int enc_src_percent = enc_src_percents[i];
-                std::cout << "----------Insert percentage" << enc_src_percent << "%------------" << std::endl;
+                std::cout << "----------Insert percentage " << enc_src_percent << "%------------" << std::endl;
                 exec(expt_id, kEmail, encoder_type, ds, sample_percent, enc_src_percent, emails_shuffle, total_len_email);
             }
         }
+        output_per_cpr_lat.close();
+    } else if (expt_id == 9) {
+        int encoder_type = 2;
+        int ds = 6;
+        int sample_percent = 1;
+        int enc_src_percent = 100;
+        int W = 0;
+        int input_dict_size = 0;
+        int encode_method = 0;
+        int batch_size = 0;
+        double bt = 0;
+        double tput = 0;
+        double lat = 0;
+        double cpr = 0;
+        double mem = 0;
+        double dict_size = 0;
+        std::cout << "-----------------Dataset 1, Dictionary 1---------------" << std::endl;
+        exec(expt_id, kEmail, encoder_type, ds, sample_percent, enc_src_percent, emails1_shuffle, total_len_email1);
+        std::cout << "-----------------Dataset 2, Dictionary 2---------------" << std::endl;
+        exec(expt_id, kEmail, encoder_type, ds, sample_percent, enc_src_percent, emails2_shuffle, total_len_email2);
+        std::cout << "----------------Dataset 1, Dictionary 2----------------" << std::endl;
+        std::vector<std::string> sample1_keys;
+        std::vector<std::string> sample2_keys;
+        int64_t sample_src_len1 = 0;
+        int64_t sample_src_len2 = 0;
+        getFirstSampleKeys(sample_percent, sample1_keys, emails1_shuffle, sample_src_len1);
+        getFirstSampleKeys(sample_percent, sample2_keys, emails2_shuffle, sample_src_len2);
+        exec_helper(encoder_type, W, input_dict_size,
+                    sample2_keys, emails1_shuffle,
+                    total_len_email1, encode_method,
+                    batch_size, bt, tput, lat, cpr, dict_size, mem);
+        std::cout << "---------------Dataset 2, Dictionary 1-----------------" << std::endl;
+        exec_helper(encoder_type, W, input_dict_size,
+                    sample1_keys, emails2_shuffle,
+                    total_len_email2, encode_method,
+                    batch_size, bt, tput, lat, cpr, dict_size, mem);
     }
     return 0;
 }
