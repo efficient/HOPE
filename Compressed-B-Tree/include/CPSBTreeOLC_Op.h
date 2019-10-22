@@ -7,6 +7,8 @@
 #include <sched.h>
 #include <algorithm>
 #include <queue>
+#include <string>
+#include <utility>
 
 namespace cpsbtreeolc {
 
@@ -404,7 +406,7 @@ struct BTreeLeaf : public BTreeLeafBase {
       uint16_t new_prefix_len = k.commonPrefix(prefix_key_);
       k.chunkBeginning(new_prefix_len);
       keys[pos] = k;
-      payloads[pos] = p.c_str();
+      payloads[pos] = p;
       count++;
       // decide if we need to modify all the other keys
       if (new_prefix_len == prefix_key_.getLen()) {
@@ -426,7 +428,7 @@ struct BTreeLeaf : public BTreeLeafBase {
       prefix_key_.setKeyStr(k.getKeyStr(), k.getLen());
       k.setKeyStr("", 0);
       keys[0] = k;
-      payloads[0] = p.c_str();
+      payloads[0] = p;
       count++;
     }
   }
@@ -439,8 +441,8 @@ struct BTreeLeaf : public BTreeLeafBase {
 
     for (int i = 0; i < newLeaf->count; i++) {
       newLeaf->keys[i] = keys[i+count];
-      keys[i+count].~Key();
-      newLeaf->payloads[i] = payloads[i + count].c_str();
+      keys[i+count] = Key();
+      newLeaf->payloads[i] = payloads[i + count];
     }
 
     // update common prefix
@@ -558,12 +560,12 @@ struct BTreeInner : public BTreeInnerBase {
     // Concatenate to get the full key
     sep = prefix_key_.concate(right);
 
-    //memcpy(newInner->keys,keys+count+1,sizeof(Key)*(newInner->count+1));
-    //memset(keys + count + 1, 0, sizeof(Key) * (newInner->count+1));
-    for (int i = 0; i < newInner->count + 1; i++) {
-      newInner->keys[i] = keys[i + count + 1];
-      keys[i + count + 1].~Key();
-    }
+    memcpy(newInner->keys,keys+count+1,sizeof(Key)*(newInner->count));
+    memset(keys + count + 1, 0, sizeof(Key) * (newInner->count));
+    //for (int i = 0; i < newInner->count; i++) {
+    //  newInner->keys[i] = keys[i + count + 1];
+    //  keys[i + count + 1] = Key();
+    //}
     memcpy(newInner->children,children+count+1,sizeof(NodeBase*)*(newInner->count+1));
     newInner->prefix_key_ = prefix_key_;
 
