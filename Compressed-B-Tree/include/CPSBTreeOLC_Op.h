@@ -13,8 +13,8 @@ namespace cpsbtreeolc {
 enum class PageType : uint8_t { BTreeInner=1, BTreeLeaf=2 };
 
 static const uint8_t POINTER_SIZE = 8;
-static const int MaxEntries = 20;
-static const int MaxLeafEntries = 20;
+static const int MaxEntries = 50;
+static const int MaxLeafEntries = 50;
 static int64_t leaf_waste_byte = 0;
 
 struct OptLock {
@@ -178,7 +178,7 @@ class Key {
   void chunkToLength(uint16_t new_len) {
     if (getLen() > POINTER_SIZE && new_len <= POINTER_SIZE) {
       const char *overflow_str = getOverFlowStr();
-      memmove(key, overflow_str, new_len);
+      memcpy(key, overflow_str, new_len);
       delete []overflow_str;
     }
     setLen(new_len);
@@ -435,11 +435,11 @@ struct BTreeLeaf : public BTreeLeafBase {
     BTreeLeaf* newLeaf = new BTreeLeaf();
     newLeaf->count = count-(count/2);
     count = count-newLeaf->count;
-    memcpy(newLeaf->keys, keys+count, sizeof(Key)*newLeaf->count);
-    memset(keys + count, 0, sizeof(Key)*newLeaf->count);
     newLeaf->prefix_key_ = prefix_key_;
 
     for (int i = 0; i < newLeaf->count; i++) {
+      newLeaf->keys[i] = keys[i+count];
+      keys[i+count].~Key();
       newLeaf->payloads[i] = payloads[i + count].c_str();
     }
 
@@ -558,11 +558,12 @@ struct BTreeInner : public BTreeInnerBase {
     // Concatenate to get the full key
     sep = prefix_key_.concate(right);
 
-    memcpy(newInner->keys,keys+count+1,sizeof(Key)*(newInner->count+1));
-    memset(keys + count + 1, 0, sizeof(Key) * (newInner->count+1));
-//    for (int i = 0; i < newInner->count + 1; i++) {
-//      newInner->keys[i] = keys[i + count + 1];
-//    }
+    //memcpy(newInner->keys,keys+count+1,sizeof(Key)*(newInner->count+1));
+    //memset(keys + count + 1, 0, sizeof(Key) * (newInner->count+1));
+    for (int i = 0; i < newInner->count + 1; i++) {
+      newInner->keys[i] = keys[i + count + 1];
+      keys[i + count + 1].~Key();
+    }
     memcpy(newInner->children,children+count+1,sizeof(NodeBase*)*(newInner->count+1));
     newInner->prefix_key_ = prefix_key_;
 
@@ -787,7 +788,7 @@ struct BTree {
 
     // Parent of current node
     BTreeInner *parent = nullptr;
-    uint64_t versionParent;
+    uint64_t versionParent = 0;
 
     while (node->type==PageType::BTreeInner) {
       auto inner = static_cast<BTreeInner *>(node);
@@ -929,6 +930,7 @@ struct BTree {
       q.pop();
     }
     std::cout << "---------------Compressed B tree----------------------" << std::endl;
+    std::cout << "Btree size = " << size * 1.0 / 1000000.0 << " MB" << std::endl;
     std::cout << "Max Height = " << max_hei << std::endl;
     std::cout << "Max Prefix Len = " << max_prefix_len << std::endl;
     std::cout << "Avg Prefix Len = " << 1.0 * avg_internal_prefix / internal_node_num << std::endl;
