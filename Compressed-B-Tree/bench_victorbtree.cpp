@@ -6,14 +6,12 @@
 #include <set>
 
 #include "encoder_factory.hpp"
-#include "CPSBTreeOLC_Op.h"
 #include "BTreeOLC.h"
 
 //#define NOT_USE_ENCODE_PAIR 1
 //#define RUN_TIMESTAMP
 
 static const uint64_t kNumEmailRecords = 25000000;
-//static const uint64_t kNumEmailRecords = 2500;
 static const uint64_t kNumWikiRecords = 14000000;
 static const uint64_t kNumTsRecords = 14000000;
 static const uint64_t kNumTxns = 10000000;
@@ -52,7 +50,7 @@ static const int kTs = 3;
 //-------------------------------------------------------------
 // Expt ID = 0
 //-------------------------------------------------------------
-static const std::string output_dir_btree_point = "results/cpsbtree/point/";
+static const std::string output_dir_btree_point = "results/victorbtree/point/";
 static const std::string file_lookuplat_email_btree = output_dir_btree_point + "lookuplat_email_btree.csv";
 std::ofstream output_lookuplat_email_btree;
 static const std::string file_insertlat_email_btree = output_dir_btree_point + "insertlat_email_btree.csv";
@@ -84,7 +82,7 @@ std::ofstream output_mem_ts_btree;
 //-------------------------------------------------------------
 // Expt ID = 1
 //-------------------------------------------------------------
-static const std::string output_dir_btree_range = "results/cpsbtree/range/";
+static const std::string output_dir_btree_range = "results/victorbtree/range/";
 static const std::string file_lookuplat_email_btree_range = output_dir_btree_range + "lookuplat_email_btree_range.csv";
 std::ofstream output_lookuplat_email_btree_range;
 static const std::string file_insertlat_email_btree_range = output_dir_btree_range + "insertlat_email_btree_range.csv";
@@ -216,16 +214,14 @@ void loadWorkload(int wkld_id,
 
     if (wkld_id == kEmail) {
         loadKeysFromFile(file_txn_email, kNumTxns, txn_keys);
-        loadLensInt(file_txn_email_len, kNumTxns, scan_key_lens);
     } else if (wkld_id == kWiki) {
         loadKeysFromFile(file_txn_wiki, kNumTxns, txn_keys);
-        loadLensInt(file_txn_wiki_len, kNumTxns, scan_key_lens);
     } else if (wkld_id == kUrl) {
         loadKeysFromFile(file_txn_url, kNumTxns, txn_keys);
-        loadLensInt(file_txn_url_len, kNumTxns, scan_key_lens);
     } else if (wkld_id == kTs)
         loadKeysInt(file_txn_ts, kNumTxns, txn_keys);
 
+    loadLensInt(file_txn_email_len, kNumTxns, scan_key_lens);
     std::cout << "insert_keys size = " << insert_keys.size() << std::endl;
     std::cout << "insert_keys_sample size = " << insert_keys_sample.size() << std::endl;
     std::cout << "txn_keys size = " << txn_keys.size() << std::endl;
@@ -276,24 +272,19 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
         enc_insert_keys.push_back(std::make_pair(insert_keys[i], encode_str));
     }
 
-    auto bt = new cpsbtreeolc::BTree<int64_t>();
+    //auto bt = new btreeolc::BTree<std::string, int64_t>();
+    auto bt = new btreeolc::BTree<std::string, std::string>();
     std::cout << enc_insert_keys.size() << "*" << std::endl;
     double insert_start_time = getNow();
     for (int i = 0; i < (int)enc_insert_keys.size(); i++) {
         if (i%1000000 == 0)
             std::cout << i << "/" << enc_insert_keys.size() << std::endl;
         std::pair<std::string, std::string>* tmp_pair = &enc_insert_keys[i];
-        int enc_len = 0;
-        cpsbtreeolc::Key key;
         if (is_compressed) {
-            enc_len = encoder->encode(tmp_pair->first, buffer);
-            int enc_len_round = (enc_len + 7) >> 3;
-            key.setKeyStr(reinterpret_cast<char *>(buffer), enc_len_round);
-        } else {
-            enc_len = tmp_pair->first.length();
-            key.setKeyStr(tmp_pair->first.c_str(), enc_len);
+            encoder->encode(tmp_pair->first, buffer);
         }
-        bt->insert(key, reinterpret_cast<int64_t>(&(tmp_pair->second)));
+//        bt->insert(tmp_pair->second, reinterpret_cast<int64_t>(&(tmp_pair->second)));
+          bt->insert(tmp_pair->second, tmp_pair->second);
     }
 
     double end_time = getNow();
@@ -309,65 +300,70 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     double encoder_mem = 0;
     if (encoder != nullptr)
         encoder_mem = encoder->memoryUse();
-    double mem = (btree_size + encoder_mem) / 1000000.0;
+    double mem = (btree_size + encoder_mem + total_key_size) / 1000000.0;
     std::cout << kGreen << "Mem = " << kNoColor << mem << std::endl;
 
     // execute transactions =======================================
     uint64_t sum = 0;
-    //uint64_t TIDs[120];
+    int64_t TIDs[1000];
+    std::string results[1000];
+
     start_time = getNow();
     if (is_point) { // point query
         if (is_compressed) {
             for (int i = 0; i < (int)txn_keys.size(); i++) {
                 int enc_len = encoder->encode(txn_keys[i], buffer);
                 int enc_len_round = (enc_len + 7) >> 3;
-                cpsbtreeolc::Key key;
-                key.setKeyStr(reinterpret_cast<char *>(buffer), enc_len_round);
-                int64_t re;
-                bool find = bt->lookup(key, re);
+                std::string enc_key = std::string((const char*)buffer, enc_len_round);
+                //int64_t re;
+                std::string re;
+                bool find = bt->lookup(enc_key, re);
                 sum += (int)find;
             }
         } else {
             for (int i = 0; i < (int)txn_keys.size(); i++) {
-                cpsbtreeolc::Key key;
-                key.setKeyStr(txn_keys[i].c_str(), txn_keys[i].length());
-                int64_t re;
-                bool find = bt->lookup(key, re);
+                //int64_t re;
+                std::string re;
+                bool find = bt->lookup(txn_keys[i], re);
                 sum += (int)find;
-                assert(find);
-               // assert(re == txn_keys[i]);
             }
         }
     } else { // range query
-/*        if (is_compressed) {
+        if (is_compressed) {
             for (int i = 0; i < (int)txn_keys.size(); i++) {
                 int enc_len = 0;
                 enc_len = encoder->encode(txn_keys[i], buffer);
                 int enc_len_round = (enc_len + 7) >> 3;
                 std::string left_key = std::string((const char*)buffer, enc_len_round);
-                btree_type::const_iterator iter = bt->lower_bound(left_key);
-                int cnt = 0;
-                while (iter != bt->end() &&  iter.key().compare(endStr) < 0
-                       && cnt < scan_key_lens[i]) {
-                    TIDs[cnt] = iter->second;
-                    ++iter;
-                    ++cnt;
+//                int cnt = bt->scan(left_key, scan_key_lens[i], TIDs);
+//                if (cnt != scan_key_lens[i]) {
+//                    std::cout << "Input Size: " << scan_key_lens[i] << "\t" << "Result Size: " << cnt << std::endl;
+//                }
+                int cnt = bt->scan(left_key, scan_key_lens[i], results);
+                if (cnt != scan_key_lens[i]) {
+                    std::cout << "Input Size: " << scan_key_lens[i] << "\t" << "Result Size: " << cnt << std::endl;
+                    for (int j = 0; j < cnt; j++) {
+                        std::cout << results[j] << std::endl;
+                    }
                 }
+
             }
-            std::cout << "Finish Uncompressed Range Query" << std::endl;
         } else {
             for (int i = 0; i < (int)txn_keys.size(); i++) {
-                btree_type::const_iterator iter = bt->lower_bound(txn_keys[i]);
-                int cnt = 0;
-                while (iter != bt->end() && iter.key().compare(endStr) < 0
-                       && cnt < scan_key_lens[i]) {
-                    TIDs[cnt] = iter->second;
-                    ++iter;
-                    ++cnt;
+//                int cnt = bt->scan(txn_keys[i], scan_key_lens[i], TIDs);
+//                if (cnt != scan_key_lens[i]) {
+//                    std::cout << "Input Size: " << scan_key_lens[i] << "\t" << "Result Size: " << cnt << std::endl;
+//                }
+                int cnt = bt->scan(txn_keys[i], scan_key_lens[i], results);
+                if (cnt != scan_key_lens[i]) {
+                    std::cout << "Input Size: " << scan_key_lens[i] << "\t" << "Result Size: " << cnt << std::endl;
+                    for (int j = 0; j < cnt; j++) {
+                        std::cout << results[j] << std::endl;
+                    }
                 }
+
             }
-            std::cout << "Finish Uncompressed Range Query" << std::endl;
-        }*/
+        }
     }
     end_time = getNow();
     double exec_time = end_time - start_time;

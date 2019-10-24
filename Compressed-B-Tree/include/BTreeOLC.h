@@ -93,8 +93,6 @@ struct BTreeLeaf : public BTreeLeafBase {
   BTreeLeaf() {
     count=0;
     type=typeMarker;
-    memset(keys, 0, maxEntries * sizeof(Key));
-    memset(payloads, 0, maxEntries * sizeof(Payload));
   }
 
   int64_t getSize() {
@@ -103,7 +101,7 @@ struct BTreeLeaf : public BTreeLeafBase {
 
   bool isFull() { return count==maxEntries; };
 
-  unsigned lowerBound(Key k) {
+  unsigned lowerBound(Key &k) {
     unsigned lower=0;
     unsigned upper=count;
     do {
@@ -139,8 +137,12 @@ struct BTreeLeaf : public BTreeLeafBase {
         payloads[pos] = p;
         return;
       }
-      memmove(keys+pos+1,keys+pos,sizeof(Key)*(count-pos));
-      memmove(payloads+pos+1,payloads+pos,sizeof(Payload)*(count-pos));
+      //memmove(keys+pos+1,keys+pos,sizeof(Key)*(count-pos));
+      //memmove(payloads+pos+1,payloads+pos,sizeof(Payload)*(count-pos));
+      for (int i = count; i > (int)pos; i--) {
+        keys[i] = keys[i-1];
+        payloads[i] = payloads[i-1];
+      }
       keys[pos]=k;
       payloads[pos]=p;
     } else {
@@ -154,8 +156,12 @@ struct BTreeLeaf : public BTreeLeafBase {
     BTreeLeaf* newLeaf = new BTreeLeaf();
     newLeaf->count = count-(count/2);
     count = count-newLeaf->count;
-    memcpy(newLeaf->keys, keys+count, sizeof(Key)*newLeaf->count);
-    memcpy(newLeaf->payloads, payloads+count, sizeof(Payload)*newLeaf->count);
+//    memcpy(newLeaf->keys, keys+count, sizeof(Key)*newLeaf->count);
+//    memcpy(newLeaf->payloads, payloads+count, sizeof(Payload)*newLeaf->count);
+    for (int i = 0; i < newLeaf->count; i++) {
+      newLeaf->keys[i] = keys[i + count];
+      newLeaf->payloads[i] = payloads[i + count];
+    }
     sep = keys[count-1];
     return newLeaf;
   }
@@ -174,8 +180,6 @@ struct BTreeInner : public BTreeInnerBase {
   BTreeInner() {
     count=0;
     type=typeMarker;
-    memset(keys, 0, maxEntries * sizeof(Key));
-    memset(children, 0, maxEntries * sizeof(NodeBase*));
   }
 
   ~BTreeInner() {
@@ -226,16 +230,23 @@ struct BTreeInner : public BTreeInnerBase {
     newInner->count=count-(count/2);
     count=count-newInner->count-1;
     sep=keys[count];
-    memcpy(newInner->keys,keys+count+1,sizeof(Key)*(newInner->count+1));
+//    memcpy(newInner->keys,keys+count+1,sizeof(Key)*(newInner->count));
     memcpy(newInner->children,children+count+1,sizeof(NodeBase*)*(newInner->count+1));
+
+    for (int i = 0;i <= newInner->count; i++) {
+      newInner->keys[i] = keys[i + count + 1];
+    }
     return newInner;
   }
 
   void insert(Key k,NodeBase* child) {
     assert(count<maxEntries-1);
     unsigned pos=lowerBound(k);
-    memmove(keys+pos+1,keys+pos,sizeof(Key)*(count-pos+1));
+//    memmove(keys+pos+1,keys+pos,sizeof(Key)*(count-pos+1));
     memmove(children+pos+1,children+pos,sizeof(NodeBase*)*(count-pos+1));
+    for (int i = count + 1; i > (int)pos; i--) {
+      keys[i] = keys[i-1];
+    }
     keys[pos]=k;
     children[pos]=child;
     std::swap(children[pos],children[pos+1]);

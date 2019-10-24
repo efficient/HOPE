@@ -379,7 +379,7 @@ struct BTreeLeaf : public BTreeLeafBase {
 //    return (*base<k)+base-keys;
 //  }
 
-  void insert(Key &k,std::string &p) {
+  void insert(Key &k,Payload &p) {
     assert(count + 1 <= MaxLeafEntries);
     if (count) {
       unsigned pos = lowerBound(k);
@@ -668,7 +668,7 @@ struct BTree {
       _mm_pause();
   }
 
-  void insert(Key &k, Payload &v) {
+  void insert(Key k, Payload v) {
     int restartCount = 0;
     restart:
     if (restartCount++)
@@ -778,7 +778,7 @@ struct BTree {
     }
   }
 
-  bool lookup(Key k, std::string &result) {
+  bool lookup(Key k, Payload &result) {
     int restartCount = 0;
     restart:
     if (restartCount++)
