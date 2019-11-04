@@ -314,7 +314,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
 
     // execute transactions =======================================
     uint64_t sum = 0;
-    //uint64_t TIDs[120];
+    int64_t TIDs[120];
     start_time = getNow();
     if (is_point) { // point query
         if (is_compressed) {
@@ -339,35 +339,27 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
             }
         }
     } else { // range query
-/*        if (is_compressed) {
+        if (is_compressed) {
             for (int i = 0; i < (int)txn_keys.size(); i++) {
                 int enc_len = 0;
                 enc_len = encoder->encode(txn_keys[i], buffer);
                 int enc_len_round = (enc_len + 7) >> 3;
                 std::string left_key = std::string((const char*)buffer, enc_len_round);
-                btree_type::const_iterator iter = bt->lower_bound(left_key);
-                int cnt = 0;
-                while (iter != bt->end() &&  iter.key().compare(endStr) < 0
-                       && cnt < scan_key_lens[i]) {
-                    TIDs[cnt] = iter->second;
-                    ++iter;
-                    ++cnt;
-                }
+                cpsbtreeolc::Key key;
+                key.setKeyStr(left_key.c_str(), left_key.length());
+                bt->rangeScan(key, scan_key_lens[i], TIDs);
             }
-            std::cout << "Finish Uncompressed Range Query" << std::endl;
+            std::cout << "Finish Compressed Range Query" << std::endl;
         } else {
             for (int i = 0; i < (int)txn_keys.size(); i++) {
-                btree_type::const_iterator iter = bt->lower_bound(txn_keys[i]);
-                int cnt = 0;
-                while (iter != bt->end() && iter.key().compare(endStr) < 0
-                       && cnt < scan_key_lens[i]) {
-                    TIDs[cnt] = iter->second;
-                    ++iter;
-                    ++cnt;
-                }
+                cpsbtreeolc::Key key;
+                key.setKeyStr(txn_keys[i].c_str(), txn_keys[i].length());
+                bt->rangeScan(key, scan_key_lens[i], TIDs);
+         //       if (cnt != scan_key_lens[i])
+         //           std::cout << cnt << " " << scan_key_lens[i] << std::endl;
             }
             std::cout << "Finish Uncompressed Range Query" << std::endl;
-        }*/
+        }
     }
     end_time = getNow();
     double exec_time = end_time - start_time;
@@ -381,6 +373,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     std::cout << kGreen << "Lookup Latency = " << kNoColor << lookup_lat << "\n";
 
     delete bt;
+    delete buffer;
 
     if (expt_id == 0) {
         if (wkld_id == kEmail) {
@@ -445,7 +438,7 @@ void exec_group(const int expt_id, const bool is_point,
     expt_num++;
 
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-    exec(expt_id, kWiki, is_point, false, 0, 0,
+     exec(expt_id, kWiki, is_point, false, 0, 0,
      insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
     expt_num++;
 
