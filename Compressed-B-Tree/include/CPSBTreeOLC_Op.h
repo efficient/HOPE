@@ -1118,26 +1118,6 @@ class BTree {
     return size;
   }
 
-  void truncateSuffix() {
-    std::queue<NodeBase *> q;
-    q.push(root.load());
-
-    while (!q.empty()) {
-      NodeBase *top = q.front();
-      if (top->type == PageType::BTreeInner) {
-        auto inner = reinterpret_cast<BTreeInner *>(top);
-        for (int i = 0; i < (int)inner->count - 1; i++) {
-          int prefix_len = inner->keys[i].commonPrefix(inner->keys[i+1]);
-          inner->keys[i+1].chunkToLength(prefix_len + 1);
-        }
-        for (int i = 0; i <=(int)inner->count; i++) {
-          q.push(inner->children[i]);
-        }
-      } // do nothing for leaves
-      q.pop();
-    }
-  }
-
   void getSubstrings(std::vector<std::string> &substrings) {
     std::queue<NodeBase *> q;
     q.push(root.load());
