@@ -53,7 +53,8 @@ class BlendTrie {
   ~BlendTrie();
 
   void build(std::vector<std::string> key_list);
-  //        void build(const std::unordered_map<std::string, int64_t> &freq_map);
+  //        void build(const std::unordered_map<std::string, int64_t>
+  //        &freq_map);
 
   void insert(std::string &key, int64_t freq);
 
@@ -80,8 +81,8 @@ BlendTrie::~BlendTrie() {
         for (int i = 0; i < (int)key_list.size(); i++) {
             std::string key = key_list[i];
             for (int j = 0; j < (int)key.size(); j++) {
-                for (int k = 1; k <= (int)key.size() - j && k < maxkey_len; k++) {
-                    std::string substring = key.substr(j, k);
+                for (int k = 1; k <= (int)key.size() - j && k < maxkey_len; k++)
+   { std::string substring = key.substr(j, k);
                     //std::cout << substring << "*" << std::endl;
                     insert(substring, 1);
                 }
@@ -138,8 +139,8 @@ void BlendTrie::blendingAndGetLeaves(std::vector<SymbolFreq> &freq_vec) {
       }
     }
     if (top_node->hasChildren()) {
-      // high_freq_child->setFreq(high_freq_child->getFreq() + top_node->getFreq());
-      // top_node->setFreq(0);
+      // high_freq_child->setFreq(high_freq_child->getFreq() +
+      // top_node->getFreq()); top_node->setFreq(0);
     } else {
       freq_vec.push_back(std::make_pair(top_node->getPrefix(), top_node->getFreq()));
     }

@@ -1,11 +1,9 @@
-#include "gtest/gtest.h"
-
-#include <assert.h>
 #include <algorithm>
 #include <bitset>
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include "gtest/gtest.h"
 
 #include "blending_trie.hpp"
 
@@ -50,16 +48,16 @@ void BlendTrieTest::getFrequencyTable(const std::vector<std::string> &key_list,
 TEST_F(BlendTrieTest, baseNodeTest) {
   TrieNode node;
   node.setFreq(100);
-  ASSERT_TRUE(node.getFreq() == 100);
+  EXPECT_TRUE(node.getFreq() == 100);
   node.setPrefix("test");
-  ASSERT_TRUE(node.getPrefix().compare("test") == 0);
+  EXPECT_TRUE(node.getPrefix().compare("test") == 0);
   TrieNode child1;
   child1.setPrefix("1");
   TrieNode child2;
   child2.setPrefix("2");
   node.addChild('1', &child1);
   node.addChild('2', &child2);
-  ASSERT_TRUE(node.getChild('2')->second->getPrefix().compare("2") == 0);
+  EXPECT_TRUE(node.getChild('2')->second->getPrefix().compare("2") == 0);
 }
 
 TEST_F(BlendTrieTest, getFrequencyTable) {
@@ -118,16 +116,16 @@ TEST_F(BlendTrieTest, emailTrie) {
       std::cout << iter->first << " " << result_iter->first << std::endl;
       std::cout << iter->second << " " << result_iter->second << std::endl;
     }
-    ASSERT_TRUE(iter->first.compare(result_iter->first) == 0);
+    EXPECT_TRUE(iter->first.compare(result_iter->first) == 0);
     if (iter->second != result_iter->second) {
       std::cout << iter->first << " " << result_iter->first << std::endl;
       std::cout << iter->second << " " << result_iter->second << std::endl;
     }
-    ASSERT_TRUE(iter->second == result_iter->second);
+    EXPECT_TRUE(iter->second == result_iter->second);
     cnt += iter->second - result_iter->second;
     result_iter++;
   }
-  ASSERT_TRUE(result_iter == blend_results.end());
+  EXPECT_TRUE(result_iter == blend_results.end());
 }
 
 void loadEmails() {
@@ -156,7 +154,7 @@ void loadBlendResult() {
 }  // namespace ope
 
 int main(int argc, char **argv) {
-  ::testing::InitGoogleTest(&argc, argv);
+  //  ::testing::InitGoogleTest(&argc, argv);
 
   ope::blendtrietest::loadEmails();
   ope::blendtrietest::loadBlendResult();

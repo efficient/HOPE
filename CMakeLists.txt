@@ -8,8 +8,7 @@ if (NOT CMAKE_BUILD_TYPE)
 endif()
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g -Wall -Werror -march=native -mavx -pthread -std=c++14")
-#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -Wall -Werror -march=native -mavx -pthread -std=c++14")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -Wall -march=native -mavx -pthread -std=c++14")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -Wall -Werror -march=native -mavx -pthread -std=c++14")
 
 enable_testing()
 
@@ -47,8 +46,8 @@ add_subdirectory(bench)
 #add_subdirectory(SuRF/bench)
 #add_subdirectory(ART_single/test)
 #add_subdirectory(ART_single/bench)
-add_subdirectory(ART/test)
-add_subdirectory(ART/bench)
+#add_subdirectory(ART/test)
+#add_subdirectory(ART/bench)
 #add_subdirectory(btree)
 #add_subdirectory(hot)
 
@@ -127,8 +126,7 @@ add_custom_target(check-format ${OPE_BUILD_SUPPORT_DIR}/run_clang_format.py
 file(GLOB_RECURSE OPE_LINT_FILES
         #"${CMAKE_CURRENT_SOURCE_DIR}/include/*/*.hpp"
         #"${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp"
-        #"${CMAKE_CURRENT_SOURCE_DIR}/test/*.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/test/test_single_char_encoder.cpp"
+        #"${CMAKE_CURRENT_SOURCE_DIR}/test/*.cpp"
         )
 
 # Balancing act: cpplint.py takes a non-trivial time to launch,
@@ -145,9 +143,9 @@ add_custom_target(check-lint echo '${OPE_LINT_FILES}' | xargs -n12 -P8
 ###########################################################
 # runs clang-tidy and exits with a non-zero exit code if any errors are found.
 # note that clang-tidy automatically looks for a .clang-tidy file in parent directories
-add_custom_target(check-clang-tidy
-        ${OPE_BUILD_SUPPORT_DIR}/run_clang_tidy.py                     # run LLVM's clang-tidy script
-        -clang-tidy-binary ${CLANG_TIDY_BIN}                              # using our clang-tidy binary
-        -p ${CMAKE_BINARY_DIR}                                            # using cmake's generated compile commands
-        )
-add_dependencies(check-clang-tidy gtest)                    # needs gtest headers, compile_commands.json
+#add_custom_target(check-clang-tidy
+#        ${OPE_BUILD_SUPPORT_DIR}/run_clang_tidy.py                     # run LLVM's clang-tidy script
+#        -clang-tidy-binary ${CLANG_TIDY_BIN}                              # using our clang-tidy binary
+#        -p ${CMAKE_BINARY_DIR}                                            # using cmake's generated compile commands
+#        )
+#add_dependencies(check-clang-tidy gtest)                    # needs gtest headers, compile_commands.json

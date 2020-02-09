@@ -9,8 +9,6 @@
 #include "sbt.hpp"
 #include "symbol_selector_factory.hpp"
 
-//#define PRINT_BUILD_TIME_BREAKDOWN
-
 namespace ope {
 
 class SingleCharEncoder : public Encoder {
@@ -27,7 +25,6 @@ class SingleCharEncoder : public Encoder {
   void encodePair(const std::string &l_key, const std::string &r_key, uint8_t *l_buffer, uint8_t *r_buffer,
                   int &l_enc_len, int &r_enc_len) const;
 
-  //    void encodeBatch();
   int64_t encodeBatch(const std::vector<std::string> &org_keys, int start_id, int batch_size,
                       std::vector<std::string> &enc_keys);
 
@@ -45,7 +42,9 @@ class SingleCharEncoder : public Encoder {
 
 bool SingleCharEncoder::build(const std::vector<std::string> &key_list, const int64_t dict_size_limit) {
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
-  std::cout << "------------------------Build single character Encoder-----------------------" << std::endl;
+  std::cout << "------------------------Build single character "
+               "Encoder-----------------------"
+            << std::endl;
   double cur_time = getNow();
 #endif
   std::vector<SymbolFreq> symbol_freq_list;
@@ -232,8 +231,10 @@ int64_t SingleCharEncoder::encodeBatch(const std::vector<std::string> &org_keys,
     int_key_buf[key_idx] <<= (64 - int_key_len);
     int_key_buf[key_idx] = __builtin_bswap64(int_key_buf[key_idx]);
     int64_t cur_size = (key_idx << 6) + int_key_len;
-    //        int enc_len = ((key_idx << 6) + int_key_len + 7) >> 3;
-    //        enc_keys.push_back(std::string((const char*)key_buffer, enc_len));
+#ifndef BATCH_DRY_ENCPDE
+    int enc_len = ((key_idx << 6) + int_key_len + 7) >> 3;
+    enc_keys.push_back(std::string((const char *)key_buffer, enc_len));
+#endif
     batch_code_size += cur_size;
   }
   return batch_code_size;

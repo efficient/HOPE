@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <cstdint>
 
+#include "common.hpp"
+
 using namespace std;
 
 namespace ope {
@@ -154,7 +156,8 @@ class N16 : public N {
   ~N16() { cnt_N16--; }
 
   static uint8_t flipSign(uint8_t keyByte) {
-    // Flip the sign bit, enables signed SSE comparison of unsigned values, used by Node16
+    // Flip the sign bit, enables signed SSE comparison of unsigned values, used
+    // by Node16
     return keyByte ^ 128;
   };
 
@@ -779,8 +782,10 @@ bool N16::insert(uint8_t k, N *node) {
   }
 
   //        uint8_t keyByteFlipped = flipSign(k);
-  //        __m128i cmp = _mm_cmplt_epi8(_mm_set1_epi8(keyByteFlipped), _mm_loadu_si128(reinterpret_cast<__m128i
-  //        *>(keys))); uint16_t bitfield = _mm_movemask_epi8(cmp) & (0xFFFF >> (16 - count)); unsigned i = bitfield ?
+  //        __m128i cmp = _mm_cmplt_epi8(_mm_set1_epi8(keyByteFlipped),
+  //        _mm_loadu_si128(reinterpret_cast<__m128i
+  //        *>(keys))); uint16_t bitfield = _mm_movemask_epi8(cmp) & (0xFFFF >>
+  //        (16 - count)); unsigned i = bitfield ?
   //        __builtin_ctz(bitfield) : count;
   for (int j = count; j > (int)i; j--) {
     keys[j] = keys[j - 1];

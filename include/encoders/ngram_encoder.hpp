@@ -7,8 +7,6 @@
 #include "dictionary_factory.hpp"
 #include "symbol_selector_factory.hpp"
 
-//#define PRINT_BUILD_TIME_BREAKDOWN
-
 namespace ope {
 
 class NGramEncoder : public Encoder {
@@ -329,8 +327,10 @@ int64_t NGramEncoder::encodeBatch(const std::vector<std::string> &org_keys, int 
     int_key_buf[key_idx] = __builtin_bswap64(int_key_buf[key_idx]);
     int64_t cur_size = (key_idx << 6) + int_key_len;
     batch_code_size += cur_size;
-    //        int enc_len = (cur_size + 7) >> 3;
-    //        enc_keys.push_back(std::string((const char*)key_buffer, enc_len));
+#ifndef BATCH_DRY_ENCODE
+    int enc_len = (cur_size + 7) >> 3;
+    enc_keys.push_back(std::string((const char *)key_buffer, enc_len));
+#endif
   }
   return batch_code_size;
 }

@@ -53,7 +53,8 @@ class BlendTrie {
   ~BlendTrie();
 
   void build(std::vector<std::string> key_list);
-  //        void build(const std::unordered_map<std::string, int64_t> &freq_map);
+  //        void build(const std::unordered_map<std::string, int64_t>
+  //        &freq_map);
 
   void insert(std::string &key, int64_t freq);
 
@@ -84,8 +85,8 @@ BlendTrie::~BlendTrie() {
         for (int i = 0; i < (int)key_list.size(); i++) {
             std::string key = key_list[i];
             for (int j = 0; j < (int)key.size(); j++) {
-                for (int k = 1; k <= (int)key.size() - j && k < maxkey_len; k++) {
-                    std::string substring = key.substr(j, k);
+                for (int k = 1; k <= (int)key.size() - j && k < maxkey_len; k++)
+   { std::string substring = key.substr(j, k);
                     //std::cout << substring << "*" << std::endl;
                     insert(substring, 1);
                 }

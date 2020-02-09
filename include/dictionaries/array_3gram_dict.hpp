@@ -59,7 +59,8 @@ bool Array3GramDict::build(const std::vector<SymbolCode> &symbol_code_list) {
   return true;
 }
 
-// bool Array3GramDict::build (const std::vector<SymbolCode>& symbol_code_list) {
+// bool Array3GramDict::build (const std::vector<SymbolCode>& symbol_code_list)
+// {
 //     for (int i = 0; i < (int)symbol_code_list.size(); i++) {
 // 	Interval3Gram interval;
 // 	std::string symbol = symbol_code_list[i].first;

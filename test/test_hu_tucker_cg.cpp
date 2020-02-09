@@ -1,11 +1,13 @@
-#include "gtest/gtest.h"
-
 #include <assert.h>
 
+#include <algorithm>
 #include <bitset>
 #include <fstream>
 #include <iostream>
+#include <string>
+#include <vector>
 
+#include "gtest/gtest.h"
 #include "hu_tucker_cg.hpp"
 #include "symbol_selector_factory.hpp"
 
@@ -13,16 +15,16 @@ namespace ope {
 
 namespace hutuckertest {
 
-static const std::string kFilePath = "../../datasets/words.txt";
+static const char kFilePath[] = "../../datasets/words.txt";
 static const int kWordTestSize = 234369;
 static std::vector<std::string> words;
-static const std::string kEmailFilePath = "../../datasets/emails.txt";
+static const char kEmailFilePath[] = "../../datasets/emails.txt";
 static const int kEmailTestSize = 25000000;
 static std::vector<std::string> emails;
-static const std::string kWikiFilePath = "../../datasets/wikis.txt";
+static const char kWikiFilePath[] = "../../datasets/wikis.txt";
 static const int kWikiTestSize = 14000000;
 static std::vector<std::string> wikis;
-static const std::string kUrlFilePath = "../../datasets/urls.txt";
+static const char kUrlFilePath[] = "../../datasets/urls.txt";
 static const int kUrlTestSize = 25000000;
 static std::vector<std::string> urls;
 
@@ -33,7 +35,7 @@ class HuTuckerCGTest : public ::testing::Test {
 };
 
 void print(const std::vector<SymbolCode> &symbol_code_list, const HuTuckerCG *code_generator) {
-  for (int i = 0; i < (int)symbol_code_list.size(); i++) {
+  for (int i = 0; i < static_cast<int>(symbol_code_list.size()); i++) {
     int64_t code = symbol_code_list[i].second.code;
     unsigned len = symbol_code_list[i].second.len;
     std::cout << i << ", "
@@ -48,11 +50,17 @@ void printCPR(const HuTuckerCG *code_generator) {
   std::cout << "Compression Rate = " << code_generator->getCompressionRate() << std::endl;
 }
 
-std::string changeToBinary(int64_t num) {
+std::string changeToBinary(int64_t num, int8_t len) {
   std::string result = std::string();
+  int8_t cur_len = 0;
   while (num > 0) {
     result = std::string(1, num % 2 + '0') + result;
+    cur_len += 1;
     num = num / 2;
+  }
+  while (cur_len < len) {
+    result = "0" + result;
+    cur_len += 1;
   }
   return result;
 }
@@ -69,10 +77,18 @@ TEST_F(HuTuckerCGTest, testCodeOrder) {
   std::sort(symbol_code_list.begin(), symbol_code_list.end(),
             [](SymbolCode &x, SymbolCode &y) { return x.first.compare(y.first) < 0; });
   for (auto iter = symbol_code_list.begin() + 1; iter != symbol_code_list.end(); iter++) {
-    std::string str1 = changeToBinary(iter->second.code);
-    std::string str2 = changeToBinary((iter - 1)->second.code);
+    std::string str1 = changeToBinary(iter->second.code, iter->second.len);
+    std::string str2 = changeToBinary((iter - 1)->second.code, (iter - 1)->second.len);
     int cmp = str1.compare(str2);
-    assert(cmp > 0);
+    if (cmp <= 0) {
+      std::cout << cmp << std::endl;
+      std::cout << iter->first.compare((iter - 1)->first) << std::endl;
+      printString(iter->first);
+      std::cout << "\t" << str1 << "\t" << static_cast<int16_t>((iter)->second.len) << std::endl;
+      printString((iter - 1)->first);
+      std::cout << "\t" << str2 << "\t" << static_cast<int16_t>((iter - 1)->second.len) << std::endl;
+    }
+    //    assert(cmp > 0);
   }
 }
 //======================= Word Tests ==============================

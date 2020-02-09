@@ -10,14 +10,13 @@
 namespace ope {
 
 class SymbolSelector {
-public:
-    virtual ~SymbolSelector() {};
+ public:
+  virtual ~SymbolSelector(){};
 
-    virtual bool selectSymbols (const std::vector<std::string>& key_list,
-				const int64_t num_limit,
-				std::vector<SymbolFreq>* symbol_freq_list, int W = 10000) = 0;
+  virtual bool selectSymbols(const std::vector<std::string> &key_list, const int64_t num_limit,
+                             std::vector<SymbolFreq> *symbol_freq_list, int W = 10000) = 0;
 };
 
-} // namespace ope
+}  // namespace ope
 
-#endif // SYMBOL_SELECTOR_H
+#endif  // SYMBOL_SELECTOR_H

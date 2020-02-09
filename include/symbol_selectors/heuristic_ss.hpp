@@ -142,8 +142,8 @@ bool HeuristicSS::selectSymbols(const std::vector<std::string> &key_list, const 
     intervals_.clear();
     getEqualInterval(blend_freq_table);
 #ifdef PRINT_TIME_BREAKDOWN
-//            std::cout << "Generate Interval = " << getNow() - curtime << std::endl;
-//            curtime = getNow();
+//            std::cout << "Generate Interval = " << getNow() - curtime <<
+//            std::endl; curtime = getNow();
 #endif
     std::cout << "W = " << W << "\t" << intervals_.size() << std::endl;
     // sort intervals
@@ -152,18 +152,19 @@ bool HeuristicSS::selectSymbols(const std::vector<std::string> &key_list, const 
                 return strCompare(x.first, y.first) < 0;
               });
 #ifdef PRINT_TIME_BREAKDOWN
-//            std::cout << "Sort Interevals = " << getNow() - curtime << std::endl;
-//            curtime = getNow();
+//            std::cout << "Sort Interevals = " << getNow() - curtime <<
+//            std::endl; curtime = getNow();
 #endif
     // Merge adjacent intervals with same prefix
     mergeAdjacentComPrefixIntervals();
 #ifdef PRINT_TIME_BREAKDOWN
-//            std::cout << "Merge Intervals = " << getNow() - curtime << std::endl;
-//            curtime = getNow();
+//            std::cout << "Merge Intervals = " << getNow() - curtime <<
+//            std::endl; curtime = getNow();
 #endif
     if (abs(num_limit - (int)intervals_.size()) <= (int)(0.02 * num_limit)) {
-      //                std::cout << "W = " << W << "\tNumber of intervals = "<< intervals_.size() << "\tTarget = " <<
-      //                num_limit << std::endl;
+      //                std::cout << "W = " << W << "\tNumber of intervals = "<<
+      //                intervals_.size() << "\tTarget = " << num_limit <<
+      //                std::endl;
       break;
     }
     // too many intervals
@@ -242,7 +243,8 @@ void HeuristicSS::getIntervalFreqEntropy(std::vector<SymbolFreq> *symbol_freq_li
     // Pass Frequencty to Hu-Tucker
     symbol_freq_list->push_back(std::make_pair(interval_start, cnt[i] + 1));
     // Pass Frequencty * length to Hu-Tucker
-    // symbol_freq_list->push_back(std::make_pair(interval_start, (cnt[i] + 1) * common_prefix.length()));
+    // symbol_freq_list->push_back(std::make_pair(interval_start, (cnt[i] + 1) *
+    // common_prefix.length()));
   }
 #ifdef CAL_ENTROPY
   double entropy = 0;
@@ -408,7 +410,8 @@ void HeuristicSS::checkIntervals(std::string &start_str, std::string &end_str) {
       printString(end);
       std::cout << std::endl;
       //                auto nit = iter - 5;
-      //                for (; nit != iter + 5 && nit != intervals_.end(); nit++) {
+      //                for (; nit != iter + 5 && nit != intervals_.end();
+      //                nit++) {
       //                    printString(nit->first);
       //                    std::cout << "|";
       //                    printString(nit->second);

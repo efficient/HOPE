@@ -1,13 +1,15 @@
 #ifndef DOUBLE_CHAR_ENCODER_H
 #define DOUBLE_CHAR_ENCODER_H
 
-#include "encoder.hpp"
+// for memset
+#include <stdio.h>
+#include <string.h>
 
 #include "code_generator_factory.hpp"
+#include "encoder.hpp"
 #include "sbt.hpp"
 #include "symbol_selector_factory.hpp"
 
-//#define PRINT_BUILD_TIME_BREAKDOWN
 namespace ope {
 
 class DoubleCharEncoder : public Encoder {
@@ -39,7 +41,9 @@ class DoubleCharEncoder : public Encoder {
 
 bool DoubleCharEncoder::build(const std::vector<std::string> &key_list, const int64_t dict_size_limit) {
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
-  std::cout << "-----------------------------Double Character Encoder------------------------------" << std::endl;
+  std::cout << "-----------------------------Double Character "
+               "Encoder------------------------------"
+            << std::endl;
   double cur_time = getNow();
 #endif
   std::vector<SymbolFreq> symbol_freq_list;
@@ -247,8 +251,10 @@ int64_t DoubleCharEncoder::encodeBatch(const std::vector<std::string> &org_keys,
     int_key_buf[key_idx] <<= (64 - int_key_len);
     int_key_buf[key_idx] = __builtin_bswap64(int_key_buf[key_idx]);
     int64_t cur_size = (key_idx << 6) + int_key_len;
-    //        int enc_len = (cur_size + 7) >> 3;
-    //        enc_keys.push_back(std::string((const char*)key_buffer, enc_len));
+#ifndef BATCH_DRY_ENCODE
+    int enc_len = (cur_size + 7) >> 3;
+    enc_keys.push_back(std::string((const char *)key_buffer, enc_len));
+#endif
     batch_code_size += cur_size;
   }
   return batch_code_size;

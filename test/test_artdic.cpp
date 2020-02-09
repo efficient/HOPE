@@ -1,5 +1,3 @@
-#include "gtest/gtest.h"
-
 #include <assert.h>
 
 #include <algorithm>
@@ -7,20 +5,23 @@
 #include <fstream>
 #include <iostream>
 #include <set>
+#include <string>
 #include <vector>
+
 #include "art_dic_tree.hpp"
+#include "gtest/gtest.h"
 
 namespace ope {
 
 namespace treetest {
-static const std::string kEmailFilePath = "../../datasets/emails.txt";
-static const std::string kWikiFilePath = "../../datasets/wikis.txt";
-static const std::string kUrlFilePath = "../../datasets/urls.txt";
-static const std::string kTsFilePath = "../../datasets/poisson_timestamps.csv";
+static const char kEmailFilePath[] = "../../datasets/emails.txt";
+static const char kWikiFilePath[] = "../../datasets/wikis.txt";
+static const char kUrlFilePath[] = "../../datasets/urls.txt";
+static const char kTsFilePath[] = "../../datasets/poisson_timestamps.csv";
 static const int kEmailTestSize = 100000;
-static const int kWikiTestSize = 10000000;
-static const int kUrlTestSize = 1000000;
-static const int kTsTestSize = 10000;
+static const int kWikiTestSize = 100000;
+static const int kUrlTestSize = 100000;
+static const int kTsTestSize = 100000;
 static std::vector<std::string> emails;
 static std::vector<std::string> wikis;
 static std::vector<std::string> urls;
@@ -29,8 +30,8 @@ static std::vector<std::string> timestamps;
 class ARTDICTest : public ::testing::Test {
  private:
   static int strCompare(std::string s1, std::string s2) {
-    int len1 = (int)s1.size();
-    int len2 = (int)s2.size();
+    int len1 = static_cast<int>(s1.size());
+    int len2 = static_cast<int>(s2.size());
     int len = min(len1, len2);
     for (int i = 0; i < len; i++) {
       auto c1 = static_cast<uint8_t>(s1[i]);
@@ -48,8 +49,8 @@ class ARTDICTest : public ::testing::Test {
 
  public:
   static void printTs(std::string ts) {
-    for (int i = 0; i < (int)ts.length(); i++) {
-      std::cout << std::hex << unsigned((uint8_t)ts[i]) << " ";
+    for (int i = 0; i < static_cast<int>(ts.length()); i++) {
+      std::cout << std::hex << unsigned(static_cast<uint8_t>(ts[i])) << " ";
     }
     std::cout << std::endl;
   }
@@ -62,12 +63,12 @@ class ARTDICTest : public ::testing::Test {
    * @return The next string based on alphabetical order
    */
   static std::string getNextString(std::string str) {
-    for (int i = int(str.length() - 1); i >= 0; i--) {
-      if (uint8_t(str[i]) == 255) continue;
+    for (int i = static_cast<int>(str.length()) - 1; i >= 0; i--) {
+      if (static_cast<uint8_t>(str[i]) == 255) continue;
       char next_chr = str[i] + 1;
       return str.substr(0, i) + std::string(1, next_chr);
     }
-    // All characters are 255
+    // All characters are shorter than 255 characters
     assert(str.length() < MAX_STR_LEN);
     return str + std::string(1, 1);
   }
@@ -80,19 +81,20 @@ class ARTDICTest : public ::testing::Test {
    * @param cur_str           the string that we want to find its interval
    * @param out_next_idx      the index of the interval the string belongs to
    * @param out_next_str      the start string of that interval
+   * @return true : find the next interval
+             false : the given string does not belong to any interval
    */
-  static void getNextInterval(std::vector<std::string> sorted_intervals, int cur_idx, std::string &cur_str,
-                              int &out_next_idx, std::string &out_next_str) {
+  static bool getNextInterval(std::vector<std::string> sorted_intervals, int cur_idx, const std::string &cur_str,
+                              int *out_next_idx, std::string *out_next_str) {
     int i = cur_idx;
-    for (; i < (int)sorted_intervals.size(); i++) {
+    for (; i < static_cast<int>(sorted_intervals.size()); i++) {
       if (strCompare(sorted_intervals[i], cur_str) > 0) {
-        out_next_idx = i - 1;
-        out_next_str = sorted_intervals[i - 1];
-        return;
+        *out_next_idx = i - 1;
+        *out_next_str = sorted_intervals[i - 1];
+        return true;
       }
     }
-    out_next_idx = i - 1;
-    out_next_str = sorted_intervals[i - 1];
+    return false;
   }
 };
 
@@ -102,7 +104,7 @@ TEST_F(ARTDICTest, pointLookupEmailTest) {
   auto test = new ArtDicTree();
   std::vector<ope::SymbolCode> ls;
 
-  for (int i = 0; i < (int)emails.size() - 1; i++) {
+  for (int i = 0; i < static_cast<int>(emails.size()) - 1; i++) {
     ope::SymbolCode symbol_code = ope::SymbolCode();
     symbol_code.first = emails[i];
     symbol_code.second = ope::Code();
@@ -112,11 +114,11 @@ TEST_F(ARTDICTest, pointLookupEmailTest) {
 
   test->build(ls);
 
-  for (int i = 0; i < (int)emails.size() - 1; i++) {
+  for (int i = 0; i < static_cast<int>(emails.size()) - 1; i++) {
     int prefix_len = -1;
     ope::Code result = test->lookup(emails[i].c_str(), emails[i].size(), prefix_len);
     if (result.code != i) std::cout << "lookup:" << result.code << " answer:" << i << std::endl;
-    ASSERT_TRUE(result.code == i);
+    EXPECT_TRUE(result.code == i);
   }
   delete test;
 }
@@ -125,7 +127,7 @@ TEST_F(ARTDICTest, pointLookupWikiTest) {
   auto test = new ArtDicTree();
   std::vector<ope::SymbolCode> ls;
 
-  for (int i = 0; i < (int)wikis.size() - 1; i++) {
+  for (int i = 0; i < static_cast<int>(wikis.size()) - 1; i++) {
     ope::SymbolCode symbol_code = ope::SymbolCode();
     symbol_code.first = wikis[i];
     symbol_code.second = ope::Code();
@@ -135,11 +137,11 @@ TEST_F(ARTDICTest, pointLookupWikiTest) {
 
   test->build(ls);
 
-  for (int i = 0; i < (int)wikis.size() - 1; i++) {
+  for (int i = 0; i < static_cast<int>(wikis.size()) - 1; i++) {
     int prefix_len = -1;
     ope::Code result = test->lookup(wikis[i].c_str(), wikis[i].size(), prefix_len);
     if (result.code != i) std::cout << "lookup:" << result.code << " answer:" << i << std::endl;
-    ASSERT_TRUE(result.code == i);
+    EXPECT_TRUE(result.code == i);
   }
   delete test;
 }
@@ -148,7 +150,7 @@ TEST_F(ARTDICTest, pointLookupUrlTest) {
   auto test = new ArtDicTree();
   std::vector<ope::SymbolCode> ls;
 
-  for (int i = 0; i < (int)urls.size() - 1; i++) {
+  for (int i = 0; i < static_cast<int>(urls.size()) - 1; i++) {
     ope::SymbolCode symbol_code = ope::SymbolCode();
     symbol_code.first = urls[i];
     symbol_code.second = ope::Code();
@@ -158,54 +160,52 @@ TEST_F(ARTDICTest, pointLookupUrlTest) {
 
   test->build(ls);
 
-  for (int i = 0; i < (int)urls.size() - 1; i++) {
+  for (int i = 0; i < static_cast<int>(urls.size()) - 1; i++) {
     int prefix_len = -1;
     ope::Code result = test->lookup(urls[i].c_str(), urls[i].size(), prefix_len);
     if (result.code != i) std::cout << "lookup:" << result.code << " answer:" << i << std::endl;
-    ASSERT_TRUE(result.code == i);
+    EXPECT_TRUE(result.code == i);
   }
   delete test;
 }
 
-/*        TEST_F(ARTDICTest, pointTsLookupTest) {
-            ArtDicTree *test = new ArtDicTree();
-            std::vector<ope::SymbolCode> ls;
-            std::cout << "number of test timestamps:" << timestamps.size() <<
-   std::endl;
+TEST_F(ARTDICTest, pointTsLookupTest) {
+  ArtDicTree *test = new ArtDicTree();
+  std::vector<ope::SymbolCode> ls;
+  std::cout << "number of test timestamps:" << timestamps.size() << std::endl;
 
-            for (int i = 0; i < (int)timestamps.size() - 1; i++) {
-                // std::cout << emails[i] << std::endl;
-                ope::SymbolCode symbol_code = ope::SymbolCode();
-                symbol_code.first = timestamps[i];
-                symbol_code.second = ope::Code();
-                symbol_code.second.code = i;
-                ls.push_back(symbol_code);
-            }
+  for (int i = 0; i < static_cast<int>(timestamps.size()) - 1; i++) {
+    ope::SymbolCode symbol_code = ope::SymbolCode();
+    symbol_code.first = timestamps[i];
+    symbol_code.second = ope::Code();
+    symbol_code.second.code = i;
+    ls.push_back(symbol_code);
+  }
 
-            test->build(ls);
+  test->build(ls);
 
-            for (int i = 0; i < (int)timestamps.size() - 1; i++) {
-                int prefix_len = -1;
-                if ( i == -1) {
-                    for (int j = 0; j < (int)timestamps[i].length();j++)
-                        std::cout << std::hex <<
-   unsigned(uint8_t(timestamps[i][j])) << "*";
-                }
-                ope::Code result = test->lookup(timestamps[i].c_str(),
-   timestamps[i].length(), prefix_len); if (result.code != i) { std::cout <<
-   std::dec << "lookup:" << result.code << " answer:" << i << std::endl;
-                }
-                ASSERT_TRUE(result.code == i);
-            }
-            delete test;
-        }
-*/
+  for (int i = 0; i < static_cast<int>(timestamps.size()) - 1; i++) {
+    int prefix_len = -1;
+    ope::Code result = test->lookup(timestamps[i].c_str(), timestamps[i].length(), prefix_len);
+    if (result.code != i) {
+      std::cout << std::dec << "lookup:" << result.code << " answer:" << i << std::endl;
+    }
+    EXPECT_TRUE(result.code == i);
+  }
+  delete test;
+}
+
+/*
+ * ART should find the first key greater than or equal to the given key
+ * the test simulates the condition when the provided key does not exist
+ * in ART
+ */
 TEST_F(ARTDICTest, withinRangeLookupTest) {
   auto test = new ArtDicTree();
   std::vector<ope::SymbolCode> ls;
   std::sort(emails.begin(), emails.end());
 
-  for (int i = 0; i < (int)emails.size(); i++) {
+  for (int i = 0; i < static_cast<int>(emails.size()); i++) {
     ope::SymbolCode symbol_code = ope::SymbolCode();
     symbol_code.first = emails[i];
     symbol_code.second = ope::Code();
@@ -215,12 +215,16 @@ TEST_F(ARTDICTest, withinRangeLookupTest) {
 
   test->build(ls);
 
-  for (int i = 0; i < (int)emails.size() - 1; i++) {
+  for (int i = 0; i < static_cast<int>(emails.size()) - 1; i++) {
     int prefix_len = -1;
     std::string cur_str = getNextString(emails[i]);
     std::string next_str = cur_str;
     int next_idx = i;
-    getNextInterval(emails, i, cur_str, next_idx, next_str);
+    bool find_next = getNextInterval(emails, i, cur_str, &next_idx, &next_str);
+    // The given string does not belong to any interval
+    if (!find_next) {
+      break;
+    }
     ope::Code result;
     result = test->lookup(cur_str.c_str(), cur_str.size(), prefix_len);
 
@@ -231,56 +235,53 @@ TEST_F(ARTDICTest, withinRangeLookupTest) {
       auto org = test->lookup(emails[i].c_str(), emails[i].size(), l);
       std::cout << org.code << std::endl;
     }
-    ASSERT_TRUE(result.code == next_idx);
+    EXPECT_TRUE(result.code == next_idx);
   }
   delete test;
 }
 
-/*
-        TEST_F(ARTDICTest, withinRangeTsLookupTest) {
-            ArtDicTree *test = new ArtDicTree();
-            std::vector<ope::SymbolCode> ls;
-            std::cout << timestamps.size() << std::endl;
-            std::sort(timestamps.begin(), timestamps.end());
+TEST_F(ARTDICTest, withinRangeTsLookupTest) {
+  ArtDicTree *test = new ArtDicTree();
+  std::vector<ope::SymbolCode> ls;
+  std::cout << timestamps.size() << std::endl;
+  std::sort(timestamps.begin(), timestamps.end());
 
-            for (int i = 0; i < (int)timestamps.size(); i++) {
-                ope::SymbolCode symbol_code = ope::SymbolCode();
-                symbol_code.first = timestamps[i];
-                symbol_code.second = ope::Code();
-                symbol_code.second.code = i;
-                ls.push_back(symbol_code);
-            }
+  for (int i = 0; i < static_cast<int>(timestamps.size()); i++) {
+    ope::SymbolCode symbol_code = ope::SymbolCode();
+    symbol_code.first = timestamps[i];
+    symbol_code.second = ope::Code();
+    symbol_code.second.code = i;
+    ls.push_back(symbol_code);
+  }
 
-            test->build(ls);
+  test->build(ls);
 
-            for (int i = 0; i < (int)timestamps.size() - 1; i++) {
-                if (i%1000 == 0)
-                    std::cout << i << std::endl;
-                int prefix_len = -1;
-                //printTs(timestamps[i]);
-                std::string cur_str = getNextString(timestamps[i]);
-                std::string next_str = cur_str;
-                int next_idx = i;
-                getNextInterval(timestamps, i, cur_str, next_idx, next_str);
-                ope::Code result;
-                // next string <= cur_star
-                result = test->lookup(cur_str.c_str(), cur_str.size(),
-   prefix_len);
+  for (int i = 0; i < static_cast<int>(timestamps.size()) - 1; i++) {
+    int prefix_len = -1;
+    std::string cur_str = getNextString(timestamps[i]);
+    std::string next_str = cur_str;
+    int next_idx = i;
+    bool find_next = getNextInterval(timestamps, i, cur_str, &next_idx, &next_str);
+    if (!find_next) {
+      break;
+    }
+    ope::Code result;
+    result = test->lookup(cur_str.c_str(), cur_str.size(), prefix_len);
 
-                if (result.code != next_idx) {
-                    std::cout << "*" << next_idx << " " << result.code << " " <<
-   i << std::endl; std::cout << timestamps[next_idx] << " " <<
-   timestamps[result.code] << " " << cur_str << std::endl; int l; auto org =
-   test->lookup(timestamps[i].c_str(), timestamps[i].size(), l); std::cout <<
-   org.code <<std::endl;
-                }
-                ASSERT_TRUE(result.code == next_idx);
-            }
-            delete test;
-        }
-*/
-int getCommonPrefixLen(std::string &str1, std::string &str2) {
-  int min_len = (int)std::min(str1.size(), str2.size());
+    if (result.code != next_idx) {
+      std::cout << "*" << next_idx << " " << result.code << " " << i << std::endl;
+      std::cout << timestamps[next_idx] << " " << timestamps[result.code] << " " << cur_str << std::endl;
+      int l;
+      auto org = test->lookup(timestamps[i].c_str(), timestamps[i].size(), l);
+      std::cout << org.code << std::endl;
+    }
+    EXPECT_TRUE(result.code == next_idx);
+  }
+  delete test;
+}
+
+int getCommonPrefixLen(const std::string &str1, const std::string &str2) {
+  int min_len = static_cast<int>(std::min(str1.size(), str2.size()));
   int i = 0;
   for (; i < min_len; i++) {
     if (str1[i] != str2[i]) return i;
@@ -334,8 +335,8 @@ void loadTimestamp() {
   int count = 0;
   while (infile.good() && count < kTsTestSize) {
     infile >> int_key;
+    // skip duplicate timestamp keys
     if (int_keys.find(int_key) != int_keys.end()) {
-      std::cout << "continue" << std::endl;
       continue;
     }
     int_keys.insert(int_key);
@@ -344,7 +345,6 @@ void loadTimestamp() {
     count++;
   }
 }
-
 }  // namespace treetest
 
 }  // namespace ope

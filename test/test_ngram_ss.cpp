@@ -50,49 +50,49 @@ TEST_F(NGramSSTest, word4Test) {
   ss->selectSymbols(words, 200, &symbol_freq_list);
   print(symbol_freq_list);
 }
-/*
-TEST_F (NGramSSTest, email3Test) {
-NGramSS* ss = new NGramSS(3);
-std::vector<SymbolFreq> symbol_freq_list;
-ss->selectSymbols(emails, 200, &symbol_freq_list);
-print(symbol_freq_list);
+
+TEST_F(NGramSSTest, email3Test) {
+  NGramSS *ss = new NGramSS(3);
+  std::vector<SymbolFreq> symbol_freq_list;
+  ss->selectSymbols(emails, 200, &symbol_freq_list);
+  print(symbol_freq_list);
 }
 
-TEST_F (NGramSSTest, email4Test) {
-NGramSS* ss = new NGramSS(4);
-std::vector<SymbolFreq> symbol_freq_list;
-ss->selectSymbols(emails, 200, &symbol_freq_list);
-print(symbol_freq_list);
+TEST_F(NGramSSTest, email4Test) {
+  NGramSS *ss = new NGramSS(4);
+  std::vector<SymbolFreq> symbol_freq_list;
+  ss->selectSymbols(emails, 200, &symbol_freq_list);
+  print(symbol_freq_list);
 }
 
-TEST_F (NGramSSTest, wiki3Test) {
-NGramSS* ss = new NGramSS(3);
-std::vector<SymbolFreq> symbol_freq_list;
-ss->selectSymbols(wikis, 200, &symbol_freq_list);
-print(symbol_freq_list);
+TEST_F(NGramSSTest, wiki3Test) {
+  NGramSS *ss = new NGramSS(3);
+  std::vector<SymbolFreq> symbol_freq_list;
+  ss->selectSymbols(wikis, 200, &symbol_freq_list);
+  print(symbol_freq_list);
 }
 
-TEST_F (NGramSSTest, wiki4Test) {
-NGramSS* ss = new NGramSS(4);
-std::vector<SymbolFreq> symbol_freq_list;
-ss->selectSymbols(wikis, 200, &symbol_freq_list);
-print(symbol_freq_list);
+TEST_F(NGramSSTest, wiki4Test) {
+  NGramSS *ss = new NGramSS(4);
+  std::vector<SymbolFreq> symbol_freq_list;
+  ss->selectSymbols(wikis, 200, &symbol_freq_list);
+  print(symbol_freq_list);
 }
 
-TEST_F (NGramSSTest, url3Test) {
-NGramSS* ss = new NGramSS(3);
-std::vector<SymbolFreq> symbol_freq_list;
-ss->selectSymbols(urls, 200, &symbol_freq_list);
-print(symbol_freq_list);
+TEST_F(NGramSSTest, url3Test) {
+  NGramSS *ss = new NGramSS(3);
+  std::vector<SymbolFreq> symbol_freq_list;
+  ss->selectSymbols(urls, 200, &symbol_freq_list);
+  print(symbol_freq_list);
 }
 
-TEST_F (NGramSSTest, url4Test) {
-NGramSS* ss = new NGramSS(4);
-std::vector<SymbolFreq> symbol_freq_list;
-ss->selectSymbols(urls, 200, &symbol_freq_list);
-print(symbol_freq_list);
+TEST_F(NGramSSTest, url4Test) {
+  NGramSS *ss = new NGramSS(4);
+  std::vector<SymbolFreq> symbol_freq_list;
+  ss->selectSymbols(urls, 200, &symbol_freq_list);
+  print(symbol_freq_list);
 }
-*/
+
 void loadWords() {
   std::ifstream infile(kFilePath);
   std::string key;
@@ -144,8 +144,8 @@ void loadUrls() {
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   ope::ngramsstest::loadWords();
-  // ope::ngramsstest::loadEmails();
-  // ope::ngramsstest::loadWikis();
-  // ope::ngramsstest::loadUrls();
+  ope::ngramsstest::loadEmails();
+  ope::ngramsstest::loadWikis();
+  ope::ngramsstest::loadUrls();
   return RUN_ALL_TESTS();
 }
