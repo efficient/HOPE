@@ -13,9 +13,9 @@
 namespace ope {
 
 struct LeafInfo {
-  const SymbolCode *symbol_code = nullptr;
-  LeafInfo *prev_leaf = nullptr;
-  uint32_t prefix_len = 0;
+  const SymbolCode *symbol_code;
+  LeafInfo *prev_leaf;
+  uint32_t prefix_len;
   int visit_cnt = 0;
 };
 
@@ -41,8 +41,8 @@ class N {
 
   // compressed path
   // if compressed path > maxPrefixLen, it will be
-  // stored in long_prefix, which is dynamically allocated on heap
-  uint8_t prefix[maxPrefixLen] = {};
+  // stired in long_prefix, which is dynamically allocated on heap
+  uint8_t prefix[maxPrefixLen];
 
   // store prefix key, value pairs
   N *prefix_leaf = nullptr;
@@ -55,9 +55,7 @@ class N {
       extra_size += _prefix_len;
       for (int i = 0; i < static_cast<int>(_prefix_len); i++) long_prefix[i] = _prefix[i];
     } else {
-      for (int i = 0; i < (int)_prefix_len; i++) {
-        prefix[i] = _prefix[i];
-      }
+      for (int i = 0; i < (int)_prefix_len; i++) prefix[i] = _prefix[i];
     }
   }
 
@@ -110,7 +108,7 @@ class N {
 
 class N4 : public N {
  public:
-  uint8_t keys[4] = {};
+  uint8_t keys[4];
   N *children[4] = {nullptr};
 
   N4(const uint8_t *prefix, uint32_t prefix_len) : N(NTypes::N4, prefix, prefix_len) { cnt_N4++; };
@@ -141,7 +139,7 @@ class N4 : public N {
 
 class N16 : public N {
  public:
-  uint8_t keys[16] = {};
+  uint8_t keys[16];
   N *children[16] = {nullptr};
 
   N16(const uint8_t *prefix, uint32_t prefix_len) : N(NTypes::N16, prefix, prefix_len) { cnt_N16++; };
@@ -179,7 +177,7 @@ class N16 : public N {
 class N48 : public N {
  public:
   const uint8_t empty_marker = 48;
-  uint8_t child_index[256] = {};
+  uint8_t child_index[256];
   N *children[48] = {nullptr};
 
   N48(const uint8_t *prefix, uint32_t prefix_len) : N(NTypes::N48, prefix, prefix_len) {
@@ -265,6 +263,8 @@ uint8_t *N::getPrefix() {
 
 void N::setPrefixLeaf(N *leaf) { prefix_leaf = leaf; }
 
+void N::deletePrefixLeaf() { delete prefix_leaf; }
+
 N *N::getPrefixLeaf() { return prefix_leaf; }
 
 N *N::setLeaf(N *n) {
@@ -303,22 +303,22 @@ void N::insertGrow(curN *n, uint8_t key, N *val, uint8_t key_par, N *node_par) {
 void N::change(N *node, uint8_t key, N *val) {
   switch (node->type) {
     case NTypes::N4: {
-      N4 *n = reinterpret_cast<N4 *>(node);
+      N4 *n = static_cast<N4 *>(node);
       n->change(key, val);
       return;
     }
     case NTypes::N16: {
-      N16 *n = reinterpret_cast<N16 *>(node);
+      N16 *n = static_cast<N16 *>(node);
       n->change(key, val);
       return;
     }
     case NTypes::N48: {
-      N48 *n = reinterpret_cast<N48 *>(node);
+      N48 *n = static_cast<N48 *>(node);
       n->change(key, val);
       return;
     }
     case NTypes::N256: {
-      N256 *n = reinterpret_cast<N256 *>(node);
+      N256 *n = static_cast<N256 *>(node);
       n->change(key, val);
       return;
     }
@@ -330,25 +330,25 @@ void N::change(N *node, uint8_t key, N *val) {
 void N::insertOrUpdateNode(N *node, N *parent_node, uint8_t parent_key, uint8_t key, N *val) {
   switch (node->type) {
     case NTypes::N4: {
-      auto n = reinterpret_cast<N4 *>(node);
+      auto n = static_cast<N4 *>(node);
       insertGrow<N4, N16>(n, key, val, parent_key, parent_node);
       //		N::checkNode(N::getChild(parent_key, parent_node));
       return;
     }
     case NTypes::N16: {
-      auto n = reinterpret_cast<N16 *>(node);
+      auto n = static_cast<N16 *>(node);
       insertGrow<N16, N48>(n, key, val, parent_key, parent_node);
       //		N::checkNode(N::getChild(parent_key, parent_node));
       return;
     }
     case NTypes::N48: {
-      auto n = reinterpret_cast<N48 *>(node);
+      auto n = static_cast<N48 *>(node);
       insertGrow<N48, N256>(n, key, val, parent_key, parent_node);
       //		N::checkNode(N::getChild(parent_key, parent_node));
       return;
     }
     case NTypes::N256: {
-      auto n = reinterpret_cast<N256 *>(node);
+      auto n = static_cast<N256 *>(node);
       if (n->getChild(key) != nullptr)
         n->change(key, val);
       else
@@ -486,7 +486,7 @@ N *N::getPrevChild(N *node, uint8_t k) {
 }
 
 void N::deleteChildren(N *node) {
-  if (node == nullptr) return;
+  if (node == NULL) return;
 
   if (N::isLeaf(node)) {
     return;
@@ -528,22 +528,22 @@ void N::deleteNode(N *node) {
 
   switch (node->type) {
     case NTypes::N4: {
-      auto n = reinterpret_cast<N4 *>(node);
+      auto n = static_cast<N4 *>(node);
       delete n;
       return;
     }
     case NTypes::N16: {
-      auto n = reinterpret_cast<N16 *>(node);
+      auto n = static_cast<N16 *>(node);
       delete n;
       return;
     }
     case NTypes::N48: {
-      auto n = reinterpret_cast<N48 *>(node);
+      auto n = static_cast<N48 *>(node);
       delete n;
       return;
     }
     case NTypes::N256: {
-      auto n = reinterpret_cast<N256 *>(node);
+      auto n = static_cast<N256 *>(node);
       delete n;
       return;
     }
@@ -833,7 +833,7 @@ void N48::copyTo(NODE *n) const {
 void N48::checkNode() {}
 
 bool N256::insert(uint8_t k, N *n) {
-  if (count == 255) {
+  if (count == 256) {
     std::cout << "[Error]Node full" << std::endl;
     return false;
   }
