@@ -32,7 +32,7 @@ class ARTDICTest : public ::testing::Test {
   static int strCompare(std::string s1, std::string s2) {
     int len1 = static_cast<int>(s1.size());
     int len2 = static_cast<int>(s2.size());
-    int len = min(len1, len2);
+    int len = std::min(len1, len2);
     for (int i = 0; i < len; i++) {
       auto c1 = static_cast<uint8_t>(s1[i]);
       auto c2 = static_cast<uint8_t>(s2[i]);

@@ -1,7 +1,3 @@
-#include <utility>
-
-#include <utility>
-
 #ifndef BLENDING_TRI_H
 #define BLENDING_TRI_H
 
@@ -9,7 +5,9 @@
 #include <iostream>
 #include <list>
 #include <map>
+#include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "common.hpp"
@@ -48,81 +46,59 @@ class TrieNode {
 
 class BlendTrie {
  public:
-  BlendTrie(int _blend_type = 1);
+  explicit BlendTrie(int _blend_type = 1);
 
   ~BlendTrie();
 
   void build(std::vector<std::string> key_list);
-  //        void build(const std::unordered_map<std::string, int64_t>
-  //        &freq_map);
 
-  void insert(std::string &key, int64_t freq);
+  void insert(const std::string &key, int64_t freq);
 
   void clear(TrieNode *node);
 
-  void blendingAndGetLeaves(std::vector<SymbolFreq> &freq_vec);
+  void blendingAndGetLeaves(std::vector<SymbolFreq> *freq_vec);
 
   void vis(const std::string &filename);
 
  private:
   TrieNode *root_;
-  int blend_type;
+  int blend_type_;
 };
 
-BlendTrie::BlendTrie(int _blend_type) {
+BlendTrie::BlendTrie(int blend_type) {
   root_ = nullptr;
-  blend_type = _blend_type;
+  blend_type_ = blend_type;
 }
 
 BlendTrie::~BlendTrie() {
   // Delete all the nodes
   clear(root_);
 }
-/*
-    void BlendTrie::build(std::vector<std::string> key_list) {
-        root_ = new TrieNode();
-        int maxkey_len = 50;
-        for (int i = 0; i < (int)key_list.size(); i++) {
-            std::string key = key_list[i];
-            for (int j = 0; j < (int)key.size(); j++) {
-                for (int k = 1; k <= (int)key.size() - j && k < maxkey_len; k++)
-   { std::string substring = key.substr(j, k);
-                    //std::cout << substring << "*" << std::endl;
-                    insert(substring, 1);
-                }
-            }
-        }
-    }
-*/
 
-// Only calculate the frequency of suffix
+/* Different ways to calculate substring frequency (only calculate suffix frequency)
+ * 1--- Used by ALM scheme
+ *      Calculate frequency of *all* possible suffix
+ *      For example, the key 'abc' will count a,ab,abc,b,bc,c
+ * 2--- Used by ALMImproved scheme
+ *      Only calculate partial suffixes
+ *      For example, the key 'abc' will count abc,bc,c
+ * In order to reduce calculation, we truncate strings longer than maxkey_len(50)
+ */
 void BlendTrie::build(std::vector<std::string> key_list) {
-  std::cout << "Key list size:" << key_list.size() << std::endl;
   root_ = new TrieNode();
   int maxkey_len = 50;
-  if (blend_type == 0) {
-    for (int i = 0; i < (int)key_list.size(); i++) {
+  if (blend_type_ == 0) {
+    for (int i = 0; i < static_cast<int>(key_list.size()); i++) {
       std::string key = key_list[i].substr(0, maxkey_len);
-      for (int j = 0; j < (int)key.length(); j++) {
-        for (int k = 1; k <= (int)key.length() - j; k++) {
+      for (int j = 0; j < static_cast<int>(key.length()); j++) {
+        for (int k = 1; k <= static_cast<int>(key.length()) - j; k++) {
           std::string substring = key.substr(j, k);
-          // std::cout << substring << "*" << std::endl;
           insert(substring, 1);
         }
       }
     }
-    /*for (int i = 0; i < (int)key_list.size(); i++) {
-        std::string key = key_list[i];
-        for (int j = 0; j < (int)key.size(); j++) {
-            for (int k = 1; k <= (int)key.size() - j && k < maxkey_len; k++) {
-                std::string substring = key.substr(j, k);
-                //std::cout << substring << "*" << std::endl;
-                insert(substring, 1);
-            }
-        }
-    }*/
-  } else if (blend_type == 1) {
-    for (int i = 0; i < (int)key_list.size(); i++) {
+  } else if (blend_type_ == 1) {
+    for (int i = 0; i < static_cast<int>(key_list.size()); i++) {
       std::string key = key_list[i].substr(0, maxkey_len);
       int str_len = key.length();
       for (int j = 0; j < str_len; j++) {
@@ -133,9 +109,9 @@ void BlendTrie::build(std::vector<std::string> key_list) {
   }
 }
 
-void BlendTrie::insert(std::string &key, int64_t freq) {
+void BlendTrie::insert(const std::string &key, int64_t freq) {
   TrieNode *node = root_;
-  for (int i = 0; i < (int)key.length(); i++) {
+  for (int i = 0; i < static_cast<int>(key.length()); i++) {
     std::map<char, TrieNode *>::iterator child = node->getChild(key[i]);
     if (child != node->getEnd()) {
       node = child->second;
@@ -148,7 +124,7 @@ void BlendTrie::insert(std::string &key, int64_t freq) {
   node->setFreq(freq + node->getFreq());
 }
 
-void BlendTrie::blendingAndGetLeaves(std::vector<SymbolFreq> &freq_vec) {
+void BlendTrie::blendingAndGetLeaves(std::vector<SymbolFreq> *freq_vec) {
   std::list<TrieNode *> l;
   l.push_back(root_);
   while (!l.empty()) {
@@ -168,7 +144,7 @@ void BlendTrie::blendingAndGetLeaves(std::vector<SymbolFreq> &freq_vec) {
       high_freq_child->setFreq(high_freq_child->getFreq() + top_node->getFreq());
       top_node->setFreq(0);
     } else {
-      freq_vec.push_back(std::make_pair(top_node->getPrefix(), top_node->getFreq()));
+      freq_vec->push_back(std::make_pair(top_node->getPrefix(), top_node->getFreq()));
     }
   }
 }

@@ -2,7 +2,7 @@
 #define ALMIMPROVED_ENCODER_H
 
 #include <string.h>
-
+#include <vector>
 #include "encoder.hpp"
 
 #include "code_generator_factory.hpp"
@@ -53,7 +53,7 @@ std::string ALMImprovedEncoder::changeToBinary(int64_t num, int8_t len) {
   return result;
 }
 
-void ALMImprovedEncoder::checkOrder(vector<SymbolCode> &symbol_code_list) {
+void ALMImprovedEncoder::checkOrder(std::vector<SymbolCode> &symbol_code_list) {
   std::sort(symbol_code_list.begin(), symbol_code_list.end(),
             [](SymbolCode &x, SymbolCode &y) { return x.first.compare(y.first) < 0; });
   for (auto iter = symbol_code_list.begin() + 1; iter != symbol_code_list.end(); iter++) {

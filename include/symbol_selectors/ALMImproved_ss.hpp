@@ -167,7 +167,7 @@ bool ALMImprovedSS::selectSymbols(const std::vector<std::string> &key_list, cons
 #endif
   std::vector<SymbolFreq> blend_freq_table;
   // Blending
-  tree->blendingAndGetLeaves(blend_freq_table);
+  tree->blendingAndGetLeaves(&blend_freq_table);
   delete tree;
   // Write blending results  to file
 #ifdef PRINT_TIME_BREAKDOWN

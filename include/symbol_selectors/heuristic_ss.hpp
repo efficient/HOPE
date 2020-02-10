@@ -123,7 +123,7 @@ bool HeuristicSS::selectSymbols(const std::vector<std::string> &key_list, const 
 //            curtime = getNow();
 #endif
     // Blending
-    tree->blendingAndGetLeaves(blend_freq_table);
+    tree->blendingAndGetLeaves(&blend_freq_table);
     delete tree;
     // Write blending results  to file
 #ifdef WRITE_BLEND_RESULT

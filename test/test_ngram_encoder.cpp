@@ -17,13 +17,13 @@ static const char kFilePath[] = "../../datasets/words.txt";
 static const int kWordTestSize = 234369;
 static std::vector<std::string> words;
 static const char kEmailFilePath[] = "../../datasets/emails.txt";
-static const int kEmailTestSize = 10000000;
+static const int kEmailTestSize = 100000;
 static std::vector<std::string> emails;
 static const char kWikiFilePath[] = "../../datasets/wikis.txt";
-static const int kWikiTestSize = 14000000;
+static const int kWikiTestSize = 100000;
 static std::vector<std::string> wikis;
 static const char kUrlFilePath[] = "../../datasets/urls.txt";
-static const int kUrlTestSize = 25000000;
+static const int kUrlTestSize = 100000;
 static std::vector<std::string> urls;
 static const int kLongestCodeLen = 4096;
 

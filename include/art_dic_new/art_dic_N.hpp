@@ -1,14 +1,14 @@
 #ifndef ART_DIC_N_H
 #define ART_DIC_N_H
 
+#include <assert.h>
 #include <emmintrin.h>  // x86 SSE intrinsics
 #include <stdio.h>
+
 #include <algorithm>
 #include <cstdint>
 
 #include "common.hpp"
-
-using namespace std;
 
 namespace ope {
 
@@ -40,6 +40,8 @@ class N {
   uint32_t prefix_len = 0;
 
   // compressed path
+  // if compressed path > maxPrefixLen, it will be
+  // stired in long_prefix, which is dynamically allocated on heap
   uint8_t prefix[maxPrefixLen];
 
   // store prefix key, value pairs
@@ -51,17 +53,15 @@ class N {
     if (_prefix_len > maxPrefixLen) {
       long_prefix = new uint8_t[_prefix_len];
       extra_size += _prefix_len;
-      for (int i = 0; i < (int)_prefix_len; i++) long_prefix[i] = _prefix[i];
+      for (int i = 0; i < static_cast<int>(_prefix_len); i++) long_prefix[i] = _prefix[i];
     } else {
       for (int i = 0; i < (int)_prefix_len; i++) prefix[i] = _prefix[i];
     }
-  };
+  }
 
   void setPrefix(const uint8_t *prefix, int length);
 
   uint8_t *getPrefix();
-
-  N *duplicate();
 
   void setPrefixLeaf(N *leaf);
 
@@ -71,18 +71,11 @@ class N {
 
   bool insert(uint8_t key, N *node);
 
-  bool remove(uint8_t key);
-
   template <class curN, class biggerN>
   static void insertGrow(curN *n, uint8_t k, N *node, uint8_t key_par, N *parent);
 
-  template <class curN, class smallerN>
-  static void removeAndShrink(curN *n, uint8_t key, uint8_t key_par, N *parent);
-
   // API for tree classes
   static void insertOrUpdateNode(N *node, N *parentNode, uint8_t keyParent, uint8_t key, N *val);
-
-  static void removeNode(N *node, N *parentNode, uint8_t keyParent, uint8_t key);
 
   static void change(N *node, uint8_t key, N *val);
 
@@ -124,8 +117,6 @@ class N4 : public N {
 
   bool insert(uint8_t key, N *node);
 
-  bool remove(uint8_t key);
-
   void change(uint8_t key, N *val);
 
   N *getChild(uint8_t key);
@@ -163,8 +154,6 @@ class N16 : public N {
 
   bool insert(uint8_t key, N *node);
 
-  bool remove(uint8_t key);
-
   void change(uint8_t key, N *val);
 
   N *getChild(uint8_t key);
@@ -200,8 +189,6 @@ class N48 : public N {
 
   bool insert(uint8_t key, N *n);
 
-  bool remove(uint8_t key);
-
   void change(uint8_t key, N *val);
 
   N *getChild(uint8_t k) const;
@@ -231,8 +218,6 @@ class N256 : public N {
   ~N256() { cnt_N256--; }
 
   bool insert(uint8_t key, N *n);
-
-  bool remove(uint8_t key);
 
   void change(uint8_t key, N *val);
 
@@ -315,22 +300,6 @@ void N::insertGrow(curN *n, uint8_t key, N *val, uint8_t key_par, N *node_par) {
   delete n;
 }
 
-template <class curN, class smallerN>
-void N::removeAndShrink(curN *n, uint8_t key, uint8_t key_par, N *parent_node) {
-  if (n->remove(key)) {
-    return;
-  }
-  // initialize a smaller node
-  auto nSmall = new smallerN(n->getPrefix(), n->prefix_len);
-  // remove key
-  n->remove(key);
-  // copy to smaller node
-  n->copyTo(nSmall);
-  // replace old node with new node
-  N::change(parent_node, key_par, nSmall);
-  delete n;
-}
-
 void N::change(N *node, uint8_t key, N *val) {
   switch (node->type) {
     case NTypes::N4: {
@@ -389,61 +358,6 @@ void N::insertOrUpdateNode(N *node, N *parent_node, uint8_t parent_key, uint8_t 
   }
 }
 
-void N::removeNode(N *node, N *parent_node, uint8_t key_par, uint8_t key) {
-  switch (node->type) {
-    case NTypes::N4: {
-      auto n = static_cast<N4 *>(node);
-      removeAndShrink<N4, N4>(n, key, key_par, parent_node);
-      return;
-    }
-    case NTypes::N16: {
-      auto n = static_cast<N16 *>(node);
-      removeAndShrink<N16, N4>(n, key, key_par, parent_node);
-      return;
-    }
-    case NTypes::N48: {
-      auto n = static_cast<N48 *>(node);
-      removeAndShrink<N48, N16>(n, key, key_par, parent_node);
-      return;
-    }
-    case NTypes::N256: {
-      auto n = static_cast<N256 *>(node);
-      removeAndShrink<N256, N48>(n, key, key_par, parent_node);
-      return;
-    }
-  }
-}
-
-N *N::duplicate() {
-  switch (this->type) {
-    case NTypes::N4: {
-      N4 *new_node = new N4(prefix, prefix_len);
-      N4 *node = reinterpret_cast<N4 *>(this);
-      node->copyTo(new_node);
-      return new_node;
-    }
-    case NTypes::N16: {
-      N16 *new_node = new N16(prefix, prefix_len);
-      N16 *node = reinterpret_cast<N16 *>(this);
-      node->copyTo(new_node);
-      return new_node;
-    }
-    case NTypes::N48: {
-      N48 *new_node = new N48(prefix, prefix_len);
-      N48 *node = reinterpret_cast<N48 *>(this);
-      node->copyTo(new_node);
-      return new_node;
-    }
-    case NTypes::N256: {
-      N256 *new_node = new N256(prefix, prefix_len);
-      N256 *node = reinterpret_cast<N256 *>(this);
-      node->copyTo(new_node);
-      return new_node;
-    }
-  }
-  return nullptr;
-}
-
 bool N::insert(uint8_t key, N *node) {
   switch (this->type) {
     case NTypes::N4: {
@@ -480,24 +394,6 @@ N *N::getChild(uint8_t key, N *node) {
   return nullptr;
 }
 
-bool N::remove(uint8_t key) {
-  switch (this->type) {
-    case NTypes::N4: {
-      return reinterpret_cast<N4 *>(this)->remove(key);
-    }
-    case NTypes::N16: {
-      return reinterpret_cast<N16 *>(this)->remove(key);
-    }
-    case NTypes::N48: {
-      return reinterpret_cast<N48 *>(this)->remove(key);
-    }
-    case NTypes::N256: {
-      return reinterpret_cast<N256 *>(this)->remove(key);
-    }
-  }
-  return false;
-}
-
 void N::getChildren(N *node, uint8_t start, uint8_t end, uint8_t *children_key, N **children_p, int &child_cnt) {
   child_cnt = 0;
   for (uint8_t cur = start; cur < end; cur++) {
@@ -508,9 +404,9 @@ void N::getChildren(N *node, uint8_t start, uint8_t end, uint8_t *children_key, 
     child_cnt++;
   }
   if (start == 0 && end == 255 && child_cnt != node->count) {
-    cout << "Child Count mismatch" << endl;
-    cout << "Child count:" << unsigned(child_cnt) << endl;
-    cout << "Record count:" << unsigned(node->count) << endl;
+    std::cout << "Child Count mismatch" << std::endl;
+    std::cout << "Child count:" << unsigned(child_cnt) << std::endl;
+    std::cout << "Record count:" << unsigned(node->count) << std::endl;
     assert(false);
   }
 }
@@ -686,20 +582,6 @@ bool N4::insert(uint8_t k, N *node) {
   return true;
 }
 
-bool N4::remove(uint8_t k) {
-  for (int i = 0; i < count; i++) {
-    if (keys[i] == k) {
-      for (int j = (int)i; j < count - 1; j++) {
-        keys[j] = keys[j + 1];
-        children[j] = children[j + 1];
-      }
-      count--;
-      return true;
-    }
-  }
-  __builtin_unreachable();
-}
-
 void N4::change(uint8_t key, N *val) {
   for (uint8_t i = 0; i < count; i++) {
     if (children[i] != nullptr && keys[i] == key) {
@@ -804,24 +686,6 @@ N *N16::getChild(uint8_t k) {
   return nullptr;
 }
 
-bool N16::remove(uint8_t k) {
-  // if we need shrink, return false
-  if (count == 4) return false;
-
-  for (int i = 0; i < count; i++) {
-    if (keys[i] == k) {
-      for (int j = int(i); j < count - 1; j--) {
-        keys[j] = keys[j + 1];
-        children[j] = children[j + 1];
-      }
-      count--;
-      return true;
-    }
-  }
-  cout << " [Error]Remove N16 element not exist" << endl;
-  __builtin_unreachable();
-}
-
 void N16::change(uint8_t key, N *val) {
   for (int i = 0; i < count; i++) {
     if (keys[i] == key) {
@@ -895,16 +759,6 @@ bool N48::insert(uint8_t k, N *n) {
   children[pos] = n;
   child_index[k] = static_cast<uint8_t>(pos);
   count++;
-  return true;
-}
-
-bool N48::remove(uint8_t k) {
-  assert(child_index[k] != empty_marker);
-  if (count == 16) return false;
-  children[child_index[k]] = nullptr;
-  child_index[k] = empty_marker;
-  count--;
-  assert(getChild(k) == nullptr);
   return true;
 }
 
@@ -984,13 +838,6 @@ bool N256::insert(uint8_t k, N *n) {
   }
   children[k] = n;
   count++;
-  return true;
-}
-
-bool N256::remove(uint8_t k) {
-  if (count == 48) return false;
-  children[k] = nullptr;
-  count--;
   return true;
 }
 

@@ -2,6 +2,7 @@
 #define HEURISTIC_ENCODER_H
 
 #include <string.h>
+#include <vector>
 
 #include "encoder.hpp"
 
@@ -53,7 +54,7 @@ std::string HeuristicEncoder::changeToBinary(int64_t num, int8_t len) {
   return result;
 }
 
-void HeuristicEncoder::checkOrder(vector<SymbolCode> &symbol_code_list) {
+void HeuristicEncoder::checkOrder(std::vector<SymbolCode> &symbol_code_list) {
   std::sort(symbol_code_list.begin(), symbol_code_list.end(),
             [](SymbolCode &x, SymbolCode &y) { return x.first.compare(y.first) < 0; });
   for (auto iter = symbol_code_list.begin() + 1; iter != symbol_code_list.end(); iter++) {
