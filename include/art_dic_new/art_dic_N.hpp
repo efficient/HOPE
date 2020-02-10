@@ -373,6 +373,7 @@ bool N::insert(uint8_t key, N *node) {
       return reinterpret_cast<N256 *>(this)->insert(key, node);
     }
   }
+  assert(false);
 }
 
 N *N::getChild(uint8_t key, N *node) {
@@ -390,6 +391,7 @@ N *N::getChild(uint8_t key, N *node) {
       return reinterpret_cast<N256 *>(node)->getChild(key);
     }
   }
+  assert(false);
 }
 
 void N::getChildren(N *node, uint8_t start, uint8_t end, uint8_t *children_key, N **children_p, int &child_cnt) {
@@ -426,6 +428,7 @@ N *N::getLastChild(N *node) {
       return reinterpret_cast<N256 *>(node)->getLastChild();
     }
   }
+  assert(false);
 }
 
 N *N::getFirstChild(N *node) {
@@ -443,6 +446,7 @@ N *N::getFirstChild(N *node) {
       return reinterpret_cast<N256 *>(node)->getFirstChild();
     }
   }
+  assert(false);
 }
 
 N *N::getNextChild(N *node, uint8_t k) {
@@ -460,6 +464,7 @@ N *N::getNextChild(N *node, uint8_t k) {
       return reinterpret_cast<N256 *>(node)->getNextChild(k);
     }
   }
+  assert(false);
 }
 
 N *N::getPrevChild(N *node, uint8_t k) {
@@ -477,6 +482,7 @@ N *N::getPrevChild(N *node, uint8_t k) {
       return reinterpret_cast<N256 *>(node)->getPrevChild(k);
     }
   }
+  assert(false);
 }
 
 void N::deleteChildren(N *node) {
@@ -504,6 +510,7 @@ void N::deleteChildren(N *node) {
       return reinterpret_cast<N256 *>(node)->deleteChildren();
     }
   }
+  assert(false);
 }
 
 void N::deleteNode(N *node) {
@@ -541,6 +548,7 @@ void N::deleteNode(N *node) {
       return;
     }
   }
+  assert(false);
 }
 
 void N::checkNode(ope::N *node) {
@@ -558,6 +566,7 @@ void N::checkNode(ope::N *node) {
       reinterpret_cast<N256 *>(node)->checkNode();
     }
   }
+  assert(false);
 }
 
 bool N4::insert(uint8_t k, N *node) {
