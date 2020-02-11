@@ -2,12 +2,12 @@
 
 #include <algorithm>
 #include <bitset>
+#include <cstdlib>  // std::rand, std::srand
 #include <fstream>
 #include <iostream>
 #include <set>
 #include <string>
 #include <vector>
-
 #include "art_dic_tree.hpp"
 #include "gtest/gtest.h"
 
@@ -18,13 +18,14 @@ static const char kEmailFilePath[] = "../../datasets/emails.txt";
 static const char kWikiFilePath[] = "../../datasets/wikis.txt";
 static const char kUrlFilePath[] = "../../datasets/urls.txt";
 static const char kTsFilePath[] = "../../datasets/poisson_timestamps.csv";
-static const int kEmailTestSize = 100000;
+static const int kEmailTestSize = 10000;
 static const int kWikiTestSize = 100000;
-static const int kUrlTestSize = 100000;
-static const int kTsTestSize = 100000;
+static const int kUrlTestSize = 1000000;
+static const int kTsTestSize = 10000;
 static std::vector<std::string> emails;
 static std::vector<std::string> wikis;
 static std::vector<std::string> urls;
+static std::vector<std::string> long_urls;
 static std::vector<std::string> timestamps;
 
 class ARTDICTest : public ::testing::Test {
@@ -169,6 +170,29 @@ TEST_F(ARTDICTest, pointLookupUrlTest) {
   delete test;
 }
 
+TEST_F(ARTDICTest, pointLookupLongUrlTest) {
+  auto test = new ArtDicTree();
+  std::vector<ope::SymbolCode> ls;
+
+  for (int i = 0; i < static_cast<int>(long_urls.size()) - 1; i++) {
+    ope::SymbolCode symbol_code = ope::SymbolCode();
+    symbol_code.first = long_urls[i];
+    symbol_code.second = ope::Code();
+    symbol_code.second.code = i;
+    ls.push_back(symbol_code);
+  }
+
+  test->build(ls);
+
+  for (int i = 0; i < static_cast<int>(long_urls.size()) - 1; i++) {
+    int prefix_len = -1;
+    ope::Code result = test->lookup(long_urls[i].c_str(), long_urls[i].size(), prefix_len);
+    if (result.code != i) std::cout << "lookup:" << result.code << " answer:" << i << std::endl;
+    EXPECT_TRUE(result.code == i);
+  }
+  delete test;
+}
+
 TEST_F(ARTDICTest, pointTsLookupTest) {
   ArtDicTree *test = new ArtDicTree();
   std::vector<ope::SymbolCode> ls;
@@ -298,6 +322,7 @@ void loadEmails() {
     emails.push_back(key);
     count++;
   }
+  std::random_shuffle(emails.begin(), emails.end());
 }
 
 void loadWikis() {
@@ -309,6 +334,7 @@ void loadWikis() {
     wikis.push_back(key);
     count++;
   }
+  std::random_shuffle(wikis.begin(), wikis.end());
 }
 
 void loadUrls() {
@@ -320,6 +346,22 @@ void loadUrls() {
     urls.push_back(key);
     count++;
   }
+  std::random_shuffle(urls.begin(), urls.end());
+}
+
+void loadLongUrls() {
+  std::ifstream infile(kUrlFilePath);
+  std::string key;
+  int count = 0;
+  while (infile.good() && count < kUrlTestSize) {
+    infile >> key;
+    if (key.size() < 200) {
+      continue;
+    }
+    long_urls.push_back(key);
+    count++;
+  }
+  std::random_shuffle(long_urls.begin(), long_urls.end());
 }
 
 std::string uint64ToString(uint64_t key) {
@@ -355,6 +397,7 @@ int main(int argc, char **argv) {
   ope::treetest::loadEmails();
   ope::treetest::loadWikis();
   ope::treetest::loadUrls();
+  ope::treetest::loadLongUrls();
   ope::treetest::loadTimestamp();
 
   return RUN_ALL_TESTS();

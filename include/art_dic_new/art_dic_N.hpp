@@ -47,19 +47,13 @@ class N {
   // store prefix key, value pairs
   N *prefix_leaf = nullptr;
 
-  uint8_t *long_prefix;
-
-  N(NTypes _type, const uint8_t *_prefix, uint32_t _prefix_len) : type(_type), prefix_len(_prefix_len) {
-    if (_prefix_len > maxPrefixLen) {
-      long_prefix = new uint8_t[_prefix_len];
-      extra_size += _prefix_len;
-      for (int i = 0; i < static_cast<int>(_prefix_len); i++) long_prefix[i] = _prefix[i];
-    } else {
-      for (int i = 0; i < (int)_prefix_len; i++) prefix[i] = _prefix[i];
-    }
-  }
+  uint8_t *long_prefix = nullptr;
 
   void setPrefix(const uint8_t *prefix, int length);
+
+  N(NTypes _type, const uint8_t *_prefix, uint32_t _prefix_len) : type(_type), prefix_len(_prefix_len) {
+    setPrefix(_prefix, _prefix_len);
+  }
 
   uint8_t *getPrefix();
 
@@ -68,8 +62,6 @@ class N {
   N *getPrefixLeaf();
 
   void deletePrefixLeaf();
-
-  bool insert(uint8_t key, N *node);
 
   template <class curN, class biggerN>
   static void insertGrow(curN *n, uint8_t k, N *node, uint8_t key_par, N *parent);
@@ -240,20 +232,22 @@ class N256 : public N {
 };
 
 void N::setPrefix(const uint8_t *_prefix, int length) {
+  uint8_t *new_prefix = nullptr;
   if ((uint32_t)length > maxPrefixLen) {
-    if (long_prefix != nullptr) {
-      delete long_prefix;
-      extra_size -= prefix_len;
-    }
-    long_prefix = new uint8_t[length];
+    new_prefix = new uint8_t[length];
     extra_size += length;
-    for (int i = 0; i < length; i++) long_prefix[i] = _prefix[i];
+    for (int i = 0; i < length; i++) new_prefix[i] = _prefix[i];
   } else {
     for (int i = 0; i < length; i++) {
       prefix[i] = _prefix[i];
     }
   }
+  if (long_prefix != nullptr) {
+    delete long_prefix;
+    extra_size -= prefix_len;
+  }
   prefix_len = length;
+  long_prefix = new_prefix;
 }
 
 uint8_t *N::getPrefix() {
@@ -358,24 +352,6 @@ void N::insertOrUpdateNode(N *node, N *parent_node, uint8_t parent_key, uint8_t 
   }
 }
 
-bool N::insert(uint8_t key, N *node) {
-  switch (this->type) {
-    case NTypes::N4: {
-      return reinterpret_cast<N4 *>(this)->insert(key, node);
-    }
-    case NTypes::N16: {
-      return reinterpret_cast<N16 *>(this)->insert(key, node);
-    }
-    case NTypes::N48: {
-      return reinterpret_cast<N48 *>(this)->insert(key, node);
-    }
-    case NTypes::N256: {
-      return reinterpret_cast<N256 *>(this)->insert(key, node);
-    }
-  }
-  assert(false);
-}
-
 N *N::getChild(uint8_t key, N *node) {
   switch (node->type) {
     case NTypes::N4: {
@@ -390,8 +366,9 @@ N *N::getChild(uint8_t key, N *node) {
     case NTypes::N256: {
       return reinterpret_cast<N256 *>(node)->getChild(key);
     }
+    default:
+      assert(false);
   }
-  assert(false);
 }
 
 void N::getChildren(N *node, uint8_t start, uint8_t end, uint8_t *children_key, N **children_p, int &child_cnt) {
@@ -427,8 +404,9 @@ N *N::getLastChild(N *node) {
     case NTypes::N256: {
       return reinterpret_cast<N256 *>(node)->getLastChild();
     }
+    default:
+      assert(false);
   }
-  assert(false);
 }
 
 N *N::getFirstChild(N *node) {
@@ -445,8 +423,9 @@ N *N::getFirstChild(N *node) {
     case NTypes::N256: {
       return reinterpret_cast<N256 *>(node)->getFirstChild();
     }
+    default:
+      assert(false);
   }
-  assert(false);
 }
 
 N *N::getNextChild(N *node, uint8_t k) {
@@ -463,8 +442,9 @@ N *N::getNextChild(N *node, uint8_t k) {
     case NTypes::N256: {
       return reinterpret_cast<N256 *>(node)->getNextChild(k);
     }
+    default:
+      assert(false);
   }
-  assert(false);
 }
 
 N *N::getPrevChild(N *node, uint8_t k) {
@@ -481,8 +461,9 @@ N *N::getPrevChild(N *node, uint8_t k) {
     case NTypes::N256: {
       return reinterpret_cast<N256 *>(node)->getPrevChild(k);
     }
+    default:
+      assert(false);
   }
-  assert(false);
 }
 
 void N::deleteChildren(N *node) {
@@ -509,8 +490,9 @@ void N::deleteChildren(N *node) {
     case NTypes::N256: {
       return reinterpret_cast<N256 *>(node)->deleteChildren();
     }
+    default:
+      assert(false);
   }
-  assert(false);
 }
 
 void N::deleteNode(N *node) {
@@ -547,8 +529,9 @@ void N::deleteNode(N *node) {
       delete n;
       return;
     }
+    default:
+      assert(false);
   }
-  assert(false);
 }
 
 void N::checkNode(ope::N *node) {
@@ -565,8 +548,9 @@ void N::checkNode(ope::N *node) {
     case NTypes::N256: {
       reinterpret_cast<N256 *>(node)->checkNode();
     }
+    default:
+      assert(false);
   }
-  assert(false);
 }
 
 bool N4::insert(uint8_t k, N *node) {
@@ -609,13 +593,11 @@ N *N4::getFirstChild() {
 
 N *N4::getLastChild() {
   // count does not include prefix_leaf
-  if (count == 0 && prefix_leaf != nullptr) return prefix_leaf;
-  if (count == 0) return nullptr;
+  if (count == 0) return prefix_leaf;
   return children[count - 1];
 }
 
 N *N4::getNextChild(uint8_t k) {
-  if (count == 0) return nullptr;
   for (int i = 0; i < count; i++) {
     if (keys[i] >= k) return children[i];
   }
@@ -623,13 +605,11 @@ N *N4::getNextChild(uint8_t k) {
 }
 
 N *N4::getPrevChild(uint8_t k) {
-  if (count == 0 && prefix_leaf != nullptr) return prefix_leaf;
-  if (count == 0) return nullptr;
-  for (uint8_t i = k; i <= k; i--) {
-    N *child = getChild(i);
-    if (child != nullptr) return child;
+  for (uint8_t i = count - 1; i < count; i--) {
+    if (keys[i] > k) continue;
+    return children[i];
   }
-  return nullptr;
+  return prefix_leaf;
 }
 
 void N4::deleteChildren() {
@@ -703,13 +683,11 @@ N *N16::getFirstChild() {
 }
 
 N *N16::getLastChild() {
-  if (count == 0 && prefix_leaf != nullptr) return prefix_leaf;
-  if (count == 0) return nullptr;
+  if (count == 0) return prefix_leaf;
   return getChild(keys[count - 1]);
 }
 
 N *N16::getNextChild(uint8_t k) {
-  if (count == 0) return nullptr;
   for (int i = 0; i < count; i++) {
     if (keys[i] >= k) return children[i];
   }
@@ -717,14 +695,11 @@ N *N16::getNextChild(uint8_t k) {
 }
 
 N *N16::getPrevChild(uint8_t k) {
-  if (count == 0 && prefix_leaf != nullptr) return prefix_leaf;
-  if (count == 0) return nullptr;
-  for (uint8_t i = k; i <= k; i--) {
-    N *child = getChild(i);
-    if (child != nullptr) return child;
+  for (uint8_t i = count - 1; i < count; i--) {
+    if (keys[i] > k) continue;
+    return children[i];
   }
-  if (prefix_leaf != nullptr) return prefix_leaf;
-  return nullptr;
+  return prefix_leaf;
 }
 
 void N16::deleteChildren() {
@@ -781,8 +756,7 @@ N *N48::getFirstChild() {
 }
 
 N *N48::getLastChild() {
-  if (count == 0 && prefix_leaf != nullptr) return prefix_leaf;
-  if (count == 0) return nullptr;
+  if (count == 0) return prefix_leaf;
   for (uint8_t k = 255; (int)k >= 0; k--) {
     N *child = getChild(k);
     if (child != nullptr) return child;
@@ -800,13 +774,11 @@ N *N48::getNextChild(uint8_t k) {
 }
 
 N *N48::getPrevChild(uint8_t k) {
-  if (count == 0 && prefix_leaf != nullptr) return prefix_leaf;
-  if (count == 0) return nullptr;
   for (uint8_t i = k; i <= k; i--) {
     N *child = getChild((uint8_t)i);
     if (child != nullptr) return child;
   }
-  return nullptr;
+  return prefix_leaf;
 }
 
 void N48::deleteChildren() {
@@ -833,10 +805,6 @@ void N48::copyTo(NODE *n) const {
 void N48::checkNode() {}
 
 bool N256::insert(uint8_t k, N *n) {
-  if (count == 256) {
-    std::cout << "[Error]Node full" << std::endl;
-    return false;
-  }
   children[k] = n;
   count++;
   return true;
@@ -861,8 +829,7 @@ N *N256::getFirstChild() {
 }
 
 N *N256::getLastChild() {
-  if (count == 0 && prefix_leaf != nullptr) return prefix_leaf;
-  if (count == 0) return nullptr;
+  if (count == 0) return prefix_leaf;
   for (uint8_t k = 255; (int)k > 0; k--) {
     N *child = getChild(k);
     if (child != nullptr) return child;
@@ -880,13 +847,11 @@ N *N256::getNextChild(uint8_t k) {
 }
 
 N *N256::getPrevChild(uint8_t k) {
-  if (count == 0 && prefix_leaf != nullptr) return prefix_leaf;
-  if (count == 0) return nullptr;
   for (uint8_t i = k; i <= k; i--) {
     N *child = getChild((uint8_t)i);
     if (child != nullptr) return child;
   }
-  return nullptr;
+  return prefix_leaf;
 }
 
 void N256::deleteChildren() {

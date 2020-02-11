@@ -3,6 +3,7 @@
 
 #include <common.hpp>
 #include <string>
+#include <vector>
 #include "art_dic_N.hpp"
 
 namespace ope {
@@ -39,10 +40,6 @@ class ArtDicTree {
            uint8_t parent_key);
 
   void addLeaf(int insertkey_level, std::string key, N *node, N *val, N *parent_node, uint8_t parent_key);
-
-  void skipIfEmpty(N *node_new, N *leaf_dup, uint8_t key);
-
-  void subKey(int start, int end, uint8_t *subKey, uint8_t *org);
 
   int getCommonPrefixLen(std::string &str1, std::string &str2);
 
@@ -87,10 +84,10 @@ Code ArtDicTree::lookup(const char *symbol, const int symbol_len, int &prefix_le
       if (next_node == nullptr) {
         // Get previous child
         N *prev = N::getPrevChild(node, next_level_key_chr);
-        LeafInfo *leaf_info = NULL;
+        LeafInfo *leaf_info = nullptr;
         if (prev == nullptr) {
           N *next = N::getNextChild(node, next_level_key_chr);
-          assert(next != NULL);
+          assert(next != nullptr);
           LeafInfo *next_leaf_info = getLeftBottom(next);
           leaf_info = next_leaf_info->prev_leaf;
         } else {
@@ -105,7 +102,7 @@ Code ArtDicTree::lookup(const char *symbol, const int symbol_len, int &prefix_le
         return leaf_info->symbol_code->second;
       }
     } else {
-      LeafInfo *leaf_info = NULL;
+      LeafInfo *leaf_info = nullptr;
       if (key_level == symbol_len ||
           static_cast<uint8_t>(symbol[key_level]) < static_cast<uint8_t>(node->getPrefix()[node_level])) {
         N *prev = N::getFirstChild(node);
@@ -138,8 +135,6 @@ bool ArtDicTree::build(const std::vector<SymbolCode> &symbol_code_list) {
     }
     lf->prev_leaf = prev_leaf;
     lf->symbol_code = &(*iter);
-    if (iter - symbol_code_list.begin() == 86) std::cout << "";
-    if (iter == symbol_code_list.end() - 1) std::cout << "";
     insert(lf);
     prev_leaf = lf;
   }
@@ -226,7 +221,6 @@ void ArtDicTree::printTree(N *node) {
 void ArtDicTree::addLeaf(int insertkey_level, std::string key, N *node, N *val, N *parent_node, uint8_t parent_key) {
   if (insertkey_level == (int)key.size()) {
     // N::insertOrUpdateNode(node, parent_node, parent_key, 0, val);
-    if (node->prefix_len != 0) std::cout << "[Error] Prefix is not empty" << std::endl;
     node->setPrefixLeaf(val);
     return;
   }
@@ -265,18 +259,6 @@ N *ArtDicTree::spawn(uint8_t *common_prefix, N *node, std::string key, N *val, i
   return node_new;
 }
 
-void ArtDicTree::skipIfEmpty(N *node_new, N *leaf_dup, uint8_t key) {
-  // TODO: remove std
-  uint8_t children_key[256];
-  N *children_p[256];
-  int child_cnt = 0;
-  N::getChildren(leaf_dup, 0, 255, children_key, children_p, child_cnt);
-  if (leaf_dup->prefix_len == 0 && leaf_dup->count == 1 && children_key[0] == 0) {
-    N::insertOrUpdateNode(node_new, nullptr, 0, key, children_p[0]);
-    N::deleteNode(leaf_dup);
-  }
-}
-
 bool ArtDicTree::prefixMatch(N *node, uint8_t *key, int key_size, int &key_level, int &node_level,
                              uint8_t *common_prefix) const {
   int i = 0;
@@ -292,12 +274,6 @@ bool ArtDicTree::prefixMatch(N *node, uint8_t *key, int key_size, int &key_level
   node_level = i;
   key_level += node_level;
   return true;
-}
-
-void ArtDicTree::subKey(int start, int end, uint8_t *subKey, uint8_t *org) {
-  for (int i = start; i < end; i++) {
-    subKey[i - start] = org[i];
-  }
 }
 
 LeafInfo *ArtDicTree::getLeftBottom(N *node) const {
