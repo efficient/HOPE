@@ -6,6 +6,8 @@
 #include <vector>
 #include "art_dic_N.hpp"
 
+#define TmpMaxPrefixLen 4096
+
 namespace ope {
 class ArtDicTree {
  public:
@@ -16,8 +18,6 @@ class ArtDicTree {
   Code lookup(const char *symbol, int symbol_len, int &prefix_len) const;
 
   bool build(const std::vector<SymbolCode> &symbol_code_list);
-
-  void countFreq(std::vector<std::string> keys, std::vector<SymbolFreq> *symbol_freq_list);
 
   int getN4Num();
 
@@ -34,7 +34,7 @@ class ArtDicTree {
 
   void insert(LeafInfo *leafinfo);
 
-  bool prefixMatch(N *node, uint8_t *key, int key_size, int &key_level, int &node_level, uint8_t *common_prefix) const;
+  bool prefixMatch(N *node, uint8_t *key, int key_size, int *key_level, int *node_level, uint8_t *common_prefix) const;
 
   N *spawn(uint8_t *common_prefix, N *node, std::string key, N *val, int node_level, int key_level, N *parent_node,
            uint8_t parent_key);
@@ -49,7 +49,7 @@ class ArtDicTree {
 
   std::string getPrevString(const std::string &str);
 
-  void printTree(N *node);
+  //  void printTree(N *node);
 };
 
 ArtDicTree::ArtDicTree() : root(new N256(nullptr, 0)){};
@@ -64,11 +64,11 @@ Code ArtDicTree::lookup(const char *symbol, const int symbol_len, int &prefix_le
   N *next_node = root;
   int key_level = 0;
   int node_level = 0;
-  uint8_t common_prefix[maxPrefixLen];
+  uint8_t common_prefix[TmpMaxPrefixLen];
 
   while (true) {
     node = next_node;
-    if (prefixMatch(node, (uint8_t *)symbol, symbol_len, key_level, node_level, common_prefix)) {
+    if (prefixMatch(node, (uint8_t *)symbol, symbol_len, &key_level, &node_level, common_prefix)) {
       if (key_level == symbol_len) {
         LeafInfo *leaf_info = reinterpret_cast<LeafInfo *>(N::getValueFromLeaf(node->getPrefixLeaf()));
         if (leaf_info == nullptr) {
@@ -124,12 +124,10 @@ bool ArtDicTree::build(const std::vector<SymbolCode> &symbol_code_list) {
 
   for (auto iter = symbol_code_list.begin(); iter != symbol_code_list.end(); iter++) {
     LeafInfo *lf = new LeafInfo();
-    // std::cout << iter - symbol_code_list.begin() << std::endl;
     std::string start_interval = iter->first;
     if (iter != symbol_code_list.end() - 1) {
       std::string end_interval = getPrevString((iter + 1)->first);
       lf->prefix_len = (uint32_t)getCommonPrefixLen(start_interval, end_interval);
-      // assert(lf->prefix_len > 0)
     } else {
       lf->prefix_len = 1;
     }
@@ -157,13 +155,10 @@ void ArtDicTree::insert(LeafInfo *leafInfo) {
     parent_node = node;
     parent_key = node_key;
     node = next_node;
-    uint8_t common_prefix[maxPrefixLen];
-    // uint8_t uint8_key[maxPrefixLen];
-    // hangeStringToUint8(key, uint8_key);
-    if (prefixMatch(node, (uint8_t *)key.c_str(), (uint32_t)key.size(), key_level, node_level, common_prefix)) {
+    uint8_t common_prefix[TmpMaxPrefixLen];
+    if (prefixMatch(node, (uint8_t *)key.c_str(), (uint32_t)key.size(), &key_level, &node_level, common_prefix)) {
       // left_key == prefix
       if (key_level == (int)key.size()) {
-        // N::insertOrUpdateNode(node, parent_node, parent_key, 0, val);
         node->setPrefixLeaf(val);
         return;
       }
@@ -174,7 +169,7 @@ void ArtDicTree::insert(LeafInfo *leafInfo) {
         addLeaf(key_level, key, node, val, parent_node, parent_key);
         return;
       } else if (N::isLeaf(next_node)) {
-        uint8_t prefix[maxPrefixLen];
+        uint8_t prefix[TmpMaxPrefixLen];
         N *new_node = new N4(prefix, 0);
         new_node->setPrefixLeaf(next_node);
         N::insertOrUpdateNode(node, parent_node, parent_key, reinterpret_cast<uint8_t &>(key[key_level]), new_node);
@@ -190,17 +185,7 @@ void ArtDicTree::insert(LeafInfo *leafInfo) {
   }
 }
 
-void ArtDicTree::countFreq(std::vector<std::string> keys, std::vector<SymbolFreq> *symbol_freq_list) {
-  for (auto iter = keys.begin(); iter != keys.end(); iter++) {
-    LeafInfo *result_leaf_info = nullptr;
-    int prefix_len = -1;
-    lookup(iter->c_str(), iter->size(), prefix_len);
-    assert(result_leaf_info != nullptr);
-    result_leaf_info->visit_cnt++;
-  }
-}
-
-void ArtDicTree::printTree(N *node) {
+/*void ArtDicTree::printTree(N *node) {
   if (N::isLeaf(node)) {
     std::cout << "Leaf: " << node << std::endl;
     return;
@@ -216,7 +201,7 @@ void ArtDicTree::printTree(N *node) {
     std::cout << "Child " << i << std::endl;
     printTree(children[i]);
   }
-}
+}*/
 
 void ArtDicTree::addLeaf(int insertkey_level, std::string key, N *node, N *val, N *parent_node, uint8_t parent_key) {
   if (insertkey_level == (int)key.size()) {
@@ -229,20 +214,12 @@ void ArtDicTree::addLeaf(int insertkey_level, std::string key, N *node, N *val, 
     N::insertOrUpdateNode(node, parent_node, parent_key, (uint8_t)(key[insertkey_level]), val);
     return;
   }
+  // create a new node, set its prefix leaf to val
   const uint8_t *key_cstr = reinterpret_cast<const uint8_t *>(key.c_str());
   int tmp_level = insertkey_level + 1;
-  N *leaf =
-      new N4((uint8_t *)(key_cstr + tmp_level),
-             (uint32_t)(key.length() - tmp_level) < maxPrefixLen ? (uint32_t)(key.length() - tmp_level) : maxPrefixLen);
+  N *leaf = new N4((uint8_t *)(key_cstr + tmp_level), (uint32_t)(key.length() - tmp_level));
   N::insertOrUpdateNode(node, parent_node, parent_key, (uint8_t)(key[insertkey_level]), leaf);
-  //        printTree(root);
-  tmp_level += maxPrefixLen;
-  if (tmp_level < (int)key.size()) {
-    //            std::cout << "I am spawing " << tmp_level << std::endl;
-    addLeaf(tmp_level, key, leaf, val, node, (uint8_t)(key[insertkey_level]));
-  } else {
-    leaf->setPrefixLeaf(val);
-  }
+  leaf->setPrefixLeaf(val);
 }
 
 // break the node
@@ -255,24 +232,19 @@ N *ArtDicTree::spawn(uint8_t *common_prefix, N *node, std::string key, N *val, i
   node_new->insert(node->getPrefix()[node_level], node);
   assert(node_level < (int)node->prefix_len);
   node->setPrefix(node->getPrefix() + node_level + 1, node->prefix_len - node_level - 1);
-  //        skipIfEmpty(node_new, node, node->prefix[node_level]);
   return node_new;
 }
 
-bool ArtDicTree::prefixMatch(N *node, uint8_t *key, int key_size, int &key_level, int &node_level,
+bool ArtDicTree::prefixMatch(N *node, uint8_t *key, int key_size, int *key_level, int *node_level,
                              uint8_t *common_prefix) const {
-  int i = 0;
-  uint8_t *node_prefix = node->getPrefix();
-  for (; i < (int)node->prefix_len; i++) {
-    if (key_level + i >= key_size || key[key_level + i] != node_prefix[i]) {
-      node_level = i;
-      key_level += i;
-      return false;
-    }
-    common_prefix[i] = node_prefix[i];
+  *node_level = 0;
+  while (*key_level < key_size && *node_level < static_cast<int>(node->prefix_len)) {
+    if (key[*key_level] != node->getPrefix()[*node_level]) return false;
+    common_prefix[*node_level] = key[*key_level];
+    *key_level = *key_level + 1;
+    *node_level = *node_level + 1;
   }
-  node_level = i;
-  key_level += node_level;
+  if (*node_level < static_cast<int>(node->prefix_len)) return false;
   return true;
 }
 
@@ -300,22 +272,11 @@ int ArtDicTree::getCommonPrefixLen(std::string &str1, std::string &str2) {
 }
 
 std::string ArtDicTree::getPrevString(const std::string &str) {
-  bool end_with_startchr = false;
-  for (int i = (int)str.size() - 1; i >= 0; i--) {
-    if (uint8_t(str[i]) == 0) {
-      end_with_startchr = true;
-      continue;
-    }
-    std::string addchr;
-    if (!end_with_startchr) {
-      char prev_chr = str[i] - 1;
-      addchr = std::string(1, prev_chr);
-    } else
-      addchr = std::string(1, str[i]);
-    return str.substr(0, i) + addchr;
+  if (uint8_t(str[str.size() - 1] == 0)) {
+    return str.substr(0, str.size() - 1);
+  } else {
+    return str.substr(0, str.size() - 1) + std::string(1, str[str.size() - 1] - 1);
   }
-  assert(false);
-  return std::string();
 }
 
 int ArtDicTree::getN4Num() { return cnt_N4; }
