@@ -61,8 +61,6 @@ class N {
 
   N *getPrefixLeaf();
 
-  void deletePrefixLeaf();
-
   template <class curN, class biggerN>
   static void insertGrow(curN *n, uint8_t k, N *node, uint8_t key_par, N *parent);
 
@@ -79,7 +77,7 @@ class N {
 
   static N *getChild(uint8_t key, N *node);
 
-  static void getChildren(N *node, uint8_t start, uint8_t end, uint8_t *children_key, N **children_p, int &cnt);
+  //  static void getChildren(N *node, uint8_t start, uint8_t end, uint8_t *children_key, N **children_p, int &cnt);
 
   static N *getFirstChild(N *node);
 
@@ -94,8 +92,6 @@ class N {
   static void deleteChildren(N *node);
 
   static void deleteNode(N *node);
-
-  static void checkNode(N *node);
 };
 
 class N4 : public N {
@@ -125,8 +121,6 @@ class N4 : public N {
 
   template <class NODE>
   void copyTo(NODE *n) const;
-
-  void checkNode();
 };
 
 class N16 : public N {
@@ -162,8 +156,6 @@ class N16 : public N {
 
   template <class NODE>
   void copyTo(NODE *n) const;
-
-  void checkNode();
 };
 
 class N48 : public N {
@@ -197,8 +189,6 @@ class N48 : public N {
 
   template <class NODE>
   void copyTo(NODE *n) const;
-
-  void checkNode();
 };
 
 class N256 : public N {
@@ -227,8 +217,6 @@ class N256 : public N {
 
   template <class NODE>
   void copyTo(NODE *n) const;
-
-  void checkNode();
 };
 
 void N::setPrefix(const uint8_t *_prefix, int length) {
@@ -256,8 +244,6 @@ uint8_t *N::getPrefix() {
 }
 
 void N::setPrefixLeaf(N *leaf) { prefix_leaf = leaf; }
-
-void N::deletePrefixLeaf() { delete prefix_leaf; }
 
 N *N::getPrefixLeaf() { return prefix_leaf; }
 
@@ -316,8 +302,6 @@ void N::change(N *node, uint8_t key, N *val) {
       n->change(key, val);
       return;
     }
-    default:
-      break;
   }
 }
 
@@ -326,19 +310,16 @@ void N::insertOrUpdateNode(N *node, N *parent_node, uint8_t parent_key, uint8_t 
     case NTypes::N4: {
       auto n = static_cast<N4 *>(node);
       insertGrow<N4, N16>(n, key, val, parent_key, parent_node);
-      //		N::checkNode(N::getChild(parent_key, parent_node));
       return;
     }
     case NTypes::N16: {
       auto n = static_cast<N16 *>(node);
       insertGrow<N16, N48>(n, key, val, parent_key, parent_node);
-      //		N::checkNode(N::getChild(parent_key, parent_node));
       return;
     }
     case NTypes::N48: {
       auto n = static_cast<N48 *>(node);
       insertGrow<N48, N256>(n, key, val, parent_key, parent_node);
-      //		N::checkNode(N::getChild(parent_key, parent_node));
       return;
     }
     case NTypes::N256: {
@@ -353,117 +334,120 @@ void N::insertOrUpdateNode(N *node, N *parent_node, uint8_t parent_key, uint8_t 
 }
 
 N *N::getChild(uint8_t key, N *node) {
+  N *child = nullptr;
   switch (node->type) {
     case NTypes::N4: {
-      return reinterpret_cast<N4 *>(node)->getChild(key);
+      child = (reinterpret_cast<N4 *>(node))->getChild(key);
+      break;
     }
     case NTypes::N16: {
-      return reinterpret_cast<N16 *>(node)->getChild(key);
+      child = (reinterpret_cast<N16 *>(node))->getChild(key);
+      break;
     }
     case NTypes::N48: {
-      return reinterpret_cast<N48 *>(node)->getChild(key);
+      child = (reinterpret_cast<N48 *>(node))->getChild(key);
+      break;
     }
     case NTypes::N256: {
-      return reinterpret_cast<N256 *>(node)->getChild(key);
+      child = (reinterpret_cast<N256 *>(node))->getChild(key);
+      break;
     }
-    default:
-      assert(false);
   }
-}
-
-void N::getChildren(N *node, uint8_t start, uint8_t end, uint8_t *children_key, N **children_p, int &child_cnt) {
-  child_cnt = 0;
-  for (uint8_t cur = start; cur < end; cur++) {
-    N *child = getChild(cur, node);
-    if (child == nullptr) continue;
-    children_key[child_cnt] = cur;
-    children_p[child_cnt] = child;
-    child_cnt++;
-  }
-  if (start == 0 && end == 255 && child_cnt != node->count) {
-    std::cout << "Child Count mismatch" << std::endl;
-    std::cout << "Child count:" << unsigned(child_cnt) << std::endl;
-    std::cout << "Record count:" << unsigned(node->count) << std::endl;
-    assert(false);
-  }
+  return child;
 }
 
 N *N::getValueFromLeaf(N *leaf) { return reinterpret_cast<N *>(reinterpret_cast<uint64_t>(leaf) & 0x7fffffffffffffff); }
 
 N *N::getLastChild(N *node) {
+  N *child = nullptr;
   switch (node->type) {
     case NTypes::N4: {
-      return reinterpret_cast<N4 *>(node)->getLastChild();
+      child = reinterpret_cast<N4 *>(node)->getLastChild();
+      break;
     }
     case NTypes::N16: {
-      return reinterpret_cast<N16 *>(node)->getLastChild();
+      child = reinterpret_cast<N16 *>(node)->getLastChild();
+      break;
     }
     case NTypes::N48: {
-      return reinterpret_cast<N48 *>(node)->getLastChild();
+      child = reinterpret_cast<N48 *>(node)->getLastChild();
+      break;
     }
     case NTypes::N256: {
-      return reinterpret_cast<N256 *>(node)->getLastChild();
+      child = reinterpret_cast<N256 *>(node)->getLastChild();
+      break;
     }
-    default:
-      assert(false);
   }
+  return child;
 }
 
 N *N::getFirstChild(N *node) {
+  N *child = nullptr;
   switch (node->type) {
     case NTypes::N4: {
-      return reinterpret_cast<N4 *>(node)->getFirstChild();
+      child = reinterpret_cast<N4 *>(node)->getFirstChild();
+      break;
     }
     case NTypes::N16: {
-      return reinterpret_cast<N16 *>(node)->getFirstChild();
+      child = reinterpret_cast<N16 *>(node)->getFirstChild();
+      break;
     }
     case NTypes::N48: {
-      return reinterpret_cast<N48 *>(node)->getFirstChild();
+      child = reinterpret_cast<N48 *>(node)->getFirstChild();
+      break;
     }
     case NTypes::N256: {
-      return reinterpret_cast<N256 *>(node)->getFirstChild();
+      child = reinterpret_cast<N256 *>(node)->getFirstChild();
+      break;
     }
-    default:
-      assert(false);
   }
+  return child;
 }
 
 N *N::getNextChild(N *node, uint8_t k) {
+  N *child = nullptr;
   switch (node->type) {
     case NTypes::N4: {
-      return reinterpret_cast<N4 *>(node)->getNextChild(k);
+      child = reinterpret_cast<N4 *>(node)->getNextChild(k);
+      break;
     }
     case NTypes::N16: {
-      return reinterpret_cast<N16 *>(node)->getNextChild(k);
+      child = reinterpret_cast<N16 *>(node)->getNextChild(k);
+      break;
     }
     case NTypes::N48: {
-      return reinterpret_cast<N48 *>(node)->getNextChild(k);
+      child = reinterpret_cast<N48 *>(node)->getNextChild(k);
+      break;
     }
     case NTypes::N256: {
-      return reinterpret_cast<N256 *>(node)->getNextChild(k);
+      child = reinterpret_cast<N256 *>(node)->getNextChild(k);
+      break;
     }
-    default:
-      assert(false);
   }
+  return child;
 }
 
 N *N::getPrevChild(N *node, uint8_t k) {
+  N *child = nullptr;
   switch (node->type) {
     case NTypes::N4: {
-      return reinterpret_cast<N4 *>(node)->getPrevChild(k);
+      child = reinterpret_cast<N4 *>(node)->getPrevChild(k);
+      break;
     }
     case NTypes::N16: {
-      return reinterpret_cast<N16 *>(node)->getPrevChild(k);
+      child = reinterpret_cast<N16 *>(node)->getPrevChild(k);
+      break;
     }
     case NTypes::N48: {
-      return reinterpret_cast<N48 *>(node)->getPrevChild(k);
+      child = reinterpret_cast<N48 *>(node)->getPrevChild(k);
+      break;
     }
     case NTypes::N256: {
-      return reinterpret_cast<N256 *>(node)->getPrevChild(k);
+      child = reinterpret_cast<N256 *>(node)->getPrevChild(k);
+      break;
     }
-    default:
-      assert(false);
   }
+  return child;
 }
 
 void N::deleteChildren(N *node) {
@@ -479,19 +463,21 @@ void N::deleteChildren(N *node) {
 
   switch (node->type) {
     case NTypes::N4: {
-      return reinterpret_cast<N4 *>(node)->deleteChildren();
+      reinterpret_cast<N4 *>(node)->deleteChildren();
+      break;
     }
     case NTypes::N16: {
-      return reinterpret_cast<N16 *>(node)->deleteChildren();
+      reinterpret_cast<N16 *>(node)->deleteChildren();
+      break;
     }
     case NTypes::N48: {
-      return reinterpret_cast<N48 *>(node)->deleteChildren();
+      reinterpret_cast<N48 *>(node)->deleteChildren();
+      break;
     }
     case NTypes::N256: {
-      return reinterpret_cast<N256 *>(node)->deleteChildren();
+      reinterpret_cast<N256 *>(node)->deleteChildren();
+      break;
     }
-    default:
-      assert(false);
   }
 }
 
@@ -529,27 +515,6 @@ void N::deleteNode(N *node) {
       delete n;
       return;
     }
-    default:
-      assert(false);
-  }
-}
-
-void N::checkNode(ope::N *node) {
-  switch (node->type) {
-    case NTypes::N4: {
-      reinterpret_cast<N4 *>(node)->checkNode();
-    }
-    case NTypes::N16: {
-      reinterpret_cast<N16 *>(node)->checkNode();
-    }
-    case NTypes::N48: {
-      reinterpret_cast<N48 *>(node)->checkNode();
-    }
-    case NTypes::N256: {
-      reinterpret_cast<N256 *>(node)->checkNode();
-    }
-    default:
-      assert(false);
   }
 }
 
@@ -629,13 +594,6 @@ void N4::copyTo(NODE *n) const {
   }
 }
 
-void N4::checkNode() {
-  for (int i = 0; i < (int)count - 1; i++) {
-    assert(keys[i] != keys[i + 1]);
-    assert(children[i] != nullptr);
-  }
-}
-
 bool N16::insert(uint8_t k, N *node) {
   if (count == 16) return false;
   // TODO: use __mm__cmplt to speed up
@@ -671,7 +629,7 @@ void N16::change(uint8_t key, N *val) {
   for (int i = 0; i < count; i++) {
     if (keys[i] == key) {
       children[i] = val;
-      return;
+      break;
     }
   }
 }
@@ -716,13 +674,6 @@ void N16::copyTo(NODE *n) const {
   }
   for (int i = 0; i < count; i++) {
     n->insert(keys[i], children[i]);
-  }
-}
-
-void N16::checkNode() {
-  for (int i = 0; i < (int)count - 1; i++) {
-    assert(keys[i] != keys[i + 1]);
-    assert(children[i] != nullptr);
   }
 }
 
@@ -802,8 +753,6 @@ void N48::copyTo(NODE *n) const {
   }
 }
 
-void N48::checkNode() {}
-
 bool N256::insert(uint8_t k, N *n) {
   children[k] = n;
   count++;
@@ -873,7 +822,6 @@ void N256::copyTo(NODE *n) const {
   }
 }
 
-void N256::checkNode() {}
 }  // namespace ope
 
 #endif

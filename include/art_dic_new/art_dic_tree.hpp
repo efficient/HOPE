@@ -27,7 +27,7 @@ class ArtDicTree {
 
   int getN256Num();
 
-  int getExtraSize() { return 0; };
+  int getExtraSize() { return extra_size; };
 
  private:
   N *root;
@@ -48,8 +48,6 @@ class ArtDicTree {
   LeafInfo *getRightBottom(N *node) const;
 
   std::string getPrevString(const std::string &str);
-
-  //  void printTree(N *node);
 };
 
 ArtDicTree::ArtDicTree() : root(new N256(nullptr, 0)){};
@@ -185,27 +183,8 @@ void ArtDicTree::insert(LeafInfo *leafInfo) {
   }
 }
 
-/*void ArtDicTree::printTree(N *node) {
-  if (N::isLeaf(node)) {
-    std::cout << "Leaf: " << node << std::endl;
-    return;
-  }
-  std::cout << "Prefix:";
-  for (int i = 0; i < (int)node->prefix_len; i++) std::cout << node->getPrefix()[i];
-  std::cout << " Prefix_len:" << node->prefix_len << " Child cnt:" << (int)node->count << std::endl;
-  uint8_t keys[300];
-  N *children[300];
-  int n = 0;
-  N::getChildren(node, 0, 255, keys, children, n);
-  for (int i = 0; i < node->count; i++) {
-    std::cout << "Child " << i << std::endl;
-    printTree(children[i]);
-  }
-}*/
-
 void ArtDicTree::addLeaf(int insertkey_level, std::string key, N *node, N *val, N *parent_node, uint8_t parent_key) {
   if (insertkey_level == (int)key.size()) {
-    // N::insertOrUpdateNode(node, parent_node, parent_key, 0, val);
     node->setPrefixLeaf(val);
     return;
   }
