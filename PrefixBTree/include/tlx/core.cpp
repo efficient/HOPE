@@ -20,38 +20,34 @@ namespace tlx {
 
 static std::atomic<bool> s_die_with_exception {
 #if TLX_DIE_WITH_EXCEPTION
-    true
+  true
 #else
-    false
+  false
 #endif
 };
 
-void die_with_message(const std::string& msg) {
+void die_with_message(const std::string &msg) {
   if (s_die_with_exception) {
     throw DieException(msg);
-  }
-  else {
+  } else {
     std::cerr << msg << std::endl;
     std::terminate();
   }
 }
 
-void die_with_message(const char* msg, const char* file, size_t line) {
+void die_with_message(const char *msg, const char *file, size_t line) {
   std::ostringstream oss;
   oss << msg << " @ " << file << ':' << line;
   die_with_message(oss.str());
 }
 
-void die_with_message(const std::string& msg, const char* file, size_t line) {
+void die_with_message(const std::string &msg, const char *file, size_t line) {
   return die_with_message(msg.c_str(), file, line);
 }
 
-DieException::DieException(const std::string& message)
-    : std::runtime_error(message) { }
+DieException::DieException(const std::string &message) : std::runtime_error(message) {}
 
-bool set_die_with_exception(bool b) {
-  return s_die_with_exception.exchange(b);
-}
+bool set_die_with_exception(bool b) { return s_die_with_exception.exchange(b); }
 
 /******************************************************************************/
 /** \page tlx_die die() - Simple Invariant Testing
@@ -83,6 +79,6 @@ TLX_DIE_WITH_EXCEPTION=1 using the preprocessor.
 
  */
 
-} // namespace tlx
+}  // namespace tlx
 
 /******************************************************************************/
