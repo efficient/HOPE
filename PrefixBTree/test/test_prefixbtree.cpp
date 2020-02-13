@@ -127,7 +127,7 @@ void loadEmailList() {
   }
 }
 
-}  // namespace prefixbtree
+}  // namespace prefixbtreetest
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
