@@ -14,6 +14,7 @@ namespace prefixbtreetest {
 
 static const std::string kWordFilePath = "../../../datasets/words.txt";
 static const std::string kEmailFilePath = "../../../datasets/emails.txt";
+// static const int kWordTestSize = 234369;
 static const int kWordTestSize = 234369;
 static const int kEmailTestSize = 250000;
 static const int kEncoderType = 1;
@@ -32,6 +33,7 @@ class PrefixBtreeUnitTest : public ::testing::Test {
   ope::Encoder *encoder_;
   cpsbtreeolc::BTree<int64_t> *bt_;
   std::vector<std::string> words_compressed_;
+  std::vector<std::string> emails_compressed_;
   uint8_t buffer_[256];
 };
 
@@ -105,6 +107,81 @@ TEST_F(PrefixBtreeUnitTest, opcLookupWordTest) {
   delete encoder_;
 }
 
+TEST_F(PrefixBtreeUnitTest, rangeScanTest) {
+  bt_ = new cpsbtreeolc::BTree<int64_t>();
+  std::vector<std::string> sorted_emails;
+  for (int i = 0; i < (int)emails.size(); i++) {
+    sorted_emails.push_back(emails[i]);
+  }
+  std::sort(sorted_emails.begin(), sorted_emails.end());
+  std::hash<std::string> str_hash;
+  // key: hash(string), value: index
+  std::unordered_map<size_t, int> index_map;
+  for (int i = 0; i < (int)sorted_emails.size(); i++) {
+    index_map[str_hash(sorted_emails[i])] = i;
+  }
+
+  for (int i = 0; i < (int)emails.size(); i++) {
+    cpsbtreeolc::Key key;
+    key.setKeyStr(emails[i].c_str(), emails[i].length());
+    bt_->insert(key, reinterpret_cast<int64_t>(&emails[i]));
+  }
+
+  int scanlen = 100;
+  int64_t re[200];
+  for (int i = 0; i + scanlen < (int)emails.size(); i++) {
+    cpsbtreeolc::Key key;
+    key.setKeyStr(emails[i].c_str(), emails[i].length());
+    int cnt = bt_->rangeScan(key, scanlen, re);
+    int start_idx = index_map[str_hash(*reinterpret_cast<std::string *>(re[0]))];
+    for (int j = 0; j < cnt; j++) {
+      EXPECT_EQ(sorted_emails[start_idx + j], *reinterpret_cast<std::string *>(re[j]));
+    }
+  }
+  delete bt_;
+}
+
+TEST_F(PrefixBtreeUnitTest, rangeScanEncodeTest) {
+  encoder_ = ope::EncoderFactory::createEncoder(kEncoderType);
+  encoder_->build(words, kDictSizeLimit);
+  for (int i = 0; i < (int)emails.size(); i++) {
+    emails_compressed_.push_back(encodeString(emails[i]));
+  }
+
+  bt_ = new cpsbtreeolc::BTree<int64_t>();
+  std::vector<std::string> sorted_emails;
+  for (int i = 0; i < (int)emails_compressed_.size(); i++) {
+    sorted_emails.push_back(emails_compressed_[i]);
+  }
+  std::sort(sorted_emails.begin(), sorted_emails.end());
+  std::hash<std::string> str_hash;
+  // key: hash(string), value: index
+  std::unordered_map<size_t, int> index_map;
+  for (int i = 0; i < (int)sorted_emails.size(); i++) {
+    index_map[str_hash(sorted_emails[i])] = i;
+  }
+
+  for (int i = 0; i < (int)emails_compressed_.size(); i++) {
+    cpsbtreeolc::Key key;
+    key.setKeyStr(emails_compressed_[i].c_str(), emails_compressed_[i].length());
+    bt_->insert(key, reinterpret_cast<int64_t>(&emails_compressed_[i]));
+  }
+
+  int scanlen = 100;
+  int64_t re[200];
+  for (int i = 0; i + scanlen < (int)emails_compressed_.size(); i++) {
+    cpsbtreeolc::Key key;
+    key.setKeyStr(emails_compressed_[i].c_str(), emails_compressed_[i].length());
+    int cnt = bt_->rangeScan(key, scanlen, re);
+    int start_idx = index_map[str_hash(*reinterpret_cast<std::string *>(re[0]))];
+    for (int j = 0; j < cnt; j++) {
+      EXPECT_EQ(sorted_emails[start_idx + j], *reinterpret_cast<std::string *>(re[j]));
+    }
+  }
+  delete bt_;
+  delete encoder_;
+}
+
 void loadWordList() {
   std::ifstream infile(kWordFilePath);
   std::string key;
@@ -114,6 +191,7 @@ void loadWordList() {
     words.push_back(key);
     count++;
   }
+  std::cout << words[count - 1] << std::endl;
 }
 
 void loadEmailList() {
@@ -125,6 +203,7 @@ void loadEmailList() {
     emails.push_back(key);
     count++;
   }
+  std::random_shuffle(emails.begin(), emails.end());
 }
 
 }  // namespace prefixbtreetest

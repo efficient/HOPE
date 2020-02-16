@@ -13,7 +13,6 @@
 //#define RUN_TIMESTAMP
 
 static const uint64_t kNumEmailRecords = 25000000;
-// static const uint64_t kNumEmailRecords = 2500;
 static const uint64_t kNumWikiRecords = 14000000;
 static const uint64_t kNumTsRecords = 14000000;
 static const uint64_t kNumTxns = 10000000;
@@ -188,18 +187,9 @@ void loadWorkload(int wkld_id, std::vector<std::string> &insert_keys, std::vecto
     return;
 
   std::sort(load_keys.begin(), load_keys.end());
-  for (int i = 0; i < (int)load_keys.size() - 1; i++) {
-    // int key_len = load_keys[i].length();
-    // int next_key_len = load_keys[i + 1].length();
-    // if (key_len < next_key_len) {
-    //    std::string next_prefix = load_keys[i + 1].substr(0, key_len);
-    //    if (load_keys[i].compare(next_prefix) != 0)
-    //    insert_keys.push_back(load_keys[i]);
-    //} else {
+  for (int i = 0; i < (int)load_keys.size(); i++) {
     insert_keys.push_back(load_keys[i]);
-    //}
   }
-  insert_keys.push_back(load_keys[load_keys.size() - 1]);
 
   load_keys.clear();
   std::random_shuffle(insert_keys.begin(), insert_keys.end());
@@ -290,7 +280,6 @@ void exec(const int expt_id, const int wkld_id, const bool is_point, const bool 
   double build_time = end_time - start_time;
   std::cout << "Insert time = " << insert_time << std::endl;
   std::cout << "Build time = " << build_time << std::endl;
-
   std::cout << "size = " << bt->getSize() << std::endl;
   std::cout << "total key size = " << total_key_size << std::endl;
 
@@ -302,7 +291,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point, const bool 
 
   // execute transactions =======================================
   uint64_t sum = 0;
-  int64_t TIDs[120];
+  int64_t *TIDs = new int64_t[120];
   start_time = getNow();
   if (is_point) {  // point query
     if (is_compressed) {
@@ -322,8 +311,6 @@ void exec(const int expt_id, const int wkld_id, const bool is_point, const bool 
         int64_t re;
         bool find = bt->lookup(key, re);
         sum += (int)find;
-        assert(find);
-        // assert(re == txn_keys[i]);
       }
     }
   } else {  // range query
@@ -335,20 +322,17 @@ void exec(const int expt_id, const int wkld_id, const bool is_point, const bool 
         std::string left_key = std::string((const char *)buffer, enc_len_round);
         cpsbtreeolc::Key key;
         key.setKeyStr(left_key.c_str(), left_key.length());
-        bt->rangeScan(key, scan_key_lens[i], TIDs);
+        sum += bt->rangeScan(key, scan_key_lens[i], TIDs);
       }
-      std::cout << "Finish Compressed Range Query" << std::endl;
     } else {
       for (int i = 0; i < (int)txn_keys.size(); i++) {
         cpsbtreeolc::Key key;
         key.setKeyStr(txn_keys[i].c_str(), txn_keys[i].length());
-        bt->rangeScan(key, scan_key_lens[i], TIDs);
-        //       if (cnt != scan_key_lens[i])
-        //           std::cout << cnt << " " << scan_key_lens[i] << std::endl;
+        sum += bt->rangeScan(key, scan_key_lens[i], TIDs);
       }
-      std::cout << "Finish Uncompressed Range Query" << std::endl;
     }
   }
+
   end_time = getNow();
   double exec_time = end_time - start_time;
   double iput = enc_insert_keys.size() / insert_time / 1000000;  // Mops/sec
@@ -359,9 +343,11 @@ void exec(const int expt_id, const int wkld_id, const bool is_point, const bool 
   double insert_lat = (insert_time * 1000000) / enc_insert_keys.size();
   std::cout << kGreen << "Insert Latency = " << kNoColor << insert_lat << "\n";
   std::cout << kGreen << "Lookup Latency = " << kNoColor << lookup_lat << "\n";
+  std::cout << sum << std::endl;
 
   delete bt;
-  delete buffer;
+  delete[] buffer;
+  delete[] TIDs;
 
   if (expt_id == 0) {
     if (wkld_id == kEmail) {
@@ -475,6 +461,7 @@ void exec_group(const int expt_id, const bool is_point, int &expt_num, const int
   std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
   exec(expt_id, kUrl, is_point, true, 3, 6, insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
   expt_num++;
+
 #ifdef RUN_TIMESTAMP
   std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
   exec(expt_id, kTs, is_point, true, 3, 6, insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
