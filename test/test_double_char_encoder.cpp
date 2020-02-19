@@ -21,9 +21,6 @@ static std::vector<std::string> words;
 static const int kLongestCodeLen = 4096;
 
 class DoubleCharEncoderTest : public ::testing::Test {
- public:
-  virtual void SetUp() {}
-  virtual void TearDown() {}
 };
 
 int GetByteLen(const int bitlen) { return ((bitlen + 7) & ~7) / 8; }
@@ -62,7 +59,7 @@ TEST_F(DoubleCharEncoderTest, wordTest) {
   }
 }
 
-TEST_F(DoubleCharEncoderTest, wordPairTest) {
+/*TEST_F(DoubleCharEncoderTest, wordPairTest) {
   DoubleCharEncoder *encoder = new DoubleCharEncoder();
   encoder->build(words, 65536);
   auto l_buffer = new uint8_t[kLongestCodeLen];
@@ -75,7 +72,7 @@ TEST_F(DoubleCharEncoderTest, wordPairTest) {
     int cmp = str1.compare(str2);
     EXPECT_LT(cmp, 0);
   }
-}
+}*/
 
 void LoadWords() {
   std::ifstream infile(kWordFilePath);
