@@ -59,7 +59,7 @@ TEST_F(DoubleCharEncoderTest, wordTest) {
   }
 }
 
-/*TEST_F(DoubleCharEncoderTest, wordPairTest) {
+TEST_F(DoubleCharEncoderTest, wordPairTest) {
   DoubleCharEncoder *encoder = new DoubleCharEncoder();
   encoder->build(words, 65536);
   auto l_buffer = new uint8_t[kLongestCodeLen];
@@ -72,7 +72,7 @@ TEST_F(DoubleCharEncoderTest, wordTest) {
     int cmp = str1.compare(str2);
     EXPECT_LT(cmp, 0);
   }
-}*/
+}
 
 void LoadWords() {
   std::ifstream infile(kWordFilePath);
