@@ -117,32 +117,6 @@ TEST_F(ARTDICTest, pointLookupWordTest) {
 }
 
 
-TEST_F(ARTDICTest, pointTsLookupTest) {
-  ArtDicTree *test = new ArtDicTree();
-  std::vector<ope::SymbolCode> ls;
-  std::cout << "number of test timestamps:" << timestamps.size() << std::endl;
-
-  for (int i = 0; i < static_cast<int>(timestamps.size()) - 1; i++) {
-    ope::SymbolCode symbol_code = ope::SymbolCode();
-    symbol_code.first = timestamps[i];
-    symbol_code.second = ope::Code();
-    symbol_code.second.code = i;
-    ls.push_back(symbol_code);
-  }
-
-  test->build(ls);
-
-  for (int i = 0; i < static_cast<int>(timestamps.size()) - 1; i++) {
-    int prefix_len = -1;
-    ope::Code result = test->lookup(timestamps[i].c_str(), timestamps[i].length(), prefix_len);
-    if (result.code != i) {
-      std::cout << std::dec << "lookup:" << result.code << " answer:" << i << std::endl;
-    }
-    EXPECT_TRUE(result.code == i);
-  }
-  delete test;
-}
-
 /*
  * ART should find the first key greater than or equal to the given key
  * the test simulates the condition when the provided key does not exist
@@ -188,46 +162,6 @@ TEST_F(ARTDICTest, withinRangeLookupTest) {
   delete test;
 }
 
-TEST_F(ARTDICTest, withinRangeTsLookupTest) {
-  ArtDicTree *test = new ArtDicTree();
-  std::vector<ope::SymbolCode> ls;
-  std::cout << timestamps.size() << std::endl;
-  std::sort(timestamps.begin(), timestamps.end());
-
-  for (int i = 0; i < static_cast<int>(timestamps.size()); i++) {
-    ope::SymbolCode symbol_code = ope::SymbolCode();
-    symbol_code.first = timestamps[i];
-    symbol_code.second = ope::Code();
-    symbol_code.second.code = i;
-    ls.push_back(symbol_code);
-  }
-
-  test->build(ls);
-
-  for (int i = 0; i < static_cast<int>(timestamps.size()) - 1; i++) {
-    int prefix_len = -1;
-    std::string cur_str = GetNextString(timestamps[i]);
-    std::string next_str = cur_str;
-    int next_idx = i;
-    bool find_next = GetNextInterval(timestamps, i, cur_str, &next_idx, &next_str);
-    if (!find_next) {
-      break;
-    }
-    ope::Code result;
-    result = test->lookup(cur_str.c_str(), cur_str.size(), prefix_len);
-
-    if (result.code != next_idx) {
-      std::cout << "*" << next_idx << " " << result.code << " " << i << std::endl;
-      std::cout << timestamps[next_idx] << " " << timestamps[result.code] << " " << cur_str << std::endl;
-      int l;
-      auto org = test->lookup(timestamps[i].c_str(), timestamps[i].size(), l);
-      std::cout << org.code << std::endl;
-    }
-    EXPECT_TRUE(result.code == next_idx);
-  }
-  delete test;
-}
-
 int GetCommonPrefixLen(const std::string &str1, const std::string &str2) {
   int min_len = static_cast<int>(std::min(str1.size(), str2.size()));
   int i = 0;
@@ -254,31 +188,12 @@ std::string Uint64ToString(uint64_t key) {
   return std::string(reinterpret_cast<const char *>(&endian_swapped_key), 8);
 }
 
-void LoadTimestamp() {
-  std::ifstream infile(kTsFilePath);
-  uint64_t int_key;
-  std::set<uint64_t> int_keys;
-  std::string key;
-  int count = 0;
-  while (infile.good() && count < kTsTestSize) {
-    infile >> int_key;
-    // skip duplicate timestamp keys
-    if (int_keys.find(int_key) != int_keys.end()) {
-      continue;
-    }
-    int_keys.insert(int_key);
-    key = Uint64ToString(int_key);
-    timestamps.push_back(key);
-    count++;
-  }
-}
 }  // namespace treetest
 
 }  // namespace ope
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
-  ope::treetest::loadWords();
-  ope::treetest::loadTimestamp();
+  ope::treetest::LoadWords();
   return RUN_ALL_TESTS();
 }
