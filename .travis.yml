@@ -4,7 +4,7 @@ language: cpp
 matrix:
   include:
     - os: linux
-      dist: trusty
+      dist: xenial 
       env: BUILD_SYSTEM=cmake C_COMPILER=gcc-7 CXX_COMPILER=g++-7
       addons:
         apt:
