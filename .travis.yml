@@ -1,0 +1,49 @@
+sudo: required
+language: cpp
+
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+      env: BUILD_SYSTEM=cmake C_COMPILER=gcc-7 CXX_COMPILER=g++-7
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - gcc-7
+          - g++-7
+
+install:
+# Set the ${CXX} variable properly
+- export CC="${C_COMPILER}"
+- export CXX=${CXX_COMPILER}
+- ${CXX_COMPILER} --version
+- sudo apt-get install build-essential
+- sudo apt-get install cmake
+- sudo apt-get install libgtest.dev
+- cd /usr/src/gtest
+- sudo cmake CMakeLists.txt
+- sudo make
+- sudo cp *.a /usr/lib
+- sudo apt-get install lcov
+- sudo apt-get install ruby
+- sudo gem install coveralls-lcov
+- sudo apt-get install libjemalloc-dev
+- sudo apt-get install libtbb-dev
+
+script:
+- cd $TRAVIS_BUILD_DIR
+- mkdir build
+- cd build
+- cmake -DCMAKE_BUILD_TYPE=Debug -DCOVERALLS=ON ..
+- make -j
+- make test
+- make coverage
+
+after_success:
+- lcov --remove coverage.info 'test/*' '/usr/*' '/lib/*' --output-file coverage.info
+- lcov --list coverage.info
+- coveralls-lcov --repo-token=${COVERALLS_TOKEN} coverage.info
+
+
