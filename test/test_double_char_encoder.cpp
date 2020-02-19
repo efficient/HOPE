@@ -18,7 +18,7 @@ namespace doublecharencodertest {
 static const char kWordFilePath[] = "../../datasets/words.txt";
 static const int kWordTestSize = 234369;
 static std::vector<std::string> words;
-static const int kLongestCondeLen = 4096;
+static const int kLongestCodeLen = 4096;
 
 class DoubleCharEncoderTest : public ::testing::Test {
  public:

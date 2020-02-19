@@ -40,9 +40,9 @@ TEST_F(HeuristicEncoderTest, wordTest) {
     int len = encoder->encode(words[i], buffer);
     total_len += (words[i].length() * 8);
     total_enc_len += len;
-    std::string str1 = std::string((const char *)buffer, getByteLen(len));
+    std::string str1 = std::string((const char *)buffer, GetByteLen(len));
     len = encoder->encode(words[i + 1], buffer);
-    std::string str2 = std::string((const char *)buffer, getByteLen(len));
+    std::string str2 = std::string((const char *)buffer, GetByteLen(len));
     int cmp = str1.compare(str2);
 
     if (cmp >= 0) {
