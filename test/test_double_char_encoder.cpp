@@ -28,9 +28,9 @@ class DoubleCharEncoderTest : public ::testing::Test {
 
 int GetByteLen(const int bitlen) { return ((bitlen + 7) & ~7) / 8; }
 
-void Print(std::string str) {
-  for (int i = 0; i < static_cast<int>(str.size()); i++) {
-    std::cout << std::bitset<8>(str[i]) << " ";
+void Print(const std::string &str) {
+  for (auto c : str) {
+    std::cout << std::bitset<8>(c) << " ";
   }
   std::cout << std::endl;
 }

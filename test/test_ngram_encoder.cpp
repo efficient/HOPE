@@ -13,7 +13,7 @@ namespace ope {
 
 namespace ngramencodertest {
 
-static const char kFilePath[] = "../../datasets/words.txt";
+static const char kWordFilePath[] = "../../datasets/words.txt";
 static const int kWordTestSize = 234369;
 static std::vector<std::string> words;
 static const int kLongestCodeLen = 4096;
@@ -91,8 +91,8 @@ TEST_F(NGramEncoderTest, word4Test) {
       std::cout << i << std::endl;
       std::cout << words[i] << std::endl;
       std::cout << words[i + 1] << std::endl;
-      print(str1);
-      print(str2);
+      Print(str1);
+      Print(str2);
     }
     EXPECT_LT(cmp, 0);
   }
