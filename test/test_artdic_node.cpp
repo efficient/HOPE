@@ -62,10 +62,12 @@ TEST_F(ARTNodeTest, prefixSetGetTest) {
   delete[] long_prefix;
 }
 
+}  // namespace nodetest
+}  // namespace ope
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
 
-}  // namespace nodetest
-}  // namespace ope
+
