@@ -78,6 +78,6 @@ void LoadWords() {
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
-  ope::almimprovedencodertest::loadWords();
+  ope::almimprovedencodertest::LoadWords();
   return RUN_ALL_TESTS();
 }
