@@ -136,6 +136,6 @@ void LoadWords() {
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
-  ope::ngramencodertest::loadWords();
+  ope::ngramencodertest::LoadWords();
   return RUN_ALL_TESTS();
 }
