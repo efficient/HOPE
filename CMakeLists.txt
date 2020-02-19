@@ -19,7 +19,6 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/symbol_selectors")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/code_generators")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/dictionaries")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/encoders")
-#include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/art_dic")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/art_dic_new")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/succinct_binary_trie")
 
