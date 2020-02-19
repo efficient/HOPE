@@ -1,24 +1,8 @@
 sudo: required
 language: cpp
-
-matrix:
-  include:
-    - os: linux
-      dist: xenial 
-      env: BUILD_SYSTEM=cmake C_COMPILER=gcc-7 CXX_COMPILER=g++-7
-      addons:
-        apt:
-          sources:
-          - ubuntu-toolchain-r-test
-          packages:
-          - gcc-7
-          - g++-7
+dist: bionic
 
 install:
-# Set the ${CXX} variable properly
-- export CC="${C_COMPILER}"
-- export CXX=${CXX_COMPILER}
-- ${CXX_COMPILER} --version
 - sudo apt-get install build-essential
 - sudo apt-get install cmake
 - sudo apt-get install libgtest.dev
