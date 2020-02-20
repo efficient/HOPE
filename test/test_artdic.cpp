@@ -2,12 +2,13 @@
 
 #include <algorithm>
 #include <bitset>
-#include <cstdlib>  // std::rand, std::srand
 #include <fstream>
 #include <iostream>
 #include <set>
 #include <string>
 #include <vector>
+#include <random>
+
 #include "art_dic_tree.hpp"
 #include "gtest/gtest.h"
 
@@ -16,9 +17,9 @@ namespace ope {
 namespace treetest {
 static const char kWordFilePath[] = "../../datasets/words.txt";
 static const int kWordTestSize = 234369;
-static const int kTsTestSize = 10000;
+static const int kInt64TestSize = 10000;
 static std::vector<std::string> words;
-static std::vector<std::string> timestamps;
+static std::vector<std::string> integers;
 
 class ARTDICTest : public ::testing::Test {
  private:
@@ -91,7 +92,28 @@ class ARTDICTest : public ::testing::Test {
   }
 };
 
-TEST_F(ARTDICTest, emptyTest) {}
+TEST_F(ARTDICTest, pointLookupInt64Test) {
+   auto test = new ArtDicTree();
+  std::vector<ope::SymbolCode> ls;
+
+  for (int i = 0; i < static_cast<int>(integers.size()) - 1; i++) {
+    ope::SymbolCode symbol_code = ope::SymbolCode();
+    symbol_code.first = integers[i];
+    symbol_code.second = ope::Code();
+    symbol_code.second.code = i;
+    ls.push_back(symbol_code);
+  }
+
+  test->build(ls);
+
+  for (int i = 0; i < static_cast<int>(integers.size()) - 1; i++) {
+    int prefix_len = -1;
+    ope::Code result = test->lookup(integers[i].c_str(), integers[i].size(), prefix_len);
+    if (result.code != i) std::cout << "lookup:" << result.code << " answer:" << i << std::endl;
+    EXPECT_TRUE(result.code == i);
+  }
+  delete test; 
+}
 
 TEST_F(ARTDICTest, pointLookupWordTest) {
   auto test = new ArtDicTree();
@@ -186,6 +208,17 @@ void LoadWords() {
 std::string Uint64ToString(uint64_t key) {
   uint64_t endian_swapped_key = __builtin_bswap64(key);
   return std::string(reinterpret_cast<const char *>(&endian_swapped_key), 8);
+}
+
+void GenerateInt64() {
+  std::random_device rd;  //Will be used to obtain a seed for the random number engine
+  std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+  std::uniform_int_distribution<> dis(1, 2000000);
+  uint64_t data = 1;
+  for (int i = 0; i < kInt64TestSize; i++) {
+    data += dis(gen);
+    integers.push_back(Uint64ToString(data));
+  }
 }
 
 }  // namespace treetest
