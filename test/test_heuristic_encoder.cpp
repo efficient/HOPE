@@ -44,15 +44,6 @@ TEST_F(HeuristicEncoderTest, wordTest) {
     len = encoder->encode(words[i + 1], buffer);
     std::string str2 = std::string((const char *)buffer, GetByteLen(len));
     int cmp = str1.compare(str2);
-
-    if (cmp >= 0) {
-      int len1 = encoder->encode(words[i], buffer);
-      std::cout << words[i] << "\t" << len1 << std::endl;
-      Print(str1);
-      int len2 = encoder->encode(words[i + 1], buffer);
-      std::cout << words[i + 1] << "\t" << len2 << std::endl;
-      Print(str2);
-    }
     EXPECT_LT(cmp, 0);
   }
   delete[] buffer;
@@ -60,7 +51,7 @@ TEST_F(HeuristicEncoderTest, wordTest) {
   std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
 }
 
-void loadWords() {
+void LoadWords() {
   std::ifstream infile(kWordFilePath);
   std::string key;
   int count = 0;
@@ -77,6 +68,6 @@ void loadWords() {
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
-  ope::heuristicencodertest::loadWords();
+  ope::heuristicencodertest::LoadWords();
   return RUN_ALL_TESTS();
 }

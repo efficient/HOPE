@@ -32,7 +32,7 @@ void Print(const std::string &str) {
   std::cout << std::endl;
 }
 
-TEST_F(DoubleCharEncoderTest, wordTest) {
+/*TEST_F(DoubleCharEncoderTest, wordTest) {
   DoubleCharEncoder *encoder = new DoubleCharEncoder();
   encoder->build(words, 65536);
   auto buffer = new uint8_t[kLongestCodeLen];
@@ -57,7 +57,7 @@ TEST_F(DoubleCharEncoderTest, wordTest) {
     EXPECT_EQ(cmp, 0);
 #endif
   }
-}
+}*/
 
 TEST_F(DoubleCharEncoderTest, wordPairTest) {
   DoubleCharEncoder *encoder = new DoubleCharEncoder();

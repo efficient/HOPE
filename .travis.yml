@@ -20,7 +20,7 @@ script:
 - cd $TRAVIS_BUILD_DIR
 - mkdir build
 - cd build
-- cmake -DCMAKE_BUILD_TYPE=Release -DCOVERALLS=ON ..
+- cmake -DCMAKE_BUILD_TYPE=Debug -DCOVERALLS=ON ..
 - make -j
 - make test
 - make coverage
