@@ -71,7 +71,7 @@ std::string Uint64ToString(uint64_t key) {
 
 TEST_F(DoubleCharEncoderTest, wordPairTest) {
   DoubleCharEncoder *encoder = new DoubleCharEncoder();
-  encoder->build(words, 65536);
+  encoder->build(words, 4096);
   auto l_buffer = new uint8_t[kLongestCodeLen];
   auto r_buffer = new uint8_t[kLongestCodeLen];
   for (int i = 0; i < static_cast<int>(words.size()) - 1; i++) {
@@ -86,7 +86,7 @@ TEST_F(DoubleCharEncoderTest, wordPairTest) {
 
 TEST_F(DoubleCharEncoderTest, intTest) {
   DoubleCharEncoder *encoder = new DoubleCharEncoder();
-  encoder->build(integers, 65536);
+  encoder->build(integers, 4096);
   auto buffer = new uint8_t[kLongestCodeLen];
   for (int i = 0; i < static_cast<int>(integers.size()) - 1; i++) {
     int len = encoder->encode(integers[i], buffer);
