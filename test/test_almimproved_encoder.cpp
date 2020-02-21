@@ -102,6 +102,7 @@ void GenerateInt64() {
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
-  ope::almimprovedenco“+ydertest::LoadWords();
+  ope::almimprovedencodertest::LoadWords();
+  ope::almimprovedencodertest::GenerateInt64();
   return RUN_ALL_TESTS();
 }

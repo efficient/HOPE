@@ -93,7 +93,7 @@ TEST_F(SingleCharEncoderTest, wordBatchTest) {
   }
 }
 
-void loadWords() {
+void LoadWords() {
   std::ifstream infile(kFilePath);
   std::string key;
   int count = 0;
@@ -109,6 +109,6 @@ void loadWords() {
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
-  ope::singlecharencodertest::loadWords();
+  ope::singlecharencodertest::LoadWords();
   return RUN_ALL_TESTS();
 }

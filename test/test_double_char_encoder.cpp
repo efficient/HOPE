@@ -18,6 +18,7 @@ namespace doublecharencodertest {
 static const char kWordFilePath[] = "../../datasets/words.txt";
 static const int kWordTestSize = 234369;
 static std::vector<std::string> words;
+static std::vector<std::string> integers;
 static const int kLongestCodeLen = 4096;
 
 class DoubleCharEncoderTest : public ::testing::Test {
@@ -74,6 +75,33 @@ TEST_F(DoubleCharEncoderTest, wordPairTest) {
   }
 }
 
+TEST_F(DoubleCharEncoderTest, intTest) {
+  DoubleCharEncoder *encoder = new DoubleCharEncoder();
+  encoder->build(integers, 65536);
+  auto buffer = new uint8_t[kLongestCodeLen];
+  for (int i = 0; i < static_cast<int>(integers.size()) - 1; i++) {
+    int len = encoder->encode(integers[i], buffer);
+    std::string str1 = std::string((const char *)buffer, GetByteLen(len));
+    len = encoder->encode(integers[i + 1], buffer);
+    std::string str2 = std::string((const char *)buffer, GetByteLen(len));
+    int cmp = str1.compare(str2);
+    EXPECT_LT(cmp, 0);
+
+#ifdef INCLUDE_DECODE
+    len = encoder->decode(str1, buffer);
+    std::string dec_str1 = std::string((const char *)buffer, len);
+    cmp = dec_str1.compare(integers[i]);
+
+    EXPECT_EQ(cmp, 0);
+
+    len = encoder->decode(str2, buffer);
+    std::string dec_str2 = std::string((const char *)buffer, len);
+    cmp = dec_str2.compare(integers[i + 1]);
+    EXPECT_EQ(cmp, 0);
+#endif
+  }
+}
+
 void LoadWords() {
   std::ifstream infile(kWordFilePath);
   std::string key;
@@ -85,6 +113,16 @@ void LoadWords() {
   }
 }
 
+void GenerateInt64() {
+  std::random_device rd;  //Will be used to obtain a seed for the random number engine
+  std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+  std::uniform_int_distribution<> dis(1, 2000000);
+  uint64_t data = 1;
+  for (int i = 0; i < kInt64TestSize; i++) {
+    data += dis(gen);
+    integers.push_back(Uint64ToString(data));
+  }
+}
 }  // namespace doublecharencodertest
 
 }  // namespace ope
@@ -92,5 +130,6 @@ void LoadWords() {
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   ope::doublecharencodertest::LoadWords();
+  ope::doublecharencodertest::GenerateInt64();
   return RUN_ALL_TESTS();
 }
