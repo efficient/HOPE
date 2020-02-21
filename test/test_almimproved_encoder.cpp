@@ -15,8 +15,10 @@ namespace ope {
 namespace almimprovedencodertest {
 
 static const char kFilePath[] = "../../datasets/words.txt";
-static const int kWordTestSize = 234369;
+//static const int kWordTestSize = 234369;
+static const int kWordTestSize = 23436;
 static std::vector<std::string> words;
+static std::vector<std::string> integers;
 static const int kLongestCodeLen = 4096;
 
 class ALMImprovedEncoderTest : public ::testing::Test {};
@@ -51,6 +53,27 @@ TEST_F(ALMImprovedEncoderTest, wordTest) {
   std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
 }
 
+TEST_F(ALMImprovedEncoderTest, intTest) {
+   ALMImprovedEncoder *encoder = new ALMImprovedEncoder();
+  encoder->build(integers, 65535);
+  auto buffer = new uint8_t[kLongestCodeLen];
+  int64_t total_len = 0;
+  int64_t total_enc_len = 0;
+  for (int i = 0; i < static_cast<int>(integers.size()) - 1; i++) {
+    int len = encoder->encode(integers[i], buffer);
+    total_len += (integers[i].length() * 8);
+    total_enc_len += len;
+    std::string str1 = std::string((const char *)buffer, GetByteLen(len));
+    len = encoder->encode(integers[i + 1], buffer);
+    std::string str2 = std::string((const char *)buffer, GetByteLen(len));
+    int cmp = str1.compare(str2);
+    EXPECT_LT(cmp, 0);
+  }
+  delete[] buffer;
+  delete encoder;
+  std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl; 
+}
+
 void LoadWords() {
   std::ifstream infile(kFilePath);
   std::string key;
@@ -63,11 +86,22 @@ void LoadWords() {
   std::sort(words.begin(), words.end());
 }
 
+void GenerateInt64() {
+  std::random_device rd;  //Will be used to obtain a seed for the random number engine
+  std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+  std::uniform_int_distribution<> dis(1, 2000000);
+  uint64_t data = 1;
+  for (int i = 0; i < kInt64TestSize; i++) {
+    data += dis(gen);
+    integers.push_back(Uint64ToString(data));
+  }
+}
+
 }  // namespace almimprovedencodertest
 }  // namespace ope
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
-  ope::almimprovedencodertest::LoadWords();
+  ope::almimprovedenco“+ydertest::LoadWords();
   return RUN_ALL_TESTS();
 }
