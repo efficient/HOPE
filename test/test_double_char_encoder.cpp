@@ -69,7 +69,7 @@ std::string Uint64ToString(uint64_t key) {
   }
 }*/
 
-TEST_F(DoubleCharEncoderTest, wordPairTest) {
+/*TEST_F(DoubleCharEncoderTest, wordPairTest) {
   DoubleCharEncoder *encoder = new DoubleCharEncoder();
   encoder->build(words, 1024);
   auto l_buffer = new uint8_t[kLongestCodeLen];
@@ -82,7 +82,7 @@ TEST_F(DoubleCharEncoderTest, wordPairTest) {
     int cmp = str1.compare(str2);
     EXPECT_LT(cmp, 0);
   }
-}
+}*/
 
 TEST_F(DoubleCharEncoderTest, intTest) {
   DoubleCharEncoder *encoder = new DoubleCharEncoder();
