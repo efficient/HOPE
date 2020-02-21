@@ -228,5 +228,6 @@ void GenerateInt64() {
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   ope::treetest::LoadWords();
+  ope::treetest::GenerateInt64();
   return RUN_ALL_TESTS();
 }
