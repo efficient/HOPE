@@ -6,6 +6,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <random>
 
 #include "ALMImproved_encoder.hpp"
 #include "gtest/gtest.h"
@@ -17,6 +18,7 @@ namespace almimprovedencodertest {
 static const char kFilePath[] = "../../datasets/words.txt";
 //static const int kWordTestSize = 234369;
 static const int kWordTestSize = 23436;
+static const int kInt64TestSize = 23436;
 static std::vector<std::string> words;
 static std::vector<std::string> integers;
 static const int kLongestCodeLen = 4096;
@@ -30,6 +32,11 @@ void Print(const std::string &str) {
     std::cout << std::bitset<8>(str[i]) << " ";
   }
   std::cout << std::endl;
+}
+
+std::string Uint64ToString(uint64_t key) {
+  uint64_t endian_swapped_key = __builtin_bswap64(key);
+  return std::string(reinterpret_cast<const char *>(&endian_swapped_key), 8);
 }
 
 TEST_F(ALMImprovedEncoderTest, wordTest) {

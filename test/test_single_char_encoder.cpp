@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <random>
 
 #include "code_generator_factory.hpp"
 #include "gtest/gtest.h"
