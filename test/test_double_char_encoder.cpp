@@ -19,8 +19,8 @@ namespace doublecharencodertest {
 static const char kWordFilePath[] = "../../datasets/words.txt";
 //static const int kWordTestSize = 234369;
 //static const int kWordTestSize = 234369;
-static const int kWordTestSize = 23436;
-static const int kInt64TestSize = 23436;
+static const int kWordTestSize = 234;
+static const int kInt64TestSize = 234;
 static std::vector<std::string> words;
 static std::vector<std::string> integers;
 static const int kLongestCodeLen = 4096;
@@ -71,7 +71,7 @@ std::string Uint64ToString(uint64_t key) {
 
 TEST_F(DoubleCharEncoderTest, wordPairTest) {
   DoubleCharEncoder *encoder = new DoubleCharEncoder();
-  encoder->build(words, 4096);
+  encoder->build(words, 1024);
   auto l_buffer = new uint8_t[kLongestCodeLen];
   auto r_buffer = new uint8_t[kLongestCodeLen];
   for (int i = 0; i < static_cast<int>(words.size()) - 1; i++) {
@@ -86,7 +86,7 @@ TEST_F(DoubleCharEncoderTest, wordPairTest) {
 
 TEST_F(DoubleCharEncoderTest, intTest) {
   DoubleCharEncoder *encoder = new DoubleCharEncoder();
-  encoder->build(integers, 4096);
+  encoder->build(integers, 1024);
   auto buffer = new uint8_t[kLongestCodeLen];
   for (int i = 0; i < static_cast<int>(integers.size()) - 1; i++) {
     int len = encoder->encode(integers[i], buffer);

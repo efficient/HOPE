@@ -41,7 +41,7 @@ std::string Uint64ToString(uint64_t key) {
 
 TEST_F(ALMImprovedEncoderTest, wordTest) {
   ALMImprovedEncoder *encoder = new ALMImprovedEncoder();
-  encoder->build(words, 65535);
+  encoder->build(words, 4096);
   auto buffer = new uint8_t[kLongestCodeLen];
   int64_t total_len = 0;
   int64_t total_enc_len = 0;
@@ -62,7 +62,7 @@ TEST_F(ALMImprovedEncoderTest, wordTest) {
 
 TEST_F(ALMImprovedEncoderTest, intTest) {
    ALMImprovedEncoder *encoder = new ALMImprovedEncoder();
-  encoder->build(integers, 65535);
+  encoder->build(integers, 4096);
   auto buffer = new uint8_t[kLongestCodeLen];
   int64_t total_len = 0;
   int64_t total_enc_len = 0;
