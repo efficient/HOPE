@@ -218,7 +218,7 @@ void LoadWords() {
   int count = 0;
   while (infile.good() && count < kWordTestSize) {
     infile >> key;
-    integers.push_back(key);
+    words.push_back(key);
     count++;
   }
 }
@@ -241,5 +241,6 @@ void GenerateInt64() {
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   ope::ngramencodertest::LoadWords();
+  ope::ngramencodertest::GenerateInt64();
   return RUN_ALL_TESTS();
 }
