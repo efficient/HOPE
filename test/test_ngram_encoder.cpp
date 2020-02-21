@@ -36,6 +36,11 @@ void Print(const std::string &str) {
   std::cout << std::endl;
 }
 
+std::string Uint64ToString(uint64_t key) {
+  uint64_t endian_swapped_key = __builtin_bswap64(key);
+  return std::string(reinterpret_cast<const char *>(&endian_swapped_key), 8);
+}
+
 TEST_F(NGramEncoderTest, word3Test) {
   NGramEncoder *encoder = new NGramEncoder(3);
   encoder->build(words, 10000);

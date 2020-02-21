@@ -19,7 +19,7 @@ namespace doublecharencodertest {
 static const char kWordFilePath[] = "../../datasets/words.txt";
 //static const int kWordTestSize = 234369;
 //static const int kWordTestSize = 234369;
-static const int kInt64TestSize = 23436;
+static const int kWordTestSize = 23436;
 static const int kInt64TestSize = 23436;
 static std::vector<std::string> words;
 static std::vector<std::string> integers;
