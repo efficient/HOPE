@@ -1,0 +1,30 @@
+sudo: required
+language: cpp
+dist: bionic
+
+install:
+- sudo apt-get install build-essential
+- sudo apt-get install cmake
+- sudo apt-get install libgtest.dev
+- cd /usr/src/gtest
+- sudo cmake CMakeLists.txt
+- sudo make
+- sudo cp *.a /usr/lib
+- sudo apt-get install lcov
+- sudo apt-get install ruby
+- sudo gem install coveralls-lcov
+- sudo apt-get install libjemalloc-dev
+- sudo apt-get install libtbb-dev
+
+script:
+- cd $TRAVIS_BUILD_DIR
+- mkdir build
+- cd build
+- cmake -DCMAKE_BUILD_TYPE=Debug -DCOVERALLS=ON ..
+- make -j
+- make coverage
+
+after_success:
+- lcov --remove coverage.info 'test/*' '/usr/*' '/lib/*' --output-file coverage.info
+- lcov --list coverage.info
+- coveralls-lcov --repo-token=${COVERALLS_TOKEN} coverage.info

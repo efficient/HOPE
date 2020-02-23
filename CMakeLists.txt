@@ -7,8 +7,22 @@ if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g -Wall -Werror -march=native -mavx -pthread -std=c++14 --coverage")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -Wall -Werror -march=native -mavx -pthread -std=c++14 --coverage")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g -Wall -Werror -march=native -mavx -pthread -std=c++14")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -Wall -Werror -march=native -mavx -pthread -std=c++14")
+
+option(COVERALLS "Generate coveralls data" ON)
+
+if (COVERALLS)
+  include("${CMAKE_CURRENT_SOURCE_DIR}/CodeCoverage.cmake")
+  append_coverage_compiler_flags()
+  set(COVERAGE_EXCLUDES '${CMAKE_CURRENT_SOURCE_DIR}/ART/include/*' 'PrefixBTree/*' 'SuRF/*' 'btree/*' 'datasets/*' 'hot/*' 'bench/*' 'test/*' '/usr/*' '/lib/*')
+  setup_target_for_coverage(
+    NAME coverage
+    EXECUTABLE make test
+    )
+else()
+  add_definitions(-DNDEBUG)
+endif()
 
 enable_testing()
 
@@ -19,7 +33,6 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/symbol_selectors")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/code_generators")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/dictionaries")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/encoders")
-#include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/art_dic")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/art_dic_new")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/succinct_binary_trie")
 

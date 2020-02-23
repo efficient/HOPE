@@ -20,8 +20,8 @@ TEST_F(ARTNodeTest, prefixLengthTest) {
   uint32_t short_len = 5;
   uint32_t long_len = 100;
   NTypes node_type = NTypes::N4;
-  uint8_t *short_prefix = new uint8_t[short_len];
-  uint8_t *long_prefix = new uint8_t[long_len];
+  auto short_prefix = new uint8_t[short_len];
+  auto long_prefix = new uint8_t[long_len];
   for (int i = 0; i < static_cast<int>(short_len); i++) {
     short_prefix[i] = 0x1;
   }
@@ -42,8 +42,8 @@ TEST_F(ARTNodeTest, prefixSetGetTest) {
   uint32_t short_len = 5;
   uint32_t long_len = 100;
   NTypes node_type = NTypes::N4;
-  uint8_t *short_prefix = new uint8_t[short_len];
-  uint8_t *long_prefix = new uint8_t[long_len];
+  auto short_prefix = new uint8_t[short_len];
+  auto long_prefix = new uint8_t[long_len];
   for (int i = 0; i < static_cast<int>(short_len); i++) {
     short_prefix[i] = 0x1;
   }
@@ -62,10 +62,12 @@ TEST_F(ARTNodeTest, prefixSetGetTest) {
   delete[] long_prefix;
 }
 
+}  // namespace nodetest
+}  // namespace ope
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
 
-}  // namespace nodetest
-}  // namespace ope
+
