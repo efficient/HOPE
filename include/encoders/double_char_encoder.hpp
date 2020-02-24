@@ -14,8 +14,8 @@ namespace ope {
 
 class DoubleCharEncoder : public Encoder {
  public:
-  DoubleCharEncoder(){};
-  ~DoubleCharEncoder(){};
+  DoubleCharEncoder() = default;
+  ~DoubleCharEncoder() = default;
 
   bool build(const std::vector<std::string> &key_list, const int64_t dict_size_limit);
 
