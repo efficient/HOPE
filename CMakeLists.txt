@@ -15,7 +15,7 @@ option(COVERALLS "Generate coveralls data" ON)
 if (COVERALLS)
   include("${CMAKE_CURRENT_SOURCE_DIR}/CodeCoverage.cmake")
   append_coverage_compiler_flags()
-  set(COVERAGE_EXCLUDES 'ART/* ' 'PrefixBTree/* ' 'SuRF/* ' 'test/* ' '/usr/* ' '/lib/*')
+  set(COVERAGE_EXCLUDES 'ART/*' 'PrefixBTree/*' 'SuRF/*' 'test/*' '/usr/*' '/lib/*')
   setup_target_for_coverage(
     NAME coverage
     EXECUTABLE make test
