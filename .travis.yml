@@ -25,7 +25,7 @@ script:
 - make coverage
 
 after_success:
-- lcov --remove coverage.info 'test/*' '/usr/*' '/lib/*' --output-file coverage.info
+- lcov --remove coverage.info 'ART/*' 'SuRF/*' 'test/*' '/usr/*' '/lib/*' --output-file coverage.info
 - lcov --list coverage.info
 
 
