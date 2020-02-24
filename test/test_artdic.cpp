@@ -4,10 +4,10 @@
 #include <bitset>
 #include <fstream>
 #include <iostream>
+#include <random>
 #include <set>
 #include <string>
 #include <vector>
-#include <random>
 
 #include "art_dic_tree.hpp"
 #include "gtest/gtest.h"
@@ -93,7 +93,7 @@ class ARTDICTest : public ::testing::Test {
 };
 
 TEST_F(ARTDICTest, pointLookupInt64Test) {
-   auto test = new ArtDicTree();
+  auto test = new ArtDicTree();
   std::vector<ope::SymbolCode> ls;
 
   for (int i = 0; i < static_cast<int>(integers.size()) - 1; i++) {
@@ -112,7 +112,7 @@ TEST_F(ARTDICTest, pointLookupInt64Test) {
     if (result.code != i) std::cout << "lookup:" << result.code << " answer:" << i << std::endl;
     EXPECT_TRUE(result.code == i);
   }
-  delete test; 
+  delete test;
 }
 
 TEST_F(ARTDICTest, pointLookupWordTest) {
@@ -137,7 +137,6 @@ TEST_F(ARTDICTest, pointLookupWordTest) {
   }
   delete test;
 }
-
 
 /*
  * ART should find the first key greater than or equal to the given key
@@ -211,8 +210,8 @@ std::string Uint64ToString(uint64_t key) {
 }
 
 void GenerateInt64() {
-  std::random_device rd;  //Will be used to obtain a seed for the random number engine
-  std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+  std::random_device rd;   // Will be used to obtain a seed for the random number engine
+  std::mt19937 gen(rd());  // Standard mersenne_twister_engine seeded with rd()
   std::uniform_int_distribution<> dis(1, 2000000);
   uint64_t data = 1;
   for (int i = 0; i < kInt64TestSize; i++) {

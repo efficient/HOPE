@@ -3,9 +3,9 @@
 #include <bitset>
 #include <fstream>
 #include <iostream>
+#include <random>
 #include <string>
 #include <vector>
-#include <random>
 
 #include "code_generator_factory.hpp"
 #include "double_char_encoder.hpp"
@@ -17,16 +17,14 @@ namespace ope {
 namespace doublecharencodertest {
 
 static const char kWordFilePath[] = "../../datasets/words.txt";
-//static const int kWordTestSize = 234369;
-//static const int kWordTestSize = 234369;
-static const int kWordTestSize = 234;
-static const int kInt64TestSize = 234;
+// static const int kWordTestSize = 234369;
+static const int kWordTestSize = 234369;
+static const int kInt64TestSize = 100000;
 static std::vector<std::string> words;
 static std::vector<std::string> integers;
 static const int kLongestCodeLen = 4096;
 
-class DoubleCharEncoderTest : public ::testing::Test {
-};
+class DoubleCharEncoderTest : public ::testing::Test {};
 
 int GetByteLen(const int bitlen) { return ((bitlen + 7) & ~7) / 8; }
 
@@ -42,7 +40,7 @@ std::string Uint64ToString(uint64_t key) {
   return std::string(reinterpret_cast<const char *>(&endian_swapped_key), 8);
 }
 
-/*TEST_F(DoubleCharEncoderTest, wordTest) {
+TEST_F(DoubleCharEncoderTest, wordTest) {
   DoubleCharEncoder *encoder = new DoubleCharEncoder();
   encoder->build(words, 65536);
   auto buffer = new uint8_t[kLongestCodeLen];
@@ -67,9 +65,9 @@ std::string Uint64ToString(uint64_t key) {
     EXPECT_EQ(cmp, 0);
 #endif
   }
-}*/
+}
 
-/*TEST_F(DoubleCharEncoderTest, wordPairTest) {
+TEST_F(DoubleCharEncoderTest, wordPairTest) {
   DoubleCharEncoder *encoder = new DoubleCharEncoder();
   encoder->build(words, 1024);
   auto l_buffer = new uint8_t[kLongestCodeLen];
@@ -82,9 +80,9 @@ std::string Uint64ToString(uint64_t key) {
     int cmp = str1.compare(str2);
     EXPECT_LT(cmp, 0);
   }
-}*/
+}
 
-TEST_F(DoubleCharEncoderTest, intTest) {
+/*TEST_F(DoubleCharEncoderTest, intTest) {
   DoubleCharEncoder *encoder = new DoubleCharEncoder();
   encoder->build(integers, 1024);
   auto buffer = new uint8_t[kLongestCodeLen];
@@ -109,7 +107,7 @@ TEST_F(DoubleCharEncoderTest, intTest) {
     EXPECT_EQ(cmp, 0);
 #endif
   }
-}
+}*/
 
 void LoadWords() {
   std::ifstream infile(kWordFilePath);
@@ -123,8 +121,8 @@ void LoadWords() {
 }
 
 void GenerateInt64() {
-  std::random_device rd;  //Will be used to obtain a seed for the random number engine
-  std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+  std::random_device rd;   // Will be used to obtain a seed for the random number engine
+  std::mt19937 gen(rd());  // Standard mersenne_twister_engine seeded with rd()
   std::uniform_int_distribution<> dis(1, 2000000);
   uint64_t data = 1;
   for (int i = 0; i < kInt64TestSize; i++) {
