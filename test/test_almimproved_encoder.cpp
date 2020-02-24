@@ -39,6 +39,32 @@ std::string Uint64ToString(uint64_t key) {
   return std::string(reinterpret_cast<const char *>(&endian_swapped_key), 8);
 }
 
+std::string changeToBinary(int64_t num, int8_t len) {
+  std::string result = std::string();
+  int cnt = 0;
+  while (num > 0) {
+    result = std::string(1, num % 2 + '0') + result;
+    num = num / 2;
+    cnt += 1;
+  }
+  for (int i = cnt; i < len; i++) result = '0' + result;
+  return result;
+}
+
+TEST_F(ALMImprovedEncoderTest, intervalTest) {
+  ALMImprovedEncoder *encoder = new ALMImprovedEncoder();
+  encoder->build(words, 4096);
+  std::vector<SymbolCode> symbol_code_list = encoder->getSymbolCodeList();
+  std::sort(symbol_code_list.begin(), symbol_code_list.end(),
+           [] (SymbolCode &x, SymbolCode &y) { return x.first.compare(y.first) < 0; });
+  for (auto iter = symbol_code_list.begin() + 1; iter != symbol_code_list.end(); iter++) {
+      std::string str1 = changeToBinary((iter - 1)->second.code, (  iter - 1)->second.len);
+      std::string str2 = changeToBinary(iter->second.code, iter->second.len);
+      int cmp = str1.compare(str2);
+      assert(cmp < 0);
+    }
+}
+
 TEST_F(ALMImprovedEncoderTest, wordTest) {
   ALMImprovedEncoder *encoder = new ALMImprovedEncoder();
   encoder->build(words, 4096);
