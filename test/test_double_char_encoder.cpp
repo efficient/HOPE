@@ -44,6 +44,7 @@ TEST_F(DoubleCharEncoderTest, wordTest) {
   DoubleCharEncoder *encoder = new DoubleCharEncoder();
   encoder->build(words, 65536);
   auto buffer = new uint8_t[kLongestCodeLen];
+  // encode single key each time
   for (int i = 0; i < static_cast<int>(words.size()) - 1; i++) {
     int len = encoder->encode(words[i], buffer);
     std::string str1 = std::string((const char *)buffer, GetByteLen(len));
@@ -65,11 +66,7 @@ TEST_F(DoubleCharEncoderTest, wordTest) {
     EXPECT_EQ(cmp, 0);
 #endif
   }
-}
-
-TEST_F(DoubleCharEncoderTest, wordPairTest) {
-  DoubleCharEncoder *encoder = new DoubleCharEncoder();
-  encoder->build(words, 1024);
+  // encode pair
   auto l_buffer = new uint8_t[kLongestCodeLen];
   auto r_buffer = new uint8_t[kLongestCodeLen];
   for (int i = 0; i < static_cast<int>(words.size()) - 1; i++) {
@@ -80,6 +77,25 @@ TEST_F(DoubleCharEncoderTest, wordPairTest) {
     int cmp = str1.compare(str2);
     EXPECT_LT(cmp, 0);
   }
+  delete[] l_buffer;
+  delete[] r_buffer;
+
+  // encode batch
+  std::vector<std::string> enc_keys;
+  int batch_size = 10;
+  int ls = (int)words.size();
+  for (int i = 0; i < ls - batch_size; i += batch_size) {
+    encoder->encodeBatch(words, i, batch_size, enc_keys);
+  }
+  std::cout << enc_keys.size() << std::endl;
+  for (int i = 0; i < (int)enc_keys.size() - 1; i += 2) {
+    std::string str1 = enc_keys[i];
+    std::string str2 = enc_keys[i + 1];
+    int cmp = strCompare(str1, str2);
+    ASSERT_TRUE(cmp < 0);
+  }
+
+  delete encoder;
 }
 
 /*TEST_F(DoubleCharEncoderTest, intTest) {

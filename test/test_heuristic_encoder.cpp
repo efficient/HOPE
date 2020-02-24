@@ -80,6 +80,25 @@ TEST_F(HeuristicEncoderTest, wordTest) {
   std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
 }
 
+TEST_F(HeuristicEncoderTest, wordPairTest) {
+  HeuristicEncoder *encoder = new HeuristicEncoder();
+  encoder->build(words, 4096);
+  // encode pair
+  auto l_buffer = new uint8_t[kLongestCodeLen];
+  auto r_buffer = new uint8_t[kLongestCodeLen];
+  for (int i = 0; i < static_cast<int>(words.size()) - 1; i++) {
+    int l_len = 0, r_len = 0;
+    encoder->encodePair(words[i], words[i + 1], l_buffer, r_buffer, l_len, r_len);
+    std::string str1 = std::string((const char *)l_buffer, GetByteLen(l_len));
+    std::string str2 = std::string((const char *)r_buffer, GetByteLen(r_len));
+    int cmp = str1.compare(str2);
+    EXPECT_LT(cmp, 0);
+  }
+  delete[] l_buffer;
+  delete[] r_buffer;
+  delete encoder;
+}
+
 TEST_F(HeuristicEncoderTest, intTest) {
   HeuristicEncoder *encoder = new HeuristicEncoder();
   encoder->build(integers, 4096);
