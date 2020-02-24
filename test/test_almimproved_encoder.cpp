@@ -60,6 +60,21 @@ TEST_F(ALMImprovedEncoderTest, wordTest) {
   std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
 }
 
+TEST_F(ALMImprovedEncoderTest, wordPairTest) {
+  ALMImprovedEncoder *encoder = new ALMImprovedEncoder();
+  encoder->build(words, 1000);
+  auto l_buffer = new uint8_t[kLongestCodeLen];
+  auto r_buffer = new uint8_t[kLongestCodeLen];
+  for (int i = 0; i < static_cast<int>(words.size()) - 1; i++) {
+    int l_len = 0, r_len = 0;
+    encoder->encodePair(words[i], words[i + 1], l_buffer, r_buffer, l_len, r_len);
+    std::string str1 = std::string((const char *)l_buffer, GetByteLen(l_len));
+    std::string str2 = std::string((const char *)r_buffer, GetByteLen(r_len));
+    int cmp = str1.compare(str2);
+    EXPECT_LT(cmp, 0);
+  }
+}
+
 TEST_F(ALMImprovedEncoderTest, intTest) {
    ALMImprovedEncoder *encoder = new ALMImprovedEncoder();
   encoder->build(integers, 4096);
