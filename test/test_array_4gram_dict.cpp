@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-#include "array_3gram_dict.hpp"
+#include "array_4gram_dict.hpp"
 #include "gtest/gtest.h"
 
 namespace ope {
@@ -22,47 +22,28 @@ static std::vector<std::string> words;
 static std::vector<std::string> integers;
 
 class Array3GramDicTest : public ::testing::Test {
- private:
-  static int StrCompare(std::string s1, std::string s2) {
-    int len1 = static_cast<int>(s1.size());
-    int len2 = static_cast<int>(s2.size());
-    int len = std::min(len1, len2);
-    for (int i = 0; i < len; i++) {
-      auto c1 = static_cast<uint8_t>(s1[i]);
-      auto c2 = static_cast<uint8_t>(s2[i]);
-      if (c1 < c2) return -1;
-      if (c1 > c2) return 1;
-    }
-    if (len1 < len2)
-      return -1;
-    else if (len1 == len2)
-      return 0;
-    else
-      return 1;
-  }
-
   void SetUp() override {
     for (int i = 0; i < (int)integers.size(); i++) {
-      if (i == 0 || (integers[i].substr(0, 3)).compare(int_3_[int_3_.size() - 1]) != 0)
-        int_3_.push_back(integers[i].substr(0, 3));
+      if (i == 0 || (integers[i].substr(0, 4)).compare(int_4_[int_4_.size() - 1]) != 0)
+        int_4_.push_back(integers[i].substr(0, 4));
     }
-    std::sort(int_3_.begin(), int_3_.end());
-    for (int i = 0; i < (int)int_3_.size(); i++) {
+    std::sort(int_4_.begin(), int_4_.end());
+    for (int i = 0; i < (int)int_4_.size(); i++) {
       ope::SymbolCode symbol_code = ope::SymbolCode();
-      symbol_code.first = int_3_[i];
+      symbol_code.first = int_4_[i];
       symbol_code.second = ope::Code();
       symbol_code.second.code = i;
       int_symbol_code_list_.push_back(symbol_code);
     }
 
     for (int i = 0; i < (int)words.size(); i++) {
-      if (i == 0 || (words[i].substr(0, 3)).compare(word_3_[word_3_.size() - 1]) != 0)
-        word_3_.push_back(words[i].substr(0, 3));
+      if (i == 0 || (words[i].substr(0, 4)).compare(word_4_[word_4_.size() - 1]) != 0)
+        word_4_.push_back(words[i].substr(0, 4));
     }
-    std::sort(word_3_.begin(), word_3_.end());
-    for (int i = 0; i < (int)word_3_.size(); i++) {
+    std::sort(word_4_.begin(), word_4_.end());
+    for (int i = 0; i < (int)word_4_.size(); i++) {
       ope::SymbolCode symbol_code = ope::SymbolCode();
-      symbol_code.first = word_3_[i];
+      symbol_code.first = word_4_[i];
       symbol_code.second = ope::Code();
       symbol_code.second.code = i;
       word_symbol_code_list_.push_back(symbol_code);
@@ -70,29 +51,29 @@ class Array3GramDicTest : public ::testing::Test {
   };
 
  public:
-  std::vector<std::string> word_3_;
-  std::vector<std::string> int_3_;
+  std::vector<std::string> word_4_;
+  std::vector<std::string> int_4_;
   std::vector<SymbolCode> int_symbol_code_list_;
   std::vector<SymbolCode> word_symbol_code_list_;
 };
 
 TEST_F(Array3GramDicTest, pointLookupInt64Test) {
-  auto dict = new ope::Array3GramDict();
+  auto dict = new ope::Array4GramDict();
   dict->build(int_symbol_code_list_);
   int prefix_len = -1;
-  for (int i = 0; i < (int)int_3_.size(); i++) {
-    ope::Code code = dict->lookup(int_3_[i].c_str(), (int)int_3_[i].size(), prefix_len);
+  for (int i = 0; i < (int)int_4_.size(); i++) {
+    ope::Code code = dict->lookup(int_4_[i].c_str(), (int)int_4_[i].size(), prefix_len);
     EXPECT_EQ(code.code, i);
   }
   delete dict;
 }
 
 TEST_F(Array3GramDicTest, pointLookupWordTest) {
-  auto dict = new ope::Array3GramDict();
+  auto dict = new ope::Array4GramDict();
   dict->build(word_symbol_code_list_);
   int prefix_len = -1;
-  for (int i = 0; i < (int)word_3_.size(); i++) {
-    ope::Code code = dict->lookup(word_3_[i].c_str(), word_3_.size(), prefix_len);
+  for (int i = 0; i < (int)word_4_.size(); i++) {
+    ope::Code code = dict->lookup(word_4_[i].c_str(), word_4_.size(), prefix_len);
     EXPECT_EQ(code.code, i);
   }
   delete dict;
