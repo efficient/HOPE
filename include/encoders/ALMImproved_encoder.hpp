@@ -41,9 +41,7 @@ class ALMImprovedEncoder : public Encoder {
   std::string changeToBinary(int64_t num, int8_t len);
 };
 
-std::vector<SymbolCode> ALMImprovedEncoder::getSymbolCodeList() {
-  return symbol_code_list;
-}
+std::vector<SymbolCode> ALMImprovedEncoder::getSymbolCodeList() { return symbol_code_list; }
 
 bool ALMImprovedEncoder::build(const std::vector<std::string> &key_list, const int64_t dict_size_limit) {
 #ifdef PRINT_BUILD_TIME_BREAKDOWN

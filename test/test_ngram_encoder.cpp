@@ -3,9 +3,9 @@
 #include <bitset>
 #include <fstream>
 #include <iostream>
+#include <random>
 #include <string>
 #include <vector>
-#include <random>
 
 #include "gtest/gtest.h"
 #include "ngram_encoder.hpp"
@@ -127,6 +127,23 @@ TEST_F(NGramEncoderTest, word4PairTest) {
   std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
 }
 
+TEST_F(NGramEncoderTest, word4BatchTest) {
+  std::vector<std::string> enc_keys;
+  NGramEncoder *encoder = new NGramEncoder(4);
+  encoder->build(words, 10000);
+  int batch_size = 10;
+  int ls = (int)words.size();
+  for (int i = 0; i < ls - batch_size; i += batch_size) {
+    encoder->encodeBatch(words, i, batch_size, enc_keys);
+  }
+  for (int i = 0; i < (int)enc_keys.size() - 1; i += 2) {
+    std::string str1 = enc_keys[i];
+    std::string str2 = enc_keys[i + 1];
+    int cmp = strCompare(str1, str2);
+    EXPECT_LT(cmp, 0);
+  }
+}
+
 TEST_F(NGramEncoderTest, int3Test) {
   NGramEncoder *encoder = new NGramEncoder(3);
   encoder->build(integers, 10000);
@@ -212,6 +229,24 @@ TEST_F(NGramEncoderTest, int4PairTest) {
   }
   std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
 }
+
+TEST_F(NGramEncoderTest, int4BatchTest) {
+  std::vector<std::string> enc_keys;
+  NGramEncoder *encoder = new NGramEncoder(4);
+  encoder->build(words, 10000);
+  int batch_size = 10;
+  int ls = (int)integers.size();
+  for (int i = 0; i < ls - batch_size; i += batch_size) {
+    encoder->encodeBatch(integers, i, batch_size, enc_keys);
+  }
+  for (int i = 0; i < (int)enc_keys.size() - 1; i += 2) {
+    std::string str1 = enc_keys[i];
+    std::string str2 = enc_keys[i + 1];
+    int cmp = strCompare(str1, str2);
+    EXPECT_LT(cmp, 0);
+  }
+}
+
 void LoadWords() {
   std::ifstream infile(kWordFilePath);
   std::string key;
@@ -224,8 +259,8 @@ void LoadWords() {
 }
 
 void GenerateInt64() {
-  std::random_device rd;  //Will be used to obtain a seed for the random number engine
-  std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+  std::random_device rd;   // Will be used to obtain a seed for the random number engine
+  std::mt19937 gen(rd());  // Standard mersenne_twister_engine seeded with rd()
   std::uniform_int_distribution<> dis(1, 2000000);
   uint64_t data = 1;
   for (int i = 0; i < kInt64TestSize; i++) {
