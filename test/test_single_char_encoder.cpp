@@ -12,6 +12,8 @@
 #include "single_char_encoder.hpp"
 #include "symbol_selector_factory.hpp"
 
+#define INCLUDE_DECODE
+
 namespace ope {
 
 namespace singlecharencodertest {
