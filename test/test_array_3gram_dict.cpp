@@ -4,12 +4,12 @@
 #include <bitset>
 #include <fstream>
 #include <iostream>
+#include <random>
 #include <set>
 #include <string>
 #include <vector>
-#include <random>
 
-#include "art_dic_tree.hpp"
+#include "array_3gram_dict.hpp"
 #include "gtest/gtest.h"
 
 namespace ope {
@@ -43,48 +43,60 @@ class Array3GramDicTest : public ::testing::Test {
 
   void SetUp() override {
     for (int i = 0; i < (int)integers.size(); i++) {
+      if (i == 0 || (integers[i].substr(0, 3)).compare(int_3_[int_3_.size() - 1]) != 0)
+        int_3_.push_back(integers[i].substr(0, 3));
+    }
+    std::sort(int_3_.begin(), int_3_.end());
+    for (int i = 0; i < (int)int_3_.size(); i++) {
       ope::SymbolCode symbol_code = ope::SymbolCode();
-      symbol_code.first = integers[i];
+      symbol_code.first = int_3_[i];
       symbol_code.second = ope::Code();
       symbol_code.second.code = i;
-      int_symbol_code_list.push_back(symbol_code);
+      int_symbol_code_list_.push_back(symbol_code);
     }
 
     for (int i = 0; i < (int)words.size(); i++) {
+      if (i == 0 || (words[i].substr(0, 3)).compare(word_3_[word_3_.size() - 1]) != 0)
+        word_3_.push_back(words[i].substr(0, 3));
+    }
+    std::sort(word_3_.begin(), word_3_.end());
+    for (int i = 0; i < (int)word_3_.size(); i++) {
       ope::SymbolCode symbol_code = ope::SymbolCode();
-      symbol_code.first = words[i];
+      symbol_code.first = word_3_[i];
       symbol_code.second = ope::Code();
       symbol_code.second.code = i;
-      word_symbol_code_list.push_back(symbol_code);
+      word_symbol_code_list_.push_back(symbol_code);
     }
   };
 
  public:
+  std::vector<std::string> word_3_;
+  std::vector<std::string> int_3_;
   std::vector<SymbolCode> int_symbol_code_list_;
   std::vector<SymbolCode> word_symbol_code_list_;
 };
 
 TEST_F(Array3GramDicTest, pointLookupInt64Test) {
-  auto dict = new Array3GramDict();
-  dict->build(int_symbol_code_list);
-  int prefix_len;
-  for (int i = 0; i < (in)integers.size(); i++) {
-    ope::Code code =dict->lookup(integers[i], integers[i].size(), prefix_len);
+  auto dict = new ope::Array3GramDict();
+  dict->build(int_symbol_code_list_);
+  int prefix_len = -1;
+  for (int i = 0; i < (int)int_3_.size(); i++) {
+    ope::Code code = dict->lookup(int_3_[i].c_str(), (int)int_3_[i].size(), prefix_len);
     EXPECT_EQ(code.code, i);
   }
   delete dict;
 }
 
 TEST_F(Array3GramDicTest, pointLookupWordTest) {
-  auto dict = new Array3GramDict();
-  dict->build(word_symbol_code_list);
-  for (int i = 0; i < (int)words.size(); i++) {
-    ope::Code code =dict->lookup(words[i], words[i].size(), prefix_len);
+  auto dict = new ope::Array3GramDict();
+  dict->build(word_symbol_code_list_);
+  int prefix_len = -1;
+  for (int i = 0; i < (int)word_3_.size(); i++) {
+    ope::Code code = dict->lookup(word_3_[i].c_str(), word_3_.size(), prefix_len);
     EXPECT_EQ(code.code, i);
   }
   delete dict;
 }
-
 
 int GetCommonPrefixLen(const std::string &str1, const std::string &str2) {
   int min_len = static_cast<int>(std::min(str1.size(), str2.size()));
@@ -104,7 +116,7 @@ void LoadWords() {
     words.push_back(key);
     count++;
   }
-  std::random_shuffle(words.begin(), words.end());
+  std::sort(words.begin(), words.end());
 }
 
 std::string Uint64ToString(uint64_t key) {
@@ -113,8 +125,8 @@ std::string Uint64ToString(uint64_t key) {
 }
 
 void GenerateInt64() {
-  std::random_device rd;  //Will be used to obtain a seed for the random number engine
-  std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+  std::random_device rd;   // Will be used to obtain a seed for the random number engine
+  std::mt19937 gen(rd());  // Standard mersenne_twister_engine seeded with rd()
   std::uniform_int_distribution<> dis(1, 2000000);
   uint64_t data = 1;
   for (int i = 0; i < kInt64TestSize; i++) {
