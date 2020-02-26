@@ -64,76 +64,17 @@ HeuristicSS::HeuristicSS() {
 
 void HeuristicSS::setW(int64_t new_w) { W = new_w; }
 
-bool readIntervals(std::vector<SymbolFreq> &blend_freq_table, std::string key) {
-#ifdef WRITE_BLEND_RESULT
-  std::ifstream myfile(BLEND_FILE_NAME + key.substr(0, 4));
-  if (myfile.is_open()) {
-    std::string line;
-    while (getline(myfile, line)) {
-      errno = 0;
-      unsigned long idx = line.find('\t');
-      std::string key = line.substr(0, idx);
-      std::string freq_str = line.substr(idx + 1, line.length());
-      int64_t freq = std::atoi(freq_str.c_str());
-      if (errno != 0) {
-        std::cout << "Fail to convert interval: " << freq_str << std::endl;
-      } else {
-        blend_freq_table.emplace_back(key, freq);
-      }
-    }
-    myfile.close();
-    return true;
-  }
-#endif
-  return false;
-}
-
-bool writeIntervals(std::vector<SymbolFreq> &blend_freq_table, std::string key) {
-  std::ofstream myfile(BLEND_FILE_NAME + key.substr(0, 4));
-  if (myfile.is_open()) {
-    for (int i = 0; i < (int)blend_freq_table.size(); i++) {
-      myfile << blend_freq_table[i].first << "\t";
-      myfile << blend_freq_table[i].second << std::endl;
-    }
-    myfile.close();
-    return true;
-  }
-  std::cout << "Fail to write to Blend file***" << std::endl;
-  return false;
-}
-
 bool HeuristicSS::selectSymbols(const std::vector<std::string> &key_list, const int64_t num_limit,
                                 std::vector<SymbolFreq> *symbol_freq_list, int _W) {
   if (key_list.empty()) return false;
-#ifdef PRINT_TIME_BREAKDOWN
-//        double curtime = getNow();
-#endif
   std::vector<SymbolFreq> blend_freq_table;
-  if (readIntervals(blend_freq_table, key_list[0])) {
-    std::cout << "Read blending results from file" << std::endl;
-  } else {
-#ifdef PRINT_TIME_BREAKDOWN
-//            curtime = getNow();
-#endif
-    // Build Trie
-    BlendTrie *tree = new BlendTrie(0);
-    tree->build(key_list);
-#ifdef PRINT_TIME_BREAKDOWN
-//            std::cout << "Build trie = " << getNow() - curtime << std::endl;
-//            curtime = getNow();
-#endif
-    // Blending
-    tree->blendingAndGetLeaves(&blend_freq_table);
-    delete tree;
-    // Write blending results  to file
-#ifdef WRITE_BLEND_RESULT
-    writeIntervals(blend_freq_table, key_list[0]);
-#endif
-  }
-#ifdef PRINT_TIME_BREAKDOWN
-//        std::cout << "Blending = " << getNow() - curtime << std::endl;
-//        curtime = getNow();
-#endif
+  // Build Trie
+  BlendTrie *tree = new BlendTrie(0);
+  tree->build(key_list);
+  // Blending
+  tree->blendingAndGetLeaves(&blend_freq_table);
+  delete tree;
+
   // Search for best W
   int64_t l = 0;
   int64_t r = _W * 2;
@@ -141,30 +82,15 @@ bool HeuristicSS::selectSymbols(const std::vector<std::string> &key_list, const 
     setW((l + r) / 2);
     intervals_.clear();
     getEqualInterval(blend_freq_table);
-#ifdef PRINT_TIME_BREAKDOWN
-//            std::cout << "Generate Interval = " << getNow() - curtime <<
-//            std::endl; curtime = getNow();
-#endif
     std::cout << "W = " << W << "\t" << intervals_.size() << std::endl;
     // sort intervals
     std::sort(intervals_.begin(), intervals_.end(),
               [](std::pair<std::string, std::string> &x, std::pair<std::string, std::string> y) {
                 return strCompare(x.first, y.first) < 0;
               });
-#ifdef PRINT_TIME_BREAKDOWN
-//            std::cout << "Sort Interevals = " << getNow() - curtime <<
-//            std::endl; curtime = getNow();
-#endif
     // Merge adjacent intervals with same prefix
     mergeAdjacentComPrefixIntervals();
-#ifdef PRINT_TIME_BREAKDOWN
-//            std::cout << "Merge Intervals = " << getNow() - curtime <<
-//            std::endl; curtime = getNow();
-#endif
     if (abs(num_limit - (int)intervals_.size()) <= (int)(0.02 * num_limit)) {
-      //                std::cout << "W = " << W << "\tNumber of intervals = "<<
-      //                intervals_.size() << "\tTarget = " << num_limit <<
-      //                std::endl;
       break;
     }
     // too many intervals
@@ -177,9 +103,6 @@ bool HeuristicSS::selectSymbols(const std::vector<std::string> &key_list, const 
   if (l > r)
     std::cout << "Best approoach W = " << W << ", target = " << num_limit << ", current size = " << intervals_.size()
               << std::endl;
-  // std::string start = std::string(1, char(0));
-  // std::string end = std::string(MAX_KEY_LEN, char(255));
-  // checkIntervals(start, end);
   // simulate encode process to get Frequency
   getIntervalFreqEntropy(symbol_freq_list, key_list);
   return true;
@@ -242,9 +165,6 @@ void HeuristicSS::getIntervalFreqEntropy(std::vector<SymbolFreq> *symbol_freq_li
     // plus one for each interval to avoid 0 frequency
     // Pass Frequencty to Hu-Tucker
     symbol_freq_list->push_back(std::make_pair(interval_start, cnt[i] + 1));
-    // Pass Frequencty * length to Hu-Tucker
-    // symbol_freq_list->push_back(std::make_pair(interval_start, (cnt[i] + 1) *
-    // common_prefix.length()));
   }
 #ifdef CAL_ENTROPY
   double entropy = 0;
@@ -409,15 +329,6 @@ void HeuristicSS::checkIntervals(std::string &start_str, std::string &end_str) {
       std::cout << std::endl << " Correct start :  ";
       printString(end);
       std::cout << std::endl;
-      //                auto nit = iter - 5;
-      //                for (; nit != iter + 5 && nit != intervals_.end();
-      //                nit++) {
-      //                    printString(nit->first);
-      //                    std::cout << "|";
-      //                    printString(nit->second);
-      //                    std::cout << std::endl;
-      //                }
-      //		        assert(false);
     }
     end = iter->second;
   }

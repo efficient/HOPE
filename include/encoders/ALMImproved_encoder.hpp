@@ -32,7 +32,7 @@ class ALMImprovedEncoder : public Encoder {
 
   int64_t memoryUse() const;
 
-  void checkOrder(std::vector<SymbolCode> &symbol_code_list);
+  std::vector<SymbolCode> getSymbolCodeList();
 
  private:
   int W;
@@ -41,34 +41,7 @@ class ALMImprovedEncoder : public Encoder {
   std::string changeToBinary(int64_t num, int8_t len);
 };
 
-std::string ALMImprovedEncoder::changeToBinary(int64_t num, int8_t len) {
-  std::string result = std::string();
-  int cnt = 0;
-  while (num > 0) {
-    result = std::string(1, num % 2 + '0') + result;
-    num = num / 2;
-    cnt += 1;
-  }
-  for (int i = cnt; i < len; i++) result = '0' + result;
-  return result;
-}
-
-void ALMImprovedEncoder::checkOrder(std::vector<SymbolCode> &symbol_code_list) {
-  std::sort(symbol_code_list.begin(), symbol_code_list.end(),
-            [](SymbolCode &x, SymbolCode &y) { return x.first.compare(y.first) < 0; });
-  for (auto iter = symbol_code_list.begin() + 1; iter != symbol_code_list.end(); iter++) {
-    std::string str1 = changeToBinary((iter - 1)->second.code, (iter - 1)->second.len);
-    std::string str2 = changeToBinary(iter->second.code, iter->second.len);
-    int cmp = str1.compare(str2);
-    if (cmp >= 0) {
-      std::cout << (iter - 1)->first << "\t" << (iter - 1)->second.code << "\t";
-      std::cout << iter->first << "\t" << iter->second.code << "\t";
-      std::cout << int((iter - 1)->second.len) << "\t" << int(iter->second.len) << "\t";
-      std::cout << str1 << "\t" << str2 << "\t" << std::endl;
-    }
-    assert(cmp < 0);
-  }
-}
+std::vector<SymbolCode> ALMImprovedEncoder::getSymbolCodeList() { return symbol_code_list; }
 
 bool ALMImprovedEncoder::build(const std::vector<std::string> &key_list, const int64_t dict_size_limit) {
 #ifdef PRINT_BUILD_TIME_BREAKDOWN

@@ -11,9 +11,6 @@
 #include "blending_trie.hpp"
 #include "symbol_selector.hpp"
 
-#define BLEND_FILE_NAME "./blend_result_"
-//#define WRITE_BLEND_RESULT 1
-//#define PRINT_TIME_BREAKDOWN
 #define MAX_KEY_LEN 50
 
 typedef struct SymbolFreqValid {
@@ -77,109 +74,22 @@ ALMImprovedSS::ALMImprovedSS() { W = 20000; }
 
 void ALMImprovedSS::setW(int64_t new_w) { W = new_w; }
 
-/*
-    bool ALMImprovedSS::selectSymbols(const std::vector<std::string> &key_list,
-                                    const int64_t num_limit,
-                                    std::vector<SymbolFreq> *symbol_freq_list,
-int _W) { if (key_list.empty()) return false;
-
-        double curtime = getNow();
-        std::vector<SymbolFreq> blend_freq_table;
-        if (readIntervals(blend_freq_table, key_list[0])) {
-            std::cout << "Read blending results from file" << std::endl;
-        } else {
-            curtime = getNow();
-            // Build Trie
-            BlendTrie tree;
-            tree.build(key_list);
-#ifdef PRINT_TIME_BREAKDOWN
-            std::cout << "Build trie = " << getNow() - curtime << std::endl;
-#endif
-            // Blending
-            tree.blendingAndGetLeaves(blend_freq_table);
-            // Write blending results  to file
-#ifdef WRITE_BLEND_RESULT
-            writeIntervals(blend_freq_table, key_list[0]);
-#endif
-        }
-#ifdef PRINT_TIME_BREAKDOWN
-        std::cout << "Blending = " << getNow() - curtime << std::endl;
-#endif
-        // Search for best W
-        int64_t l = 0;
-        int64_t r = _W * 2;
-        while (l <= r && abs(num_limit - (int)intervals_.size()) > (int)(0.02 *
-num_limit)) { setW((l+r)/2); intervals_.clear();
-            //std::cout << "W = " << _W << std::endl;
-            getSkewInterval(blend_freq_table);
-            // sort intervals
-            std::sort(intervals_.begin(), intervals_.end(),
-                      [](std::pair<std::string, std::string>& x,
-std::pair<std::string, std::string> y) { return strCompare(x.first, y.first) <
-0;
-                      });
-            // Merge adjacent intervals with same prefix
-            mergeAdjacentComPrefixIntervals();
-
-            if (abs(num_limit - (int)intervals_.size()) <= (int)(0.02 *
-num_limit)) {
-        //        std::cout << "W = " << _W << "\tNumber of intervals = "<<
-intervals_.size() << "\tTarget = " << num_limit << std::endl; break;
-            }
-            // too many intervals
-            if ((int) intervals_.size() > num_limit) {
-                r = W - 1;
-            } else  { // size < num_limit, W is too big
-                l = W + 1;
-            }
-        }
-        if (l > r)
-            std::cout << "Best approoach W = " << W <<", target = " << num_limit
-<< ", current size = " << intervals_.size() << std::endl;
-
-        std::string start = std::string(1, char(0));
-        std::string end = std::string(MAX_KEY_LEN, char(255));
-        checkIntervals(start, end);
-        curtime = getNow();
-        // simulate encode process to get Frequency
-        getIntervalFreqEntropy(symbol_freq_list, key_list);
-#ifdef PRINT_TIME_BREAKDOWN
-        std::cout << "Simulate encode process = " << getNow() - curtime <<
-std::endl; #endif curtime = getNow(); return true;
-    }
-*/
-
 bool ALMImprovedSS::selectSymbols(const std::vector<std::string> &key_list, const int64_t num_limit,
                                   std::vector<SymbolFreq> *symbol_freq_list, int _W) {
   if (key_list.empty()) return false;
-#ifdef PRINT_TIME_BREAKDOWN
-    // double curtime = getNow();
-#endif
-
-#ifdef PRINT_TIME_BREAKDOWN
-    // curtime = getNow();
-#endif
   // Build Trie
   BlendTrie *tree = new BlendTrie(1);
   tree->build(key_list);
-#ifdef PRINT_TIME_BREAKDOWN
-  // std::cout << "Build trie = " << getNow() - curtime << std::endl;
-#endif
   std::vector<SymbolFreq> blend_freq_table;
   // Blending
   tree->blendingAndGetLeaves(&blend_freq_table);
   delete tree;
-  // Write blending results  to file
-#ifdef PRINT_TIME_BREAKDOWN
-  // std::cout << "Blending = " << getNow() - curtime << std::endl;
-#endif
   // Search for best W
   int64_t l = 0;
   int64_t r = _W * 2;
   while (l <= r && abs(num_limit - (int)intervals_.size()) > (int)(0.02 * num_limit)) {
     setW((l + r) / 2);
     intervals_.clear();
-    // std::cout << "W = " << _W << std::endl;
     getEqualInterval(blend_freq_table);
     // sort intervals
     std::sort(intervals_.begin(), intervals_.end(),
@@ -190,8 +100,6 @@ bool ALMImprovedSS::selectSymbols(const std::vector<std::string> &key_list, cons
     mergeAdjacentComPrefixIntervals();
 
     if (abs(num_limit - (int)intervals_.size()) <= (int)(0.02 * num_limit)) {
-      //        std::cout << "W = " << _W << "\tNumber of intervals = "<<
-      //        intervals_.size() << "\tTarget = " << num_limit << std::endl;
       break;
     }
     // too many intervals
@@ -204,18 +112,8 @@ bool ALMImprovedSS::selectSymbols(const std::vector<std::string> &key_list, cons
   if (l > r)
     std::cout << "Best approoach W = " << W << ", target = " << num_limit << ", current size = " << intervals_.size()
               << std::endl;
-    // std::string start = std::string(1, char(0));
-    // std::string end = std::string(MAX_KEY_LEN, char(255));
-    // checkIntervals(start, end);
-#ifdef PRINT_TIME_BREAKDOWN
-    // curtime = getNow();
-#endif
   // simulate encode process to get Frequency
   getIntervalFreqEntropy(symbol_freq_list, key_list);
-#ifdef PRINT_TIME_BREAKDOWN
-  // std::cout << "Simulate encode process = " << getNow() - curtime <<
-  // std::endl; curtime = getNow();
-#endif
   return true;
 }
 
@@ -275,9 +173,6 @@ void ALMImprovedSS::getIntervalFreqEntropy(std::vector<SymbolFreq> *symbol_freq_
     // plus one for each interval to avoid 0 frequency
     // Pass Frequencty to Hu-Tucker
     symbol_freq_list->push_back(std::make_pair(interval_start, cnt[i] + 1));
-    // Pass Frequencty * length to Hu-Tucker
-    // symbol_freq_list->push_back(std::make_pair(interval_start, (cnt[i] + 1) *
-    // common_prefix.length()));
   }
 #ifdef CAL_ENTROPY
   double entropy = 0;

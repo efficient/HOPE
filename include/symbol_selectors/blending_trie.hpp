@@ -161,34 +161,6 @@ void BlendTrie::clear(ope::TrieNode *node) {
   delete node;
 }
 
-void BlendTrie::vis(const std::string &filename) {
-  std::ofstream out;
-  out.open(filename);
-  out << "digraph G {" << std::endl;
-  std::list<TrieNode *> l;
-  std::map<TrieNode *, int> id;
-  int cnt = 0;
-  id.insert(std::make_pair(root_, cnt));
-  l.push_back(root_);
-  while (!l.empty()) {
-    TrieNode *cur_node = l.front();
-    l.pop_front();
-    for (auto iter = cur_node->getBegin(); iter != cur_node->getEnd(); iter++) {
-      cnt++;
-      id.insert(std::make_pair(iter->second, cnt));
-      l.push_back(iter->second);
-      out << "\t";
-      out << id.find(cur_node)->second << "->" << cnt << std::endl;
-    }
-  }
-  for (auto &iter : id) {
-    out << "\t" << iter.second << "[label=\"";
-    out << iter.first->getPrefix() << "\"];" << std::endl;
-  }
-  out << "}" << std::endl;
-  out.close();
-}
-
 }  // namespace ope
 
 #endif

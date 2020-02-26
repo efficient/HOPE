@@ -3,6 +3,7 @@
 #include <bitset>
 #include <fstream>
 #include <iostream>
+#include <random>
 #include <string>
 #include <vector>
 #include <random>
@@ -127,6 +128,23 @@ TEST_F(NGramEncoderTest, word4PairTest) {
   std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
 }
 
+TEST_F(NGramEncoderTest, word4BatchTest) {
+  std::vector<std::string> enc_keys;
+  NGramEncoder *encoder = new NGramEncoder(4);
+  encoder->build(words, 10000);
+  int batch_size = 10;
+  int ls = (int)words.size();
+  for (int i = 0; i < ls - batch_size; i += batch_size) {
+    encoder->encodeBatch(words, i, batch_size, enc_keys);
+  }
+  for (int i = 0; i < (int)enc_keys.size() - 1; i += 2) {
+    std::string str1 = enc_keys[i];
+    std::string str2 = enc_keys[i + 1];
+    int cmp = strCompare(str1, str2);
+    EXPECT_LT(cmp, 0);
+  }
+}
+
 TEST_F(NGramEncoderTest, int3Test) {
   NGramEncoder *encoder = new NGramEncoder(3);
   encoder->build(integers, 10000);
@@ -140,26 +158,6 @@ TEST_F(NGramEncoderTest, int3Test) {
     std::string str1 = std::string((const char *)buffer, GetByteLen(len));
     len = encoder->encode(integers[i + 1], buffer);
     std::string str2 = std::string((const char *)buffer, GetByteLen(len));
-    int cmp = str1.compare(str2);
-    EXPECT_LT(cmp, 0);
-  }
-  std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
-}
-
-TEST_F(NGramEncoderTest, int3PairTest) {
-  NGramEncoder *encoder = new NGramEncoder(3);
-  encoder->build(integers, 10000);
-  auto l_buffer = new uint8_t[kLongestCodeLen];
-  auto r_buffer = new uint8_t[kLongestCodeLen];
-  int64_t total_len = 0;
-  int64_t total_enc_len = 0;
-  for (int i = 0; i < static_cast<int>(integers.size()) - 1; i++) {
-    total_len += (integers[i].length() * 8);
-    int l_len = 0, r_len = 0;
-    encoder->encodePair(integers[i], integers[i + 1], l_buffer, r_buffer, l_len, r_len);
-    total_enc_len += l_len;
-    std::string str1 = std::string((const char *)l_buffer, GetByteLen(l_len));
-    std::string str2 = std::string((const char *)r_buffer, GetByteLen(r_len));
     int cmp = str1.compare(str2);
     EXPECT_LT(cmp, 0);
   }
@@ -180,14 +178,6 @@ TEST_F(NGramEncoderTest, int4Test) {
     len = encoder->encode(integers[i + 1], buffer);
     std::string str2 = std::string((const char *)buffer, GetByteLen(len));
     int cmp = str1.compare(str2);
-
-    if (cmp >= 0) {
-      std::cout << i << std::endl;
-      std::cout << integers[i] << std::endl;
-      std::cout << integers[i + 1] << std::endl;
-      Print(str1);
-      Print(str2);
-    }
     EXPECT_LT(cmp, 0);
   }
   std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
@@ -212,6 +202,24 @@ TEST_F(NGramEncoderTest, int4PairTest) {
   }
   std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
 }
+
+TEST_F(NGramEncoderTest, int4BatchTest) {
+  std::vector<std::string> enc_keys;
+  NGramEncoder *encoder = new NGramEncoder(4);
+  encoder->build(words, 10000);
+  int batch_size = 10;
+  int ls = (int)integers.size();
+  for (int i = 0; i < ls - batch_size; i += batch_size) {
+    encoder->encodeBatch(integers, i, batch_size, enc_keys);
+  }
+  for (int i = 0; i < (int)enc_keys.size() - 1; i += 2) {
+    std::string str1 = enc_keys[i];
+    std::string str2 = enc_keys[i + 1];
+    int cmp = strCompare(str1, str2);
+    EXPECT_LT(cmp, 0);
+  }
+}
+
 void LoadWords() {
   std::ifstream infile(kWordFilePath);
   std::string key;
@@ -224,8 +232,8 @@ void LoadWords() {
 }
 
 void GenerateInt64() {
-  std::random_device rd;  //Will be used to obtain a seed for the random number engine
-  std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+  std::random_device rd;   // Will be used to obtain a seed for the random number engine
+  std::mt19937 gen(rd());  // Standard mersenne_twister_engine seeded with rd()
   std::uniform_int_distribution<> dis(1, 2000000);
   uint64_t data = 1;
   for (int i = 0; i < kInt64TestSize; i++) {

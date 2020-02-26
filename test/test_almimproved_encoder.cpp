@@ -4,6 +4,7 @@
 #include <bitset>
 #include <fstream>
 #include <iostream>
+#include <random>
 #include <string>
 #include <vector>
 #include <random>
@@ -16,7 +17,7 @@ namespace ope {
 namespace almimprovedencodertest {
 
 static const char kFilePath[] = "../../datasets/words.txt";
-//static const int kWordTestSize = 234369;
+// static const int kWordTestSize = 234369;
 static const int kWordTestSize = 23436;
 static const int kInt64TestSize = 23436;
 static std::vector<std::string> words;
@@ -37,6 +38,32 @@ void Print(const std::string &str) {
 std::string Uint64ToString(uint64_t key) {
   uint64_t endian_swapped_key = __builtin_bswap64(key);
   return std::string(reinterpret_cast<const char *>(&endian_swapped_key), 8);
+}
+
+std::string changeToBinary(int64_t num, int8_t len) {
+  std::string result = std::string();
+  int cnt = 0;
+  while (num > 0) {
+    result = std::string(1, num % 2 + '0') + result;
+    num = num / 2;
+    cnt += 1;
+  }
+  for (int i = cnt; i < len; i++) result = '0' + result;
+  return result;
+}
+
+TEST_F(ALMImprovedEncoderTest, intervalTest) {
+  ALMImprovedEncoder *encoder = new ALMImprovedEncoder();
+  encoder->build(words, 4096);
+  std::vector<SymbolCode> symbol_code_list = encoder->getSymbolCodeList();
+  std::sort(symbol_code_list.begin(), symbol_code_list.end(),
+            [](SymbolCode &x, SymbolCode &y) { return x.first.compare(y.first) < 0; });
+  for (auto iter = symbol_code_list.begin() + 1; iter != symbol_code_list.end(); iter++) {
+    std::string str1 = changeToBinary((iter - 1)->second.code, (iter - 1)->second.len);
+    std::string str2 = changeToBinary(iter->second.code, iter->second.len);
+    int cmp = str1.compare(str2);
+    assert(cmp < 0);
+  }
 }
 
 TEST_F(ALMImprovedEncoderTest, wordTest) {
@@ -60,8 +87,23 @@ TEST_F(ALMImprovedEncoderTest, wordTest) {
   std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
 }
 
+TEST_F(ALMImprovedEncoderTest, wordPairTest) {
+  ALMImprovedEncoder *encoder = new ALMImprovedEncoder();
+  encoder->build(words, 1000);
+  auto l_buffer = new uint8_t[kLongestCodeLen];
+  auto r_buffer = new uint8_t[kLongestCodeLen];
+  for (int i = 0; i < static_cast<int>(words.size()) - 1; i++) {
+    int l_len = 0, r_len = 0;
+    encoder->encodePair(words[i], words[i + 1], l_buffer, r_buffer, l_len, r_len);
+    std::string str1 = std::string((const char *)l_buffer, GetByteLen(l_len));
+    std::string str2 = std::string((const char *)r_buffer, GetByteLen(r_len));
+    int cmp = str1.compare(str2);
+    EXPECT_LT(cmp, 0);
+  }
+}
+
 TEST_F(ALMImprovedEncoderTest, intTest) {
-   ALMImprovedEncoder *encoder = new ALMImprovedEncoder();
+  ALMImprovedEncoder *encoder = new ALMImprovedEncoder();
   encoder->build(integers, 4096);
   auto buffer = new uint8_t[kLongestCodeLen];
   int64_t total_len = 0;
@@ -78,7 +120,7 @@ TEST_F(ALMImprovedEncoderTest, intTest) {
   }
   delete[] buffer;
   delete encoder;
-  std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl; 
+  std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
 }
 
 void LoadWords() {
@@ -94,8 +136,8 @@ void LoadWords() {
 }
 
 void GenerateInt64() {
-  std::random_device rd;  //Will be used to obtain a seed for the random number engine
-  std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+  std::random_device rd;   // Will be used to obtain a seed for the random number engine
+  std::mt19937 gen(rd());  // Standard mersenne_twister_engine seeded with rd()
   std::uniform_int_distribution<> dis(1, 2000000);
   uint64_t data = 1;
   for (int i = 0; i < kInt64TestSize; i++) {

@@ -3,6 +3,7 @@
 #include <bitset>
 #include <fstream>
 #include <iostream>
+#include <random>
 #include <string>
 #include <vector>
 #include <random>
@@ -17,16 +18,14 @@ namespace ope {
 namespace doublecharencodertest {
 
 static const char kWordFilePath[] = "../../datasets/words.txt";
-//static const int kWordTestSize = 234369;
-//static const int kWordTestSize = 234369;
-static const int kWordTestSize = 234;
-static const int kInt64TestSize = 234;
+// static const int kWordTestSize = 234369;
+static const int kWordTestSize = 234369;
+static const int kInt64TestSize = 100000;
 static std::vector<std::string> words;
 static std::vector<std::string> integers;
 static const int kLongestCodeLen = 4096;
 
-class DoubleCharEncoderTest : public ::testing::Test {
-};
+class DoubleCharEncoderTest : public ::testing::Test {};
 
 int GetByteLen(const int bitlen) { return ((bitlen + 7) & ~7) / 8; }
 
@@ -42,10 +41,12 @@ std::string Uint64ToString(uint64_t key) {
   return std::string(reinterpret_cast<const char *>(&endian_swapped_key), 8);
 }
 
-/*TEST_F(DoubleCharEncoderTest, wordTest) {
+
+TEST_F(DoubleCharEncoderTest, wordTest) {
   DoubleCharEncoder *encoder = new DoubleCharEncoder();
   encoder->build(words, 65536);
   auto buffer = new uint8_t[kLongestCodeLen];
+  // encode single key each time
   for (int i = 0; i < static_cast<int>(words.size()) - 1; i++) {
     int len = encoder->encode(words[i], buffer);
     std::string str1 = std::string((const char *)buffer, GetByteLen(len));
@@ -67,11 +68,7 @@ std::string Uint64ToString(uint64_t key) {
     EXPECT_EQ(cmp, 0);
 #endif
   }
-}*/
-
-/*TEST_F(DoubleCharEncoderTest, wordPairTest) {
-  DoubleCharEncoder *encoder = new DoubleCharEncoder();
-  encoder->build(words, 1024);
+  // encode pair
   auto l_buffer = new uint8_t[kLongestCodeLen];
   auto r_buffer = new uint8_t[kLongestCodeLen];
   for (int i = 0; i < static_cast<int>(words.size()) - 1; i++) {
@@ -82,7 +79,75 @@ std::string Uint64ToString(uint64_t key) {
     int cmp = str1.compare(str2);
     EXPECT_LT(cmp, 0);
   }
+  delete[] l_buffer;
+  delete[] r_buffer;
+
+  // encode batch
+  std::vector<std::string> enc_keys;
+  int batch_size = 10;
+  int ls = (int)words.size();
+  for (int i = 0; i < ls - batch_size; i += batch_size) {
+    encoder->encodeBatch(words, i, batch_size, enc_keys);
+  }
+  std::cout << enc_keys.size() << std::endl;
+  for (int i = 0; i < (int)enc_keys.size() - 1; i += 2) {
+    std::string str1 = enc_keys[i];
+    std::string str2 = enc_keys[i + 1];
+    int cmp = strCompare(str1, str2);
+    ASSERT_TRUE(cmp < 0);
+  }
+
+  delete encoder;
+}
+
+/*TEST_F(DoubleCharEncoderTest, intTest) {
+  DoubleCharEncoder *encoder = new DoubleCharEncoder();
+  encoder->build(integers, 1024);
+  auto buffer = new uint8_t[kLongestCodeLen];
+  for (int i = 0; i < static_cast<int>(integers.size()) - 1; i++) {
+    int len = encoder->encode(integers[i], buffer);
+    std::string str1 = std::string((const char *)buffer, GetByteLen(len));
+    len = encoder->encode(integers[i + 1], buffer);
+    std::string str2 = std::string((const char *)buffer, GetByteLen(len));
+    int cmp = str1.compare(str2);
+    EXPECT_LT(cmp, 0);
+
+#ifdef INCLUDE_DECODE
+    len = encoder->decode(str1, buffer);
+    std::string dec_str1 = std::string((const char *)buffer, len);
+    cmp = dec_str1.compare(integers[i]);
+
+    EXPECT_EQ(cmp, 0);
+
+    len = encoder->decode(str2, buffer);
+    std::string dec_str2 = std::string((const char *)buffer, len);
+    cmp = dec_str2.compare(integers[i + 1]);
+    EXPECT_EQ(cmp, 0);
+#endif
+  }
 }*/
+
+void LoadWords() {
+  std::ifstream infile(kWordFilePath);
+  std::string key;
+  int count = 0;
+  while (infile.good() && count < kWordTestSize) {
+    infile >> key;
+    words.push_back(key);
+    count++;
+  }
+}
+
+void GenerateInt64() {
+  std::random_device rd;   // Will be used to obtain a seed for the random number engine
+  std::mt19937 gen(rd());  // Standard mersenne_twister_engine seeded with rd()
+  std::uniform_int_distribution<> dis(1, 2000000);
+  uint64_t data = 1;
+  for (int i = 0; i < kInt64TestSize; i++) {
+    data += dis(gen);
+    integers.push_back(Uint64ToString(data));
+  }
+}
 
 TEST_F(DoubleCharEncoderTest, intTest) {
   DoubleCharEncoder *encoder = new DoubleCharEncoder();
