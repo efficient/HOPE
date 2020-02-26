@@ -7,6 +7,7 @@
 #include <random>
 #include <string>
 #include <vector>
+#include <random>
 
 #include "gtest/gtest.h"
 #include "heuristic_encoder.hpp"
