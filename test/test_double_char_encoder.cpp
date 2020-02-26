@@ -127,28 +127,6 @@ TEST_F(DoubleCharEncoderTest, wordTest) {
   }
 }*/
 
-void LoadWords() {
-  std::ifstream infile(kWordFilePath);
-  std::string key;
-  int count = 0;
-  while (infile.good() && count < kWordTestSize) {
-    infile >> key;
-    words.push_back(key);
-    count++;
-  }
-}
-
-void GenerateInt64() {
-  std::random_device rd;   // Will be used to obtain a seed for the random number engine
-  std::mt19937 gen(rd());  // Standard mersenne_twister_engine seeded with rd()
-  std::uniform_int_distribution<> dis(1, 2000000);
-  uint64_t data = 1;
-  for (int i = 0; i < kInt64TestSize; i++) {
-    data += dis(gen);
-    integers.push_back(Uint64ToString(data));
-  }
-}
-
 TEST_F(DoubleCharEncoderTest, intTest) {
   DoubleCharEncoder *encoder = new DoubleCharEncoder();
   encoder->build(integers, 1024);
