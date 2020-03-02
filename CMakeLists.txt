@@ -38,8 +38,8 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/succinct_binary_trie")
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/SuRF/include")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/ART/include")
-#include_directories("${CMAKE_CURRENT_SOURCE_DIR}/ART_single/include")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/btree/include")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/PrefixBTree/include")
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/libcuckoo/libcuckoo")
 
@@ -50,11 +50,10 @@ find_package (Threads)
 add_library(ART ART/src/Tree.cpp)
 target_link_libraries(ART ${TbbLib} ${JemallocLib} ${CMAKE_THREAD_LIBS_INIT} atomic)
 
-#add_library(ART_single ART_single/src/Tree.cpp)
-#target_link_libraries(ART_single ${TbbLib} ${JemallocLib} ${CMAKE_THREAD_LIBS_INIT})
-
 add_subdirectory(test)
 add_subdirectory(bench)
+add_subdirectory(PrefixBTree/bench)
+add_subdirectory(PrefixBTree/test)
 #add_subdirectory(SuRF/test)
 #add_subdirectory(SuRF/bench)
 #add_subdirectory(ART_single/test)
