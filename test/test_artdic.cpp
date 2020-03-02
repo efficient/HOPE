@@ -8,6 +8,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <random>
 
 #include "art_dic_tree.hpp"
 #include "gtest/gtest.h"
@@ -112,7 +113,7 @@ TEST_F(ARTDICTest, pointLookupInt64Test) {
     if (result.code != i) std::cout << "lookup:" << result.code << " answer:" << i << std::endl;
     EXPECT_TRUE(result.code == i);
   }
-  delete test;
+  delete test; 
 }
 
 TEST_F(ARTDICTest, pointLookupWordTest) {
