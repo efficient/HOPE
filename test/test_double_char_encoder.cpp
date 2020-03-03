@@ -6,7 +6,6 @@
 #include <random>
 #include <string>
 #include <vector>
-#include <random>
 
 #include "code_generator_factory.hpp"
 #include "double_char_encoder.hpp"
@@ -40,7 +39,6 @@ std::string Uint64ToString(uint64_t key) {
   uint64_t endian_swapped_key = __builtin_bswap64(key);
   return std::string(reinterpret_cast<const char *>(&endian_swapped_key), 8);
 }
-
 
 TEST_F(DoubleCharEncoderTest, wordTest) {
   DoubleCharEncoder *encoder = new DoubleCharEncoder();
@@ -188,8 +186,8 @@ void LoadWords() {
 }
 
 void GenerateInt64() {
-  std::random_device rd;  //Will be used to obtain a seed for the random number engine
-  std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+  std::random_device rd;   // Will be used to obtain a seed for the random number engine
+  std::mt19937 gen(rd());  // Standard mersenne_twister_engine seeded with rd()
   std::uniform_int_distribution<> dis(1, 2000000);
   uint64_t data = 1;
   for (int i = 0; i < kInt64TestSize; i++) {

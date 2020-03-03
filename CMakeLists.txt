@@ -54,12 +54,11 @@ add_subdirectory(test)
 add_subdirectory(bench)
 add_subdirectory(PrefixBTree/bench)
 add_subdirectory(PrefixBTree/test)
+add_subdirectory(ART/test)
+add_subdirectory(ART/bench)
+
 #add_subdirectory(SuRF/test)
 #add_subdirectory(SuRF/bench)
-#add_subdirectory(ART_single/test)
-#add_subdirectory(ART_single/bench)
-#add_subdirectory(ART/test)
-#add_subdirectory(ART/bench)
 #add_subdirectory(btree)
 #add_subdirectory(hot)
 
@@ -110,6 +109,8 @@ endif()
 string(CONCAT OPE_FORMAT_DIRS
         "${CMAKE_CURRENT_SOURCE_DIR}/include,"
         "${CMAKE_CURRENT_SOURCE_DIR}/test,"
+        "${CMAKE_CURRENT_SOURCE_DIR}/ART/bench,"
+        "${CMAKE_CURRENT_SOURCE_DIR}/ART/test,"
         )
 
 # runs clang format and updates files in place.

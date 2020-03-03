@@ -6,7 +6,6 @@
 #include <random>
 #include <string>
 #include <vector>
-#include <random>
 
 #include "gtest/gtest.h"
 #include "ngram_encoder.hpp"

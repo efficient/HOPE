@@ -6,7 +6,6 @@
 #include <random>
 #include <string>
 #include <vector>
-#include <random>
 
 #include "code_generator_factory.hpp"
 #include "gtest/gtest.h"
@@ -108,19 +107,19 @@ TEST_F(SingleCharEncoderTest, intTest) {
     std::string str2 = std::string((const char *)buffer, GetByteLen(len));
     int cmp = str1.compare(str2);
     EXPECT_LT(cmp, 0);
-/*
-#ifdef INCLUDE_DECODE
-    len = encoder->decode(str1, buffer);
-    std::string dec_str1 = std::string((const char *)buffer, len);
-    cmp = dec_str1.compare(integers[i]);
-    EXPECT_EQ(cmp, 0);
+    /*
+    #ifdef INCLUDE_DECODE
+        len = encoder->decode(str1, buffer);
+        std::string dec_str1 = std::string((const char *)buffer, len);
+        cmp = dec_str1.compare(integers[i]);
+        EXPECT_EQ(cmp, 0);
 
-    len = encoder->decode(str2, buffer);
-    std::string dec_str2 = std::string((const char *)buffer, len);
-    cmp = dec_str2.compare(integers[i + 1]);
-    EXPECT_EQ(cmp, 0);
-#endif
-*/
+        len = encoder->decode(str2, buffer);
+        std::string dec_str2 = std::string((const char *)buffer, len);
+        cmp = dec_str2.compare(integers[i + 1]);
+        EXPECT_EQ(cmp, 0);
+    #endif
+    */
   }
 }
 
