@@ -109,12 +109,6 @@ std::ofstream output_mem_url_art_range;
 static const std::string file_stats_url_art_range = output_dir_art_range + "stats_url_art_range.csv";
 std::ofstream output_stats_url_art_range;
 
-double getNow() {
-  struct timeval tv;
-  gettimeofday(&tv, 0);
-  return tv.tv_sec + tv.tv_usec / 1000000.0;
-}
-
 void loadKey(TID tid, Key &key) {
   std::string *key_str = (std::string *)tid;
   key.set(reinterpret_cast<const char *>(key_str->c_str()), key_str->length());
