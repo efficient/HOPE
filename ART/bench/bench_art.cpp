@@ -6,6 +6,7 @@
 #include <iostream>
 #include <set>
 
+#include "common.h"
 #include "Tree.h"
 #include "encoder_factory.hpp"
 
