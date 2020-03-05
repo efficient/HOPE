@@ -183,26 +183,6 @@ std::string uint64ToString(uint64_t key) {
   return std::string(reinterpret_cast<const char *>(&endian_swapped_key), 8);
 }
 
-void loadKeysInt(const std::string &file_name, const uint64_t num_records, std::vector<std::string> &keys,
-                 bool remove_dup = false) {
-  std::ifstream infile(file_name);
-  uint64_t int_key;
-  uint64_t count = 0;
-  int continue_cnt = 0;
-  std::set<uint64_t> int_keys;
-  while (count < num_records && infile.good()) {
-    infile >> int_key;
-    if (remove_dup && int_keys.find(int_key) != int_keys.end()) {
-      continue_cnt++;
-      continue;
-    }
-    int_keys.insert(int_key);
-    std::string key = uint64ToString(int_key);
-    keys.push_back(key);
-    count++;
-  }
-}
-
 void selectKeysToInsert(const unsigned percent, std::vector<std::string> &insert_keys, std::vector<std::string> &keys) {
   random_shuffle(keys.begin(), keys.end());
   uint64_t num_insert_keys = keys.size() * percent / 100;
