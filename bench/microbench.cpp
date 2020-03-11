@@ -168,36 +168,6 @@ std::string uint64ToString(uint64_t key) {
     return std::string(reinterpret_cast<const char*>(&endian_swapped_key), 8);
 }
 
-int64_t loadKeysInt(const std::string& file_name,
-                 std::vector<std::string>& keys,
-                 std::vector<std::string>& keys_shuffle) {
-    std::ifstream infile(file_name);
-    uint64_t int_key;
-    int64_t total_len = 0;
-    uint64_t count = 0;
-    std::set<uint64_t> int_keys;
-    int continue_cnt = 0;
-    uint64_t cnt = 0;
-    while (infile.good() && cnt < 100000000) {
-        infile >> int_key;
-	if (int_keys.find(int_key) != int_keys.end()) {
-            continue_cnt++;
-            std::cout << "continue cnt:" << continue_cnt << std::endl;
-	    continue;
-        }
-        cnt += 1;
-        int_keys.insert(int_key);
-        std::string key = uint64ToString(int_key);
-        keys.push_back(key);
-        keys_shuffle.push_back(key);
-        count++;
-        total_len += key.length();
-        assert(key.length() == 8);
-    }
-    std::random_shuffle(keys_shuffle.begin(), keys_shuffle.end());
-    return total_len;
-}
-
 int64_t loadKeys(const std::string& file_name,
          std::vector<std::string> &keys,
          std::vector<std::string> &keys_shuffle) {
@@ -223,17 +193,16 @@ void printStr(std::string str) {
     std::cout << std::endl;
 }
 
-/* choose sample_percent keys from first base_percent keys */
-/* Percent range [0, 100] */
-void getFirstSampleKeys(const double sample_percent,
+/* choose sample_percent keys*/
+void getSampleKeys(const double sample_percent,
                     std::vector<std::string> &sample_keys,
-                    const std::vector<std::string> &shuffle_keys,
+                    const std::vector<std::string> &all_keys,
                     int64_t &enc_src_len) {
-    int sample_size = (int)(shuffle_keys.size() * sample_percent / 100);
+    int sample_size = (int)(all_keys.size() * sample_percent / 100);
     enc_src_len = 0;
     for (int i = 0; i < sample_size; i++) {
-        sample_keys.push_back(shuffle_keys[i]);
-        enc_src_len += shuffle_keys[i].size();
+        sample_keys.push_back(all_keys[i]);
+        enc_src_len += all_keys[i].length();
     }
 }
 
@@ -259,10 +228,12 @@ void exec_helper(const int encoder_type, const int W, const int input_dict_size,
     time_start = getNow();
     std::vector<std::string> enc_keys;
 
+    // encode one string each time
     if (encode_method == 0) {
         for (int i = 0; i < (int)enc_src_keys.size(); i++) {
             total_enc_len += encoder->encode(enc_src_keys[i], buffer);
         }
+    // encode a pair of strings
     } else if (encode_method == 1) {
         int l_len;
         int r_len;
@@ -270,20 +241,21 @@ void exec_helper(const int encoder_type, const int W, const int input_dict_size,
             encoder->encodePair(enc_src_keys[i], enc_src_keys[i+1], lb, rb, l_len, r_len);
             total_enc_len += l_len + r_len;
         }
+    // encode a batch of strings
     } else if (encode_method == 2) {
         for (int i = 0; i <= (int)enc_src_keys.size() - batch_size; i += batch_size) {
             total_enc_len += encoder->encodeBatch(enc_src_keys, i, batch_size, enc_keys);
         }
     }
     time_end = getNow();
-    delete[] buffer;
-    delete lb;
-    delete rb;
-    delete encoder;
     double time_diff = time_end - time_start;
     tput = enc_src_keys.size() / time_diff / 1000000; // in Mops/s
     lat = time_diff * 1000000000 / enc_src_len; // in ns
     cpr = (enc_src_len * 8.0) / total_enc_len;
+    delete[] buffer;
+    delete lb;
+    delete rb;
+    delete encoder;
 
     std::cout << "Throughput = " << tput << " Mops/s" << std::endl;
     std::cout << "Latency = " << lat << " ns/char" << std::endl;
@@ -297,13 +269,14 @@ void exec(const int expt_id, const int wkld_id,
       const double sample_percent, const double enc_percent,
       std::vector<std::string> &keys_shuffle,
       const int64_t total_len, int encode_method = 0, int batch_size = 3) {
- #ifdef RUN_BATCH
+#ifdef RUN_BATCH
     std::sort(keys_shuffle.begin(), keys_shuffle.end());
 #endif
     std::vector<std::string> sample_keys;
     int64_t sample_enc_src_len = 0;
-    getFirstSampleKeys(sample_percent, sample_keys, keys_shuffle, sample_enc_src_len);
+    getSampleKeys(sample_percent, sample_keys, keys_shuffle, sample_enc_src_len);
 
+    // Get parameters from file to speed up building the encoder
     int64_t input_dict_size = 0;
     if (encoder_type == 3) {
         input_dict_size = three_gram_input_dict_size[wkld_id][dict_size_id];
@@ -323,7 +296,7 @@ void exec(const int expt_id, const int wkld_id,
 
     std::vector<std::string> enc_src_keys;
     int64_t enc_src_len = 0;
-    getFirstSampleKeys(enc_percent, enc_src_keys, keys_shuffle, enc_src_len);
+    getSampleKeys(enc_percent, enc_src_keys, keys_shuffle, enc_src_len);
     double tput = 0;
     double lat = 0;
     double cpr = 0;
@@ -410,26 +383,18 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> emails_shuffle;
     std::vector<std::string> emails1_shuffle;
     std::vector<std::string> emails2_shuffle;
-    //int64_t total_len_email =  0;
     int64_t total_len_email = loadKeys(file_email, emails, emails_shuffle);
     int64_t total_len_email1 = loadKeys(file_email1, emails1, emails1_shuffle);
     int64_t total_len_email2 = loadKeys(file_email2, emails2, emails2_shuffle);
 
     std::vector<std::string> wikis;
     std::vector<std::string> wikis_shuffle;
-    int64_t total_len_wiki = 0;
-//  int64_t total_len_wiki = loadKeys(file_wiki, wikis, wikis_shuffle);
+    int64_t total_len_wiki = loadKeys(file_wiki, wikis, wikis_shuffle);
 
     std::vector<std::string> urls;
     std::vector<std::string> urls_shuffle;
-    int64_t total_len_url = 0;
-//    int64_t total_len_url = loadKeys(file_url, urls, urls_shuffle);
+    int64_t total_len_url = loadKeys(file_url, urls, urls_shuffle);
 
-    std::vector<std::string> tss;
-    std::vector<std::string> tss_shuffle;
-#ifdef RUN_TIMESTAMP
-    int64_t total_len_ts = loadKeysInt(file_ts, tss, tss_shuffle);
-#endif
     if (expt_id == 0) {
         //-------------------------------------------------------------
         // Sample Size Sweep; Expt ID = 0
@@ -490,13 +455,6 @@ int main(int argc, char *argv[]) {
         output_lat_url_dict_size.open(file_lat_url_dict_size, std::fstream::app);
         output_mem_url_dict_size.open(file_mem_url_dict_size, std::fstream::app);
 
-#ifdef RUN_TIMESTAMP
-        output_x_ts_dict_size.open(file_x_ts_dict_size, std::fstream::app);
-        output_cpr_ts_dict_size.open(file_cpr_ts_dict_size, std::fstream::app);
-        output_lat_ts_dict_size.open(file_lat_ts_dict_size, std::fstream::app);
-        output_mem_ts_dict_size.open(file_mem_ts_dict_size, std::fstream::app);
-#endif
-
         int sample_percent = 1;
         int enc_src_percent = 100;
         int expt_num = 1;
@@ -520,11 +478,6 @@ int main(int argc, char *argv[]) {
         std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
         exec(expt_id, kUrl, 1, 0, sample_percent, enc_src_percent, urls_shuffle, total_len_url);
         expt_num++;
-#ifdef RUN_TIMESTAMP
-        std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-        exec(expt_id, kTs, 1, 0, sample_percent, enc_src_percent, tss_shuffle, total_len_ts);
-        expt_num++;
-#endif
 
         // Double-Char
         std::cout << "CPR and Latency (" << (expt_num++) << "/" << total_num_expts << ")" << std::endl;
@@ -535,13 +488,6 @@ int main(int argc, char *argv[]) {
         std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
         exec(expt_id, kUrl, 2, 6, sample_percent, enc_src_percent, urls_shuffle, total_len_url);
         expt_num++;
-#ifdef RUN_TIMESTAMP
-        std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-        exec(expt_id, kTs, 2, 6, sample_percent, enc_src_percent, tss_shuffle, total_len_ts);
-        expt_num++;
-#endif
-
-
 
         for (int ds = 0; ds < 7; ds++) {
             for (int et = 3; et < stop_method; et++) {
@@ -554,11 +500,6 @@ int main(int argc, char *argv[]) {
                 std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
                 exec(expt_id, kUrl, et, ds, sample_percent, enc_src_percent, urls_shuffle, total_len_url);
                 expt_num++;
-#ifdef RUN_TIMESTAMP
-                std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-                exec(expt_id, kTs, et, ds, sample_percent, enc_src_percent, tss_shuffle, total_len_ts);
-                expt_num++;
-#endif
             }
         }
 
@@ -573,11 +514,6 @@ int main(int argc, char *argv[]) {
                 std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
                 exec(expt_id, kUrl, et, ds, sample_percent, enc_src_percent, urls_shuffle, total_len_url);
                 expt_num++;
-#ifdef RUN_TIMESTAMP
-                std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-                exec(expt_id, kTs, et, ds, sample_percent, enc_src_percent, tss_shuffle, total_len_ts);
-                expt_num++;
-#endif
             }
         }
         output_x_email_dict_size << "-" << "\n";
@@ -609,17 +545,6 @@ int main(int argc, char *argv[]) {
         output_cpr_url_dict_size.close();
         output_lat_url_dict_size.close();
         output_mem_url_dict_size.close();
-#ifdef RUN_TIMESTAMP
-        output_x_ts_dict_size << "-" << "\n";
-        output_cpr_ts_dict_size << "-" << "\n";
-        output_lat_ts_dict_size << "-" << "\n";
-        output_mem_ts_dict_size << "-" << "\n";
-
-        output_x_ts_dict_size.close();
-        output_cpr_ts_dict_size.close();
-        output_lat_ts_dict_size.close();
-        output_mem_ts_dict_size.close();
-#endif
     }
     else if (expt_id == 2) {
         //-------------------------------------------------------------
@@ -752,12 +677,7 @@ int main(int argc, char *argv[]) {
         int ds = 6;
         int sample_percent = 1;
         int enc_src_percent = 100;
-        int batch_sizes[10] = { 1, 2, 4, 8, 16, 32, 64};
-/*        for (int encoder_type = 1; encoder_type < 7; encoder_type++) {
-            exec(expt_id, kemail, encoder_type, ds, percent, emails_shuffle, total_len_email, 2, 1);
-            exec(expt_id, kemail, encoder_type, ds, percent, emails_shuffle, total_len_email, 2, 2);
-        }
-*/
+        int batch_sizes[10] = {1, 2, 4, 8, 16, 32, 64};
         for (int bs = 0; bs < 7; bs++) {
             int batch_size = batch_sizes[bs];
             for (int encoder_type = 1; encoder_type < 5; encoder_type++) {
@@ -807,8 +727,8 @@ int main(int argc, char *argv[]) {
         std::vector<std::string> sample2_keys;
         int64_t sample_src_len1 = 0;
         int64_t sample_src_len2 = 0;
-        getFirstSampleKeys(sample_percent, sample1_keys, emails1_shuffle, sample_src_len1);
-        getFirstSampleKeys(sample_percent, sample2_keys, emails2_shuffle, sample_src_len2);
+        getSampleKeys(sample_percent, sample1_keys, emails1_shuffle, sample_src_len1);
+        getSampleKeys(sample_percent, sample2_keys, emails2_shuffle, sample_src_len2);
         exec_helper(encoder_type, W, input_dict_size,
                     sample2_keys, emails1_shuffle,
                     total_len_email1, encode_method,
