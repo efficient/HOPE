@@ -3,7 +3,6 @@
 
 #include <algorithm>
 #include <map>
-#endif
 #include "symbol_selector.hpp"
 
 namespace ope {
