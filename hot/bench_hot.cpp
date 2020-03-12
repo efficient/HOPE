@@ -9,10 +9,7 @@
 #include <hot/singlethreaded/HOTSingleThreaded.hpp>
 #include <idx/contenthelpers/IdentityKeyExtractor.hpp>
 
-//#define NOT_USE_ENCODE_PAIR 1
 #define WRITE_TO_FILE
-//#define RUN_TIMESTAMP
-//#define BREAKDOWN_TIME
 
 static const uint64_t kNumEmailRecords = 25000000;
 static const uint64_t kNumWikiRecords = 14000000;
@@ -399,10 +396,6 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     node_stats.push_back(getStatsDefault(stats_map, "fanout") * 1.0 / node_total);
 
     double mem = htree_size;
-#ifdef BREAKDOWN_TIME
-    double encode_time = 0;
-    double lookup_time = 0;
-#endif
     if (encoder != nullptr)
 	    mem += encoder->memoryUse();
     mem = mem / 1000000.0;
@@ -413,36 +406,17 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     start_time = getNow();
     uint64_t TIDs[120];
     uint64_t sum = 0;
-#ifdef BREAKDOWN_TIME
-    double now = start_time;
-#endif
     if (is_point) { // point query
         if (is_compressed) {
             for (int i = 0; i < (int)txn_keys.size(); i++) {
-#ifdef BREAKDOWN_TIME
-                now = getNow();
-#endif
                 int enc_len = encoder->encode(txn_keys[i], buffer);
                 int enc_len_round = (enc_len + 7) >> 3;
                 std::string enc_key = std::string((const char*)buffer, enc_len_round);
-#ifdef BREAKDOWN_TIME
-                encode_time += getNow() - now;
-                now = getNow();
-#endif
                 sum += ht->lookup(reinterpret_cast<const char*>(enc_key.c_str())).mIsValid;
-#ifdef BREAKDOWN_TIME
-                lookup_time += getNow() - now;
-#endif
 	        }
 	    } else {
 	        for (int i = 0; i < (int)txn_keys.size(); i++) {
-#ifdef BREAKDOWN_TIME
-                now = getNow();
-#endif
                 sum += ht->lookup(reinterpret_cast<const char*>(txn_keys[i].c_str())).mIsValid;
-#ifdef BREAKDOWN_TIME
-                lookup_time += getNow() - now;
-#endif
 	        }
 	    }
     } else { // range query
@@ -450,16 +424,10 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
         if (is_compressed) {
             for (int i = 0; i < (int)txn_keys.size(); i++) {
                 int enc_len = 0;
-#ifdef BREAKDOWN_TIME
-                now = getNow();
-#endif
+
 	            enc_len = encoder->encode(txn_keys[i], buffer);
                 int enc_len_round = (enc_len + 7) >> 3;
                 std::string left_key = std::string((const char*)buffer, enc_len_round);
-#ifdef BREAKDOWN_TIME
-                encode_time += getNow() - now;
-                now = getNow();
-#endif
                 hot_type::const_iterator iter = ht->lower_bound((const char*)(left_key.c_str()));
                 int cnt = 0;
                 while (iter != ht->end() && endStr.compare(*iter) > 0
@@ -468,14 +436,8 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
 		            ++iter;
                     ++cnt;
 		        }
-#ifdef BREAKDOWN_TIME
-                lookup_time += getNow() - now;
-#endif
 	        }
 	    } else {
-#ifdef BREAKDOWN_TIME
-                now  = getNow();
-#endif
             for (int i = 0; i < (int)txn_keys.size(); i++) {
                 hot_type::const_iterator iter = ht->lower_bound(txn_keys[i].c_str());
                 int cnt = 0;
@@ -487,9 +449,6 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
                 }
 
             }
-#ifdef BREAKDOWN_TIME
-                lookup_time += getNow() - now;
-#endif
   	    }
     }
     end_time = getNow();
@@ -498,10 +457,6 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     std::cout << kGreen << "Throughput = " << kNoColor << tput << "\n";
     double lookup_lat = (exec_time * 1000000) / txn_keys.size(); // us
     double insert_lat = (insert_time * 1000000) / cstr_enc_insert_keys.size(); // us
-#ifdef BREAKDOWN_TIME
-    encode_time = encode_time * 1000000 / txn_keys.size();
-    lookup_time = lookup_time * 1000000 / txn_keys.size();
-#endif
     std::cout << TIDs[0] << std::endl;
     std::cout << kGreen << "Lookup Latency = " << kNoColor << lookup_lat << "\n";
     std::cout << kGreen << "Insert Latency = " << kNoColor << insert_lat << "\n";
@@ -515,12 +470,8 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
 #ifdef WRITE_TO_FILE
     if (expt_id == 0) {
         if (wkld_id == kEmail) {
-#ifdef BREAKDOWN_TIME
-            output_time_email_hot << lookup_lat << "," << insert_lat << "," << encode_time << "," << lookup_time << "\n";
-#else
             output_lookuplat_email_hot << lookup_lat << "\n";
             output_insertlat_email_hot << insert_lat << "\n";
-#endif
 	        output_mem_email_hot << mem << "\n";
             for (int i = 0; i < int(height); i++) {
                 output_height_email_hot << std::fixed << heights[i] << ",";
@@ -531,12 +482,9 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
             }
             output_stats_email_hot << std::endl;
 	    } else if (wkld_id == kWiki) {
-#ifdef BREAKDOWN_TIME
-            output_time_wiki_hot << lookup_lat <<  "," << insert_lat << "," << encode_time << "," << lookup_time << "\n";
-#else
+
             output_lookuplat_wiki_hot << lookup_lat << "\n";
             output_insertlat_wiki_hot << insert_lat << "\n";
-#endif
             output_mem_wiki_hot << mem << "\n";
             for (int i = 0; i < int(height); i++) {
                 output_height_wiki_hot << std::fixed << heights[i] << ",";
@@ -547,12 +495,8 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
             }
             output_stats_wiki_hot << std::endl;
 	    } else if (wkld_id == kUrl) {
-#ifdef BREAKDOWN_TIME
-	        output_time_url_hot << lookup_lat <<  "," << insert_lat << "," << encode_time << "," << lookup_time <<"\n";
-#else
             output_lookuplat_url_hot << lookup_lat << "\n";
             output_insertlat_url_hot << insert_lat << "\n";
-#endif
 	        output_mem_url_hot << mem << "\n";
             for (int i = 0; i < int(height); i++) {
                 output_height_url_hot << std::fixed << heights[i] << ",";
@@ -563,12 +507,8 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
             }
             output_stats_url_hot << std::endl;
 	    }  else if (wkld_id == kTs) {
-#ifdef BREAKDOWN_TIME
-	        output_time_ts_hot << lookup_lat <<  "," << insert_lat << encode_time << "," << lookup_time <<"\n";
-#else
             output_lookuplat_ts_hot << lookup_lat << "\n";
             output_insertlat_ts_hot << insert_lat << "\n";
-#endif
 	        output_mem_ts_hot << mem << "\n";
             for (int i = 0; i < int(height); i++) {
                 output_height_ts_hot << std::fixed << heights[i] << ",";
@@ -581,48 +521,33 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
 	    }
     } else if (expt_id == 1) {
         if (wkld_id == kEmail) {
-#ifdef BREAKDOWN_TIME
-            output_time_email_hot_range << lookup_lat <<  "," << insert_lat << "," << encode_time << "," << lookup_time << "\n";
-#else
             output_lookuplat_email_hot_range << lookup_lat << "\n";
             output_insertlat_email_hot_range << insert_lat << "\n";
-#endif
             output_mem_email_hot_range << mem << "\n";
             for (int i = 0; i < int(height); i++) {
                 output_height_email_hot_range << std::fixed << heights[i] << ",";
             }
             output_height_email_hot_range << std::endl;
         } else if (wkld_id == kWiki) {
-#ifdef BREAKDOWN_TIME
-            output_time_wiki_hot_range << lookup_lat <<  "," << insert_lat << "," << encode_time << "," << lookup_time << "\n";
-#else
             output_lookuplat_wiki_hot_range << lookup_lat << "\n";
             output_insertlat_wiki_hot_range << insert_lat << "\n";
-#endif
             output_mem_wiki_hot_range << mem << "\n";
             for (int i = 0; i < int(height); i++) {
                 output_height_wiki_hot_range << std::fixed << heights[i] << ",";
             }
             output_height_wiki_hot_range << std::endl;
     	} else if (wkld_id == kUrl) {
-#ifdef BREAKDOWN_TIME
-	        output_time_url_hot_range << lookup_lat <<  "," << insert_lat << "," << encode_time << "," << lookup_time << "\n";
-#else
+
             output_lookuplat_url_hot_range << lookup_lat << "\n";
             output_insertlat_url_hot_range << insert_lat << "\n";
-#endif
 	        output_mem_url_hot_range << mem << "\n";
             for (int i = 0; i < int(height); i++) {
                 output_height_url_hot_range << std::fixed << heights[i] << ",";
             }
             output_height_url_hot_range << std::endl;
 	    } else if (wkld_id == kTs) {
-#ifdef BREAKDOWN_TIME
-	        output_time_ts_hot_range << lookup_lat << "," << insert_lat << "," << encode_time << "," << lookup_time << "\n";
-#else
             output_lookuplat_ts_hot_range << lookup_lat << "\n";
             output_insertlat_ts_hot_range << insert_lat << "\n";
-#endif
 	        output_mem_ts_hot_range << mem << "\n";
             for (int i = 0; i < int(height); i++) {
                 output_height_ts_hot_range << std::fixed << heights[i] << ",";
@@ -667,12 +592,6 @@ void exec_group(const int expt_id, const bool is_point,
 	 insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
     expt_num++;
 
-#ifdef RUN_TIMESTAMP
-    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-    exec(expt_id, kTs, is_point, false, 0, 0,
-     insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-    expt_num++;
-#endif
     //=================================================
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
     exec(expt_id, kEmail, is_point, true, 1, 0,
@@ -689,12 +608,6 @@ void exec_group(const int expt_id, const bool is_point,
 	 insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
     expt_num++;
 
-#ifdef RUN_TIMESTAMP
-    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-    exec(expt_id, kTs, is_point, true, 1, 0,
-     insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-    expt_num++;
-#endif
     //=================================================
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
     exec(expt_id, kEmail, is_point, true, 2, 6,
@@ -711,13 +624,6 @@ void exec_group(const int expt_id, const bool is_point,
 	 insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
     expt_num++;
 
-#ifdef RUN_TIMESTAMP
-    exec(expt_id, kTs, is_point, true, 2, 6,
-     insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-    expt_num++;
-#endif
-
-
 	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
 	exec(expt_id, kEmail, is_point, true, 3, 6,
 	     insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
@@ -732,13 +638,6 @@ void exec_group(const int expt_id, const bool is_point,
 	exec(expt_id, kUrl, is_point, true, 3, 6,
 	     insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 	expt_num++;
-
-#ifdef RUN_TIMESTAMP
-	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-    exec(expt_id, kTs, is_point, true, 3, 6,
-     insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-    expt_num++;
-#endif
 
 
 	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
@@ -755,13 +654,6 @@ void exec_group(const int expt_id, const bool is_point,
 	exec(expt_id, kUrl, is_point, true, 4, 6,
 	     insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 	expt_num++;
-
-#ifdef RUN_TIMESTAMP
- 	std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-	exec(expt_id, kTs, is_point, true, 4, 6,
-	     insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-	expt_num++;
-#endif
 
     if (runALM == 1) {
         for (int encoder_type = 6; encoder_type < 7; encoder_type++) {
@@ -807,10 +699,6 @@ int main(int argc, char *argv[]) {
 
     std::vector<std::string> insert_tss, insert_tss_sample, txn_tss;
     std::vector<int> upper_bound_tss;
-#ifdef RUN_TIMESTAMP
-    loadWorkload(kTs, insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-#endif
-
     if (expt_id == 0) {
 	//-------------------------------------------------------------
 	// Point Queries; Expt ID = 0
@@ -836,22 +724,6 @@ int main(int argc, char *argv[]) {
 	output_mem_url_hot.open(file_mem_url_hot, std::ofstream::app);
 	output_height_url_hot.open(file_height_url_hot, std::ofstream::app);
     output_stats_url_hot.open(file_stats_url_hot, std::ofstream::app);
-#endif
-
-#ifdef RUN_TIMESTAMP
-    output_lookuplat_ts_hot.open(file_lookuplat_ts_hot, std::ofstream::app);
-    output_insertlat_ts_hot.open(file_insertlat_ts_hot, std::ofstream::app);
-	output_mem_ts_hot.open(file_mem_ts_hot, std::ofstream::app);
-	output_height_ts_hot.open(file_height_ts_hot, std::ofstream::app);
-    output_stats_ts_hot.open(file_stats_ts_hot, std::ofstream::app);
-#endif
-
-#ifdef BREAKDOWN_TIME
-   output_time_email_hot.open(file_time_email_hot, std::ofstream::app);
-   output_time_wiki_hot.open(file_time_wiki_hot, std::ofstream::app);
-   output_time_url_hot.open(file_time_url_hot, std::ofstream::app);
-
-   output_time_ts_hot.open(file_time_ts_hot, std::ofstream::app);
 #endif
 
 	bool is_point = true;
@@ -901,31 +773,6 @@ int main(int argc, char *argv[]) {
 
 #endif
 
-#ifdef RUN_TIMESTAMP
-    output_lookuplat_ts_hot << "-" << "\n";
-    output_insertlat_ts_hot << "-" << "\n";
-	output_mem_ts_hot << "-" << "\n";
-	output_height_ts_hot << "-" << "\n";
-	output_stats_ts_hot << "-" << "\n";
-
-    output_lookuplat_ts_hot.close();
-    output_insertlat_ts_hot.close();
-	output_mem_ts_hot.close();
-	output_height_ts_hot.close();
-	output_stats_ts_hot.close();
-#endif
-
-#ifdef BREAKDOWN_TIME
-    output_time_email_hot << "-" << "\n";
-    output_time_wiki_hot << "-" << "\n";
-    output_time_url_hot << "-" << "\n";
-    output_time_ts_hot << "-" << "\n";
-
-    output_time_email_hot.close();
-    output_time_wiki_hot.close();
-    output_time_url_hot.close();
-    output_time_ts_hot.close();
-#endif
     }
     else if (expt_id == 1) {
 	//-------------------------------------------------------------
@@ -948,20 +795,6 @@ int main(int argc, char *argv[]) {
 	output_mem_url_hot_range.open(file_mem_url_hot_range, std::ofstream::app);
 #endif
 
-#ifdef RUN_TIMESTAMP
-    output_lookuplat_ts_hot_range.open(file_lookuplat_ts_hot_range, std::ofstream::app);
-    output_insertlat_ts_hot_range.open(file_insertlat_ts_hot_range, std::ofstream::app);
-	output_mem_ts_hot_range.open(file_mem_ts_hot_range, std::ofstream::app);
-	output_height_ts_hot_range.open(file_height_ts_hot_range, std::ofstream::app);
-#endif
-
-#ifdef BREAKDOWN_TIME
-   output_time_email_hot_range.open(file_time_email_hot, std::ofstream::app);
-   output_time_wiki_hot_range.open(file_time_wiki_hot, std::ofstream::app);
-   output_time_url_hot_range.open(file_time_url_hot, std::ofstream::app);
-
-   output_time_ts_hot_range.open(file_time_ts_hot, std::ofstream::app);
-#endif
 	bool is_point = false;
 	int expt_num = 1;
 	int total_num_expt = 24;
@@ -996,27 +829,6 @@ int main(int argc, char *argv[]) {
 	output_mem_url_hot_range.close();
 #endif
 
-#ifdef RUN_TIMESTAMP
-    output_lookuplat_ts_hot_range << "-" << "\n";
-    output_insertlat_ts_hot_range << "-" << "\n";
-	output_mem_ts_hot_range << "-" << "\n";
-
-    output_lookuplat_ts_hot_range.close();
-    output_insertlat_ts_hot_range.close();
-	output_mem_ts_hot_range.close();
-#endif
-
-#ifdef BREAKDOWN_TIME
-    output_time_email_hot_range << "-" << "\n";
-    output_time_wiki_hot_range << "-" << "\n";
-    output_time_url_hot_range << "-" << "\n";
-    output_time_ts_hot_range << "-" << "\n";
-
-    output_time_email_hot_range.close();
-    output_time_wiki_hot_range.close();
-    output_time_url_hot_range.close();
-    output_time_ts_hot_range.close();
-#endif
     }
     return 0;
 }

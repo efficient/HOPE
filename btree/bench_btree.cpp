@@ -8,21 +8,14 @@
 #include "encoder_factory.hpp"
 #include "btree_map.hpp"
 
-//#define NOT_USE_ENCODE_PAIR 1
-//#define RUN_TIMESTAMP
 
 static const uint64_t kNumEmailRecords = 25000000;
 static const uint64_t kNumWikiRecords = 14000000;
-static const uint64_t kNumTsRecords = 14000000;
 static const uint64_t kNumTxns = 10000000;
-
-static const int kSamplePercent = 1;
-static const double kUrlSamplePercent = 1;
 
 static const std::string file_load_email = "workloads/load_email";
 static const std::string file_load_wiki = "workloads/load_wiki";
 static const std::string file_load_url = "workloads/load_url";
-static const std::string file_load_ts = "workloads/load_timestamp";
 
 static const std::string file_txn_email = "workloads/txn_email_zipfian";
 static const std::string file_txn_email_len = "workloads/scan_len_email_zipfian";
@@ -30,22 +23,21 @@ static const std::string file_txn_wiki = "workloads/txn_wiki_zipfian";
 static const std::string file_txn_wiki_len = "workloads/scan_len_wiki_zipfian";
 static const std::string file_txn_url = "workloads/txn_url_zipfian";
 static const std::string file_txn_url_len = "workloads/scan_len_url_zipfian";
-static const std::string file_txn_ts  = "workloads/txn_timestamp_zipfian";
 
 // for pretty print
 static const char* kGreen ="\033[0;32m";
-//static const char* kRed ="\033[0;31m";
 static const char* kNoColor ="\033[0;0m";
 
 static int runALM = 1;
+static const double kSamplePercent = 1;
 static std::string endStr = std::string(255, char(255));
+
 //-------------------------------------------------------------
 // Workload IDs
 //-------------------------------------------------------------
 static const int kEmail = 0;
 static const int kWiki = 1;
 static const int kUrl = 2;
-static const int kTs = 3;
 
 //-------------------------------------------------------------
 // Expt ID = 0
@@ -141,38 +133,6 @@ void loadLensInt(const std::string& file_name, const uint64_t num_records,
     }
 }
 
-std::string uint64ToString(uint64_t key) {
-    uint64_t endian_swapped_key = __builtin_bswap64(key);
-    return std::string(reinterpret_cast<const char*>(&endian_swapped_key), 8);
-}
-
-void loadKeysInt(const std::string& file_name, const uint64_t num_records,
-                 std::vector<std::string>& keys, bool remove_dup=false) {
-    std::ifstream infile(file_name);
-    uint64_t int_key;
-    uint64_t count = 0;
-    int continue_cnt = 0;
-    std::set<uint64_t> int_keys;
-    while (count < num_records && infile.good()) {
-        infile >> int_key;
-        if (remove_dup && int_keys.find(int_key) != int_keys.end()) {
-            continue_cnt++;
-            std::cout << "continue cnt:" << continue_cnt << std::endl;
-            continue;
-        }
-        int_keys.insert(int_key);
-        std::string key = uint64ToString(int_key);
-        keys.push_back(key);
-        count++;
-    }
-}
-
-std::string getUpperBoundKey(const std::string& key) {
-    std::string ret_str = key;
-    ret_str[ret_str.size() - 1] = (char)'\255';
-    return ret_str;
-}
-
 void loadWorkload(int wkld_id,
           std::vector<std::string>& insert_keys,
           std::vector<std::string>& insert_keys_sample,
@@ -185,10 +145,8 @@ void loadWorkload(int wkld_id,
         loadKeysFromFile(file_load_wiki, kNumWikiRecords, load_keys);
     else if (wkld_id == kUrl)
         loadKeysFromFile(file_load_url, kNumEmailRecords, load_keys);
-    else if (wkld_id == kTs)
-        loadKeysInt(file_load_ts, kNumTsRecords, load_keys, true);
     else
-        return;
+      return;
 
     std::sort(load_keys.begin(), load_keys.end());
     for (int i = 0; i < (int)load_keys.size() - 1; i++) {
@@ -207,8 +165,7 @@ void loadWorkload(int wkld_id,
     load_keys.clear();
     std::random_shuffle(insert_keys.begin(), insert_keys.end());
 
-    double percent = (wkld_id == kUrl) ? kUrlSamplePercent : kSamplePercent;
-    for (int i = 0; i < (int)insert_keys.size(); i += int(100 / percent)) {
+    for (int i = 0; i < (int)insert_keys.size(); i += int(100 / kSamplePercent)) {
         insert_keys_sample.push_back(insert_keys[i]);
     }
 
@@ -221,8 +178,7 @@ void loadWorkload(int wkld_id,
     } else if (wkld_id == kUrl) {
         loadKeysFromFile(file_txn_url, kNumTxns, txn_keys);
         loadLensInt(file_txn_url_len, kNumTxns, scan_key_lens);
-    } else if (wkld_id == kTs)
-        loadKeysInt(file_txn_ts, kNumTxns, txn_keys);
+    }
 
     std::cout << "insert_keys size = " << insert_keys.size() << std::endl;
     std::cout << "insert_keys_sample size = " << insert_keys_sample.size() << std::endl;
@@ -247,6 +203,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     } else if (encoder_type == 4) {
         input_dict_size = four_gram_input_dict_size[wkld_id][dict_size_id];
     }
+
     int W = 0;
     if (encoder_type == 5)
         W = ALM_W[wkld_id][dict_size_id];
@@ -382,10 +339,6 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
             output_lookuplat_url_btree << lookup_lat << "\n";
             output_insertlat_url_btree << insert_lat << "\n";
             output_mem_url_btree << mem << "\n";
-        } else if (wkld_id == kTs) {
-            output_lookuplat_ts_btree << lookup_lat << "\n";
-            output_insertlat_ts_btree << insert_lat << "\n";
-            output_mem_ts_btree << mem << "\n";
         }
     } else if (expt_id == 1) {
         if (wkld_id == kEmail) {
@@ -400,10 +353,6 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
             output_lookuplat_url_btree_range << lookup_lat << "\n";
             output_insertlat_url_btree_range << insert_lat << "\n";
             output_mem_url_btree_range << mem << "\n";
-        }  else if (wkld_id == kTs) {
-            output_lookuplat_ts_btree_range << lookup_lat << "\n";
-            output_insertlat_ts_btree_range  << insert_lat << "\n";
-            output_mem_ts_btree_range << mem << "\n";
         }
     }
 }
@@ -441,12 +390,6 @@ void exec_group(const int expt_id, const bool is_point,
      insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
     expt_num++;
 
-#ifdef RUN_TIMESTAMP
-    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-    exec(expt_id, kTs, is_point, false, 0, 0,
-     insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-    expt_num++;
-#endif
     //=================================================
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
     exec(expt_id, kEmail, is_point, true, 1, 0,
@@ -463,12 +406,6 @@ void exec_group(const int expt_id, const bool is_point,
      insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
     expt_num++;
 
-#ifdef RUN_TIMESTAMP
-    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-    exec(expt_id, kTs, is_point, true, 1, 0,
-     insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-    expt_num++;
-#endif
     //=================================================
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
     exec(expt_id, kEmail, is_point, true, 2, 6,
@@ -485,12 +422,6 @@ void exec_group(const int expt_id, const bool is_point,
      insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
     expt_num++;
 
-#ifdef RUN_TIMESTAMP
-    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-    exec(expt_id, kTs, is_point, true, 2, 6,
-     insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-    expt_num++;
-#endif
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
     exec(expt_id, kEmail, is_point, true, 3, 6,
              insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
@@ -505,12 +436,6 @@ void exec_group(const int expt_id, const bool is_point,
     exec(expt_id, kUrl, is_point, true, 3, 6,
              insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
     expt_num++;
-#ifdef RUN_TIMESTAMP
-    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-    exec(expt_id, kTs, is_point, true, 3, 6,
-         insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-    expt_num++;
-#endif
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
     exec(expt_id, kEmail, is_point, true, 4, 6,
         insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
@@ -525,12 +450,6 @@ void exec_group(const int expt_id, const bool is_point,
     exec(expt_id, kUrl, is_point, true, 4, 6,
         insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
     expt_num++;
-#ifdef RUN_TIMESTAMP
-    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-    exec(expt_id, kTs, is_point, true, 4, 6,
-         insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-    expt_num++;
-#endif
 
     int dict_size_5[2] = {2, 6};
     if (runALM == 1) {
@@ -574,11 +493,6 @@ int main(int argc, char *argv[]) {
     std::vector<int> upper_bound_urls;
     loadWorkload(kUrl, insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 
-    std::vector<std::string> insert_tss, insert_tss_sample, txn_tss;
-    std::vector<int> upper_bound_tss;
-#ifdef RUN_TIMESTAMP
-    loadWorkload(kTs, insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-#endif
 
     if (expt_id == 0) {
         //-------------------------------------------------------------
@@ -599,11 +513,6 @@ int main(int argc, char *argv[]) {
         output_lookuplat_url_btree.open(file_lookuplat_url_btree, std::ofstream::app);
         output_insertlat_url_btree.open(file_insertlat_url_btree, std::ofstream::app);
         output_mem_url_btree.open(file_mem_url_btree, std::ofstream::app);
-#ifdef RUN_TIMESTAMP
-        output_lookuplat_ts_btree.open(file_lookuplat_ts_btree, std::ofstream::app);
-        output_insertlat_ts_btree.open(file_insertlat_ts_btree, std::ofstream::app);
-        output_mem_ts_btree.open(file_mem_ts_btree, std::ofstream::app);
-#endif
         bool is_point = true;
         int expt_num = 1;
         int total_num_expt = 24;
@@ -636,15 +545,6 @@ int main(int argc, char *argv[]) {
         output_lookuplat_url_btree.close();
         output_insertlat_url_btree.close();
         output_mem_url_btree.close();
-#ifdef RUN_TIMESTAM
-        output_lookuplat_ts_btree << "-" << "\n";
-        output_insertlat_ts_btree << "-" << "\n";
-        output_mem_ts_btree << "-" << "\n";
-
-        output_lookuplat_ts_btree.close();
-        output_insertlat_ts_btree.close();
-        output_mem_ts_btree.close();
-#endif
     } else if (expt_id == 1) {
         //-------------------------------------------------------------
         // Range Queries; Expt ID = 1
@@ -664,11 +564,6 @@ int main(int argc, char *argv[]) {
         output_lookuplat_url_btree_range.open(file_lookuplat_url_btree_range, std::ofstream::app);
         output_insertlat_url_btree_range.open(file_insertlat_url_btree_range, std::ofstream::app);
         output_mem_url_btree_range.open(file_mem_url_btree_range, std::ofstream::app);
-#ifdef RUN_TIMESTAMP
-        output_lookuplat_ts_btree_range.open(file_lookuplat_ts_btree_range, std::ofstream::app);
-        output_insertlat_ts_btree_range.open(file_insertlat_ts_btree_range, std::ofstream::app);
-        output_mem_ts_btree_range.open(file_mem_ts_btree_range, std::ofstream::app);
-#endif
         bool is_point = false;
         int expt_num = 1;
         int total_num_expt = 24;
@@ -701,15 +596,6 @@ int main(int argc, char *argv[]) {
         output_lookuplat_url_btree_range.close();
         output_insertlat_url_btree_range.close();
         output_mem_url_btree_range.close();
-#ifdef RUN_TIMESTAMP
-        output_lookuplat_ts_btree_range << "-" << "\n";
-        output_insertlat_ts_btree_range << "-" << "\n";
-        output_mem_ts_btree_range << "-" << "\n";
-
-        output_lookuplat_ts_btree_range.close();
-        output_insertlat_ts_btree_range.close();
-        output_mem_ts_btree_range.close();
-#endif
     }
     return 0;
 }
