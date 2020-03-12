@@ -11,11 +11,6 @@
 #include "blending_trie.hpp"
 #include "symbol_selector.hpp"
 
-#define BLEND_FILE_NAME "./blend_result_"
-#define PRINT_TIME_BREAKDOWN 1
-//#define WRITE_BLEND_RESULT 1
-#define MAX_KEY_LEN 50
-
 namespace ope {
 
 class HeuristicSS : public SymbolSelector {
@@ -30,8 +25,8 @@ class HeuristicSS : public SymbolSelector {
   void setW(int64_t new_w);
 
   void checkIntervals(std::string &start_str, std::string &end_str);
-
-  // private:
+ 
+private:
 
   void getEqualInterval(std::vector<SymbolFreq> &blend_freq_table);
 

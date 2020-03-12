@@ -18,7 +18,6 @@ class Array3GramDict : public Dictionary {
   int binarySearch(const char *symbol, const int symbol_len) const;
   int compareDictEntry(const char *s1, const int s1_len, const int dict_idx) const;
 
-  // std::vector<Interval3Gram> dict_;
   int dict_size_;
   Interval3Gram *dict_;
 };
@@ -59,43 +58,6 @@ bool Array3GramDict::build(const std::vector<SymbolCode> &symbol_code_list) {
   return true;
 }
 
-// bool Array3GramDict::build (const std::vector<SymbolCode>& symbol_code_list)
-// {
-//     for (int i = 0; i < (int)symbol_code_list.size(); i++) {
-// 	Interval3Gram interval;
-// 	std::string symbol = symbol_code_list[i].first;
-// 	int symbol_len = symbol.length();
-// 	assert(symbol_len <= 3);
-// 	for (int i = 0; i < 3; i++) {
-// 	    if (i < symbol_len)
-// 		(interval.start_key)[i] = symbol[i];
-// 	    else
-// 		(interval.start_key)[i] = 0;
-// 	}
-// 	if (i < (int)symbol_code_list.size() - 1) {
-// 	    interval.common_prefix_len = 0;
-// 	    std::string next_symbol = symbol_code_list[i + 1].first;
-// 	    int next_symbol_len = next_symbol.length();
-// 	    next_symbol[next_symbol_len - 1] -= 1;
-// 	    int j = 0;
-// 	    while (j < symbol_len && j < next_symbol_len
-// 		   && symbol[j] == next_symbol[j]) {
-// 		interval.common_prefix_len++;
-// 		j++;
-// 	    }
-// 	} else {
-// 	    interval.common_prefix_len = (uint8_t)symbol.length();
-// 	}
-
-// 	assert(interval.common_prefix_len > 0);
-
-// 	interval.code.code = symbol_code_list[i].second.code;
-// 	interval.code.len = symbol_code_list[i].second.len;
-// 	dict_.push_back(interval);
-//     }
-//     return true;
-// }
-
 Code Array3GramDict::lookup(const char *symbol, const int symbol_len, int &prefix_len) const {
   int idx = binarySearch(symbol, symbol_len);
   prefix_len = dict_[idx].common_prefix_len;
@@ -105,13 +67,11 @@ Code Array3GramDict::lookup(const char *symbol, const int symbol_len, int &prefi
 int Array3GramDict::numEntries() const { return dict_size_; }
 
 int64_t Array3GramDict::memoryUse() const {
-  // return ((3 + 1 + 4 + 1) * dict_size_);
   return (sizeof(Interval3Gram) * dict_size_);
 }
 
 int Array3GramDict::binarySearch(const char *symbol, const int symbol_len) const {
   int l = 0;
-  // int r = dict_.size();
   int r = dict_size_;
   int m = 0;
   while (r - l > 1) {

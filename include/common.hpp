@@ -83,12 +83,18 @@ int strCompare(std::string s1, std::string s2) {
     if (c1 < c2) return -1;
     if (c1 > c2) return 1;
   }
+  int check = s1.compare(s2) > 0 ? 1 : (s1.compare(s2) == 0 ? 0 : -1);
+  int re = 0;
   if (len1 < len2)
-    return -1;
+    re = -1;
   else if (len1 == len2)
-    return 0;
+    re = 0;
   else
-    return 1;
+    re = 1;
+  if (check != re) {
+    std::cout << "[Different string compare]" << check << " " << re << std::endl;
+  }
+  return re;
 }
 
 }  // namespace ope

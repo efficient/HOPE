@@ -67,7 +67,6 @@ Code Array4GramDict::lookup(const char *symbol, const int symbol_len, int &prefi
 int Array4GramDict::numEntries() const { return dict_size_; }
 
 int64_t Array4GramDict::memoryUse() const {
-  // return (sizeof(4 + 1 + 4 + 1) * dict_size_);
   return (sizeof(Interval4Gram) * dict_size_);
 }
 

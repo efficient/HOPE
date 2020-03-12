@@ -1,16 +1,9 @@
 #ifndef NGRAM_SS_H
 #define NGRAM_SS_H
 
-//#define USE_CUCKOO 1
-
 #include <algorithm>
-#ifdef USE_CUCKOO
-#include "cuckoohash_map.hh"
-#else
-//#include <unordered_map>
 #include <map>
 #endif
-//#define PRINT_BUILD_TIME_BREAKDOWN
 #include "symbol_selector.hpp"
 
 namespace ope {
@@ -33,12 +26,7 @@ class NGramSS : public SymbolSelector {
   int binarySearch(const std::string &key);
 
   int n_;
-#ifdef USE_CUCKOO
-  cuckoohash_map<std::string, int64_t> freq_map_;
-#else
-  // std::unordered_map<std::string, int64_t> freq_map_;
   std::map<std::string, int64_t> freq_map_;
-#endif
   std::vector<std::string> interval_prefixes_;
   std::vector<std::string> interval_boundaries_;
   std::vector<int64_t> interval_freqs_;
@@ -47,9 +35,6 @@ class NGramSS : public SymbolSelector {
 bool NGramSS::selectSymbols(const std::vector<std::string> &key_list, const int64_t num_limit,
                             std::vector<SymbolFreq> *symbol_freq_list, int W) {
   if (key_list.empty()) return false;
-#ifdef USE_CUCKOO
-  freq_map_.reserve(key_list.size());
-#endif
   countSymbolFreq(key_list);
   std::vector<std::string> most_freq_symbols;
   int64_t adjust_num_limit = num_limit;
@@ -69,57 +54,28 @@ bool NGramSS::selectSymbols(const std::vector<std::string> &key_list, const int6
 }
 
 void NGramSS::countSymbolFreq(const std::vector<std::string> &key_list) {
-/*#ifdef PRINT_BUILD_TIME_BREAKDOWN
-    double time_start = getNow();
-#endif
-*/
-#ifdef USE_CUCKOO
-  auto updatefn = [](int64_t &num) { ++num; };
-#else
   freq_map_.clear();
   //    std::unordered_map<std::string, int64_t>::iterator iter;
   std::map<std::string, int64_t>::iterator iter;
-#endif
   for (int i = 0; i < (int)key_list.size(); i++) {
     for (int j = 0; j < (int)key_list[i].length() - n_ + 1; j++) {
       std::string ngram = key_list[i].substr(j, n_);
-#ifdef USE_CUCKOO
-      freq_map_.upsert(ngram, updatefn, 1);
-#else
       iter = freq_map_.find(ngram);
       if (iter == freq_map_.end()) {
         freq_map_.insert(std::pair<std::string, int64_t>(ngram, 1));
       } else {
         iter->second += 1;
       }
-#endif
     }
   }
-  //    std::cout << "Freq map =  " << freq_map_.size() << std::endl;
-  /*#ifdef PRINT_BUILD_TIME_BREAKDOWN
-      double time_end = getNow();
-      double time_diff = time_end - time_start;
-      std::cout << "count symbol freq time = " << time_diff << std::endl;
-  #endif*/
 }
 
 void NGramSS::pickMostFreqSymbols(const int64_t num_limit, std::vector<std::string> *most_freq_symbols) {
-  /*#ifdef PRINT_BUILD_TIME_BREAKDOWN
-      double time_start = getNow();
-  #endif*/
   std::vector<SymbolFreq> symbol_freqs;
-#ifdef USE_CUCKOO
-  auto lt = freq_map_.lock_table();
-  for (const auto &it : lt) {
-    symbol_freqs.push_back(std::make_pair(it.first, it.second));
-  }
-#else
-  // std::unordered_map<std::string, int64_t>::iterator iter;
   std::map<std::string, int64_t>::iterator iter;
   for (iter = freq_map_.begin(); iter != freq_map_.end(); ++iter) {
     symbol_freqs.push_back(std::make_pair(iter->first, iter->second));
   }
-#endif
   std::sort(symbol_freqs.begin(), symbol_freqs.end(), [](const SymbolFreq &x, const SymbolFreq &y) {
     if (x.second != y.second) return x.second > y.second;
     return (x.first.compare(y.first) > 0);
@@ -128,18 +84,9 @@ void NGramSS::pickMostFreqSymbols(const int64_t num_limit, std::vector<std::stri
     most_freq_symbols->push_back(symbol_freqs[i].first);
   }
   std::sort(most_freq_symbols->begin(), most_freq_symbols->end());
-
-  /*#ifdef PRINT_BUILD_TIME_BREAKDOWN
-      double time_end = getNow();
-      double time_diff = time_end - time_start;
-      std::cout << "pick most freq symbols time = " << time_diff << std::endl;
-  #endif*/
-}
+  }
 
 void NGramSS::fillInGap(const std::vector<std::string> &most_freq_symbols) {
-  /*#ifdef PRINT_BUILD_TIME_BREAKDOWN
-      double time_start = getNow();
-  #endif*/
   fillInSingleChar(0, (int)most_freq_symbols[0][0]);
 
   int num_symbols = most_freq_symbols.size();
@@ -189,12 +136,7 @@ void NGramSS::fillInGap(const std::vector<std::string> &most_freq_symbols) {
   interval_prefixes_.push_back(std::string(1, last_str[0]));
 
   if ((int)(uint8_t)last_str[0] < 255) fillInSingleChar((int)(uint8_t)(last_str[0] + 1), 255);
-  /*#ifdef PRINT_BUILD_TIME_BREAKDOWN
-      double time_end = getNow();
-      double time_diff = time_end - time_start;
-      std::cout << "fill in gap time = " << time_diff << std::endl;
-  #endif*/
-}
+  }
 
 void NGramSS::fillInSingleChar(const int first, const int last) {
   for (int c = first; c <= last; c++) {
@@ -215,9 +157,6 @@ std::string NGramSS::commonPrefix(const std::string &str1, const std::string &st
 }
 
 void NGramSS::countIntervalFreq(const std::vector<std::string> &key_list) {
-  /*#ifdef PRINT_BUILD_TIME_BREAKDOWN
-      double time_start = getNow();
-  #endif*/
   for (int i = 0; i < (int)interval_prefixes_.size(); i++) {
     interval_freqs_.push_back(1);
   }
@@ -230,12 +169,7 @@ void NGramSS::countIntervalFreq(const std::vector<std::string> &key_list) {
       pos += (int)interval_prefixes_[idx].length();
     }
   }
-  /*#ifdef PRINT_BUILD_TIME_BREAKDOWN
-      double time_end = getNow();
-      double time_diff = time_end - time_start;
-      std::cout << "count interval freq time = " << time_diff << std::endl;
-  #endif*/
-}
+  }
 
 int NGramSS::binarySearch(const std::string &key) {
   int l = 0;
