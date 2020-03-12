@@ -63,13 +63,6 @@ std::ofstream output_insertlat_url_btree;
 static const std::string file_mem_url_btree = output_dir_btree_point + "mem_url_btree.csv";
 std::ofstream output_mem_url_btree;
 
-static const std::string file_lookuplat_ts_btree = output_dir_btree_point + "lookuplat_ts_btree.csv";
-std::ofstream output_lookuplat_ts_btree;
-static const std::string file_insertlat_ts_btree = output_dir_btree_point + "insertlat_ts_btree.csv";
-std::ofstream output_insertlat_ts_btree;
-static const std::string file_mem_ts_btree = output_dir_btree_point + "mem_ts_btree.csv";
-std::ofstream output_mem_ts_btree;
-
 //-------------------------------------------------------------
 // Expt ID = 1
 //-------------------------------------------------------------
@@ -94,13 +87,6 @@ static const std::string file_insertlat_url_btree_range = output_dir_btree_range
 std::ofstream output_insertlat_url_btree_range;
 static const std::string file_mem_url_btree_range = output_dir_btree_range + "mem_url_btree_range.csv";
 std::ofstream output_mem_url_btree_range;
-
-static const std::string file_lookuplat_ts_btree_range = output_dir_btree_range + "lookuplat_ts_btree_range.csv";
-std::ofstream output_lookuplat_ts_btree_range;
-static const std::string file_insertlat_ts_btree_range = output_dir_btree_range + "insertlat_ts_btree_range.csv";
-std::ofstream output_insertlat_ts_btree_range;
-static const std::string file_mem_ts_btree_range = output_dir_btree_range + "mem_ts_btree_range.csv";
-std::ofstream output_mem_ts_btree_range;
 
 double getNow() {
   struct timeval tv;
@@ -348,9 +334,7 @@ void exec_group(const int expt_id, const bool is_point, int &expt_num, const int
                 const std::vector<std::string> &insert_wikis, const std::vector<std::string> &insert_wikis_sample,
                 const std::vector<std::string> &txn_wikis, const std::vector<int> &upper_bound_wikis,
                 const std::vector<std::string> &insert_urls, const std::vector<std::string> &insert_urls_sample,
-                const std::vector<std::string> &txn_urls, const std::vector<int> &upper_bound_urls,
-                const std::vector<std::string> &insert_tss, const std::vector<std::string> &insert_tss_sample,
-                const std::vector<std::string> &txn_tss, const std::vector<int> &upper_bound_tss) {
+                const std::vector<std::string> &txn_urls, const std::vector<int> &upper_bound_urls) {
   std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
   exec(expt_id, kEmail, is_point, false, 0, 0, insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
   expt_num++;
@@ -478,7 +462,7 @@ int main(int argc, char *argv[]) {
     int total_num_expt = 24;
     exec_group(expt_id, is_point, expt_num, total_num_expt, insert_emails, insert_emails_sample, txn_emails,
                upper_bound_emails, insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis, insert_urls,
-               insert_urls_sample, txn_urls, upper_bound_urls, insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
+               insert_urls_sample, txn_urls, upper_bound_urls);
 
     output_lookuplat_email_btree << "-"
                                  << "\n";
@@ -536,7 +520,7 @@ int main(int argc, char *argv[]) {
     int total_num_expt = 24;
     exec_group(expt_id, is_point, expt_num, total_num_expt, insert_emails, insert_emails_sample, txn_emails,
                upper_bound_emails, insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis, insert_urls,
-               insert_urls_sample, txn_urls, upper_bound_urls, insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
+               insert_urls_sample, txn_urls, upper_bound_urls);
 
     output_lookuplat_email_btree_range << "-"
                                        << "\n";
