@@ -81,28 +81,34 @@ TEST_F(SuRFUnitTest, lookupWordTest) {
 }
 
 TEST_F(SuRFUnitTest, lookupRangeWordTest) {
+  words_compressed_.clear();
+  encoder_ = ope::EncoderFactory::createEncoder(kEncoderType);
+  encoder_->build(words, kDictSizeLimit);
+  for (int i = 0; i < (int)words.size(); i++) {
+    words_compressed_.push_back(encodeString(words[i]));
+  }
   for (int t = 0; t < kNumSuffixType; t++) {
     for (int k = 0; k < kNumSuffixLen; k++) {
       newSuRFWords(kSuffixTypeList[t], kSuffixLenList[k]);
-      bool exist = surf_->lookupRange(std::string("\1"), true, words[0], true);
+      bool exist = surf_->lookupRange(encodeString(std::string("\1")), true, words_compressed_[0], true);
       ASSERT_TRUE(exist);
-      exist = surf_->lookupRange(std::string("\1"), true, words[0], false);
+      exist = surf_->lookupRange(encodeString(std::string("\1")), true, words_compressed_[0], false);
       ASSERT_TRUE(exist);
 
       for (unsigned i = 0; i < words.size() - 1; i++) {
-        exist = surf_->lookupRange(words[i], true, words[i + 1], true);
+        exist = surf_->lookupRange(words_compressed_[i], true, words_compressed_[i + 1], true);
         ASSERT_TRUE(exist);
-        exist = surf_->lookupRange(words[i], true, words[i + 1], false);
+        exist = surf_->lookupRange(words_compressed_[i], true, words_compressed_[i + 1], false);
         ASSERT_TRUE(exist);
-        exist = surf_->lookupRange(words[i], false, words[i + 1], true);
+        exist = surf_->lookupRange(words_compressed_[i], false, words_compressed_[i + 1], true);
         ASSERT_TRUE(exist);
-        exist = surf_->lookupRange(words[i], false, words[i + 1], false);
+        exist = surf_->lookupRange(words_compressed_[i], false, words_compressed_[i + 1], false);
         ASSERT_TRUE(exist);
       }
 
-      exist = surf_->lookupRange(words[words.size() - 1], true, std::string("zzzzzzzz"), false);
+      exist = surf_->lookupRange(words_compressed_[words_compressed_.size() - 1], true, encodeString(std::string("zzzzzzzz")), false);
       ASSERT_TRUE(exist);
-      exist = surf_->lookupRange(words[words.size() - 1], false, std::string("zzzzzzzz"), false);
+      exist = surf_->lookupRange(words_compressed_[words_compressed_.size() - 1], false, encodeString(std::string("zzzzzzzz")), false);
       ASSERT_TRUE(exist);
     }
   }
