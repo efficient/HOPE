@@ -14,6 +14,7 @@ namespace ope {
 
 class DoubleCharEncoder : public Encoder {
  public:
+  static const int kCgType = 0;
   DoubleCharEncoder() = default;
   ~DoubleCharEncoder() = default;
 
@@ -55,7 +56,7 @@ bool DoubleCharEncoder::build(const std::vector<std::string> &key_list, const in
 #endif
 
   std::vector<SymbolCode> symbol_code_list;
-  CodeGenerator *code_generator = CodeGeneratorFactory::createCodeGenerator(1);
+  CodeGenerator *code_generator = CodeGeneratorFactory::createCodeGenerator(kCgType);
   code_generator->genCodes(symbol_freq_list, &symbol_code_list);
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
   std::cout << "Code Assign(Hu-Tucker) time = " << getNow() - cur_time << std::endl;

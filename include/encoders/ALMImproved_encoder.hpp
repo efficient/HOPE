@@ -12,6 +12,7 @@
 namespace ope {
 class ALMImprovedEncoder : public Encoder {
  public:
+  static const int kCgType = 0;
   ALMImprovedEncoder(int _W = 10000) { W = _W; };
 
   ~ALMImprovedEncoder() { delete dict_; };
@@ -59,9 +60,7 @@ bool ALMImprovedEncoder::build(const std::vector<std::string> &key_list, const i
   symbol_select_time = new_time - curtime;
   curtime = new_time;
 #endif
-  CodeGenerator *code_generator = CodeGeneratorFactory::createCodeGenerator(1);
-  //        CodeGenerator *code_generator =
-  //        CodeGeneratorFactory::createCodeGenerator(0);
+  CodeGenerator *code_generator = CodeGeneratorFactory::createCodeGenerator(kCgType);
   code_generator->genCodes(symbol_freq_list, &symbol_code_list);
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
   new_time = getNow();
