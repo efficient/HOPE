@@ -59,14 +59,10 @@ bool HuTuckerCG::genCodes(const std::vector<SymbolFreq> &symbol_freq_list, std::
   genOptimalCodeLen();
   buildBinaryTree();
 
-  // int max_code_len = 0;
   for (int i = 0; i < (int)symbol_list_.size(); i++) {
     Code code = lookup(i);
-    // if (code.len > max_code_len)
-    // max_code_len = code.len;
     symbol_code_list->push_back(std::make_pair(symbol_list_[i], code));
   }
-  // std::cout << "max code len = " << max_code_len << std::endl;
   return true;
 }
 
