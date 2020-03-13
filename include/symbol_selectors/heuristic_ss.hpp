@@ -37,7 +37,7 @@ private:
 
   void fillGap(std::string start_exclude, std::string end_exclude);
 
-  void getIntervalFreqEntropy(std::vector<SymbolFreq> *symbol_freq_list, const std::vector<std::string> &key_list);
+  void getIntervalFreqByEntropy(std::vector<SymbolFreq> *symbol_freq_list, const std::vector<std::string> &key_list);
 
   std::string commonPrefix(const std::string &str1, const std::string &str2);
 
@@ -81,7 +81,7 @@ bool HeuristicSS::selectSymbols(const std::vector<std::string> &key_list, const 
     // sort intervals
     std::sort(intervals_.begin(), intervals_.end(),
               [](std::pair<std::string, std::string> &x, std::pair<std::string, std::string> y) {
-                return strCompare(x.first, y.first) < 0;
+                return x.first.compare(y.first) < 0;
               });
     // Merge adjacent intervals with same prefix
     mergeAdjacentComPrefixIntervals();
@@ -99,7 +99,7 @@ bool HeuristicSS::selectSymbols(const std::vector<std::string> &key_list, const 
     std::cout << "Best approoach W = " << W << ", target = " << num_limit << ", current size = " << intervals_.size()
               << std::endl;
   // simulate encode process to get Frequency
-  getIntervalFreqEntropy(symbol_freq_list, key_list);
+  getIntervalFreqByEntropy(symbol_freq_list, key_list);
   return true;
 }
 
@@ -111,7 +111,7 @@ int HeuristicSS::BinarySearch(const std::string &str, unsigned int pos, int &pre
   while (l <= r) {
     int mid = (l + r) / 2;
     std::string mid_left_bound = intervals_[mid].first;
-    int cmp = strCompare(mid_left_bound, compare_str);
+    int cmp = mid_left_bound.compare(compare_str);
     if (cmp < 0) {
       l = mid + 1;
     } else if (cmp > 0) {
@@ -138,7 +138,7 @@ void HeuristicSS::encode(const std::string &str, std::vector<int> &cnt) {
   }
 }
 
-void HeuristicSS::getIntervalFreqEntropy(std::vector<SymbolFreq> *symbol_freq_list,
+void HeuristicSS::getIntervalFreqByEntropy(std::vector<SymbolFreq> *symbol_freq_list,
                                          const std::vector<std::string> &key_list) {
   std::vector<int> cnt(intervals_.size(), 0);
   for (const auto &iter : key_list) {
@@ -172,7 +172,7 @@ void HeuristicSS::getIntervalFreqEntropy(std::vector<SymbolFreq> *symbol_freq_li
 }
 
 void HeuristicSS::fillGap(std::string start_include, std::string end_exclude) {
-  if (strCompare(start_include, end_exclude) >= 0) return;
+  if (start_include.compare(end_exclude) >= 0) return;
   std::string com_prefix = commonPrefix(start_include, getPrevString(end_exclude));
   if (!com_prefix.empty()) {
     intervals_.emplace_back(std::make_pair(start_include, end_exclude));
@@ -187,9 +187,9 @@ void HeuristicSS::fillGap(std::string start_include, std::string end_exclude) {
       cur_end = std::string(MAX_KEY_LEN, char(255));
     else
       cur_end = std::string(1, start_chr + i + 1);
-    if (i == 0 && strCompare(cur_start, start_include) < 0) cur_start = start_include;
-    if (i == end_chr - start_chr && strCompare(cur_end, end_exclude) > 0) cur_end = end_exclude;
-    if (strCompare(cur_start, cur_end) < 0) {
+    if (i == 0 && cur_start.compare(start_include) < 0) cur_start = start_include;
+    if (i == end_chr - start_chr && cur_end.compare(end_exclude) > 0) cur_end = end_exclude;
+    if (cur_start.compare(cur_end) < 0) {
       intervals_.emplace_back(std::make_pair(cur_start, cur_end));
     }
   }
@@ -197,7 +197,7 @@ void HeuristicSS::fillGap(std::string start_include, std::string end_exclude) {
 
 void HeuristicSS::getEqualInterval(std::vector<SymbolFreq> &blend_freq_table) {
   std::sort(blend_freq_table.begin(), blend_freq_table.end(),
-            [](const SymbolFreq &x, const SymbolFreq &y) { return strCompare(x.first, y.first) < 0; });
+            [](const SymbolFreq &x, const SymbolFreq &y) { return x.first.compare(y.first) < 0; });
   auto next_start = blend_freq_table.begin();
   bool is_first_peak = (next_start->second * (int)(next_start->first.size()) > W);
   for (auto iter = blend_freq_table.begin(); iter != blend_freq_table.end(); iter++) {
@@ -218,7 +218,6 @@ void HeuristicSS::getEqualInterval(std::vector<SymbolFreq> &blend_freq_table) {
   fillGap(end_string, std::string(MAX_KEY_LEN, char(255)));
 }
 
-// Correct interval generation version
 void HeuristicSS::mergeIntervals(std::vector<SymbolFreq>::iterator start_exclude_iter,
                                  std::vector<SymbolFreq>::iterator end_exclude_iter) {
   if (end_exclude_iter - start_exclude_iter <= 0) return;
@@ -293,22 +292,22 @@ std::string HeuristicSS::getNextString(const std::string &str) {
 }
 
 void HeuristicSS::checkIntervals(std::string &start_str, std::string &end_str) {
-  if (strCompare(start_str, end_str) >= 0) assert(false);
+  if (start_str.compare(end_str) >= 0) assert(false);
   std::sort(intervals_.begin(), intervals_.end(),
             [](const std::pair<std::string, std::string> &x, const std::pair<std::string, std::string> &y) {
-              return strCompare(x.first, y.first) < 0;
+              return x.first.compare(y.first) < 0;
             });
 
   std::string end = std::string();
   int64_t cnt = 0;
   for (auto iter = intervals_.begin(); iter != intervals_.end(); iter++) {
-    if (strCompare(iter->first, start_str) < 0) continue;
-    if (strCompare(iter->first, end_str) > 0) {
+    if (iter->first.compare(start_str) < 0) continue;
+    if (iter->first.compare(end_str) > 0) {
       std::cout << "Check " << cnt << " intervals" << std::endl;
       return;
     }
     cnt++;
-    if (strCompare(iter->first, iter->second) >= 0) {
+    if (iter->first.compare(iter->second) >= 0) {
       std::cout << "[Error] Start boundary : ";
       printString(iter->first);
       std::cout << std::endl << " End boundary : ";
@@ -316,7 +315,7 @@ void HeuristicSS::checkIntervals(std::string &start_str, std::string &end_str) {
       std::cout << std::endl;
       assert(false);
     }
-    if ((int)end.size() > 0 && strCompare(end, iter->first) != 0) {
+    if ((int)end.size() > 0 && end.compare(iter->first) != 0) {
       std::cout << "[Error] intervals not connected," << std::endl << " Current interval : ";
       printString(iter->first);
       std::cout << " ";
