@@ -24,7 +24,7 @@ script:
 - mkdir hot/third-party/boost_install
 - cd hot/third-party/boost_1_66_0
 - ./bootstrap.sh --prefix=./boost_install > out
-- ./b2 install > out
+- ./b2 install
 - cd $TRAVIS_BUILD_DIR
 ## Add boost to include path
 - export LD_LIBRARY_PATH=${TRAVIS_BUILD_DIR}/hot/third-party/boost_install/lib:$LD_LIBRARY_PATH
