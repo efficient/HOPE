@@ -18,6 +18,17 @@ install:
 
 script:
 - cd $TRAVIS_BUILD_DIR
+# Install boost 1.66.0 for hot
+- wget --directory-prefix=hot/third-party/ https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.gz
+- tar -xvf hot/third-party/boost_1_66_0.tar.gz -C hot/third-party/ > out
+- mkdir hot/third-party/boost_install
+- cd hot/third-party/boost_1_66_0
+- ./bootstrap.sh --prefix=./boost_install > out
+- ./b2 install
+- cd $TRAVIS_BUILD_DIR
+## Add boost to include path
+- export LD_LIBRARY_PATH=${TRAVIS_BUILD_DIR}/hot/third-party/boost_install/lib:$LD_LIBRARY_PATH
+- git submodule update --init --recursive
 - mkdir build
 - cd build
 - cmake -DCMAKE_BUILD_TYPE=Debug -DCOVERALLS=ON ..

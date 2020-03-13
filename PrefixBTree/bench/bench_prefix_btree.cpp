@@ -5,8 +5,7 @@
 #include <iostream>
 #include <set>
 
-#include "BTreeOLC.h"
-#include "CPSBTreeOLC_Op.h"
+#include "PrefixBtree.h"
 #include "encoder_factory.hpp"
 
 //#define NOT_USE_ENCODE_PAIR 1

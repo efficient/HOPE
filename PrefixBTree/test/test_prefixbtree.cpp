@@ -5,22 +5,21 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <random>
 
-#include "CPSBTreeOLC_Op.h"
+#include "PrefixBtree.h"
 
 #include "encoder_factory.hpp"
 
 namespace prefixbtreetest {
 
 static const std::string kWordFilePath = "../../../datasets/words.txt";
-static const std::string kEmailFilePath = "../../../datasets/emails.txt";
-// static const int kWordTestSize = 234369;
 static const int kWordTestSize = 234369;
-static const int kEmailTestSize = 250000;
+static const int kInt64TestSize = 250000;
 static const int kEncoderType = 1;
 static const int kDictSizeLimit = 10000;
 static std::vector<std::string> words;
-static std::vector<std::string> emails;
+static std::vector<std::string> integers;
 
 class PrefixBtreeUnitTest : public ::testing::Test {
  public:
@@ -33,7 +32,7 @@ class PrefixBtreeUnitTest : public ::testing::Test {
   ope::Encoder *encoder_;
   cpsbtreeolc::BTree<int64_t> *bt_;
   std::vector<std::string> words_compressed_;
-  std::vector<std::string> emails_compressed_;
+  std::vector<std::string> integers_compressed_;
   uint8_t buffer_[256];
 };
 
@@ -58,25 +57,6 @@ TEST_F(PrefixBtreeUnitTest, lookupWordTest) {
     bool find = bt_->lookup(key, re);
     EXPECT_TRUE(find);
     EXPECT_EQ(reinterpret_cast<int64_t>(&(words[i])), re);
-  }
-  delete bt_;
-}
-
-TEST_F(PrefixBtreeUnitTest, lookupEmailTest) {
-  bt_ = new cpsbtreeolc::BTree<int64_t>();
-  for (int i = 0; i < (int)emails.size(); i++) {
-    cpsbtreeolc::Key key;
-    key.setKeyStr(emails[i].c_str(), emails[i].length());
-    bt_->insert(key, reinterpret_cast<int64_t>(&emails[i]));
-  }
-
-  for (int i = 0; i < (int)emails.size(); i++) {
-    cpsbtreeolc::Key key;
-    key.setKeyStr(emails[i].c_str(), emails[i].length());
-    int64_t re;
-    bool find = bt_->lookup(key, re);
-    EXPECT_TRUE(find);
-    EXPECT_EQ(reinterpret_cast<int64_t>(&(emails[i])), re);
   }
   delete bt_;
 }
@@ -107,79 +87,137 @@ TEST_F(PrefixBtreeUnitTest, opcLookupWordTest) {
   delete encoder_;
 }
 
-TEST_F(PrefixBtreeUnitTest, rangeScanTest) {
+TEST_F(PrefixBtreeUnitTest, rangeScanWordTest) {
   bt_ = new cpsbtreeolc::BTree<int64_t>();
-  std::vector<std::string> sorted_emails;
-  for (int i = 0; i < (int)emails.size(); i++) {
-    sorted_emails.push_back(emails[i]);
+  std::vector<std::string> sorted_words;
+  for (int i = 0; i < (int)words.size(); i++) {
+    sorted_words.push_back(words[i]);
   }
-  std::sort(sorted_emails.begin(), sorted_emails.end());
+  std::sort(sorted_words.begin(), sorted_words.end());
   std::hash<std::string> str_hash;
   // key: hash(string), value: index
   std::unordered_map<size_t, int> index_map;
-  for (int i = 0; i < (int)sorted_emails.size(); i++) {
-    index_map[str_hash(sorted_emails[i])] = i;
+  for (int i = 0; i < (int)sorted_words.size(); i++) {
+    index_map[str_hash(sorted_words[i])] = i;
   }
 
-  for (int i = 0; i < (int)emails.size(); i++) {
+  for (int i = 0; i < (int)words.size(); i++) {
     cpsbtreeolc::Key key;
-    key.setKeyStr(emails[i].c_str(), emails[i].length());
-    bt_->insert(key, reinterpret_cast<int64_t>(&emails[i]));
+    key.setKeyStr(words[i].c_str(), words[i].length());
+    bt_->insert(key, reinterpret_cast<int64_t>(&words[i]));
   }
 
   int scanlen = 100;
   int64_t re[200];
-  for (int i = 0; i + scanlen < (int)emails.size(); i++) {
+  for (int i = 0; i + scanlen < (int)words.size(); i++) {
     cpsbtreeolc::Key key;
-    key.setKeyStr(emails[i].c_str(), emails[i].length());
+    key.setKeyStr(words[i].c_str(), words[i].length());
     int cnt = bt_->rangeScan(key, scanlen, re);
     int start_idx = index_map[str_hash(*reinterpret_cast<std::string *>(re[0]))];
     for (int j = 0; j < cnt; j++) {
-      EXPECT_EQ(sorted_emails[start_idx + j], *reinterpret_cast<std::string *>(re[j]));
+      EXPECT_EQ(sorted_words[start_idx + j], *reinterpret_cast<std::string *>(re[j]));
     }
   }
   delete bt_;
 }
 
-TEST_F(PrefixBtreeUnitTest, rangeScanEncodeTest) {
+TEST_F(PrefixBtreeUnitTest, rangeScanEncodeWordTest) {
   encoder_ = ope::EncoderFactory::createEncoder(kEncoderType);
   encoder_->build(words, kDictSizeLimit);
-  for (int i = 0; i < (int)emails.size(); i++) {
-    emails_compressed_.push_back(encodeString(emails[i]));
+  for (int i = 0; i < (int)words.size(); i++) {
+    words_compressed_.push_back(encodeString(words[i]));
   }
 
   bt_ = new cpsbtreeolc::BTree<int64_t>();
-  std::vector<std::string> sorted_emails;
-  for (int i = 0; i < (int)emails_compressed_.size(); i++) {
-    sorted_emails.push_back(emails_compressed_[i]);
+  std::vector<std::string> sorted_words;
+  for (int i = 0; i < (int)words_compressed_.size(); i++) {
+    sorted_words.push_back(words_compressed_[i]);
   }
-  std::sort(sorted_emails.begin(), sorted_emails.end());
+  std::sort(sorted_words.begin(), sorted_words.end());
   std::hash<std::string> str_hash;
   // key: hash(string), value: index
   std::unordered_map<size_t, int> index_map;
-  for (int i = 0; i < (int)sorted_emails.size(); i++) {
-    index_map[str_hash(sorted_emails[i])] = i;
+  for (int i = 0; i < (int)sorted_words.size(); i++) {
+    index_map[str_hash(sorted_words[i])] = i;
   }
 
-  for (int i = 0; i < (int)emails_compressed_.size(); i++) {
+  for (int i = 0; i < (int)words_compressed_.size(); i++) {
     cpsbtreeolc::Key key;
-    key.setKeyStr(emails_compressed_[i].c_str(), emails_compressed_[i].length());
-    bt_->insert(key, reinterpret_cast<int64_t>(&emails_compressed_[i]));
+    key.setKeyStr(words_compressed_[i].c_str(), words_compressed_[i].length());
+    bt_->insert(key, reinterpret_cast<int64_t>(&words_compressed_[i]));
   }
 
   int scanlen = 100;
   int64_t re[200];
-  for (int i = 0; i + scanlen < (int)emails_compressed_.size(); i++) {
+  for (int i = 0; i + scanlen < (int)words_compressed_.size(); i++) {
     cpsbtreeolc::Key key;
-    key.setKeyStr(emails_compressed_[i].c_str(), emails_compressed_[i].length());
+    key.setKeyStr(words_compressed_[i].c_str(), words_compressed_[i].length());
     int cnt = bt_->rangeScan(key, scanlen, re);
     int start_idx = index_map[str_hash(*reinterpret_cast<std::string *>(re[0]))];
     for (int j = 0; j < cnt; j++) {
-      EXPECT_EQ(sorted_emails[start_idx + j], *reinterpret_cast<std::string *>(re[j]));
+      EXPECT_EQ(sorted_words[start_idx + j], *reinterpret_cast<std::string *>(re[j]));
     }
   }
   delete bt_;
   delete encoder_;
+}
+
+TEST_F(PrefixBtreeUnitTest, lookIntTest) {
+  bt_ = new cpsbtreeolc::BTree<int64_t>();
+  for (int i = 0; i < (int)integers.size(); i++) {
+    cpsbtreeolc::Key key;
+    key.setKeyStr(integers[i].c_str(), integers[i].length());
+    bt_->insert(key, reinterpret_cast<int64_t>(&integers[i]));
+  }
+
+  for (int i = 0; i < (int)integers.size(); i++) {
+    cpsbtreeolc::Key key;
+    key.setKeyStr(integers[i].c_str(), integers[i].length());
+    int64_t re;
+    bool find = bt_->lookup(key, re);
+    EXPECT_TRUE(find);
+    EXPECT_EQ(reinterpret_cast<int64_t>(&(integers[i])), re);
+  }
+  delete bt_;
+}
+
+TEST_F(PrefixBtreeUnitTest, rangeScanIntTest) {
+  bt_ = new cpsbtreeolc::BTree<int64_t>();
+  std::vector<std::string> sorted_integers;
+  for (int i = 0; i < (int)integers.size(); i++) {
+    sorted_integers.push_back(integers[i]);
+  }
+  std::sort(sorted_integers.begin(), sorted_integers.end());
+  std::hash<std::string> str_hash;
+  // key: hash(string), value: index
+  std::unordered_map<size_t, int> index_map;
+  for (int i = 0; i < (int)sorted_integers.size(); i++) {
+    index_map[str_hash(sorted_integers[i])] = i;
+  }
+
+  for (int i = 0; i < (int)integers.size(); i++) {
+    cpsbtreeolc::Key key;
+    key.setKeyStr(integers[i].c_str(), integers[i].length());
+    bt_->insert(key, reinterpret_cast<int64_t>(&integers[i]));
+  }
+
+  int scanlen = 100;
+  int64_t re[200];
+  for (int i = 0; i + scanlen < (int)integers.size(); i++) {
+    cpsbtreeolc::Key key;
+    key.setKeyStr(integers[i].c_str(), integers[i].length());
+    int cnt = bt_->rangeScan(key, scanlen, re);
+    int start_idx = index_map[str_hash(*reinterpret_cast<std::string *>(re[0]))];
+    for (int j = 0; j < cnt; j++) {
+      EXPECT_EQ(sorted_integers[start_idx + j], *reinterpret_cast<std::string *>(re[j]));
+    }
+  }
+  delete bt_;
+}
+
+std::string Uint64ToString(uint64_t key) {
+  uint64_t endian_swapped_key = __builtin_bswap64(key);
+  return std::string(reinterpret_cast<const char *>(&endian_swapped_key), 8);
 }
 
 void loadWordList() {
@@ -191,19 +229,17 @@ void loadWordList() {
     words.push_back(key);
     count++;
   }
-  std::cout << words[count - 1] << std::endl;
 }
 
-void loadEmailList() {
-  std::ifstream infile(kEmailFilePath);
-  std::string key;
-  int count = 0;
-  while (infile.good() && count < kEmailTestSize) {
-    infile >> key;
-    emails.push_back(key);
-    count++;
+void GenerateInt64() {
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> dis(1, 2000000);
+  uint64_t data = 1;
+  for (int i = 0; i < kInt64TestSize; i++) {
+    data += dis(gen);
+    integers.push_back(Uint64ToString(data));
   }
-  std::random_shuffle(emails.begin(), emails.end());
 }
 
 }  // namespace prefixbtreetest
@@ -211,6 +247,6 @@ void loadEmailList() {
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   prefixbtreetest::loadWordList();
-  prefixbtreetest::loadEmailList();
+  prefixbtreetest::GenerateInt64();
   return RUN_ALL_TESTS();
 }

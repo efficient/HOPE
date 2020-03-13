@@ -15,17 +15,20 @@ class FixedLenDictCG : public CodeGenerator {
 
  private:
   int8_t code_len_;
+  std::vector<SymbolFreq> symbol_freq_list_;
 };
 
 bool FixedLenDictCG::genCodes(const std::vector<SymbolFreq> &symbol_freq_list,
                               std::vector<SymbolCode> *symbol_code_list) {
+  std::cout << "use fix length encoder!!!" << std::endl;
+  symbol_freq_list_ = symbol_freq_list;
   int num_intervals = (int)symbol_freq_list.size();
   code_len_ = 0;
   while (num_intervals > 0) {
     code_len_++;
     num_intervals >>= 1;
   }
-  // int64_t counter = 0;
+
   int32_t counter = 0;
   for (int i = 0; i < (int)symbol_freq_list.size(); i++) {
     Code code = {counter, code_len_};
@@ -38,8 +41,14 @@ bool FixedLenDictCG::genCodes(const std::vector<SymbolFreq> &symbol_freq_list,
 int FixedLenDictCG::getCodeLen() const { return code_len_; }
 
 double FixedLenDictCG::getCompressionRate() const {
-  // TODO
-  return 0;
+  double len = 0, enc_len = 0;
+  for (int i = 0; i < (int)symbol_freq_list_.size(); i++) {
+    len += symbol_freq_list_[i].first.length() * symbol_freq_list_[i].second * 8.0;
+    enc_len += symbol_freq_list_[i].second * code_len_;
+  }
+
+  double cpr = len / enc_len;
+  return cpr;
 }
 
 }  // namespace ope

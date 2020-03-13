@@ -7,7 +7,6 @@
 #include <random>
 #include <string>
 #include <vector>
-#include <random>
 
 #include "ALMImproved_encoder.hpp"
 #include "gtest/gtest.h"

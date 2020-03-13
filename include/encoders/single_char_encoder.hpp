@@ -13,6 +13,7 @@ namespace ope {
 
 class SingleCharEncoder : public Encoder {
  public:
+  static const int kCgType = 0;
   SingleCharEncoder(){};
   ~SingleCharEncoder() {
     if (decode_dict_) delete decode_dict_;
@@ -54,9 +55,8 @@ bool SingleCharEncoder::build(const std::vector<std::string> &key_list, const in
   std::cout << "Symbol Select time = " << getNow() - cur_time << std::endl;
   cur_time = getNow();
 #endif
-
   std::vector<SymbolCode> symbol_code_list;
-  CodeGenerator *code_generator = CodeGeneratorFactory::createCodeGenerator(1);
+  CodeGenerator *code_generator = CodeGeneratorFactory::createCodeGenerator(kCgType);
   code_generator->genCodes(symbol_freq_list, &symbol_code_list);
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
   std::cout << "Code Assign(Hu-Tucker) time = " << getNow() - cur_time << std::endl;
