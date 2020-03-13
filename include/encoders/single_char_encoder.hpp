@@ -55,7 +55,6 @@ bool SingleCharEncoder::build(const std::vector<std::string> &key_list, const in
   std::cout << "Symbol Select time = " << getNow() - cur_time << std::endl;
   cur_time = getNow();
 #endif
-
   std::vector<SymbolCode> symbol_code_list;
   CodeGenerator *code_generator = CodeGeneratorFactory::createCodeGenerator(kCgType);
   code_generator->genCodes(symbol_freq_list, &symbol_code_list);

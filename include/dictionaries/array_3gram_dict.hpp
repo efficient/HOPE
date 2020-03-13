@@ -66,9 +66,7 @@ Code Array3GramDict::lookup(const char *symbol, const int symbol_len, int &prefi
 
 int Array3GramDict::numEntries() const { return dict_size_; }
 
-int64_t Array3GramDict::memoryUse() const {
-  return (sizeof(Interval3Gram) * dict_size_);
-}
+int64_t Array3GramDict::memoryUse() const { return (sizeof(Interval3Gram) * dict_size_); }
 
 int Array3GramDict::binarySearch(const char *symbol, const int symbol_len) const {
   int l = 0;

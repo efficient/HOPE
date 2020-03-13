@@ -20,6 +20,7 @@ class FixedLenDictCG : public CodeGenerator {
 
 bool FixedLenDictCG::genCodes(const std::vector<SymbolFreq> &symbol_freq_list,
                               std::vector<SymbolCode> *symbol_code_list) {
+  std::cout << "use fix length encoder!!!" << std::endl;
   symbol_freq_list_ = symbol_freq_list;
   int num_intervals = (int)symbol_freq_list.size();
   code_len_ = 0;

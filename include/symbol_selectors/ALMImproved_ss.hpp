@@ -40,7 +40,7 @@ class ALMImprovedSS : public SymbolSelector {
   void mergeAdjacentComPrefixIntervals();
 
   void getIntervalsInRange(std::vector<SymbolFreq>::iterator start_exclude_iter,
-                      std::vector<SymbolFreq>::iterator end_exclude_iter);
+                           std::vector<SymbolFreq>::iterator end_exclude_iter);
 
   void fillGap(std::string start_exclude, std::string end_exclude);
 
@@ -222,7 +222,7 @@ void ALMImprovedSS::getEqualInterval(std::vector<SymbolFreq> &blend_freq_table) 
 }
 
 void ALMImprovedSS::getIntervalsInRange(std::vector<SymbolFreq>::iterator start_exclude_iter,
-                                   std::vector<SymbolFreq>::iterator end_exclude_iter) {
+                                        std::vector<SymbolFreq>::iterator end_exclude_iter) {
   if (end_exclude_iter - start_exclude_iter <= 0) return;
   bool has_prefix = false;
   std::string prefix = std::string();

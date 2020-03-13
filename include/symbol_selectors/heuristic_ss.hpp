@@ -25,9 +25,8 @@ class HeuristicSS : public SymbolSelector {
   void setW(int64_t new_w);
 
   void checkIntervals(std::string &start_str, std::string &end_str);
- 
-private:
 
+ private:
   void getEqualInterval(std::vector<SymbolFreq> &blend_freq_table);
 
   void mergeAdjacentComPrefixIntervals();
@@ -139,7 +138,7 @@ void HeuristicSS::encode(const std::string &str, std::vector<int> &cnt) {
 }
 
 void HeuristicSS::getIntervalFreqByEntropy(std::vector<SymbolFreq> *symbol_freq_list,
-                                         const std::vector<std::string> &key_list) {
+                                           const std::vector<std::string> &key_list) {
   std::vector<int> cnt(intervals_.size(), 0);
   for (const auto &iter : key_list) {
     encode(iter, cnt);

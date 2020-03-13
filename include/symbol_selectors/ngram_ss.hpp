@@ -83,7 +83,7 @@ void NGramSS::pickMostFreqSymbols(const int64_t num_limit, std::vector<std::stri
     most_freq_symbols->push_back(symbol_freqs[i].first);
   }
   std::sort(most_freq_symbols->begin(), most_freq_symbols->end());
-  }
+}
 
 void NGramSS::fillInGap(const std::vector<std::string> &most_freq_symbols) {
   fillInSingleChar(0, (int)most_freq_symbols[0][0]);
@@ -135,7 +135,7 @@ void NGramSS::fillInGap(const std::vector<std::string> &most_freq_symbols) {
   interval_prefixes_.push_back(std::string(1, last_str[0]));
 
   if ((int)(uint8_t)last_str[0] < 255) fillInSingleChar((int)(uint8_t)(last_str[0] + 1), 255);
-  }
+}
 
 void NGramSS::fillInSingleChar(const int first, const int last) {
   for (int c = first; c <= last; c++) {
@@ -168,7 +168,7 @@ void NGramSS::countIntervalFreq(const std::vector<std::string> &key_list) {
       pos += (int)interval_prefixes_[idx].length();
     }
   }
-  }
+}
 
 int NGramSS::binarySearch(const std::string &key) {
   int l = 0;
