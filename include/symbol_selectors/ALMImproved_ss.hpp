@@ -84,7 +84,7 @@ bool ALMImprovedSS::selectSymbols(const std::vector<std::string> &key_list, cons
     // sort intervals
     std::sort(intervals_.begin(), intervals_.end(),
               [](std::pair<std::string, std::string> &x, std::pair<std::string, std::string> y) {
-                return strCompare(x.first, y.first) < 0;
+                return x.first.compare(y.first) < 0;
               });
     // Merge adjacent intervals with same prefix
     mergeAdjacentComPrefixIntervals();
@@ -292,22 +292,22 @@ std::string ALMImprovedSS::getNextString(const std::string &str) {
 }
 
 void ALMImprovedSS::checkIntervals(std::string &start_str, std::string &end_str) {
-  if (strCompare(start_str, end_str) >= 0) assert(false);
+  if (start_str.compare(end_str) >= 0) assert(false);
   std::sort(intervals_.begin(), intervals_.end(),
             [](const std::pair<std::string, std::string> &x, const std::pair<std::string, std::string> &y) {
-              return strCompare(x.first, y.first) < 0;
+              return x.first.compare(y.first) < 0;
             });
 
   std::string end = std::string();
   int64_t cnt = 0;
   for (auto iter = intervals_.begin(); iter != intervals_.end(); iter++) {
-    if (strCompare(iter->first, start_str) < 0) continue;
-    if (strCompare(iter->first, end_str) > 0) {
+    if (iter->first.compare(start_str) < 0) continue;
+    if (iter->first.compare(end_str) > 0) {
       std::cout << "Check " << cnt << " intervals" << std::endl;
       return;
     }
     cnt++;
-    if (strCompare(iter->first, iter->second) >= 0) {
+    if (iter->first.compare(iter->second) >= 0) {
       std::cout << "[Error] Start boundary : ";
       printString(iter->first);
       std::cout << std::endl << " End boundary : ";
@@ -315,7 +315,7 @@ void ALMImprovedSS::checkIntervals(std::string &start_str, std::string &end_str)
       std::cout << std::endl;
       assert(false);
     }
-    if ((int)end.size() > 0 && strCompare(end, iter->first) != 0) {
+    if ((int)end.size() > 0 && end.compare(iter->first) != 0) {
       std::cout << "[Error] intervals not connected," << std::endl << " Current interval : ";
       printString(iter->first);
       std::cout << " ";
