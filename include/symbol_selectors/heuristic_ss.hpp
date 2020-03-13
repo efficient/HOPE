@@ -184,7 +184,7 @@ void HeuristicSS::fillGap(std::string start_include, std::string end_exclude) {
     std::string cur_start = std::string(1, start_chr + i);
     std::string cur_end;
     if (int(start_chr) + i >= 255)
-      cur_end = std::string(MAX_KEY_LEN, char(255));
+      cur_end = std::string(MAX_STR_LEN, char(255));
     else
       cur_end = std::string(1, start_chr + i + 1);
     if (i == 0 && cur_start.compare(start_include) < 0) cur_start = start_include;
@@ -215,7 +215,7 @@ void HeuristicSS::getEqualInterval(std::vector<SymbolFreq> &blend_freq_table) {
   fillGap(std::string(1, char(0)), start_string);
   std::string end_string =
       next_start == blend_freq_table_end ? getNextString(blend_freq_table_end->first) : blend_freq_table_end->first;
-  fillGap(end_string, std::string(MAX_KEY_LEN, char(255)));
+  fillGap(end_string, std::string(MAX_STR_LEN, char(255)));
 }
 
 void HeuristicSS::mergeIntervals(std::vector<SymbolFreq>::iterator start_exclude_iter,
@@ -288,7 +288,7 @@ std::string HeuristicSS::getNextString(const std::string &str) {
       return str.substr(0, i) + std::string(1, next_chr);
     }
   }
-  return std::string(MAX_KEY_LEN, 255);
+  return std::string(MAX_STR_LEN, 255);
 }
 
 void HeuristicSS::checkIntervals(std::string &start_str, std::string &end_str) {

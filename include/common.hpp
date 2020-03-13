@@ -73,30 +73,6 @@ void printString(std::string str) {
   for (int i = 0; i < (int)str.length(); i++) std::cout << std::hex << (int)str[i] << " ";
 }
 
-int strCompare(std::string s1, std::string s2) {
-  int len1 = (int)s1.length();
-  int len2 = (int)s2.length();
-  int len = len1 < len2 ? len1 : len2;
-  for (int i = 0; i < len; i++) {
-    uint8_t c1 = static_cast<uint8_t>(s1[i]);
-    uint8_t c2 = static_cast<uint8_t>(s2[i]);
-    if (c1 < c2) return -1;
-    if (c1 > c2) return 1;
-  }
-  int check = s1.compare(s2) > 0 ? 1 : (s1.compare(s2) == 0 ? 0 : -1);
-  int re = 0;
-  if (len1 < len2)
-    re = -1;
-  else if (len1 == len2)
-    re = 0;
-  else
-    re = 1;
-  if (check != re) {
-    std::cout << "[Different string compare]" << check << " " << re << std::endl;
-  }
-  return re;
-}
-
 }  // namespace ope
 
 #endif  // COMMON_H
