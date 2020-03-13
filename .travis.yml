@@ -29,7 +29,6 @@ script:
 ## Add boost to include path
 - export LD_LIBRARY_PATH=${TRAVIS_BUILD_DIR}/hot/third-party/boost_install/lib:$LD_LIBRARY_PATH
 - git submodule update --init --recursive
-
 - mkdir build
 - cd build
 - cmake -DCMAKE_BUILD_TYPE=Debug -DCOVERALLS=ON ..
