@@ -91,7 +91,7 @@ TEST_F(SingleCharEncoderTest, wordBatchTest) {
   for (int i = 0; i < static_cast<int>(enc_keys.size()) - 1; i += 2) {
     std::string str1 = enc_keys[i];
     std::string str2 = enc_keys[i + 1];
-    int cmp = strCompare(str1, str2);
+    int cmp = str1.compare(str2);
     EXPECT_LT(cmp, 0);
   }
 }
