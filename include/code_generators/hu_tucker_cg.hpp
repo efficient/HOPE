@@ -55,7 +55,6 @@ HuTuckerCG::~HuTuckerCG() { destroyBinaryTree(); }
 
 bool HuTuckerCG::genCodes(const std::vector<SymbolFreq> &symbol_freq_list, std::vector<SymbolCode> *symbol_code_list) {
   clear();
-  std::cout << "Hutucker!!!" << std::endl;
   loadInput(symbol_freq_list);
   genOptimalCodeLen();
   buildBinaryTree();

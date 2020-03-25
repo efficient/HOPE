@@ -24,7 +24,8 @@ class HeuristicSS : public SymbolSelector {
 
   void setW(int64_t new_w);
 
-  void checkIntervals(std::string &start_str, std::string &end_str);
+//  used for debugging
+//  void checkIntervals(std::string &start_str, std::string &end_str);
 
  private:
   void getEqualInterval(std::vector<SymbolFreq> &blend_freq_table);
@@ -76,7 +77,6 @@ bool HeuristicSS::selectSymbols(const std::vector<std::string> &key_list, const 
     setW((l + r) / 2);
     intervals_.clear();
     getEqualInterval(blend_freq_table);
-    std::cout << "W = " << W << "\t" << intervals_.size() << std::endl;
     // sort intervals
     std::sort(intervals_.begin(), intervals_.end(),
               [](std::pair<std::string, std::string> &x, std::pair<std::string, std::string> y) {
@@ -95,8 +95,6 @@ bool HeuristicSS::selectSymbols(const std::vector<std::string> &key_list, const 
     }
   }
   if (l > r)
-    std::cout << "Best approoach W = " << W << ", target = " << num_limit << ", current size = " << intervals_.size()
-              << std::endl;
   // simulate encode process to get Frequency
   getIntervalFreqByEntropy(symbol_freq_list, key_list);
   return true;
@@ -290,6 +288,7 @@ std::string HeuristicSS::getNextString(const std::string &str) {
   return std::string(MAX_STR_LEN, 255);
 }
 
+/*
 void HeuristicSS::checkIntervals(std::string &start_str, std::string &end_str) {
   if (start_str.compare(end_str) >= 0) assert(false);
   std::sort(intervals_.begin(), intervals_.end(),

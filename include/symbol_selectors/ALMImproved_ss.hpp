@@ -32,7 +32,8 @@ class ALMImprovedSS : public SymbolSelector {
 
   void setW(int64_t new_w);
 
-  void checkIntervals(std::string &start_str, std::string &end_str);
+//  used for debug
+//  void checkIntervals(std::string &start_str, std::string &end_str);
 
  private:
   void getEqualInterval(std::vector<SymbolFreq> &blend_freq_table);
@@ -100,8 +101,6 @@ bool ALMImprovedSS::selectSymbols(const std::vector<std::string> &key_list, cons
     }
   }
   if (l > r)
-    std::cout << "Best approoach W = " << W << ", target = " << num_limit << ", current size = " << intervals_.size()
-              << std::endl;
   // simulate encode process to get Frequency
   getIntervalFreqEntropy(symbol_freq_list, key_list);
   return true;
@@ -170,7 +169,6 @@ void ALMImprovedSS::getIntervalFreqEntropy(std::vector<SymbolFreq> *symbol_freq_
     double p = freq_len[i] / sum_fl;
     entropy += p * log2(p);
   }
-  std::cout << "Entropy = " << -entropy << std::endl;
 #endif
 }
 
@@ -291,6 +289,7 @@ std::string ALMImprovedSS::getNextString(const std::string &str) {
   return std::string(MAX_STR_LEN, 255);
 }
 
+/*
 void ALMImprovedSS::checkIntervals(std::string &start_str, std::string &end_str) {
   if (start_str.compare(end_str) >= 0) assert(false);
   std::sort(intervals_.begin(), intervals_.end(),
@@ -328,6 +327,7 @@ void ALMImprovedSS::checkIntervals(std::string &start_str, std::string &end_str)
   }
   std::cout << "Check " << cnt << " intervals" << std::endl;
 }
+*/
 
 void ALMImprovedSS::mergeAdjacentComPrefixIntervals() {
   std::vector<std::pair<std::string, std::string>> merged_intervals;

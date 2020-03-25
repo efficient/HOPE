@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROJECT_DIR=$(pwd)
+PROJECT_DIR="../$(pwd)"
 
 ##################################################
 # Initialize modules
@@ -69,33 +69,33 @@ function run_experiment() {
     fi
 }
 
-remove_old_results ${run_microbench} "results/microbench/cpr_latency/"
-remove_old_results ${run_microbench} "figures/microbench/cpr_latency/"
-remove_old_results ${run_surf} "results/SuRF"
-remove_old_results ${run_surf} "figures/SuRF"
-remove_old_results ${run_surf} "results/SuRF_real"
-remove_old_results ${run_surf} "figures/SuRF_real"
-remove_old_results ${run_art} "results/ART"
-remove_old_results ${run_art} "figures/ART"
-remove_old_results ${run_hot} "results/hot"
-remove_old_results ${run_hot} "figures/hot"
-remove_old_results ${run_btree} "results/btree"
-remove_old_results ${run_btree} "figures/btree"
+remove_old_results ${run_microbench} "../results/microbench/cpr_latency/"
+remove_old_results ${run_microbench} "../figures/microbench/cpr_latency/"
+remove_old_results ${run_surf} "../results/SuRF"
+remove_old_results ${run_surf} "../figures/SuRF"
+remove_old_results ${run_surf} "../results/SuRF_real"
+remove_old_results ${run_surf} "../figures/SuRF_real"
+remove_old_results ${run_art} "../results/ART"
+remove_old_results ${run_art} "../figures/ART"
+remove_old_results ${run_hot} "../results/hot"
+remove_old_results ${run_hot} "../figures/hot"
+remove_old_results ${run_btree} "../results/btree"
+remove_old_results ${run_btree} "../figures/btree"
 
 ./create_dir.sh
 
 cnt=0
 while [ ${cnt} -lt ${repeat_times} ]
 do
-    run_experiment ${run_microbench} "./build/bench/microbench 1 ${run_alm}"
-    run_experiment ${run_surf} "./build/SuRF/bench/bench_surf 0 ${run_alm}"
-    run_experiment ${run_surf} "./build/SuRF/bench/bench_surf 1 ${run_alm}"
-    run_experiment ${run_art} "./build/ART/bench/bench_art 0 ${run_alm}"
-    run_experiment ${run_art} "./build/ART/bench/bench_art 1 ${run_alm}"
-    run_experiment ${run_hot} "./build/hot/bench_hot 0 ${run_alm}"
-    run_experiment ${run_hot} "./build/hot/bench_hot 1 ${run_alm}"
-    run_experiment ${run_btree} "./build/btree/bench_btree 0 ${run_alm}"
-    run_experiment ${run_btree} "./build/btree/bench_btree 1 ${run_alm}"
+    run_experiment ${run_microbench} "../build/bench/microbench 1 ${run_alm}"
+    run_experiment ${run_surf} "../build/SuRF/bench/bench_surf 0 ${run_alm}"
+    run_experiment ${run_surf} "../build/SuRF/bench/bench_surf 1 ${run_alm}"
+    run_experiment ${run_art} "../build/ART/bench/bench_art 0 ${run_alm}"
+    run_experiment ${run_art} "../build/ART/bench/bench_art 1 ${run_alm}"
+    run_experiment ${run_hot} "../build/hot/bench_hot 0 ${run_alm}"
+    run_experiment ${run_hot} "../build/hot/bench_hot 1 ${run_alm}"
+    run_experiment ${run_btree} "../build/btree/bench_btree 0 ${run_alm}"
+    run_experiment ${run_btree} "../build/btree/bench_btree 1 ${run_alm}"
     let "cnt+=1"
 done
 

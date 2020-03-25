@@ -1,21 +1,19 @@
 import sys
 import os
 import numpy as np
-RESULT_DIR = './results/'
-#PREFIX = ['ART', 'btree', 'hot', 'microbench/cpr_latency', 'SuRF', 'SuRF_real']
-PREFIX = ['microbench/cpr_latency', 'SuRF', 'SuRF_real']
-#TYPE = ['point', 'range']
-TYPE = ['point']
+RESULT_DIR = '../results/'
+PREFIX = ['ART', 'btree', 'hot', 'microbench/cpr_latency', 'SuRF', 'SuRF_real']
+TYPE = ['point', 'range']
 DATASETS = ['email', 'ts', 'url', 'wiki']
 VAR = ['cpr','x','height', 'fpr', 'lat', 'insertlat', 'lookuplat', 'stats']
-BT_OUTFILE = "results/microbench/build_time_breakdown/bt_breakdown.csv"
+BT_OUTFILE = "../results/microbench/build_time_breakdown/bt_breakdown.csv"
 
 def generate_result_single(dirpath, filename):
     full_path = dirpath + filename
     output_path = dirpath + 'final_' + filename
     results = []
     with open(full_path, 'r') as f:
-#        print(full_path)
+        print("Generate result for " + full_path)
         lines = f.readlines()
         cnt = 0
         for line in lines:
@@ -27,11 +25,9 @@ def generate_result_single(dirpath, filename):
         idx = 0
         for i,line in enumerate(lines):
             line = line.strip(',\n')
-            #print line, line == '-'
             if line == '-':
                 idx = 0
                 continue
-            #print([float(x) for x in line.split(',')])
             results[idx].append(np.array([float(x) for x in line.split(',')]))
             idx += 1
         results = (np.mean(np.asarray(results), axis=1))
@@ -79,9 +75,6 @@ def buildtime():
             if (key == "Build Dictionary time"):
                 build_dict_time.append(wl[1].strip())
 
-#    print(ss_time)
-#    print(encode_time)
-#    print(build_dict_time)
     with open(BT_OUTFILE, 'w') as f:
         for i in range(0, len(ss_time)):
             f.write(ss_time[i] + "," + encode_time[i] + "," + build_dict_time[i]+"\n")
