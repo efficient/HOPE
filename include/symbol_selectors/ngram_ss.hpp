@@ -12,7 +12,8 @@ class NGramSS : public SymbolSelector {
   NGramSS(int n) : n_(n){};
   ~NGramSS() { freq_map_.clear(); };
 
-  bool selectSymbols(const std::vector<std::string> &key_list, const int64_t num_limit,
+  bool selectSymbols(const std::vector<std::string> &key_list,
+		     const int64_t num_limit,
                      std::vector<SymbolFreq> *symbol_freq_list, int W = 10000);
 
  private:
@@ -39,7 +40,7 @@ bool NGramSS::selectSymbols(const std::vector<std::string> &key_list, const int6
   int64_t adjust_num_limit = num_limit;
   if (num_limit > (int64_t)freq_map_.size() * 2) {
     adjust_num_limit = (int64_t)freq_map_.size() * 2 - 1;
-    std::cout << "3 Gram: Input dictionary Size is too big, change to " << adjust_num_limit << std::endl;
+    //std::cout << "3 Gram: Input dictionary Size is too big, change to " << adjust_num_limit << std::endl;
   }
   pickMostFreqSymbols((adjust_num_limit / 2), &most_freq_symbols);
   fillInGap(most_freq_symbols);
@@ -54,7 +55,7 @@ bool NGramSS::selectSymbols(const std::vector<std::string> &key_list, const int6
 
 void NGramSS::countSymbolFreq(const std::vector<std::string> &key_list) {
   freq_map_.clear();
-  //    std::unordered_map<std::string, int64_t>::iterator iter;
+  // std::unordered_map<std::string, int64_t>::iterator iter;
   std::map<std::string, int64_t>::iterator iter;
   for (int i = 0; i < (int)key_list.size(); i++) {
     for (int j = 0; j < (int)key_list[i].length() - n_ + 1; j++) {

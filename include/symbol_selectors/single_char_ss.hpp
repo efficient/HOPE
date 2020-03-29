@@ -10,26 +10,28 @@ class SingleCharSS : public SymbolSelector {
   SingleCharSS();
   ~SingleCharSS(){};
 
-  bool selectSymbols(const std::vector<std::string> &key_list, const int64_t num_limit,
+  bool selectSymbols(const std::vector<std::string> &key_list,
+		     const int64_t num_limit,
                      std::vector<SymbolFreq> *symbol_freq_list, int W);
 
  private:
   void countSymbolFreq(const std::vector<std::string> &key_list);
 
-  int64_t freq_list_[256];
+  int64_t freq_list_[kNumSingleChar];
 };
 
 SingleCharSS::SingleCharSS() {
-  for (int i = 0; i < 256; i++) {
+  for (int i = 0; i < kNumSingleChar; i++) {
     freq_list_[i] = 1;
   }
 }
 
-bool SingleCharSS::selectSymbols(const std::vector<std::string> &key_list, const int64_t num_limit,
+bool SingleCharSS::selectSymbols(const std::vector<std::string> &key_list,
+				 const int64_t num_limit,
                                  std::vector<SymbolFreq> *symbol_freq_list, int W) {
-  if (key_list.empty() || num_limit < 256) return false;
+  if (key_list.empty() || num_limit < kNumSingleChar) return false;
   countSymbolFreq(key_list);
-  for (int i = 0; i < 256; i++) {
+  for (int i = 0; i < kNumSingleChar; i++) {
     symbol_freq_list->push_back(std::make_pair(std::string(1, (char)i), freq_list_[i]));
   }
   return true;

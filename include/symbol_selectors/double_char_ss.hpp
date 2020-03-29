@@ -10,26 +10,28 @@ class DoubleCharSS : public SymbolSelector {
   DoubleCharSS();
   ~DoubleCharSS(){};
 
-  bool selectSymbols(const std::vector<std::string> &key_list, const int64_t num_limit,
+  bool selectSymbols(const std::vector<std::string> &key_list,
+		     const int64_t num_limit,
                      std::vector<SymbolFreq> *symbol_freq_list, int W);
 
  private:
   void countSymbolFreq(const std::vector<std::string> &key_list);
 
-  int64_t freq_list_[65536];
+  int64_t freq_list_[kNumDoubleChar];
 };
 
 DoubleCharSS::DoubleCharSS() {
-  for (int i = 0; i < 65536; i++) {
+  for (int i = 0; i < kNumDoubleChar; i++) {
     freq_list_[i] = 1;
   }
 }
 
-bool DoubleCharSS::selectSymbols(const std::vector<std::string> &key_list, const int64_t num_limit,
+bool DoubleCharSS::selectSymbols(const std::vector<std::string> &key_list,
+				 const int64_t num_limit,
                                  std::vector<SymbolFreq> *symbol_freq_list, int W) {
   if (key_list.empty()) return false;
   countSymbolFreq(key_list);
-  for (int i = 0; i < 65536; i++) {
+  for (int i = 0; i < kNumDoubleChar; i++) {
     std::string symbol;
     symbol += (char)(i / 256);
     symbol += (char)(i % 256);
