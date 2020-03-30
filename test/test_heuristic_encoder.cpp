@@ -16,9 +16,15 @@ namespace ope {
 namespace heuristicencodertest {
 
 static const char kWordFilePath[] = "../../datasets/words.txt";
+static const char kWikiFilePath[] = "../../datasets/wikis.txt";
+static const char kUrlFilePath[] = "../../datasets/urls.txt";
 static const int kWordTestSize = 23436;
+static const int kWikiTestSize = 23436;
+static const int kUrlTestSize = 23436;
 static const int kInt64TestSize = 23436;
 static std::vector<std::string> words;
+static std::vector<std::string> wikis;
+static std::vector<std::string> urls;
 static std::vector<std::string> integers;
 static const int kLongestCodeLen = 4096;
 
@@ -99,6 +105,48 @@ TEST_F(HeuristicEncoderTest, wordPairTest) {
   delete encoder;
 }
 
+TEST_F(HeuristicEncoderTest, wikiTest) {
+  HeuristicEncoder *encoder = new HeuristicEncoder();
+  encoder->build(wikis, 4096);
+  auto buffer = new uint8_t[kLongestCodeLen];
+  int64_t total_len = 0;
+  int64_t total_enc_len = 0;
+  for (int i = 0; i < static_cast<int>(wikis.size()) - 1; i++) {
+    int len = encoder->encode(wikis[i], buffer);
+    total_len += (wikis[i].length() * 8);
+    total_enc_len += len;
+    std::string str1 = std::string((const char *)buffer, GetByteLen(len));
+    len = encoder->encode(wikis[i + 1], buffer);
+    std::string str2 = std::string((const char *)buffer, GetByteLen(len));
+    int cmp = str1.compare(str2);
+    EXPECT_LT(cmp, 0);
+  }
+  delete[] buffer;
+  delete encoder;
+  std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
+}
+
+TEST_F(HeuristicEncoderTest, urlTest) {
+  HeuristicEncoder *encoder = new HeuristicEncoder();
+  encoder->build(urls, 4096);
+  auto buffer = new uint8_t[kLongestCodeLen];
+  int64_t total_len = 0;
+  int64_t total_enc_len = 0;
+  for (int i = 0; i < static_cast<int>(urls.size()) - 1; i++) {
+    int len = encoder->encode(urls[i], buffer);
+    total_len += (urls[i].length() * 8);
+    total_enc_len += len;
+    std::string str1 = std::string((const char *)buffer, GetByteLen(len));
+    len = encoder->encode(urls[i + 1], buffer);
+    std::string str2 = std::string((const char *)buffer, GetByteLen(len));
+    int cmp = str1.compare(str2);
+    EXPECT_LT(cmp, 0);
+  }
+  delete[] buffer;
+  delete encoder;
+  std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
+}
+
 TEST_F(HeuristicEncoderTest, intTest) {
   HeuristicEncoder *encoder = new HeuristicEncoder();
   encoder->build(integers, 4096);
@@ -132,6 +180,29 @@ void LoadWords() {
   std::sort(words.begin(), words.end());
 }
 
+void LoadWikis() {
+  std::ifstream infile(kWikiFilePath);
+  std::string key;
+  int count = 0;
+  while (infile.good() && count < kWikiTestSize) {
+    infile >> key;
+    wikis.push_back(key);
+    count++;
+  }
+}
+
+void LoadUrls() {
+  std::ifstream infile(kUrlFilePath);
+  std::string key;
+  int count = 0;
+  while (infile.good() && count < kUrlTestSize) {
+    infile >> key;
+    urls.push_back(key);
+    count++;
+  }
+}
+
+
 std::string Uint64ToString(uint64_t key) {
   uint64_t endian_swapped_key = __builtin_bswap64(key);
   return std::string(reinterpret_cast<const char *>(&endian_swapped_key), 8);
@@ -153,6 +224,8 @@ void GenerateInt64() {
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   ope::heuristicencodertest::LoadWords();
+  ope::heuristicencodertest::LoadWikis();
+  ope::heuristicencodertest::LoadUrls();
   ope::heuristicencodertest::GenerateInt64();
   return RUN_ALL_TESTS();
 }

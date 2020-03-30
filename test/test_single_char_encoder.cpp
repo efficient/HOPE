@@ -16,10 +16,16 @@ namespace ope {
 
 namespace singlecharencodertest {
 
-static const char kFilePath[] = "../../datasets/words.txt";
+static const char kWordFilePath[] = "../../datasets/words.txt";
+static const char kWikiFilePath[] = "../../datasets/wikis.txt";
+static const char kUrlFilePath[] = "../../datasets/urls.txt";
 static const int kWordTestSize = 234369;
+static const int kWikiTestSize = 234369;
+static const int kUrlTestSize = 234369;
 static const int kInt64TestSize = 10000;
 static std::vector<std::string> words;
+static std::vector<std::string> wikis;
+static std::vector<std::string> urls;
 static std::vector<std::string> integers;
 static const int kLongestCodeLen = 4096;
 
@@ -96,6 +102,58 @@ TEST_F(SingleCharEncoderTest, wordBatchTest) {
   }
 }
 
+TEST_F(SingleCharEncoderTest, wikiTest) {
+  SingleCharEncoder *encoder = new SingleCharEncoder();
+  encoder->build(wikis, 1000);
+  uint8_t *buffer = new uint8_t[kLongestCodeLen];
+  for (int i = 0; i < static_cast<int>(wikis.size()) - 1; i++) {
+    int len = encoder->encode(wikis[i], buffer);
+    std::string str1 = std::string((const char *)buffer, GetByteLen(len));
+    len = encoder->encode(wikis[i + 1], buffer);
+    std::string str2 = std::string((const char *)buffer, GetByteLen(len));
+    int cmp = str1.compare(str2);
+    EXPECT_LT(cmp, 0);
+
+#ifdef INCLUDE_DECODE
+    len = encoder->decode(str1, buffer);
+    std::string dec_str1 = std::string((const char *)buffer, len);
+    cmp = dec_str1.compare(wikis[i]);
+    EXPECT_EQ(cmp, 0);
+
+    len = encoder->decode(str2, buffer);
+    std::string dec_str2 = std::string((const char *)buffer, len);
+    cmp = dec_str2.compare(wikis[i + 1]);
+    EXPECT_EQ(cmp, 0);
+#endif
+  }
+}
+
+TEST_F(SingleCharEncoderTest, urlTest) {
+  SingleCharEncoder *encoder = new SingleCharEncoder();
+  encoder->build(urls, 1000);
+  uint8_t *buffer = new uint8_t[kLongestCodeLen];
+  for (int i = 0; i < static_cast<int>(urls.size()) - 1; i++) {
+    int len = encoder->encode(urls[i], buffer);
+    std::string str1 = std::string((const char *)buffer, GetByteLen(len));
+    len = encoder->encode(urls[i + 1], buffer);
+    std::string str2 = std::string((const char *)buffer, GetByteLen(len));
+    int cmp = str1.compare(str2);
+    EXPECT_LT(cmp, 0);
+
+#ifdef INCLUDE_DECODE
+    len = encoder->decode(str1, buffer);
+    std::string dec_str1 = std::string((const char *)buffer, len);
+    cmp = dec_str1.compare(urls[i]);
+    EXPECT_EQ(cmp, 0);
+
+    len = encoder->decode(str2, buffer);
+    std::string dec_str2 = std::string((const char *)buffer, len);
+    cmp = dec_str2.compare(urls[i + 1]);
+    EXPECT_EQ(cmp, 0);
+#endif
+  }
+}
+
 TEST_F(SingleCharEncoderTest, intTest) {
   SingleCharEncoder *encoder = new SingleCharEncoder();
   encoder->build(integers, 1000);
@@ -122,7 +180,7 @@ TEST_F(SingleCharEncoderTest, intTest) {
 }
 
 void LoadWords() {
-  std::ifstream infile(kFilePath);
+  std::ifstream infile(kWordFilePath);
   std::string key;
   int count = 0;
   while (infile.good() && count < kWordTestSize) {
@@ -131,6 +189,30 @@ void LoadWords() {
     count++;
   }
 }
+
+void LoadWikis() {
+  std::ifstream infile(kWikiFilePath);
+  std::string key;
+  int count = 0;
+  while (infile.good() && count < kWikiTestSize) {
+    infile >> key;
+    wikis.push_back(key);
+    count++;
+  }
+}
+
+
+void LoadUrls() {
+  std::ifstream infile(kUrlFilePath);
+  std::string key;
+  int count = 0;
+  while (infile.good() && count < kUrlTestSize) {
+    infile >> key;
+    urls.push_back(key);
+    count++;
+  }
+}
+
 std::string Uint64ToString(uint64_t key) {
   uint64_t endian_swapped_key = __builtin_bswap64(key);
   return std::string(reinterpret_cast<const char *>(&endian_swapped_key), 8);
@@ -153,6 +235,8 @@ void GenerateInt64() {
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   ope::singlecharencodertest::LoadWords();
+  ope::singlecharencodertest::LoadWikis();
+  ope::singlecharencodertest::LoadUrls();
   ope::singlecharencodertest::GenerateInt64();
   return RUN_ALL_TESTS();
 }

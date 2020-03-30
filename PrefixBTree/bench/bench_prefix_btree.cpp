@@ -8,9 +8,6 @@
 #include "PrefixBtree.h"
 #include "encoder_factory.hpp"
 
-//#define NOT_USE_ENCODE_PAIR 1
-//#define RUN_TIMESTAMP
-
 static const uint64_t kNumEmailRecords = 25000000;
 static const uint64_t kNumWikiRecords = 14000000;
 static const uint64_t kNumTsRecords = 14000000;
@@ -22,7 +19,6 @@ static const double kUrlSamplePercent = 1;
 static const std::string file_load_email = "workloads/load_email";
 static const std::string file_load_wiki = "workloads/load_wiki";
 static const std::string file_load_url = "workloads/load_url";
-static const std::string file_load_ts = "workloads/load_timestamp";
 
 static const std::string file_txn_email = "workloads/txn_email_zipfian";
 static const std::string file_txn_email_len = "workloads/scan_len_email_zipfian";
@@ -30,7 +26,6 @@ static const std::string file_txn_wiki = "workloads/txn_wiki_zipfian";
 static const std::string file_txn_wiki_len = "workloads/scan_len_wiki_zipfian";
 static const std::string file_txn_url = "workloads/txn_url_zipfian";
 static const std::string file_txn_url_len = "workloads/scan_len_url_zipfian";
-static const std::string file_txn_ts = "workloads/txn_timestamp_zipfian";
 
 // for pretty print
 static const char *kGreen = "\033[0;32m";
@@ -72,13 +67,6 @@ std::ofstream output_insertlat_url_btree;
 static const std::string file_mem_url_btree = output_dir_btree_point + "mem_url_btree.csv";
 std::ofstream output_mem_url_btree;
 
-static const std::string file_lookuplat_ts_btree = output_dir_btree_point + "lookuplat_ts_btree.csv";
-std::ofstream output_lookuplat_ts_btree;
-static const std::string file_insertlat_ts_btree = output_dir_btree_point + "insertlat_ts_btree.csv";
-std::ofstream output_insertlat_ts_btree;
-static const std::string file_mem_ts_btree = output_dir_btree_point + "mem_ts_btree.csv";
-std::ofstream output_mem_ts_btree;
-
 //-------------------------------------------------------------
 // Expt ID = 1
 //-------------------------------------------------------------
@@ -103,13 +91,6 @@ static const std::string file_insertlat_url_btree_range = output_dir_btree_range
 std::ofstream output_insertlat_url_btree_range;
 static const std::string file_mem_url_btree_range = output_dir_btree_range + "mem_url_btree_range.csv";
 std::ofstream output_mem_url_btree_range;
-
-static const std::string file_lookuplat_ts_btree_range = output_dir_btree_range + "lookuplat_ts_btree_range.csv";
-std::ofstream output_lookuplat_ts_btree_range;
-static const std::string file_insertlat_ts_btree_range = output_dir_btree_range + "insertlat_ts_btree_range.csv";
-std::ofstream output_insertlat_ts_btree_range;
-static const std::string file_mem_ts_btree_range = output_dir_btree_range + "mem_ts_btree_range.csv";
-std::ofstream output_mem_ts_btree_range;
 
 double getNow() {
   struct timeval tv;
@@ -180,8 +161,6 @@ void loadWorkload(int wkld_id, std::vector<std::string> &insert_keys, std::vecto
     loadKeysFromFile(file_load_wiki, kNumWikiRecords, load_keys);
   else if (wkld_id == kUrl)
     loadKeysFromFile(file_load_url, kNumEmailRecords, load_keys);
-  else if (wkld_id == kTs)
-    loadKeysInt(file_load_ts, kNumTsRecords, load_keys, true);
   else
     return;
 
@@ -207,8 +186,7 @@ void loadWorkload(int wkld_id, std::vector<std::string> &insert_keys, std::vecto
   } else if (wkld_id == kUrl) {
     loadKeysFromFile(file_txn_url, kNumTxns, txn_keys);
     loadLensInt(file_txn_url_len, kNumTxns, scan_key_lens);
-  } else if (wkld_id == kTs)
-    loadKeysInt(file_txn_ts, kNumTxns, txn_keys);
+  }
 
   std::cout << "insert_keys size = " << insert_keys.size() << std::endl;
   std::cout << "insert_keys_sample size = " << insert_keys_sample.size() << std::endl;
@@ -361,10 +339,6 @@ void exec(const int expt_id, const int wkld_id, const bool is_point, const bool 
       output_lookuplat_url_btree << lookup_lat << "\n";
       output_insertlat_url_btree << insert_lat << "\n";
       output_mem_url_btree << mem << "\n";
-    } else if (wkld_id == kTs) {
-      output_lookuplat_ts_btree << lookup_lat << "\n";
-      output_insertlat_ts_btree << insert_lat << "\n";
-      output_mem_ts_btree << mem << "\n";
     }
   } else if (expt_id == 1) {
     if (wkld_id == kEmail) {
@@ -379,10 +353,6 @@ void exec(const int expt_id, const int wkld_id, const bool is_point, const bool 
       output_lookuplat_url_btree_range << lookup_lat << "\n";
       output_insertlat_url_btree_range << insert_lat << "\n";
       output_mem_url_btree_range << mem << "\n";
-    } else if (wkld_id == kTs) {
-      output_lookuplat_ts_btree_range << lookup_lat << "\n";
-      output_insertlat_ts_btree_range << insert_lat << "\n";
-      output_mem_ts_btree_range << mem << "\n";
     }
   }
 }
@@ -393,9 +363,7 @@ void exec_group(const int expt_id, const bool is_point, int &expt_num, const int
                 const std::vector<std::string> &insert_wikis, const std::vector<std::string> &insert_wikis_sample,
                 const std::vector<std::string> &txn_wikis, const std::vector<int> &upper_bound_wikis,
                 const std::vector<std::string> &insert_urls, const std::vector<std::string> &insert_urls_sample,
-                const std::vector<std::string> &txn_urls, const std::vector<int> &upper_bound_urls,
-                const std::vector<std::string> &insert_tss, const std::vector<std::string> &insert_tss_sample,
-                const std::vector<std::string> &txn_tss, const std::vector<int> &upper_bound_tss) {
+                const std::vector<std::string> &txn_urls, const std::vector<int> &upper_bound_urls) {
   std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
   exec(expt_id, kEmail, is_point, false, 0, 0, insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
   expt_num++;
@@ -408,11 +376,6 @@ void exec_group(const int expt_id, const bool is_point, int &expt_num, const int
   exec(expt_id, kUrl, is_point, false, 0, 0, insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
   expt_num++;
 
-#ifdef RUN_TIMESTAMP
-  std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-  exec(expt_id, kTs, is_point, false, 0, 0, insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-  expt_num++;
-#endif
   //=================================================
   std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
   exec(expt_id, kEmail, is_point, true, 1, 0, insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
@@ -426,11 +389,6 @@ void exec_group(const int expt_id, const bool is_point, int &expt_num, const int
   exec(expt_id, kUrl, is_point, true, 1, 0, insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
   expt_num++;
 
-#ifdef RUN_TIMESTAMP
-  std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-  exec(expt_id, kTs, is_point, true, 1, 0, insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-  expt_num++;
-#endif
   //=================================================
   std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
   exec(expt_id, kEmail, is_point, true, 2, 6, insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
@@ -444,11 +402,6 @@ void exec_group(const int expt_id, const bool is_point, int &expt_num, const int
   exec(expt_id, kUrl, is_point, true, 2, 6, insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
   expt_num++;
 
-#ifdef RUN_TIMESTAMP
-  std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-  exec(expt_id, kTs, is_point, true, 2, 6, insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-  expt_num++;
-#endif
   std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
   exec(expt_id, kEmail, is_point, true, 3, 6, insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
   expt_num++;
@@ -461,11 +414,6 @@ void exec_group(const int expt_id, const bool is_point, int &expt_num, const int
   exec(expt_id, kUrl, is_point, true, 3, 6, insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
   expt_num++;
 
-#ifdef RUN_TIMESTAMP
-  std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-  exec(expt_id, kTs, is_point, true, 3, 6, insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-  expt_num++;
-#endif
   std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
   exec(expt_id, kEmail, is_point, true, 4, 6, insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
   expt_num++;
@@ -477,11 +425,6 @@ void exec_group(const int expt_id, const bool is_point, int &expt_num, const int
   std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
   exec(expt_id, kUrl, is_point, true, 4, 6, insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
   expt_num++;
-#ifdef RUN_TIMESTAMP
-  std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-  exec(expt_id, kTs, is_point, true, 4, 6, insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-  expt_num++;
-#endif
 
   int dict_size_5[2] = {2, 6};
   if (runALM == 1) {
@@ -525,12 +468,6 @@ int main(int argc, char *argv[]) {
   std::vector<int> upper_bound_urls;
   loadWorkload(kUrl, insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 
-  std::vector<std::string> insert_tss, insert_tss_sample, txn_tss;
-  std::vector<int> upper_bound_tss;
-#ifdef RUN_TIMESTAMP
-  loadWorkload(kTs, insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
-#endif
-
   if (expt_id == 0) {
     //-------------------------------------------------------------
     // Point Queries; Expt ID = 0
@@ -550,17 +487,12 @@ int main(int argc, char *argv[]) {
     output_lookuplat_url_btree.open(file_lookuplat_url_btree, std::ofstream::app);
     output_insertlat_url_btree.open(file_insertlat_url_btree, std::ofstream::app);
     output_mem_url_btree.open(file_mem_url_btree, std::ofstream::app);
-#ifdef RUN_TIMESTAMP
-    output_lookuplat_ts_btree.open(file_lookuplat_ts_btree, std::ofstream::app);
-    output_insertlat_ts_btree.open(file_insertlat_ts_btree, std::ofstream::app);
-    output_mem_ts_btree.open(file_mem_ts_btree, std::ofstream::app);
-#endif
     bool is_point = true;
     int expt_num = 1;
     int total_num_expt = 24;
     exec_group(expt_id, is_point, expt_num, total_num_expt, insert_emails, insert_emails_sample, txn_emails,
                upper_bound_emails, insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis, insert_urls,
-               insert_urls_sample, txn_urls, upper_bound_urls, insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
+               insert_urls_sample, txn_urls, upper_bound_urls);
 
     output_lookuplat_email_btree << "-"
                                  << "\n";
@@ -594,18 +526,6 @@ int main(int argc, char *argv[]) {
     output_lookuplat_url_btree.close();
     output_insertlat_url_btree.close();
     output_mem_url_btree.close();
-#ifdef RUN_TIMESTAM
-    output_lookuplat_ts_btree << "-"
-                              << "\n";
-    output_insertlat_ts_btree << "-"
-                              << "\n";
-    output_mem_ts_btree << "-"
-                        << "\n";
-
-    output_lookuplat_ts_btree.close();
-    output_insertlat_ts_btree.close();
-    output_mem_ts_btree.close();
-#endif
   } else if (expt_id == 1) {
     //-------------------------------------------------------------
     // Range Queries; Expt ID = 1
@@ -625,17 +545,12 @@ int main(int argc, char *argv[]) {
     output_lookuplat_url_btree_range.open(file_lookuplat_url_btree_range, std::ofstream::app);
     output_insertlat_url_btree_range.open(file_insertlat_url_btree_range, std::ofstream::app);
     output_mem_url_btree_range.open(file_mem_url_btree_range, std::ofstream::app);
-#ifdef RUN_TIMESTAMP
-    output_lookuplat_ts_btree_range.open(file_lookuplat_ts_btree_range, std::ofstream::app);
-    output_insertlat_ts_btree_range.open(file_insertlat_ts_btree_range, std::ofstream::app);
-    output_mem_ts_btree_range.open(file_mem_ts_btree_range, std::ofstream::app);
-#endif
     bool is_point = false;
     int expt_num = 1;
     int total_num_expt = 24;
     exec_group(expt_id, is_point, expt_num, total_num_expt, insert_emails, insert_emails_sample, txn_emails,
                upper_bound_emails, insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis, insert_urls,
-               insert_urls_sample, txn_urls, upper_bound_urls, insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
+               insert_urls_sample, txn_urls, upper_bound_urls);
 
     output_lookuplat_email_btree_range << "-"
                                        << "\n";
@@ -669,18 +584,6 @@ int main(int argc, char *argv[]) {
     output_lookuplat_url_btree_range.close();
     output_insertlat_url_btree_range.close();
     output_mem_url_btree_range.close();
-#ifdef RUN_TIMESTAMP
-    output_lookuplat_ts_btree_range << "-"
-                                    << "\n";
-    output_insertlat_ts_btree_range << "-"
-                                    << "\n";
-    output_mem_ts_btree_range << "-"
-                              << "\n";
-
-    output_lookuplat_ts_btree_range.close();
-    output_insertlat_ts_btree_range.close();
-    output_mem_ts_btree_range.close();
-#endif
   }
   return 0;
 }

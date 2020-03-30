@@ -15,9 +15,15 @@ namespace ope {
 namespace ngramencodertest {
 
 static const char kWordFilePath[] = "../../datasets/words.txt";
+static const char kWordFilePath[] = "../../datasets/wikis.txt";
+static const char kWordFilePath[] = "../../datasets/urls.txt";
 static const int kWordTestSize = 234369;
+static const int kWikiTestSize = 234369;
+static const int kUrlTestSize = 234369;
 static const int kInt64TestSize = 10000;
 static std::vector<std::string> words;
+static std::vector<std::string> wikis;
+static std::vector<std::string> urls;
 static std::vector<std::string> integers;
 static const int kLongestCodeLen = 4096;
 
@@ -144,6 +150,138 @@ TEST_F(NGramEncoderTest, word4BatchTest) {
   }
 }
 
+TEST_F(NGramEncoderTest, wiki3Test) {
+  NGramEncoder *encoder = new NGramEncoder(3);
+  encoder->build(wikis, 10000);
+  auto buffer = new uint8_t[kLongestCodeLen];
+  int64_t total_len = 0;
+  int64_t total_enc_len = 0;
+  for (int i = 0; i < static_cast<int>(wikis.size()) - 1; i++) {
+    int len = encoder->encode(wikis[i], buffer);
+    total_len += (wikis[i].length() * 8);
+    total_enc_len += len;
+    std::string str1 = std::string((const char *)buffer, GetByteLen(len));
+    len = encoder->encode(wikis[i + 1], buffer);
+    std::string str2 = std::string((const char *)buffer, GetByteLen(len));
+    int cmp = str1.compare(str2);
+    EXPECT_LT(cmp, 0);
+  }
+  std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
+}
+
+TEST_F(NGramEncoderTest, wiki3PairTest) {
+  NGramEncoder *encoder = new NGramEncoder(3);
+  encoder->build(wikis, 10000);
+  auto l_buffer = new uint8_t[kLongestCodeLen];
+  auto r_buffer = new uint8_t[kLongestCodeLen];
+  int64_t total_len = 0;
+  int64_t total_enc_len = 0;
+  for (int i = 0; i < static_cast<int>(wikis.size()) - 1; i++) {
+    total_len += (wikis[i].length() * 8);
+    int l_len = 0, r_len = 0;
+    encoder->encodePair(wikis[i], wikis[i + 1], l_buffer, r_buffer, l_len, r_len);
+    total_enc_len += l_len;
+    std::string str1 = std::string((const char *)l_buffer, GetByteLen(l_len));
+    std::string str2 = std::string((const char *)r_buffer, GetByteLen(r_len));
+    int cmp = str1.compare(str2);
+    EXPECT_LT(cmp, 0);
+  }
+  std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
+}
+
+TEST_F(NGramEncoderTest, wiki4Test) {
+  NGramEncoder *encoder = new NGramEncoder(4);
+  encoder->build(wikis, 10000);
+  auto buffer = new uint8_t[kLongestCodeLen];
+  int64_t total_len = 0;
+  int64_t total_enc_len = 0;
+  for (int i = 0; i < static_cast<int>(wikis.size()) - 1; i++) {
+    int len = encoder->encode(wikis[i], buffer);
+    total_len += (wikis[i].length() * 8);
+    total_enc_len += len;
+    std::string str1 = std::string((const char *)buffer, GetByteLen(len));
+    len = encoder->encode(wikis[i + 1], buffer);
+    std::string str2 = std::string((const char *)buffer, GetByteLen(len));
+    int cmp = str1.compare(str2);
+
+    if (cmp >= 0) {
+      std::cout << i << std::endl;
+      std::cout << wikis[i] << std::endl;
+      std::cout << wikis[i + 1] << std::endl;
+      Print(str1);
+      Print(str2);
+    }
+    EXPECT_LT(cmp, 0);
+  }
+  std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
+}
+
+TEST_F(NGramEncoderTest, url3Test) {
+  NGramEncoder *encoder = new NGramEncoder(3);
+  encoder->build(urls, 10000);
+  auto buffer = new uint8_t[kLongestCodeLen];
+  int64_t total_len = 0;
+  int64_t total_enc_len = 0;
+  for (int i = 0; i < static_cast<int>(urls.size()) - 1; i++) {
+    int len = encoder->encode(urls[i], buffer);
+    total_len += (urls[i].length() * 8);
+    total_enc_len += len;
+    std::string str1 = std::string((const char *)buffer, GetByteLen(len));
+    len = encoder->encode(urls[i + 1], buffer);
+    std::string str2 = std::string((const char *)buffer, GetByteLen(len));
+    int cmp = str1.compare(str2);
+    EXPECT_LT(cmp, 0);
+  }
+  std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
+}
+
+TEST_F(NGramEncoderTest, url3PairTest) {
+  NGramEncoder *encoder = new NGramEncoder(3);
+  encoder->build(urls, 10000);
+  auto l_buffer = new uint8_t[kLongestCodeLen];
+  auto r_buffer = new uint8_t[kLongestCodeLen];
+  int64_t total_len = 0;
+  int64_t total_enc_len = 0;
+  for (int i = 0; i < static_cast<int>(urls.size()) - 1; i++) {
+    total_len += (urls[i].length() * 8);
+    int l_len = 0, r_len = 0;
+    encoder->encodePair(urls[i], urls[i + 1], l_buffer, r_buffer, l_len, r_len);
+    total_enc_len += l_len;
+    std::string str1 = std::string((const char *)l_buffer, GetByteLen(l_len));
+    std::string str2 = std::string((const char *)r_buffer, GetByteLen(r_len));
+    int cmp = str1.compare(str2);
+    EXPECT_LT(cmp, 0);
+  }
+  std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
+}
+
+TEST_F(NGramEncoderTest, url4Test) {
+  NGramEncoder *encoder = new NGramEncoder(4);
+  encoder->build(urls, 10000);
+  auto buffer = new uint8_t[kLongestCodeLen];
+  int64_t total_len = 0;
+  int64_t total_enc_len = 0;
+  for (int i = 0; i < static_cast<int>(urls.size()) - 1; i++) {
+    int len = encoder->encode(urls[i], buffer);
+    total_len += (urls[i].length() * 8);
+    total_enc_len += len;
+    std::string str1 = std::string((const char *)buffer, GetByteLen(len));
+    len = encoder->encode(urls[i + 1], buffer);
+    std::string str2 = std::string((const char *)buffer, GetByteLen(len));
+    int cmp = str1.compare(str2);
+
+    if (cmp >= 0) {
+      std::cout << i << std::endl;
+      std::cout << urls[i] << std::endl;
+      std::cout << urls[i + 1] << std::endl;
+      Print(str1);
+      Print(str2);
+    }
+    EXPECT_LT(cmp, 0);
+  }
+  std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
+}
+
 TEST_F(NGramEncoderTest, int3Test) {
   NGramEncoder *encoder = new NGramEncoder(3);
   encoder->build(integers, 10000);
@@ -230,6 +368,28 @@ void LoadWords() {
   }
 }
 
+void LoadWikis() {
+  std::ifstream infile(kWikiFilePath);
+  std::string key;
+  int count = 0;
+  while (infile.good() && count < kWikiTestSize) {
+    infile >> key;
+    wikis.push_back(key);
+    count++;
+  }
+}
+
+void LoadUrls() {
+  std::ifstream infile(kUrlFilePath);
+  std::string key;
+  int count = 0;
+  while (infile.good() && count < kUrlTestSize) {
+    infile >> key;
+    urls.push_back(key);
+    count++;
+  }
+}
+
 void GenerateInt64() {
   std::random_device rd;   // Will be used to obtain a seed for the random number engine
   std::mt19937 gen(rd());  // Standard mersenne_twister_engine seeded with rd()
@@ -248,6 +408,8 @@ void GenerateInt64() {
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   ope::ngramencodertest::LoadWords();
+  ope::ngramencodertest::LoadWikis();
+  ope::ngramencodertest::LoadUrls();
   ope::ngramencodertest::GenerateInt64();
   return RUN_ALL_TESTS();
 }
