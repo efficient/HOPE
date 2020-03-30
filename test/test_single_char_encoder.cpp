@@ -20,8 +20,8 @@ static const char kWordFilePath[] = "../../datasets/words.txt";
 static const char kWikiFilePath[] = "../../datasets/wikis.txt";
 static const char kUrlFilePath[] = "../../datasets/urls.txt";
 static const int kWordTestSize = 234369;
-static const int kWikiTestSize = 234369;
-static const int kUrlTestSize = 234369;
+static const int kWikiTestSize = 14000;
+static const int kUrlTestSize = 5000;
 static const int kInt64TestSize = 10000;
 static std::vector<std::string> words;
 static std::vector<std::string> wikis;
@@ -165,7 +165,7 @@ TEST_F(SingleCharEncoderTest, intTest) {
     std::string str2 = std::string((const char *)buffer, GetByteLen(len));
     int cmp = str1.compare(str2);
     EXPECT_LT(cmp, 0);
-    #ifdef INCLUDE_DECODE
+/*    #ifdef INCLUDE_DECODE
         len = encoder->decode(str1, buffer);
         std::string dec_str1 = std::string((const char *)buffer, len);
         cmp = dec_str1.compare(integers[i]);
@@ -176,6 +176,7 @@ TEST_F(SingleCharEncoderTest, intTest) {
         cmp = dec_str2.compare(integers[i + 1]);
         EXPECT_EQ(cmp, 0);
     #endif
+*/
   }
 }
 
