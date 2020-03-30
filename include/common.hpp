@@ -36,6 +36,9 @@ const int ALM_W_improved[3][9] = {{13274, 7726, 2462, 3436, 2071, 1131, 252, 359
 
 namespace ope {
 
+static const int kNumSingleChar = 256;
+static const int kNumDoubleChar = 65536;
+
 typedef struct {
   // int64_t code;
   int32_t code;
@@ -62,16 +65,6 @@ typedef struct {
   uint8_t common_prefix_len;
   Code code;
 } Interval4Gram;
-
-double getNow() {
-  struct timeval tv;
-  gettimeofday(&tv, 0);
-  return tv.tv_sec + tv.tv_usec / 1000000.0;
-}
-
-void printString(std::string str) {
-  for (int i = 0; i < (int)str.length(); i++) std::cout << std::hex << (int)str[i] << " ";
-}
 
 }  // namespace ope
 
