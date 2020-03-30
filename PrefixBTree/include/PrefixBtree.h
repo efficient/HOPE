@@ -514,7 +514,9 @@ struct BTreeInner : public BTreeInnerBase {
     count = 0;
     type = typeMarker;
     memset(children, 0, sizeof(NodeBase *) * MaxEntries);
-    memset(keys, 0, sizeof(Key) * MaxEntries);
+    for (int i = 0; i < MaxEntries;i++) {
+      keys[i] = Key();
+    }
   }
 
   ~BTreeInner() {
@@ -584,8 +586,11 @@ struct BTreeInner : public BTreeInnerBase {
     // Concatenate to get the full key
     sep = prefix_key_.concate(right);
 
-    memcpy(newInner->keys, keys + count + 1, sizeof(Key) * (newInner->count));
-    memset(keys + count + 1, 0, sizeof(Key) * (newInner->count));
+    for (int i = 0; i < (int)newInner->count; i++) {
+      newInner->keys[i] = keys[count + 1 + i];
+      keys[count + 1 + i] = Key();
+    }
+
     memcpy(newInner->children, children + count + 1, sizeof(NodeBase *) * (newInner->count + 1));
     newInner->prefix_key_ = prefix_key_;
 

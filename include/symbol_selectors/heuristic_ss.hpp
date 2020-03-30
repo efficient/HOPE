@@ -326,6 +326,7 @@ void HeuristicSS::checkIntervals(std::string &start_str, std::string &end_str) {
   }
   std::cout << "Check " << cnt << " intervals" << std::endl;
 }
+*/
 
 void HeuristicSS::mergeAdjacentComPrefixIntervals() {
   std::vector<std::pair<std::string, std::string>> merged_intervals;

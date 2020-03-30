@@ -56,20 +56,6 @@ std::string changeToBinary(int64_t num, int8_t len) {
   return result;
 }
 
-TEST_F(ALMImprovedEncoderTest, intervalTest) {
-  ALMImprovedEncoder *encoder = new ALMImprovedEncoder();
-  encoder->build(words, 4096);
-  std::vector<SymbolCode> symbol_code_list = encoder->getSymbolCodeList();
-  std::sort(symbol_code_list.begin(), symbol_code_list.end(),
-            [](SymbolCode &x, SymbolCode &y) { return x.first.compare(y.first) < 0; });
-  for (auto iter = symbol_code_list.begin() + 1; iter != symbol_code_list.end(); iter++) {
-    std::string str1 = changeToBinary((iter - 1)->second.code, (iter - 1)->second.len);
-    std::string str2 = changeToBinary(iter->second.code, iter->second.len);
-    int cmp = str1.compare(str2);
-    assert(cmp < 0);
-  }
-}
-
 TEST_F(ALMImprovedEncoderTest, wordTest) {
   ALMImprovedEncoder *encoder = new ALMImprovedEncoder();
   encoder->build(words, 4096);
@@ -182,7 +168,7 @@ void LoadWords() {
 }
 
 void LoadWikis() {
-  std::ifstream infile(kWikiPath);
+  std::ifstream infile(kWikiFilePath);
   std::string key;
   int count = 0;
   while (infile.good() && count < kWikiTestSize) {
@@ -193,7 +179,7 @@ void LoadWikis() {
 }
 
 void LoadUrls() {
-  std::ifstream infile(kUrlPath);
+  std::ifstream infile(kUrlFilePath);
   std::string key;
   int count = 0;
   while (infile.good() && count < kUrlTestSize) {

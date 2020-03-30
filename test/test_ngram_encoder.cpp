@@ -15,8 +15,8 @@ namespace ope {
 namespace ngramencodertest {
 
 static const char kWordFilePath[] = "../../datasets/words.txt";
-static const char kWordFilePath[] = "../../datasets/wikis.txt";
-static const char kWordFilePath[] = "../../datasets/urls.txt";
+static const char kWikiFilePath[] = "../../datasets/wikis.txt";
+static const char kUrlFilePath[] = "../../datasets/urls.txt";
 static const int kWordTestSize = 234369;
 static const int kWikiTestSize = 234369;
 static const int kUrlTestSize = 234369;
