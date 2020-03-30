@@ -19,8 +19,8 @@ static const char kWordFilePath[] = "../../datasets/words.txt";
 static const char kWikiFilePath[] = "../../datasets/wikis.txt";
 static const char kUrlFilePath[] = "../../datasets/urls.txt";
 static const int kWordTestSize = 23436;
-static const int kWikiTestSize = 15000;
-static const int kUrlTestSize = 4000;
+static const int kWikiTestSize = 14000;
+static const int kUrlTestSize = 5000;
 static const int kInt64TestSize = 23436;
 static std::vector<std::string> words;
 static std::vector<std::string> wikis;
@@ -103,7 +103,7 @@ TEST_F(ALMImprovedEncoderTest, wikiTest) {
     total_len += (wikis[i].length() * 8);
     total_enc_len += len;
     std::string str1 = std::string((const char *)buffer, GetByteLen(len));
-    len = encoder->encode(words[i + 1], buffer);
+    len = encoder->encode(wikis[i + 1], buffer);
     std::string str2 = std::string((const char *)buffer, GetByteLen(len));
     int cmp = str1.compare(str2);
     EXPECT_LT(cmp, 0);
@@ -121,10 +121,10 @@ TEST_F(ALMImprovedEncoderTest, urlTest) {
   int64_t total_enc_len = 0;
   for (int i = 0; i < static_cast<int>(urls.size()) - 1; i++) {
     int len = encoder->encode(urls[i], buffer);
-    total_len += (wikis[i].length() * 8);
+    total_len += (urls[i].length() * 8);
     total_enc_len += len;
     std::string str1 = std::string((const char *)buffer, GetByteLen(len));
-    len = encoder->encode(words[i + 1], buffer);
+    len = encoder->encode(urls[i + 1], buffer);
     std::string str2 = std::string((const char *)buffer, GetByteLen(len));
     int cmp = str1.compare(str2);
     EXPECT_LT(cmp, 0);

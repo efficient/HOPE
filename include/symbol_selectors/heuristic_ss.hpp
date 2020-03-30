@@ -85,6 +85,7 @@ bool HeuristicSS::selectSymbols(const std::vector<std::string> &key_list, const 
     // Merge adjacent intervals with same prefix
     mergeAdjacentComPrefixIntervals();
     if (abs(num_limit - (int)intervals_.size()) <= (int)(0.02 * num_limit)) {
+      getIntervalFreqByEntropy(symbol_freq_list, key_list);
       break;
     }
     // too many intervals
@@ -94,7 +95,7 @@ bool HeuristicSS::selectSymbols(const std::vector<std::string> &key_list, const 
       r = W - 1;
     }
   }
-  if (l > r)
+  // l > r
   // simulate encode process to get Frequency
   getIntervalFreqByEntropy(symbol_freq_list, key_list);
   return true;
