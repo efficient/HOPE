@@ -60,7 +60,7 @@ add_subdirectory(ART/bench)
 add_subdirectory(SuRF/test)
 add_subdirectory(SuRF/bench)
 add_subdirectory(btree)
-add_subdirectory(hot)
+#add_subdirectory(hot)
 
 
 #################################################################

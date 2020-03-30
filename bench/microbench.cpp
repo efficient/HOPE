@@ -628,7 +628,7 @@ int main(int argc, char *argv[]) {
     int ds = 6;
     int expt_num = 0;
     int total_num_expts = 6;
-    for (int encoder_type = 5; encoder_type < 7; encoder_type++) {
+    for (int encoder_type = 1; encoder_type < 7; encoder_type++) {
       std::cout << "Build Time Breakdown " << (expt_num++) << "/" << total_num_expts << std::endl;
       exec(expt_id, kEmail, encoder_type, ds, sample_percent, enc_src_percent, emails_shuffle, total_len_email);
     }
