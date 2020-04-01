@@ -91,7 +91,6 @@ bool ALMImprovedSS::selectSymbols(const std::vector<std::string> &key_list, cons
     mergeAdjacentComPrefixIntervals();
 
     if (abs(num_limit - (int)intervals_.size()) <= (int)(0.02 * num_limit)) {
-      getIntervalFreqEntropy(symbol_freq_list, key_list);
       break;
     }
     // too many intervals
