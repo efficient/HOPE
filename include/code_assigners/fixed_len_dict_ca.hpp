@@ -1,15 +1,15 @@
-#ifndef FIXED_LEN_DICT_CG_H
-#define FIXED_LEN_DICT_CG_H
+#ifndef FIXED_LEN_DICT_CA_H
+#define FIXED_LEN_DICT_CA_H
 
-#include "code_generator.hpp"
+#include "code_assigner.hpp"
 
 namespace ope {
 
-class FixedLenDictCG : public CodeGenerator {
+class FixedLenDictCA : public CodeAssigner {
  public:
-  FixedLenDictCG() { code_len_ = 0; };
-  ~FixedLenDictCG(){};
-  bool genCodes(const std::vector<SymbolFreq> &symbol_freq_list, std::vector<SymbolCode> *symbol_code_list);
+  FixedLenDictCA() { code_len_ = 0; };
+  ~FixedLenDictCA(){};
+  bool assignCodes(const std::vector<SymbolFreq> &symbol_freq_list, std::vector<SymbolCode> *symbol_code_list);
   int getCodeLen() const;
   double getCompressionRate() const;
 
@@ -18,7 +18,7 @@ class FixedLenDictCG : public CodeGenerator {
   std::vector<SymbolFreq> symbol_freq_list_;
 };
 
-bool FixedLenDictCG::genCodes(const std::vector<SymbolFreq> &symbol_freq_list,
+bool FixedLenDictCA::assignCodes(const std::vector<SymbolFreq> &symbol_freq_list,
                               std::vector<SymbolCode> *symbol_code_list) {
   symbol_freq_list_ = symbol_freq_list;
   int num_intervals = (int)symbol_freq_list.size();
@@ -37,9 +37,9 @@ bool FixedLenDictCG::genCodes(const std::vector<SymbolFreq> &symbol_freq_list,
   return true;
 }
 
-int FixedLenDictCG::getCodeLen() const { return code_len_; }
+int FixedLenDictCA::getCodeLen() const { return code_len_; }
 
-double FixedLenDictCG::getCompressionRate() const {
+double FixedLenDictCA::getCompressionRate() const {
   double len = 0, enc_len = 0;
   for (int i = 0; i < (int)symbol_freq_list_.size(); i++) {
     len += symbol_freq_list_[i].first.length() * symbol_freq_list_[i].second * 8.0;
@@ -52,4 +52,4 @@ double FixedLenDictCG::getCompressionRate() const {
 
 }  // namespace ope
 
-#endif  // FIXED_LEN_DICT_CG_H
+#endif  // FIXED_LEN_DICT_CA_H

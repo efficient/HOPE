@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "code_generator_factory.hpp"
+#include "code_assigner_factory.hpp"
 #include "encoder.hpp"
 #include "sbt.hpp"
 #include "symbol_selector_factory.hpp"
@@ -25,7 +25,7 @@ class DoubleCharEncoder : public Encoder {
   void encodePair(const std::string &l_key, const std::string &r_key, uint8_t *l_buffer, uint8_t *r_buffer,
                   int &l_enc_len, int &r_enc_len) const;
 
-  int64_t encodeBatch(const std::vector<std::string> &org_keys, int start_id, int batch_size,
+  int64_t encodeBatch(const std::vector<std::string> &ori_keys, int start_id, int batch_size,
                       std::vector<std::string> &enc_keys);
 
   int decode(const std::string &enc_key, uint8_t *buffer) const;
@@ -56,8 +56,8 @@ bool DoubleCharEncoder::build(const std::vector<std::string> &key_list, const in
 #endif
 
   std::vector<SymbolCode> symbol_code_list;
-  CodeGenerator *code_generator = CodeGeneratorFactory::createCodeGenerator(kCgType);
-  code_generator->genCodes(symbol_freq_list, &symbol_code_list);
+  CodeAssigner *code_assigner = CodeAssignerFactory::createCodeAssigner(kCgType);
+  code_assigner->assignCodes(symbol_freq_list, &symbol_code_list);
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
   std::cout << "Code Assign(Hu-Tucker) time = " << getNow() - cur_time << std::endl;
   cur_time = getNow();
@@ -66,6 +66,8 @@ bool DoubleCharEncoder::build(const std::vector<std::string> &key_list, const in
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
   std::cout << "Build Dictionary time = " << getNow() - cur_time << std::endl;
 #endif
+  delete code_assigner;
+  delete symbol_selector;
   return br;
 }
 
@@ -172,17 +174,17 @@ void DoubleCharEncoder::encodePair(const std::string &l_key, const std::string &
   r_enc_len = (idx_r << 6) + int_buf_len_r;
 }
 
-int64_t DoubleCharEncoder::encodeBatch(const std::vector<std::string> &org_keys, int start_id, int batch_size,
+int64_t DoubleCharEncoder::encodeBatch(const std::vector<std::string> &ori_keys, int start_id, int batch_size,
                                        std::vector<std::string> &enc_keys) {
   int64_t batch_code_size = 0;
   int end_id = start_id + batch_size;
 
   // Get batch common prefix
   int cp_len = 0;
-  std::string start_string = org_keys[start_id];
+  std::string start_string = ori_keys[start_id];
   int last_len = start_string.length();
   for (int i = start_id + 1; i < end_id; i++) {
-    const auto &cur_key = org_keys[i];
+    const auto &cur_key = ori_keys[i];
     cp_len = 0;
     while ((cp_len < last_len) && *(int *)(cur_key.c_str() + cp_len) == *(int *)(start_string.c_str() + cp_len)) {
       cp_len += 4;
@@ -228,7 +230,7 @@ int64_t DoubleCharEncoder::encodeBatch(const std::vector<std::string> &org_keys,
     int int_key_len = int_buf_len;
     int key_idx = idx;
     memcpy(key_buffer, buffer, 8 * (idx + 1));
-    const auto &cur_key = org_keys[i];
+    const auto &cur_key = ori_keys[i];
     int pos = cp_pos;
     while (pos < (int)cur_key.length()) {
       unsigned s_idx = 256 * (uint8_t)cur_key[pos] + (uint8_t)cur_key[pos + 1];

@@ -1,13 +1,13 @@
-#ifndef HU_TUCKER_CG_H
-#define HU_TUCKER_CG_H
+#ifndef HU_TUCKER_CA_H
+#define HU_TUCKER_CA_H
 
 #include <queue>
 
-#include "code_generator.hpp"
+#include "code_assigner.hpp"
 
 namespace ope {
 
-class HuTuckerCG : public CodeGenerator {
+class HuTuckerCA : public CodeAssigner {
  public:
   class Node {
    public:
@@ -24,9 +24,9 @@ class HuTuckerCG : public CodeGenerator {
     Node *right_child;
   };
 
-  HuTuckerCG(){};
-  ~HuTuckerCG();
-  bool genCodes(const std::vector<SymbolFreq> &symbol_freq_list, std::vector<SymbolCode> *symbol_code_list);
+  HuTuckerCA(){};
+  ~HuTuckerCA();
+  bool assignCodes(const std::vector<SymbolFreq> &symbol_freq_list, std::vector<SymbolCode> *symbol_code_list);
   int getCodeLen() const;
   double getCompressionRate() const;
 
@@ -51,9 +51,9 @@ class HuTuckerCG : public CodeGenerator {
   Node *root_;
 };
 
-HuTuckerCG::~HuTuckerCG() { destroyBinaryTree(); }
+HuTuckerCA::~HuTuckerCA() { destroyBinaryTree(); }
 
-bool HuTuckerCG::genCodes(const std::vector<SymbolFreq> &symbol_freq_list, std::vector<SymbolCode> *symbol_code_list) {
+bool HuTuckerCA::assignCodes(const std::vector<SymbolFreq> &symbol_freq_list, std::vector<SymbolCode> *symbol_code_list) {
   clear();
   loadInput(symbol_freq_list);
   genOptimalCodeLen();
@@ -66,9 +66,9 @@ bool HuTuckerCG::genCodes(const std::vector<SymbolFreq> &symbol_freq_list, std::
   return true;
 }
 
-int HuTuckerCG::getCodeLen() const { return -1; }
+int HuTuckerCA::getCodeLen() const { return -1; }
 
-double HuTuckerCG::getCompressionRate() const {
+double HuTuckerCA::getCompressionRate() const {
   int64_t freq_sum = 0;
   for (int i = 0; i < (int)freq_list_.size(); i++) {
     freq_sum += freq_list_[i];
@@ -85,20 +85,20 @@ double HuTuckerCG::getCompressionRate() const {
   return cpr;
 }
 
-void HuTuckerCG::clear() {
+void HuTuckerCA::clear() {
   symbol_list_.clear();
   freq_list_.clear();
   code_len_list_.clear();
 }
 
-void HuTuckerCG::loadInput(const std::vector<SymbolFreq> &symbol_freq_list) {
+void HuTuckerCA::loadInput(const std::vector<SymbolFreq> &symbol_freq_list) {
   for (int i = 0; i < (int)symbol_freq_list.size(); i++) {
     symbol_list_.push_back(symbol_freq_list[i].first);
     freq_list_.push_back(symbol_freq_list[i].second);
   }
 }
 
-void HuTuckerCG::genOptimalCodeLen() {
+void HuTuckerCA::genOptimalCodeLen() {
   int n = (int)freq_list_.size();
   int64_t maxp = 1;
   std::vector<int> L, s, d;
@@ -174,7 +174,7 @@ void HuTuckerCG::genOptimalCodeLen() {
   }
 }
 
-void HuTuckerCG::buildBinaryTree() {
+void HuTuckerCA::buildBinaryTree() {
   initLeafs();
   int max_code_len = getMaxCodeLen();
   std::vector<int> tmp_code_lens;
@@ -198,14 +198,14 @@ void HuTuckerCG::buildBinaryTree() {
   root_ = node_list_[0];
 }
 
-void HuTuckerCG::initLeafs() {
+void HuTuckerCA::initLeafs() {
   for (int i = 0; i < (int)code_len_list_.size(); i++) {
     Node *n = new Node(i);
     node_list_.push_back(n);
   }
 }
 
-int HuTuckerCG::getMaxCodeLen() const {
+int HuTuckerCA::getMaxCodeLen() const {
   int max_len = 0;
   for (int i = 0; i < (int)code_len_list_.size(); i++) {
     if (code_len_list_[i] > max_len) max_len = code_len_list_[i];
@@ -213,7 +213,7 @@ int HuTuckerCG::getMaxCodeLen() const {
   return max_len;
 }
 
-void HuTuckerCG::mergeNodes(const int idx1, const int idx2) {
+void HuTuckerCA::mergeNodes(const int idx1, const int idx2) {
   assert(idx1 < idx2);
   Node *left_node = node_list_[idx1];
   Node *right_node = node_list_[idx2];
@@ -222,7 +222,7 @@ void HuTuckerCG::mergeNodes(const int idx1, const int idx2) {
   node_list_[idx2] = nullptr;
 }
 
-Code HuTuckerCG::lookup(const int idx) const {
+Code HuTuckerCA::lookup(const int idx) const {
   Code code = {0, 0};
   Node *n = root_;
   while (!n->isLeaf()) {
@@ -238,7 +238,7 @@ Code HuTuckerCG::lookup(const int idx) const {
   return code;
 }
 
-void HuTuckerCG::destroyBinaryTree() {
+void HuTuckerCA::destroyBinaryTree() {
   std::queue<Node *> node_q;
   node_q.push(root_);
   while (!node_q.empty()) {
@@ -254,4 +254,4 @@ void HuTuckerCG::destroyBinaryTree() {
 
 }  // namespace ope
 
-#endif  // HU_TUCKER_CG_H
+#endif  // HU_TUCKER_CA_H

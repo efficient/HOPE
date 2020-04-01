@@ -3,7 +3,7 @@
 
 #include "encoder.hpp"
 
-#include "code_generator_factory.hpp"
+#include "code_assigner_factory.hpp"
 #include "dictionary_factory.hpp"
 #include "symbol_selector_factory.hpp"
 
@@ -22,7 +22,7 @@ class NGramEncoder : public Encoder {
   void encodePair(const std::string &l_key, const std::string &r_key, uint8_t *l_buffer, uint8_t *r_buffer,
                   int &l_enc_len, int &r_enc_len) const;
 
-  int64_t encodeBatch(const std::vector<std::string> &org_keys, int start_id, int batch_size,
+  int64_t encodeBatch(const std::vector<std::string> &ori_keys, int start_id, int batch_size,
                       std::vector<std::string> &enc_keys);
 
   int decode(const std::string &enc_key, uint8_t *buffer) const;
@@ -55,9 +55,9 @@ bool NGramEncoder::build(const std::vector<std::string> &key_list, const int64_t
   time_start = getNow();
 #endif
   std::vector<SymbolCode> symbol_code_list;
-  CodeGenerator *code_generator = CodeGeneratorFactory::createCodeGenerator(kCgType);
-  code_generator->genCodes(symbol_freq_list, &symbol_code_list);
-  code_len_ = code_generator->getCodeLen();
+  CodeAssigner *code_assigner = CodeAssignerFactory::createCodeAssigner(kCgType);
+  code_assigner->assignCodes(symbol_freq_list, &symbol_code_list);
+  code_len_ = code_assigner->getCodeLen();
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
   time_end = getNow();
   time_diff = time_end - time_start;
@@ -68,7 +68,6 @@ bool NGramEncoder::build(const std::vector<std::string> &key_list, const int64_t
   time_start = getNow();
 #endif
   dict_ = DictionaryFactory::createDictionary(n_);
-  // return dict_->build(symbol_code_list);
   bool ret_val = dict_->build(symbol_code_list);
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
   time_end = getNow();
@@ -76,6 +75,8 @@ bool NGramEncoder::build(const std::vector<std::string> &key_list, const int64_t
   std::cout << "Build Dictionary time = " << time_diff << std::endl;
   std::cout << "num entries = " << dict_->numEntries() << std::endl;
 #endif
+  delete symbol_selector;
+  delete code_assigner;
   return ret_val;
 }
 
@@ -245,17 +246,17 @@ void NGramEncoder::encodePair(const std::string &l_key, const std::string &r_key
   r_enc_len = (idx_r << 6) + int_buf_len_r;
 }
 
-int64_t NGramEncoder::encodeBatch(const std::vector<std::string> &org_keys, int start_id, int batch_size,
+int64_t NGramEncoder::encodeBatch(const std::vector<std::string> &ori_keys, int start_id, int batch_size,
                                   std::vector<std::string> &enc_keys) {
   int64_t batch_code_size = 0;
   int end_id = start_id + batch_size;
   // Get batch common prefix
   int cp_len = 0;
-  std::string start_string = org_keys[start_id];
+  std::string start_string = ori_keys[start_id];
   const char *key_str = start_string.c_str();
   int last_len = start_string.length();
   for (int i = start_id + 1; i < end_id; i++) {
-    const auto &cur_key = org_keys[i];
+    const auto &cur_key = ori_keys[i];
     const char *cur_key_str = cur_key.c_str();
     cp_len = 0;
     while ((cp_len + 4 < last_len) && *(int *)(cur_key_str + cp_len) == *(int *)(key_str + cp_len)) {
@@ -301,7 +302,7 @@ int64_t NGramEncoder::encodeBatch(const std::vector<std::string> &org_keys, int 
     int int_key_len = int_buf_len;
     int key_idx = idx;
     memcpy(key_buffer, buffer, 8 * (idx + 1));
-    const auto &cur_key = org_keys[i];
+    const auto &cur_key = ori_keys[i];
     const char *cur_key_str = cur_key.c_str();
     int pos = cp_pos;
     while (pos < (int)cur_key.length()) {

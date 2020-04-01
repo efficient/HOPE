@@ -24,7 +24,7 @@ class Encoder {
   // Encode a batch of keys
   // The algorithm is faster than encoding the keys individually
   // because the common prefixes of the keys are only encoded once
-  virtual int64_t encodeBatch(const std::vector<std::string> &org_keys,
+  virtual int64_t encodeBatch(const std::vector<std::string> &ori_keys,
 			      int start_id, int batch_size,
                               std::vector<std::string> &enc_keys) = 0;
 

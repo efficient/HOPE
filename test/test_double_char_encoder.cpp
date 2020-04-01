@@ -7,10 +7,10 @@
 #include <string>
 #include <vector>
 
-#include "code_generator_factory.hpp"
 #include "double_char_encoder.hpp"
 #include "gtest/gtest.h"
 #include "symbol_selector_factory.hpp"
+#include "code_assigner_factory.hpp"
 
 namespace ope {
 

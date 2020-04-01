@@ -62,8 +62,6 @@ class ARTDICTest : public ::testing::Test {
       char next_chr = str[i] + 1;
       return str.substr(0, i) + std::string(1, next_chr);
     }
-    // All characters are shorter than 255 characters
-    assert(str.length() < MAX_STR_LEN);
     return str + std::string(1, 1);
   }
 

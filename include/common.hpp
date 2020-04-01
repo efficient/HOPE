@@ -11,7 +11,6 @@
 //#define USE_ARRAY_DICT 1
 //#define USE_FIXED_LEN_DICT_CODE 1
 #define INCLUDE_DECODE 1
-#define MAX_STR_LEN 50
 //#define BATCH_DRY_ENCODE
 
 const int dict_size_list[9] = {1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144};
@@ -66,11 +65,13 @@ typedef struct {
   Code code;
 } Interval4Gram;
 
+#ifdef PRINT_BUILD_TIME_BREAKDOWN
 double getNow() {
   struct timeval tv;
   gettimeofday(&tv, 0);
   return tv.tv_sec + tv.tv_usec / 1000000.0;
 }
+#endif
 
 }  // namespace ope
 

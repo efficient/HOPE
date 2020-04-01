@@ -18,8 +18,7 @@ class SymbolSelector {
   // symbol_freq_list: outputs that will be passed to the CodeAssigner
   virtual bool selectSymbols(const std::vector<std::string> &key_list,
 			     const int64_t num_limit,
-                             std::vector<SymbolFreq> *symbol_freq_list,
-			     int W = 10000) = 0;
+                             std::vector<SymbolFreq> *symbol_freq_list) = 0;
 };
 
 }  // namespace ope

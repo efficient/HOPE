@@ -1,5 +1,5 @@
-#ifndef CODE_GENERATOR_H
-#define CODE_GENERATOR_H
+#ifndef CODE_ASSIGNER_H
+#define CODE_ASSIGNER_H
 
 #include <assert.h>
 #include <vector>
@@ -8,11 +8,11 @@
 
 namespace ope {
 
-class CodeGenerator {
+class CodeAssigner {
  public:
-  virtual ~CodeGenerator(){};
+  virtual ~CodeAssigner(){};
 
-  virtual bool genCodes(const std::vector<SymbolFreq> &symbol_freq_list,
+  virtual bool assignCodes(const std::vector<SymbolFreq> &symbol_freq_list,
 			std::vector<SymbolCode> *symbol_code_list) = 0;
 
   // -1 means variable length
@@ -23,4 +23,4 @@ class CodeGenerator {
 
 }  // namespace ope
 
-#endif  // CODE_GENERATOR_H
+#endif  // CODE_ASSIGNER_H

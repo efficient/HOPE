@@ -12,13 +12,12 @@
 #include "symbol_selector.hpp"
 
 namespace ope {
-
 class HeuristicSS : public SymbolSelector {
  public:
   HeuristicSS();
 
   bool selectSymbols(const std::vector<std::string> &key_list, const int64_t num_limit,
-                     std::vector<SymbolFreq> *symbol_freq_list, int W = 10000);
+                     std::vector<SymbolFreq> *symbol_freq_list);
 
   std::string getPrevString(const std::string &str);
 
@@ -50,6 +49,8 @@ class HeuristicSS : public SymbolSelector {
   int64_t W;
 
   std::vector<std::pair<std::string, std::string>> intervals_;
+
+  const int kMaxIntervalStringLen = 50;
 };
 
 HeuristicSS::HeuristicSS() {
@@ -60,7 +61,7 @@ HeuristicSS::HeuristicSS() {
 void HeuristicSS::setW(int64_t new_w) { W = new_w; }
 
 bool HeuristicSS::selectSymbols(const std::vector<std::string> &key_list, const int64_t num_limit,
-                                std::vector<SymbolFreq> *symbol_freq_list, int _W) {
+                                std::vector<SymbolFreq> *symbol_freq_list) {
   if (key_list.empty()) return false;
   std::vector<SymbolFreq> blend_freq_table;
   // Build Trie
@@ -72,7 +73,7 @@ bool HeuristicSS::selectSymbols(const std::vector<std::string> &key_list, const 
 
   // Search for best W
   int64_t l = 0;
-  int64_t r = _W * 2;
+  int64_t r = W * 2;
   while (l <= r && abs(num_limit - (int)intervals_.size()) > (int)(0.02 * num_limit)) {
     setW((l + r) / 2);
     intervals_.clear();
@@ -182,7 +183,7 @@ void HeuristicSS::fillGap(std::string start_include, std::string end_exclude) {
     std::string cur_start = std::string(1, start_chr + i);
     std::string cur_end;
     if (int(start_chr) + i >= 255)
-      cur_end = std::string(MAX_STR_LEN, char(255));
+      cur_end = std::string(kMaxIntervalStringLen, char(255));
     else
       cur_end = std::string(1, start_chr + i + 1);
     if (i == 0 && cur_start.compare(start_include) < 0) cur_start = start_include;
@@ -213,7 +214,7 @@ void HeuristicSS::getEqualInterval(std::vector<SymbolFreq> &blend_freq_table) {
   fillGap(std::string(1, char(0)), start_string);
   std::string end_string =
       next_start == blend_freq_table_end ? getNextString(blend_freq_table_end->first) : blend_freq_table_end->first;
-  fillGap(end_string, std::string(MAX_STR_LEN, char(255)));
+  fillGap(end_string, std::string(kMaxIntervalStringLen, char(255)));
 }
 
 void HeuristicSS::mergeIntervals(std::vector<SymbolFreq>::iterator start_exclude_iter,
@@ -286,7 +287,7 @@ std::string HeuristicSS::getNextString(const std::string &str) {
       return str.substr(0, i) + std::string(1, next_chr);
     }
   }
-  return std::string(MAX_STR_LEN, 255);
+  return std::string(kMaxIntervalStringLen, 255);
 }
 
 /*

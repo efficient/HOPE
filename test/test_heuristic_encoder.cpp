@@ -61,6 +61,12 @@ TEST_F(HeuristicEncoderTest, intervalTest) {
     std::string str1 = changeToBinary((iter - 1)->second.code, (iter - 1)->second.len);
     std::string str2 = changeToBinary(iter->second.code, iter->second.len);
     int cmp = str1.compare(str2);
+    if (cmp >= 0) {
+      std::cout << str1 << std::endl << str2 << std::endl;
+      Print((iter-1)->first);
+      Print((iter->first));
+      std::cout << int((iter-1)->second.len) << " " << int(iter->second.len) << std::endl;
+    }
     assert(cmp < 0);
   }
 }

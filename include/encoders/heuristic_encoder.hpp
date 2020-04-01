@@ -6,7 +6,7 @@
 
 #include "encoder.hpp"
 
-#include "code_generator_factory.hpp"
+#include "code_assigner_factory.hpp"
 #include "dictionary_factory.hpp"
 #include "symbol_selector_factory.hpp"
 
@@ -25,7 +25,7 @@ class HeuristicEncoder : public Encoder {
   void encodePair(const std::string &l_key, const std::string &r_key, uint8_t *l_buffer, uint8_t *r_buffer,
                   int &l_enc_len, int &r_enc_len) const;
 
-  int64_t encodeBatch(const std::vector<std::string> &org_keys, int start_id, int batch_size,
+  int64_t encodeBatch(const std::vector<std::string> &ori_keys, int start_id, int batch_size,
                       std::vector<std::string> &enc_keys);
 
   int decode(const std::string &enc_key, uint8_t *buffer) const;
@@ -56,14 +56,15 @@ bool HeuristicEncoder::build(const std::vector<std::string> &key_list, const int
 #endif
   std::vector<SymbolFreq> symbol_freq_list;
   SymbolSelector *symbol_selector = SymbolSelectorFactory::createSymbolSelector(5);
-  symbol_selector->selectSymbols(key_list, dict_size_limit, &symbol_freq_list, W);
+  reinterpret_cast<HeuristicSS *>(symbol_selector)->setW(W);
+  symbol_selector->selectSymbols(key_list, dict_size_limit, &symbol_freq_list);
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
   new_time = getNow();
   symbol_select_time = new_time - curtime;
   curtime = new_time;
 #endif
-  CodeGenerator *code_generator = CodeGeneratorFactory::createCodeGenerator(kCgType);
-  code_generator->genCodes(symbol_freq_list, &symbol_code_list);
+  CodeAssigner *code_assigner = CodeAssignerFactory::createCodeAssigner(kCgType);
+  code_assigner->assignCodes(symbol_freq_list, &symbol_code_list);
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
   new_time = getNow();
   code_assign_time = new_time - curtime;
@@ -79,7 +80,7 @@ bool HeuristicEncoder::build(const std::vector<std::string> &key_list, const int
   std::cout << "Build Dictionary time = " << build_dict_time << std::endl;
 #endif
   delete symbol_selector;
-  delete code_generator;
+  delete code_assigner;
   return dic;
 }
 
@@ -122,7 +123,7 @@ void HeuristicEncoder::encodePair(const std::string &l_key, const std::string &r
   return;
 }
 
-int64_t HeuristicEncoder::encodeBatch(const std::vector<std::string> &org_keys, int start_id, int batch_size,
+int64_t HeuristicEncoder::encodeBatch(const std::vector<std::string> &ori_keys, int start_id, int batch_size,
                                       std::vector<std::string> &enc_keys) {
   return 0;
 }

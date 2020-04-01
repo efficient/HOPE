@@ -12,7 +12,7 @@ class SingleCharSS : public SymbolSelector {
 
   bool selectSymbols(const std::vector<std::string> &key_list,
 		     const int64_t num_limit,
-                     std::vector<SymbolFreq> *symbol_freq_list, int W);
+                     std::vector<SymbolFreq> *symbol_freq_list);
 
  private:
   void countSymbolFreq(const std::vector<std::string> &key_list);
@@ -28,7 +28,7 @@ SingleCharSS::SingleCharSS() {
 
 bool SingleCharSS::selectSymbols(const std::vector<std::string> &key_list,
 				 const int64_t num_limit,
-                                 std::vector<SymbolFreq> *symbol_freq_list, int W) {
+                                 std::vector<SymbolFreq> *symbol_freq_list) {
   if (key_list.empty() || num_limit < kNumSingleChar) return false;
   countSymbolFreq(key_list);
   for (int i = 0; i < kNumSingleChar; i++) {
