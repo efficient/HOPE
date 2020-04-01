@@ -10,7 +10,7 @@ endif()
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g -Wall -Werror -march=native -mavx -pthread -std=c++14")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -Wall -Werror -march=native -mavx -pthread -std=c++14")
 
-option(COVERALLS "Generate coveralls data" ON)
+#option(COVERALLS "Generate coveralls data" ON)
 
 if (COVERALLS)
   include("${CMAKE_CURRENT_SOURCE_DIR}/CodeCoverage.cmake")
@@ -20,8 +20,6 @@ if (COVERALLS)
     NAME coverage
     EXECUTABLE make test
     )
-else()
-  add_definitions(-DNDEBUG)
 endif()
 
 enable_testing()
@@ -30,7 +28,7 @@ include_directories("/usr/local/include")
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/symbol_selectors")
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/code_generators")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/code_assigners")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/dictionaries")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/encoders")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/art_dic_new")
