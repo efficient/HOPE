@@ -17,13 +17,15 @@ namespace ope {
 namespace doublecharencodertest {
 
 static const char kWordFilePath[] = "../../datasets/words.txt";
-static const char kEmailFilePath[] = "../../datasets/emails.txt";
-// static const int kWordTestSize = 234369;
+static const char kWikiFilePath[] = "../../datasets/wikis.txt";
+static const char kUrlFilePath[] = "../../datasets/urls.txt";
 static const int kWordTestSize = 234369;
-static const int kEmailTestSize = 100000;
+static const int kWikiTestSize = 14000;
+static const int kUrlTestSize = 5000;
 static const int kInt64TestSize = 100000;
 static std::vector<std::string> words;
-static std::vector<std::string> emails;
+static std::vector<std::string> wikis;
+static std::vector<std::string> urls;
 static std::vector<std::string> integers;
 static const int kLongestCodeLen = 4096;
 
@@ -90,7 +92,6 @@ TEST_F(DoubleCharEncoderTest, wordTest) {
   for (int i = 0; i < ls - batch_size; i += batch_size) {
     encoder->encodeBatch(words, i, batch_size, enc_keys);
   }
-  std::cout << enc_keys.size() << std::endl;
   for (int i = 0; i < (int)enc_keys.size() - 1; i += 2) {
     std::string str1 = enc_keys[i];
     std::string str2 = enc_keys[i + 1];
@@ -101,47 +102,35 @@ TEST_F(DoubleCharEncoderTest, wordTest) {
   delete encoder;
 }
 
-TEST_F(DoubleCharEncoderTest, emailTest) {
+TEST_F(DoubleCharEncoderTest, wikiTest) {
   DoubleCharEncoder *encoder = new DoubleCharEncoder();
-  encoder->build(words, 65536);
+  encoder->build(wikis, 65536);
   auto buffer = new uint8_t[kLongestCodeLen];
   // encode single key each time
-  for (int i = 0; i < static_cast<int>(emails.size()) - 1; i++) {
-    int len = encoder->encode(emails[i], buffer);
+  for (int i = 0; i < static_cast<int>(wikis.size()) - 1; i++) {
+    int len = encoder->encode(wikis[i], buffer);
     std::string str1 = std::string((const char *)buffer, GetByteLen(len));
-    len = encoder->encode(emails[i + 1], buffer);
+    len = encoder->encode(wikis[i + 1], buffer);
     std::string str2 = std::string((const char *)buffer, GetByteLen(len));
     int cmp = str1.compare(str2);
     EXPECT_LT(cmp, 0);
   }
 }
 
-/*TEST_F(DoubleCharEncoderTest, intTest) {
+TEST_F(DoubleCharEncoderTest, urlTest) {
   DoubleCharEncoder *encoder = new DoubleCharEncoder();
-  encoder->build(integers, 1024);
+  encoder->build(urls, 65536);
   auto buffer = new uint8_t[kLongestCodeLen];
-  for (int i = 0; i < static_cast<int>(integers.size()) - 1; i++) {
-    int len = encoder->encode(integers[i], buffer);
+  // encode single key each time
+  for (int i = 0; i < static_cast<int>(urls.size()) - 1; i++) {
+    int len = encoder->encode(urls[i], buffer);
     std::string str1 = std::string((const char *)buffer, GetByteLen(len));
-    len = encoder->encode(integers[i + 1], buffer);
+    len = encoder->encode(urls[i + 1], buffer);
     std::string str2 = std::string((const char *)buffer, GetByteLen(len));
     int cmp = str1.compare(str2);
     EXPECT_LT(cmp, 0);
-
-#ifdef INCLUDE_DECODE
-    len = encoder->decode(str1, buffer);
-    std::string dec_str1 = std::string((const char *)buffer, len);
-    cmp = dec_str1.compare(integers[i]);
-
-    EXPECT_EQ(cmp, 0);
-
-    len = encoder->decode(str2, buffer);
-    std::string dec_str2 = std::string((const char *)buffer, len);
-    cmp = dec_str2.compare(integers[i + 1]);
-    EXPECT_EQ(cmp, 0);
-#endif
   }
-}*/
+}
 
 TEST_F(DoubleCharEncoderTest, intTest) {
   DoubleCharEncoder *encoder = new DoubleCharEncoder();
@@ -182,13 +171,24 @@ void LoadWords() {
   }
 }
 
-void LoadEmails() {
-  std::ifstream infile(kEmailFilePath);
+void LoadWikis() {
+  std::ifstream infile(kWikiFilePath);
   std::string key;
   int count = 0;
-  while (infile.good() && count < kEmailTestSize) {
+  while (infile.good() && count < kWikiTestSize) {
     infile >> key;
-    emails.push_back(key);
+    wikis.push_back(key);
+    count++;
+  }
+}
+
+void LoadUrls() {
+  std::ifstream infile(kUrlFilePath);
+  std::string key;
+  int count = 0;
+  while (infile.good() && count < kUrlTestSize) {
+    infile >> key;
+    urls.push_back(key);
     count++;
   }
 }
@@ -210,7 +210,8 @@ void GenerateInt64() {
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   ope::doublecharencodertest::LoadWords();
-  ope::doublecharencodertest::LoadEmails();
+  ope::doublecharencodertest::LoadWikis();
+  ope::doublecharencodertest::LoadUrls();
   ope::doublecharencodertest::GenerateInt64();
   return RUN_ALL_TESTS();
 }

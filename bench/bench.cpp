@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "encoder_factory.hpp"
+#include "parameters.h"
 
 static const int64_t MAX_THREE = 80000;
 static const int64_t MAX_FOUR = 450000;

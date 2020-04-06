@@ -7,6 +7,7 @@
 
 #include "PrefixBtree.h"
 #include "encoder_factory.hpp"
+#include "parameters.h"
 
 static const uint64_t kNumEmailRecords = 25000000;
 static const uint64_t kNumWikiRecords = 14000000;
