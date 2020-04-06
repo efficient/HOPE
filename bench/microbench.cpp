@@ -8,6 +8,7 @@
 #include <set>
 #include "common.hpp"
 #include "encoder_factory.hpp"
+#include "parameters.h"
 
 namespace microbench {
 

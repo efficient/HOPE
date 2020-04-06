@@ -50,6 +50,7 @@ bool DoubleCharEncoder::build(const std::vector<std::string> &key_list, const in
   std::vector<SymbolFreq> symbol_freq_list;
   SymbolSelector *symbol_selector = SymbolSelectorFactory::createSymbolSelector(2);
   symbol_selector->selectSymbols(key_list, dict_size_limit, &symbol_freq_list);
+  delete symbol_selector;
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
   std::cout << "Symbol Select time = " << getNow() - cur_time << std::endl;
   cur_time = getNow();
@@ -67,7 +68,6 @@ bool DoubleCharEncoder::build(const std::vector<std::string> &key_list, const in
   std::cout << "Build Dictionary time = " << getNow() - cur_time << std::endl;
 #endif
   delete code_assigner;
-  delete symbol_selector;
   return br;
 }
 
