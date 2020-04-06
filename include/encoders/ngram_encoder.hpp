@@ -75,7 +75,6 @@ bool NGramEncoder::build(const std::vector<std::string> &key_list, const int64_t
   std::cout << "Build Dictionary time = " << time_diff << std::endl;
   std::cout << "num entries = " << dict_->numEntries() << std::endl;
 #endif
-  delete symbol_selector;
   delete code_assigner;
   return ret_val;
 }

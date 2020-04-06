@@ -17,22 +17,33 @@ class NGramSS : public SymbolSelector {
                      std::vector<SymbolFreq> *symbol_freq_list);
 
  private:
+  // count the frequency of every ngram appeared in the sampled keys
   void countSymbolFreq(const std::vector<std::string> &key_list);
-  void pickMostFreqSymbols(const int64_t num_limit, std::vector<std::string> *most_freq_symbols);
+  void pickMostFreqSymbols(const int64_t num_limit,
+			   std::vector<std::string> *most_freq_symbols);
+
+  // create intervals between the selected ngrams on the string axis
   void fillInGap(const std::vector<std::string> &most_freq_symbols);
   void fillInSingleChar(const int first, const int last);
-  std::string commonPrefix(const std::string &str1, const std::string &str2);
+  std::string commonPrefix(const std::string &str1,
+			   const std::string &str2) const;
+
+  // run a test encoding on the sampled keys using the current
+  // interval division to compute the probability of each interval
+  // being accessed. This information is useful later for assigning
+  // optimal prefix codes to the intervals.
   void countIntervalFreq(const std::vector<std::string> &key_list);
-  int binarySearch(const std::string &key);
+  int binarySearch(const std::string &key) const;
 
   int n_;
   std::map<std::string, int64_t> freq_map_;
   std::vector<std::string> interval_prefixes_;
-  std::vector<std::string> interval_boundaries_;
+  std::vector<std::string> interval_boundaries_; // left boundaries
   std::vector<int64_t> interval_freqs_;
 };
 
-bool NGramSS::selectSymbols(const std::vector<std::string> &key_list, const int64_t num_limit,
+bool NGramSS::selectSymbols(const std::vector<std::string> &key_list,
+			    const int64_t num_limit,
                             std::vector<SymbolFreq> *symbol_freq_list) {
   if (key_list.empty()) return false;
   countSymbolFreq(key_list);
@@ -40,7 +51,8 @@ bool NGramSS::selectSymbols(const std::vector<std::string> &key_list, const int6
   int64_t adjust_num_limit = num_limit;
   if (num_limit > (int64_t)freq_map_.size() * 2) {
     adjust_num_limit = (int64_t)freq_map_.size() * 2 - 1;
-    //std::cout << "3 Gram: Input dictionary Size is too big, change to " << adjust_num_limit << std::endl;
+    //std::cout << "3 Gram: Input dictionary Size is too big, change to "
+    //<< adjust_num_limit << std::endl;
   }
   pickMostFreqSymbols((adjust_num_limit / 2), &most_freq_symbols);
   fillInGap(most_freq_symbols);
@@ -48,7 +60,8 @@ bool NGramSS::selectSymbols(const std::vector<std::string> &key_list, const int6
   countIntervalFreq(key_list);
   assert(interval_prefixes_.size() == interval_freqs_.size());
   for (int i = 0; i < (int)interval_boundaries_.size(); i++) {
-    symbol_freq_list->push_back(std::make_pair(interval_boundaries_[i], interval_freqs_[i]));
+    symbol_freq_list->push_back(std::make_pair(interval_boundaries_[i],
+					       interval_freqs_[i]));
   }
   return true;
 }
@@ -70,13 +83,15 @@ void NGramSS::countSymbolFreq(const std::vector<std::string> &key_list) {
   }
 }
 
-void NGramSS::pickMostFreqSymbols(const int64_t num_limit, std::vector<std::string> *most_freq_symbols) {
+void NGramSS::pickMostFreqSymbols(const int64_t num_limit,
+				  std::vector<std::string> *most_freq_symbols) {
   std::vector<SymbolFreq> symbol_freqs;
   std::map<std::string, int64_t>::iterator iter;
   for (iter = freq_map_.begin(); iter != freq_map_.end(); ++iter) {
     symbol_freqs.push_back(std::make_pair(iter->first, iter->second));
   }
-  std::sort(symbol_freqs.begin(), symbol_freqs.end(), [](const SymbolFreq &x, const SymbolFreq &y) {
+  std::sort(symbol_freqs.begin(), symbol_freqs.end(),
+	    [](const SymbolFreq &x, const SymbolFreq &y) {
     if (x.second != y.second) return x.second > y.second;
     return (x.first.compare(y.first) > 0);
   });
@@ -135,7 +150,8 @@ void NGramSS::fillInGap(const std::vector<std::string> &most_freq_symbols) {
   interval_boundaries_.push_back(last_str_right_bound);
   interval_prefixes_.push_back(std::string(1, last_str[0]));
 
-  if ((int)(uint8_t)last_str[0] < 255) fillInSingleChar((int)(uint8_t)(last_str[0] + 1), 255);
+  if ((int)(uint8_t)last_str[0] < 255)
+      fillInSingleChar((int)(uint8_t)(last_str[0] + 1), 255);
 }
 
 void NGramSS::fillInSingleChar(const int first, const int last) {
@@ -145,7 +161,8 @@ void NGramSS::fillInSingleChar(const int first, const int last) {
   }
 }
 
-std::string NGramSS::commonPrefix(const std::string &str1, const std::string &str2) {
+std::string NGramSS::commonPrefix(const std::string &str1,
+				  const std::string &str2) const {
   if (str1[0] != str2[0]) return std::string();
   for (int i = 1; i < n_; i++) {
     if ((int)str1.size() < i) return str1.substr(0, i);
@@ -171,7 +188,7 @@ void NGramSS::countIntervalFreq(const std::vector<std::string> &key_list) {
   }
 }
 
-int NGramSS::binarySearch(const std::string &key) {
+int NGramSS::binarySearch(const std::string &key) const {
   int l = 0;
   int r = interval_boundaries_.size();
   int m = 0;

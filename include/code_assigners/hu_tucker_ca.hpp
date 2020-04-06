@@ -26,7 +26,8 @@ class HuTuckerCA : public CodeAssigner {
 
   HuTuckerCA(){};
   ~HuTuckerCA();
-  bool assignCodes(const std::vector<SymbolFreq> &symbol_freq_list, std::vector<SymbolCode> *symbol_code_list);
+  bool assignCodes(const std::vector<SymbolFreq> &symbol_freq_list,
+		   std::vector<SymbolCode> *symbol_code_list);
   int getCodeLen() const;
   double getCompressionRate() const;
 

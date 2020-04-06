@@ -9,7 +9,8 @@ class FixedLenDictCA : public CodeAssigner {
  public:
   FixedLenDictCA() { code_len_ = 0; };
   ~FixedLenDictCA(){};
-  bool assignCodes(const std::vector<SymbolFreq> &symbol_freq_list, std::vector<SymbolCode> *symbol_code_list);
+  bool assignCodes(const std::vector<SymbolFreq> &symbol_freq_list,
+		   std::vector<SymbolCode> *symbol_code_list);
   int getCodeLen() const;
   double getCompressionRate() const;
 

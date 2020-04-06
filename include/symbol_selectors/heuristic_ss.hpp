@@ -44,7 +44,7 @@ class HeuristicSS : public SymbolSelector {
 
   void encode(const std::string &str, std::vector<int> &cnt);
 
-  int BinarySearch(const std::string &str, unsigned int pos, int &prefix_len);
+  int binarySearch(const std::string &str, unsigned int pos, int &prefix_len);
 
   int64_t W;
 
@@ -101,7 +101,7 @@ bool HeuristicSS::selectSymbols(const std::vector<std::string> &key_list, const 
   return true;
 }
 
-int HeuristicSS::BinarySearch(const std::string &str, unsigned int pos, int &prefix_len) {
+int HeuristicSS::binarySearch(const std::string &str, unsigned int pos, int &prefix_len) {
   int l = 0;
   int r = static_cast<int>(intervals_.size()) - 1;
   assert(pos <= str.size());
@@ -129,7 +129,7 @@ void HeuristicSS::encode(const std::string &str, std::vector<int> &cnt) {
   int prefix_len = 0;
   int interval_idx;
   while (pos < str.size()) {
-    interval_idx = BinarySearch(str, pos, prefix_len);
+    interval_idx = binarySearch(str, pos, prefix_len);
     cnt[interval_idx]++;
     assert(prefix_len > 0);
     pos += prefix_len;

@@ -351,4 +351,4 @@ void ALMImprovedSS::mergeAdjacentComPrefixIntervals() {
 
 }  // namespace ope
 
-#endif  // HEURISTIC_SS_H
+#endif  // ALMImprovedSS_H
