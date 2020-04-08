@@ -1,7 +1,6 @@
 #ifndef DOUBLE_CHAR_ENCODER_H
 #define DOUBLE_CHAR_ENCODER_H
 
-// for memset
 #include <stdio.h>
 #include <string.h>
 
@@ -14,18 +13,18 @@ namespace ope {
 
 class DoubleCharEncoder : public Encoder {
  public:
-  static const int kCgType = 0;
+  static const int kCaType = 0;
   DoubleCharEncoder() = default;
   ~DoubleCharEncoder() = default;
 
   bool build(const std::vector<std::string> &key_list, const int64_t dict_size_limit);
-
   int encode(const std::string &key, uint8_t *buffer) const;
 
-  void encodePair(const std::string &l_key, const std::string &r_key, uint8_t *l_buffer, uint8_t *r_buffer,
+  void encodePair(const std::string &l_key, const std::string &r_key,
+		  uint8_t *l_buffer, uint8_t *r_buffer,
                   int &l_enc_len, int &r_enc_len) const;
-
-  int64_t encodeBatch(const std::vector<std::string> &ori_keys, int start_id, int batch_size,
+  int64_t encodeBatch(const std::vector<std::string> &ori_keys,
+		      int start_id, int batch_size,
                       std::vector<std::string> &enc_keys);
 
   int decode(const std::string &enc_key, uint8_t *buffer) const;
@@ -36,39 +35,31 @@ class DoubleCharEncoder : public Encoder {
  private:
   bool buildDict(const std::vector<SymbolCode> &symbol_code_list);
 
-  Code dict_[65536];
+  Code dict_[kNumDoubleChar];
   SBT *decode_dict_;
 };
 
-bool DoubleCharEncoder::build(const std::vector<std::string> &key_list, const int64_t dict_size_limit) {
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
-  std::cout << "-----------------------------Double Character "
-               "Encoder------------------------------"
-            << std::endl;
-  double cur_time = getNow();
-#endif
+bool DoubleCharEncoder::build(const std::vector<std::string> &key_list,
+			      const int64_t dict_size_limit) {
+  double cur_time = 0;
+  setStopWatch(cur_time, 2);
+
   std::vector<SymbolFreq> symbol_freq_list;
   SymbolSelector *symbol_selector = SymbolSelectorFactory::createSymbolSelector(2);
   symbol_selector->selectSymbols(key_list, dict_size_limit, &symbol_freq_list);
-  delete symbol_selector;
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
-  std::cout << "Symbol Select time = " << getNow() - cur_time << std::endl;
-  cur_time = getNow();
-#endif
+  printElapsedTime(cur_time, 0);
 
   std::vector<SymbolCode> symbol_code_list;
-  CodeAssigner *code_assigner = CodeAssignerFactory::createCodeAssigner(kCgType);
+  CodeAssigner *code_assigner = CodeAssignerFactory::createCodeAssigner(kCaType);
   code_assigner->assignCodes(symbol_freq_list, &symbol_code_list);
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
-  std::cout << "Code Assign(Hu-Tucker) time = " << getNow() - cur_time << std::endl;
-  cur_time = getNow();
-#endif
-  bool br = buildDict(symbol_code_list);
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
-  std::cout << "Build Dictionary time = " << getNow() - cur_time << std::endl;
-#endif
+  printElapsedTime(cur_time, 1);
+
+  bool ret = buildDict(symbol_code_list);
+  printElapsedTime(cur_time, 2);
+
+  delete symbol_selector;
   delete code_assigner;
-  return br;
+  return ret;
 }
 
 int DoubleCharEncoder::encode(const std::string &key, uint8_t *buffer) const {
@@ -101,8 +92,9 @@ int DoubleCharEncoder::encode(const std::string &key, uint8_t *buffer) const {
   return ((idx << 6) + int_buf_len);
 }
 
-void DoubleCharEncoder::encodePair(const std::string &l_key, const std::string &r_key, uint8_t *l_buffer,
-                                   uint8_t *r_buffer, int &l_enc_len, int &r_enc_len) const {
+void DoubleCharEncoder::encodePair(const std::string &l_key, const std::string &r_key,
+				   uint8_t *l_buffer, uint8_t *r_buffer,
+				   int &l_enc_len, int &r_enc_len) const {
   int64_t *int_buf_l = (int64_t *)l_buffer;
   int64_t *int_buf_r = (int64_t *)r_buffer;
   int idx_l = 0, idx_r = 0;
@@ -174,7 +166,8 @@ void DoubleCharEncoder::encodePair(const std::string &l_key, const std::string &
   r_enc_len = (idx_r << 6) + int_buf_len_r;
 }
 
-int64_t DoubleCharEncoder::encodeBatch(const std::vector<std::string> &ori_keys, int start_id, int batch_size,
+int64_t DoubleCharEncoder::encodeBatch(const std::vector<std::string> &ori_keys,
+				       int start_id, int batch_size,
                                        std::vector<std::string> &enc_keys) {
   int64_t batch_code_size = 0;
   int end_id = start_id + batch_size;
@@ -288,25 +281,25 @@ int DoubleCharEncoder::decode(const std::string &enc_key, uint8_t *buffer) const
 #endif
 }
 
-int DoubleCharEncoder::numEntries() const { return 65536; }
+int DoubleCharEncoder::numEntries() const { return kNumDoubleChar; }
 
 int64_t DoubleCharEncoder::memoryUse() const {
 #ifdef INCLUDE_DECODE
-  return sizeof(Code) * 65536 + decode_dict_->memory();
+  return sizeof(Code) * kNumDoubleChar + decode_dict_->memory();
 #else
-  return sizeof(Code) * 65536;
+  return sizeof(Code) * kNumDoubleChar;
 #endif
 }
 
 bool DoubleCharEncoder::buildDict(const std::vector<SymbolCode> &symbol_code_list) {
-  if (symbol_code_list.size() < 65536) return false;
-  for (int i = 0; i < 65536; i++) {
+  if (symbol_code_list.size() < kNumDoubleChar) return false;
+  for (int i = 0; i < kNumDoubleChar; i++) {
     dict_[i] = symbol_code_list[i].second;
   }
 
 #ifdef INCLUDE_DECODE
   std::vector<Code> codes;
-  for (int i = 0; i < 65536; i++) {
+  for (int i = 0; i < kNumDoubleChar; i++) {
     codes.push_back(dict_[i]);
   }
   decode_dict_ = new SBT(codes);

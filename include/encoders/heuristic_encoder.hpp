@@ -13,28 +13,27 @@
 namespace ope {
 class HeuristicEncoder : public Encoder {
  public:
-  static const int kCgType = 0;
+  static const int kCaType = 0;
   HeuristicEncoder(int _W = 10000) { W = _W; };
 
   ~HeuristicEncoder() { delete dict_; };
 
   bool build(const std::vector<std::string> &key_list, const int64_t dict_size_limit);
-
   int encode(const std::string &key, uint8_t *buffer) const;
 
-  void encodePair(const std::string &l_key, const std::string &r_key, uint8_t *l_buffer, uint8_t *r_buffer,
+  void encodePair(const std::string &l_key, const std::string &r_key,
+		  uint8_t *l_buffer, uint8_t *r_buffer,
                   int &l_enc_len, int &r_enc_len) const;
-
-  int64_t encodeBatch(const std::vector<std::string> &ori_keys, int start_id, int batch_size,
+  int64_t encodeBatch(const std::vector<std::string> &ori_keys,
+		      int start_id, int batch_size,
                       std::vector<std::string> &enc_keys);
 
   int decode(const std::string &enc_key, uint8_t *buffer) const;
 
   int numEntries() const;
-
   int64_t memoryUse() const;
 
-  const std::vector<SymbolCode> getSymbolCodeList();
+  const std::vector<SymbolCode> getSymbolCodeList(); // for test
 
  private:
   int W;
@@ -45,43 +44,28 @@ class HeuristicEncoder : public Encoder {
 
 const std::vector<SymbolCode> HeuristicEncoder::getSymbolCodeList() { return symbol_code_list; }
 
-bool HeuristicEncoder::build(const std::vector<std::string> &key_list, const int64_t dict_size_limit) {
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
-  std::cout << "---------------------Heuristic Encoder-------------------------" << std::endl;
-  double curtime = getNow();
-  double new_time = 0;
-  double symbol_select_time = 0;
-  double code_assign_time = 0;
-  double build_dict_time = 0;
-#endif
+bool HeuristicEncoder::build(const std::vector<std::string> &key_list,
+			     const int64_t dict_size_limit) {
+  double cur_time = 0;
+  setStopWatch(cur_time, 5);
+
   std::vector<SymbolFreq> symbol_freq_list;
   SymbolSelector *symbol_selector = SymbolSelectorFactory::createSymbolSelector(5);
   reinterpret_cast<HeuristicSS *>(symbol_selector)->setW(W);
   symbol_selector->selectSymbols(key_list, dict_size_limit, &symbol_freq_list);
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
-  new_time = getNow();
-  symbol_select_time = new_time - curtime;
-  curtime = new_time;
-#endif
-  CodeAssigner *code_assigner = CodeAssignerFactory::createCodeAssigner(kCgType);
+  printElapsedTime(cur_time, 0);
+
+  CodeAssigner *code_assigner = CodeAssignerFactory::createCodeAssigner(kCaType);
   code_assigner->assignCodes(symbol_freq_list, &symbol_code_list);
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
-  new_time = getNow();
-  code_assign_time = new_time - curtime;
-  curtime = new_time;
-#endif
+  printElapsedTime(cur_time, 1);
+
   dict_ = DictionaryFactory::createDictionary(5);
-  bool dic = dict_->build(symbol_code_list);
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
-  new_time = getNow();
-  build_dict_time = new_time - curtime;
-  std::cout << "Symbol Select time = " << symbol_select_time << std::endl;
-  std::cout << "Code Assign(Hu-Tucker) time = " << code_assign_time << std::endl;
-  std::cout << "Build Dictionary time = " << build_dict_time << std::endl;
-#endif
+  bool ret_val = dict_->build(symbol_code_list);
+  printElapsedTime(cur_time, 2);
+
   delete symbol_selector;
   delete code_assigner;
-  return dic;
+  return ret_val;
 }
 
 int HeuristicEncoder::encode(const std::string &key, uint8_t *buffer) const {
@@ -116,14 +100,16 @@ int HeuristicEncoder::encode(const std::string &key, uint8_t *buffer) const {
   return ((idx << 6) + int_buf_len);
 }
 
-void HeuristicEncoder::encodePair(const std::string &l_key, const std::string &r_key, uint8_t *l_buffer,
-                                  uint8_t *r_buffer, int &l_enc_len, int &r_enc_len) const {
+void HeuristicEncoder::encodePair(const std::string &l_key, const std::string &r_key,
+				  uint8_t *l_buffer, uint8_t *r_buffer,
+				  int &l_enc_len, int &r_enc_len) const {
   l_enc_len = encode(l_key, l_buffer);
   r_enc_len = encode(r_key, r_buffer);
   return;
 }
 
-int64_t HeuristicEncoder::encodeBatch(const std::vector<std::string> &ori_keys, int start_id, int batch_size,
+int64_t HeuristicEncoder::encodeBatch(const std::vector<std::string> &ori_keys,
+				      int start_id, int batch_size,
                                       std::vector<std::string> &enc_keys) {
   return 0;
 }
@@ -133,6 +119,7 @@ int HeuristicEncoder::decode(const std::string &enc_key, uint8_t *buffer) const 
 int HeuristicEncoder::numEntries() const { return dict_->numEntries(); }
 
 int64_t HeuristicEncoder::memoryUse() const { return dict_->memoryUse(); }
+
 }  // namespace ope
 
-#endif
+#endif  // HEURISTIC_ENCODER_H

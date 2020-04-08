@@ -13,20 +13,21 @@ namespace ope {
 
 class SingleCharEncoder : public Encoder {
  public:
-  static const int kCgType = 0;
+  static const int kCaType = 0;
   SingleCharEncoder(){};
   ~SingleCharEncoder() {
-    if (decode_dict_) delete decode_dict_;
+    if (decode_dict_)
+	delete decode_dict_;
   }
 
   bool build(const std::vector<std::string> &key_list, const int64_t dict_size_limit);
-
   int encode(const std::string &key, uint8_t *buffer) const;
 
-  void encodePair(const std::string &l_key, const std::string &r_key, uint8_t *l_buffer, uint8_t *r_buffer,
+  void encodePair(const std::string &l_key, const std::string &r_key,
+		  uint8_t *l_buffer, uint8_t *r_buffer,
                   int &l_enc_len, int &r_enc_len) const;
-
-  int64_t encodeBatch(const std::vector<std::string> &ori_keys, int start_id, int batch_size,
+  int64_t encodeBatch(const std::vector<std::string> &ori_keys,
+		      int start_id, int batch_size,
                       std::vector<std::string> &enc_keys);
 
   int decode(const std::string &enc_key, uint8_t *buffer) const;
@@ -37,38 +38,31 @@ class SingleCharEncoder : public Encoder {
  private:
   bool buildDict(const std::vector<SymbolCode> &symbol_code_list);
 
-  Code dict_[256];
+  Code dict_[kNumSingleChar];
   SBT *decode_dict_;
 };
 
-bool SingleCharEncoder::build(const std::vector<std::string> &key_list, const int64_t dict_size_limit) {
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
-  std::cout << "------------------------Build single character "
-               "Encoder-----------------------"
-            << std::endl;
-  double cur_time = getNow();
-#endif
+bool SingleCharEncoder::build(const std::vector<std::string> &key_list,
+			      const int64_t dict_size_limit) {
+  double cur_time = 0;
+  setStopWatch(cur_time, 1);
+  
   std::vector<SymbolFreq> symbol_freq_list;
   SymbolSelector *symbol_selector = SymbolSelectorFactory::createSymbolSelector(1);
   symbol_selector->selectSymbols(key_list, dict_size_limit, &symbol_freq_list);
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
-  std::cout << "Symbol Select time = " << getNow() - cur_time << std::endl;
-  cur_time = getNow();
-#endif
+  printElapsedTime(cur_time, 0);
+  
   std::vector<SymbolCode> symbol_code_list;
-  CodeAssigner *code_assigner = CodeAssignerFactory::createCodeAssigner(kCgType);
+  CodeAssigner *code_assigner = CodeAssignerFactory::createCodeAssigner(kCaType);
   code_assigner->assignCodes(symbol_freq_list, &symbol_code_list);
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
-  std::cout << "Code Assign(Hu-Tucker) time = " << getNow() - cur_time << std::endl;
-  cur_time = getNow();
-#endif
-  bool br = buildDict(symbol_code_list);
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
-  std::cout << "Build Dictionary time = " << getNow() - cur_time << std::endl;
-#endif
+  printElapsedTime(cur_time, 1);
+  
+  bool ret_val = buildDict(symbol_code_list);
+  printElapsedTime(cur_time, 2);
+
   delete symbol_selector;
   delete code_assigner;
-  return br;
+  return ret_val;
 }
 
 int SingleCharEncoder::encode(const std::string &key, uint8_t *buffer) const {
@@ -99,8 +93,9 @@ int SingleCharEncoder::encode(const std::string &key, uint8_t *buffer) const {
   return ((idx << 6) + int_buf_len);
 }
 
-void SingleCharEncoder::encodePair(const std::string &l_key, const std::string &r_key, uint8_t *l_buffer,
-                                   uint8_t *r_buffer, int &l_enc_len, int &r_enc_len) const {
+void SingleCharEncoder::encodePair(const std::string &l_key, const std::string &r_key,
+				   uint8_t *l_buffer, uint8_t *r_buffer,
+				   int &l_enc_len, int &r_enc_len) const {
   int64_t *int_buf_l = (int64_t *)l_buffer;
   int64_t *int_buf_r = (int64_t *)r_buffer;
   int idx_l = 0, idx_r = 0;
@@ -163,10 +158,12 @@ void SingleCharEncoder::encodePair(const std::string &l_key, const std::string &
   r_enc_len = (idx_r << 6) + int_buf_len_r;
 }
 
-int64_t SingleCharEncoder::encodeBatch(const std::vector<std::string> &ori_keys, int start_id, int batch_size,
+int64_t SingleCharEncoder::encodeBatch(const std::vector<std::string> &ori_keys,
+				       int start_id, int batch_size,
                                        std::vector<std::string> &enc_keys) {
   int64_t batch_code_size = 0;
-  int end_id = (int)ori_keys.size() < start_id + batch_size ? (int)ori_keys.size() : start_id + batch_size;
+  int end_id = (int)ori_keys.size() < (start_id + batch_size) ? (int)ori_keys.size()
+				      : (start_id + batch_size);
   // Get batch common prefix
   int cp_len = 0;
   std::string start_string = ori_keys[start_id];
@@ -233,7 +230,7 @@ int64_t SingleCharEncoder::encodeBatch(const std::vector<std::string> &ori_keys,
     int_key_buf[key_idx] <<= (64 - int_key_len);
     int_key_buf[key_idx] = __builtin_bswap64(int_key_buf[key_idx]);
     int64_t cur_size = (key_idx << 6) + int_key_len;
-#ifndef BATCH_DRY_ENCPDE
+#ifndef BATCH_DRY_ENCODE
     int enc_len = ((key_idx << 6) + int_key_len + 7) >> 3;
     enc_keys.push_back(std::string((const char *)key_buffer, enc_len));
 #endif
@@ -264,25 +261,25 @@ int SingleCharEncoder::decode(const std::string &enc_key, uint8_t *buffer) const
 #endif
 }
 
-int SingleCharEncoder::numEntries() const { return 256; }
+int SingleCharEncoder::numEntries() const { return kNumSingleChar; }
 
 int64_t SingleCharEncoder::memoryUse() const {
 #ifdef INCLUDE_DECODE
-  return sizeof(Code) * 256 + decode_dict_->memory();
+  return sizeof(Code) * kNumSingleChar + decode_dict_->memory();
 #else
-  return sizeof(Code) * 256;
+  return sizeof(Code) * kNumSingleChar;
 #endif
 }
 
 bool SingleCharEncoder::buildDict(const std::vector<SymbolCode> &symbol_code_list) {
-  if (symbol_code_list.size() < 256) return false;
-  for (int i = 0; i < 256; i++) {
+  if (symbol_code_list.size() < kNumSingleChar) return false;
+  for (int i = 0; i < kNumSingleChar; i++) {
     dict_[i] = symbol_code_list[i].second;
   }
 
 #ifdef INCLUDE_DECODE
   std::vector<Code> codes;
-  for (int i = 0; i < 256; i++) {
+  for (int i = 0; i < kNumSingleChar; i++) {
     codes.push_back(dict_[i]);
   }
   decode_dict_ = new SBT(codes);

@@ -12,28 +12,27 @@
 namespace ope {
 class ALMImprovedEncoder : public Encoder {
  public:
-  static const int kCgType = 0;
+  static const int kCaType = 0;
   ALMImprovedEncoder(int _W = 10000) { W = _W; };
 
   ~ALMImprovedEncoder() { delete dict_; };
 
   bool build(const std::vector<std::string> &key_list, const int64_t dict_size_limit);
-
   int encode(const std::string &key, uint8_t *buffer) const;
 
-  void encodePair(const std::string &l_key, const std::string &r_key, uint8_t *l_buffer, uint8_t *r_buffer,
+  void encodePair(const std::string &l_key, const std::string &r_key,
+		  uint8_t *l_buffer, uint8_t *r_buffer,
                   int &l_enc_len, int &r_enc_len) const;
-
-  int64_t encodeBatch(const std::vector<std::string> &ori_keys, int start_id, int batch_size,
+  int64_t encodeBatch(const std::vector<std::string> &ori_keys,
+		      int start_id, int batch_size,
                       std::vector<std::string> &enc_keys);
 
   int decode(const std::string &enc_key, uint8_t *buffer) const;
 
   int numEntries() const;
-
   int64_t memoryUse() const;
 
-  std::vector<SymbolCode> getSymbolCodeList();
+  std::vector<SymbolCode> getSymbolCodeList(); // for test
 
  private:
   int W;
@@ -44,43 +43,28 @@ class ALMImprovedEncoder : public Encoder {
 
 std::vector<SymbolCode> ALMImprovedEncoder::getSymbolCodeList() { return symbol_code_list; }
 
-bool ALMImprovedEncoder::build(const std::vector<std::string> &key_list, const int64_t dict_size_limit) {
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
-  std::cout << "---------------------ALM Improved-------------------------" << std::endl;
-  double curtime = getNow();
-  double symbol_select_time = 0;
-  double code_assign_time = 0;
-  double build_dict_time = 0;
-#endif
+bool ALMImprovedEncoder::build(const std::vector<std::string> &key_list,
+			       const int64_t dict_size_limit) {
+  double cur_time = 0;
+  setStopWatch(cur_time, 6);
+
   std::vector<SymbolFreq> symbol_freq_list;
   SymbolSelector *symbol_selector = SymbolSelectorFactory::createSymbolSelector(6);
   reinterpret_cast<ALMImprovedSS *>(symbol_selector)->setW(W);
   symbol_selector->selectSymbols(key_list, dict_size_limit, &symbol_freq_list);
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
-  double new_time = getNow();
-  symbol_select_time = new_time - curtime;
-  curtime = new_time;
-#endif
-  CodeAssigner *code_assigner = CodeAssignerFactory::createCodeAssigner(kCgType);
-  code_assigner->assignCodes(symbol_freq_list, &symbol_code_list);
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
-  new_time = getNow();
-  code_assign_time = new_time - curtime;
-  curtime = new_time;
-#endif
-  dict_ = DictionaryFactory::createDictionary(5);
-  bool dic = dict_->build(symbol_code_list);
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
-  new_time = getNow();
-  build_dict_time = new_time - curtime;
+  printElapsedTime(cur_time, 0);
 
-  std::cout << "Symbol Select time = " << symbol_select_time << std::endl;
-  std::cout << "Code Assign time = " << code_assign_time << std::endl;
-  std::cout << "Build Dictionary time = " << build_dict_time << std::endl;
-#endif
+  CodeAssigner *code_assigner = CodeAssignerFactory::createCodeAssigner(kCaType);
+  code_assigner->assignCodes(symbol_freq_list, &symbol_code_list);
+  printElapsedTime(cur_time, 1);
+
+  dict_ = DictionaryFactory::createDictionary(5);
+  bool ret_val = dict_->build(symbol_code_list);
+  printElapsedTime(cur_time, 2);
+
   delete symbol_selector;
   delete code_assigner;
-  return dic;
+  return ret_val;
 }
 
 int ALMImprovedEncoder::encode(const std::string &key, uint8_t *buffer) const {
@@ -115,14 +99,16 @@ int ALMImprovedEncoder::encode(const std::string &key, uint8_t *buffer) const {
   return ((idx << 6) + int_buf_len);
 }
 
-void ALMImprovedEncoder::encodePair(const std::string &l_key, const std::string &r_key, uint8_t *l_buffer,
-                                    uint8_t *r_buffer, int &l_enc_len, int &r_enc_len) const {
+void ALMImprovedEncoder::encodePair(const std::string &l_key, const std::string &r_key,
+				    uint8_t *l_buffer, uint8_t *r_buffer,
+				    int &l_enc_len, int &r_enc_len) const {
   l_enc_len = encode(l_key, l_buffer);
   r_enc_len = encode(r_key, r_buffer);
   return;
 }
 
-int64_t ALMImprovedEncoder::encodeBatch(const std::vector<std::string> &ori_keys, int start_id, int batch_size,
+int64_t ALMImprovedEncoder::encodeBatch(const std::vector<std::string> &ori_keys,
+					int start_id, int batch_size,
                                         std::vector<std::string> &enc_keys) {
   return 0;
 }
@@ -132,6 +118,7 @@ int ALMImprovedEncoder::decode(const std::string &enc_key, uint8_t *buffer) cons
 int ALMImprovedEncoder::numEntries() const { return dict_->numEntries(); }
 
 int64_t ALMImprovedEncoder::memoryUse() const { return dict_->memoryUse(); }
+
 }  // namespace ope
 
-#endif
+#endif  // ALMIMPROVED_ENCODER_H

@@ -26,7 +26,7 @@ class EncoderFactory {
     else if (type == 6)
       return new ALMImprovedEncoder(W);
     else
-      return new SingleCharEncoder();
+      return new DoubleCharEncoder();
   }
 };
 

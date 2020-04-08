@@ -11,18 +11,18 @@ namespace ope {
 
 class NGramEncoder : public Encoder {
  public:
-  static const int kCgType = 0;
+  static const int kCaType = 0;
   NGramEncoder(int n) : n_(n){};
   ~NGramEncoder() { delete dict_; };
 
   bool build(const std::vector<std::string> &key_list, const int64_t dict_size_limit);
-
   int encode(const std::string &key, uint8_t *buffer) const;
 
-  void encodePair(const std::string &l_key, const std::string &r_key, uint8_t *l_buffer, uint8_t *r_buffer,
+  void encodePair(const std::string &l_key, const std::string &r_key,
+		  uint8_t *l_buffer, uint8_t *r_buffer,
                   int &l_enc_len, int &r_enc_len) const;
-
-  int64_t encodeBatch(const std::vector<std::string> &ori_keys, int start_id, int batch_size,
+  int64_t encodeBatch(const std::vector<std::string> &ori_keys,
+		      int start_id, int batch_size,
                       std::vector<std::string> &enc_keys);
 
   int decode(const std::string &enc_key, uint8_t *buffer) const;
@@ -32,49 +32,31 @@ class NGramEncoder : public Encoder {
 
  private:
   int n_;
-  int code_len_;  // -1 means variable length
+  int code_len_; // -1 means variable length
   Dictionary *dict_;
 };
 
-bool NGramEncoder::build(const std::vector<std::string> &key_list, const int64_t dict_size_limit) {
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
-  std::cout << "------------------------" << n_ << " Gram Encoder-----------------------" << std::endl;
-  double time_start = getNow();
-#endif
+bool NGramEncoder::build(const std::vector<std::string> &key_list,
+			 const int64_t dict_size_limit) {
+  double cur_time = 0;
+  setStopWatch(cur_time, n_);
+
   std::vector<SymbolFreq> symbol_freq_list;
   SymbolSelector *symbol_selector = SymbolSelectorFactory::createSymbolSelector(n_);
   symbol_selector->selectSymbols(key_list, dict_size_limit, &symbol_freq_list);
   delete symbol_selector;
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
-  double time_end = getNow();
-  double time_diff = time_end - time_start;
-  std::cout << "Symbol Select time = " << time_diff << std::endl;
-#endif
+  printElapsedTime(cur_time, 0);
 
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
-  time_start = getNow();
-#endif
   std::vector<SymbolCode> symbol_code_list;
-  CodeAssigner *code_assigner = CodeAssignerFactory::createCodeAssigner(kCgType);
+  CodeAssigner *code_assigner = CodeAssignerFactory::createCodeAssigner(kCaType);
   code_assigner->assignCodes(symbol_freq_list, &symbol_code_list);
   code_len_ = code_assigner->getCodeLen();
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
-  time_end = getNow();
-  time_diff = time_end - time_start;
-  std::cout << "Code Assign(Hu-Tucker) time = " << time_diff << std::endl;
-#endif
+  printElapsedTime(cur_time, 1);
 
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
-  time_start = getNow();
-#endif
   dict_ = DictionaryFactory::createDictionary(n_);
   bool ret_val = dict_->build(symbol_code_list);
-#ifdef PRINT_BUILD_TIME_BREAKDOWN
-  time_end = getNow();
-  time_diff = time_end - time_start;
-  std::cout << "Build Dictionary time = " << time_diff << std::endl;
-  std::cout << "num entries = " << dict_->numEntries() << std::endl;
-#endif
+  printElapsedTime(cur_time, 2);
+
   delete code_assigner;
   return ret_val;
 }
@@ -263,7 +245,7 @@ int64_t NGramEncoder::encodeBatch(const std::vector<std::string> &ori_keys, int 
     }
     while (cp_len < last_len && cur_key[cp_len] == start_string[cp_len]) cp_len++;
     last_len = cp_len;
-    //    com_prefix = com_prefix.substr(0, cp_len);
+    // com_prefix = com_prefix.substr(0, cp_len);
   }
   // cp_len = (int)com_prefix.length();
   uint8_t buffer[8192];

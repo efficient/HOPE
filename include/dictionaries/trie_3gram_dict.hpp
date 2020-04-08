@@ -243,7 +243,8 @@ Code Trie3GramDict::lookup(const char *symbol, const int symbol_len, int &prefix
 int Trie3GramDict::numEntries() const { return dict_size_; }
 
 int64_t Trie3GramDict::memoryUse() const {
-  return (sizeof(Trie3GramDict) + sizeof(TrieNode) * (1 + level_1_num_nodes_ + level_2_num_nodes_) +
+  return (sizeof(Trie3GramDict)
+	  + sizeof(TrieNode) * (1 + level_1_num_nodes_ + level_2_num_nodes_) +
           sizeof(Code) * num_leafs_);
 }
 
