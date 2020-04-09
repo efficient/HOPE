@@ -4,7 +4,7 @@
 #include "ALMImproved_encoder.hpp"
 #include "double_char_encoder.hpp"
 #include "encoder.hpp"
-#include "heuristic_encoder.hpp"
+#include "ALM_encoder.hpp"
 #include "ngram_encoder.hpp"
 #include "single_char_encoder.hpp"
 
@@ -12,7 +12,7 @@ namespace ope {
 
 class EncoderFactory {
  public:
-  static Encoder *createEncoder(const int type, int W = 20000) {
+  static Encoder *createEncoder(const int type, int W = 10000) {
     if (type == 1)
       return new SingleCharEncoder();
     else if (type == 2)
@@ -22,7 +22,7 @@ class EncoderFactory {
     else if (type == 4)
       return new NGramEncoder(4);
     else if (type == 5)
-      return new HeuristicEncoder(W);
+      return new ALMEncoder(W);
     else if (type == 6)
       return new ALMImprovedEncoder(W);
     else

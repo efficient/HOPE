@@ -3,7 +3,7 @@
 
 #include "ALMImproved_ss.hpp"
 #include "double_char_ss.hpp"
-#include "heuristic_ss.hpp"
+#include "ALM_ss.hpp"
 #include "ngram_ss.hpp"
 #include "single_char_ss.hpp"
 #include "symbol_selector.hpp"
@@ -22,7 +22,7 @@ class SymbolSelectorFactory {
     else if (type == 4)
       return new NGramSS(4);
     else if (type == 5)
-      return new HeuristicSS();
+      return new ALMSS();
     else if (type == 6)
       return new ALMImprovedSS();
     else

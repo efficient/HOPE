@@ -1,5 +1,5 @@
-#ifndef HEURISTIC_ENCODER_H
-#define HEURISTIC_ENCODER_H
+#ifndef ALM_ENCODER_H
+#define ALM_ENCODER_H
 
 #include <string.h>
 #include <vector>
@@ -11,12 +11,12 @@
 #include "symbol_selector_factory.hpp"
 
 namespace ope {
-class HeuristicEncoder : public Encoder {
+class ALMEncoder : public Encoder {
  public:
   static const int kCaType = 0;
-  HeuristicEncoder(int _W = 10000) { W = _W; };
+  ALMEncoder(int _W = 10000) { W = _W; };
 
-  ~HeuristicEncoder() { delete dict_; };
+  ~ALMEncoder() { delete dict_; };
 
   bool build(const std::vector<std::string> &key_list, const int64_t dict_size_limit);
   int encode(const std::string &key, uint8_t *buffer) const;
@@ -32,26 +32,24 @@ class HeuristicEncoder : public Encoder {
 
   int numEntries() const;
   int64_t memoryUse() const;
-
-  const std::vector<SymbolCode> getSymbolCodeList(); // for test
+  std::vector<SymbolCode> getSymbolCodeList() { return symbol_code_list; } // for test
 
  private:
   int W;
   Dictionary *dict_;
   std::vector<SymbolCode> symbol_code_list;
   std::string changeToBinary(int64_t num, int8_t len);
+  inline int GetByteLen(const int bitlen) { return ((bitlen + 7) & ~7) / 8; };
 };
 
-const std::vector<SymbolCode> HeuristicEncoder::getSymbolCodeList() { return symbol_code_list; }
-
-bool HeuristicEncoder::build(const std::vector<std::string> &key_list,
+bool ALMEncoder::build(const std::vector<std::string> &key_list,
 			     const int64_t dict_size_limit) {
   double cur_time = 0;
   setStopWatch(cur_time, 5);
 
   std::vector<SymbolFreq> symbol_freq_list;
   SymbolSelector *symbol_selector = SymbolSelectorFactory::createSymbolSelector(5);
-  reinterpret_cast<HeuristicSS *>(symbol_selector)->setW(W);
+  reinterpret_cast<ALMSS *>(symbol_selector)->setW(W);
   symbol_selector->selectSymbols(key_list, dict_size_limit, &symbol_freq_list);
   printElapsedTime(cur_time, 0);
 
@@ -68,7 +66,7 @@ bool HeuristicEncoder::build(const std::vector<std::string> &key_list,
   return ret_val;
 }
 
-int HeuristicEncoder::encode(const std::string &key, uint8_t *buffer) const {
+int ALMEncoder::encode(const std::string &key, uint8_t *buffer) const {
   int64_t *int_buf = (int64_t *)buffer;
   int idx = 0;
   int_buf[0] = 0;
@@ -100,7 +98,7 @@ int HeuristicEncoder::encode(const std::string &key, uint8_t *buffer) const {
   return ((idx << 6) + int_buf_len);
 }
 
-void HeuristicEncoder::encodePair(const std::string &l_key, const std::string &r_key,
+void ALMEncoder::encodePair(const std::string &l_key, const std::string &r_key,
 				  uint8_t *l_buffer, uint8_t *r_buffer,
 				  int &l_enc_len, int &r_enc_len) const {
   l_enc_len = encode(l_key, l_buffer);
@@ -108,18 +106,27 @@ void HeuristicEncoder::encodePair(const std::string &l_key, const std::string &r
   return;
 }
 
-int64_t HeuristicEncoder::encodeBatch(const std::vector<std::string> &ori_keys,
+int64_t ALMEncoder::encodeBatch(const std::vector<std::string> &ori_keys,
 				      int start_id, int batch_size,
                                       std::vector<std::string> &enc_keys) {
-  return 0;
+  uint8_t key_buffer[8192];
+  int64_t batch_code_size = 0;
+  for (int i = 0; i < batch_size; i++) {
+    int enc_len = GetByteLen(encode(ori_keys[start_id + i], key_buffer));
+#ifndef BATCH_DRY_ENCODE
+    enc_keys.push_back(std::string((const char *)key_buffer, enc_len));
+#endif
+    batch_code_size += enc_len;
+  }
+  return batch_code_size;
 }
 
-int HeuristicEncoder::decode(const std::string &enc_key, uint8_t *buffer) const { return 0; }
+int ALMEncoder::decode(const std::string &enc_key, uint8_t *buffer) const { return 0; }
 
-int HeuristicEncoder::numEntries() const { return dict_->numEntries(); }
+int ALMEncoder::numEntries() const { return dict_->numEntries(); }
 
-int64_t HeuristicEncoder::memoryUse() const { return dict_->memoryUse(); }
+int64_t ALMEncoder::memoryUse() const { return dict_->memoryUse(); }
 
 }  // namespace ope
 
-#endif  // HEURISTIC_ENCODER_H
+#endif  // ALM_ENCODER_H

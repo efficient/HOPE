@@ -1,5 +1,5 @@
-#ifndef HEURISTIC_SS_H
-#define HEURISTIC_SS_H
+#ifndef ALM_SS_H
+#define ALM_SS_H
 
 #include <math.h>
 #include <algorithm>
@@ -12,9 +12,9 @@
 #include "symbol_selector.hpp"
 
 namespace ope {
-class HeuristicSS : public SymbolSelector {
+class ALMSS : public SymbolSelector {
  public:
-  HeuristicSS();
+  ALMSS();
 
   bool selectSymbols(const std::vector<std::string> &key_list, const int64_t num_limit,
                      std::vector<SymbolFreq> *symbol_freq_list);
@@ -53,14 +53,14 @@ class HeuristicSS : public SymbolSelector {
   const int kMaxIntervalStringLen = 50;
 };
 
-HeuristicSS::HeuristicSS() {
+ALMSS::ALMSS() {
   W = 20000;
   intervals_.clear();
 }
 
-void HeuristicSS::setW(int64_t new_w) { W = new_w; }
+void ALMSS::setW(int64_t new_w) { W = new_w; }
 
-bool HeuristicSS::selectSymbols(const std::vector<std::string> &key_list, const int64_t num_limit,
+bool ALMSS::selectSymbols(const std::vector<std::string> &key_list, const int64_t num_limit,
                                 std::vector<SymbolFreq> *symbol_freq_list) {
   if (key_list.empty()) return false;
   std::vector<SymbolFreq> blend_freq_table;
@@ -101,7 +101,7 @@ bool HeuristicSS::selectSymbols(const std::vector<std::string> &key_list, const 
   return true;
 }
 
-int HeuristicSS::binarySearch(const std::string &str, unsigned int pos, int &prefix_len) {
+int ALMSS::binarySearch(const std::string &str, unsigned int pos, int &prefix_len) {
   int l = 0;
   int r = static_cast<int>(intervals_.size()) - 1;
   assert(pos <= str.size());
@@ -124,7 +124,7 @@ int HeuristicSS::binarySearch(const std::string &str, unsigned int pos, int &pre
   return r;
 }
 
-void HeuristicSS::encode(const std::string &str, std::vector<int> &cnt) {
+void ALMSS::encode(const std::string &str, std::vector<int> &cnt) {
   unsigned int pos = 0;
   int prefix_len = 0;
   int interval_idx;
@@ -136,7 +136,7 @@ void HeuristicSS::encode(const std::string &str, std::vector<int> &cnt) {
   }
 }
 
-void HeuristicSS::getIntervalFreqByEntropy(std::vector<SymbolFreq> *symbol_freq_list,
+void ALMSS::getIntervalFreqByEntropy(std::vector<SymbolFreq> *symbol_freq_list,
                                            const std::vector<std::string> &key_list) {
   std::vector<int> cnt(intervals_.size(), 0);
   for (const auto &iter : key_list) {
@@ -169,7 +169,7 @@ void HeuristicSS::getIntervalFreqByEntropy(std::vector<SymbolFreq> *symbol_freq_
 #endif
 }
 
-void HeuristicSS::fillGap(std::string start_include, std::string end_exclude) {
+void ALMSS::fillGap(std::string start_include, std::string end_exclude) {
   if (start_include.compare(end_exclude) >= 0) return;
   std::string com_prefix = commonPrefix(start_include, getPrevString(end_exclude));
   if (!com_prefix.empty()) {
@@ -193,7 +193,7 @@ void HeuristicSS::fillGap(std::string start_include, std::string end_exclude) {
   }
 }
 
-void HeuristicSS::getEqualInterval(std::vector<SymbolFreq> &blend_freq_table) {
+void ALMSS::getEqualInterval(std::vector<SymbolFreq> &blend_freq_table) {
   std::sort(blend_freq_table.begin(), blend_freq_table.end(),
             [](const SymbolFreq &x, const SymbolFreq &y) { return x.first.compare(y.first) < 0; });
   auto next_start = blend_freq_table.begin();
@@ -216,7 +216,7 @@ void HeuristicSS::getEqualInterval(std::vector<SymbolFreq> &blend_freq_table) {
   fillGap(end_string, std::string(kMaxIntervalStringLen, char(255)));
 }
 
-void HeuristicSS::mergeIntervals(std::vector<SymbolFreq>::iterator start_exclude_iter,
+void ALMSS::mergeIntervals(std::vector<SymbolFreq>::iterator start_exclude_iter,
                                  std::vector<SymbolFreq>::iterator end_exclude_iter) {
   if (end_exclude_iter - start_exclude_iter <= 0) return;
   bool has_prefix = false;
@@ -250,7 +250,7 @@ void HeuristicSS::mergeIntervals(std::vector<SymbolFreq>::iterator start_exclude
   fillGap(interval_end, end_exclude_iter->first);
 }
 
-std::string HeuristicSS::commonPrefix(const std::string &str1, const std::string &str2) {
+std::string ALMSS::commonPrefix(const std::string &str1, const std::string &str2) {
   int min_len = (int)std::min(str1.size(), str2.size());
   int i = 0;
   for (; i < min_len; i++) {
@@ -259,7 +259,7 @@ std::string HeuristicSS::commonPrefix(const std::string &str1, const std::string
   return str1.substr(0, i);
 }
 
-std::string HeuristicSS::getPrevString(const std::string &str) {
+std::string ALMSS::getPrevString(const std::string &str) {
   bool end_with_startchr = false;
   for (int i = (int)str.size() - 1; i >= 0; i--) {
     if (uint8_t(str[i]) == 0) {
@@ -278,7 +278,7 @@ std::string HeuristicSS::getPrevString(const std::string &str) {
   return std::string();
 }
 
-std::string HeuristicSS::getNextString(const std::string &str) {
+std::string ALMSS::getNextString(const std::string &str) {
   assert(str.length() > 0);
   for (int i = int(str.length() - 1); i >= 0; i--) {
     if (uint8_t(str[i]) != 255) {
@@ -290,7 +290,7 @@ std::string HeuristicSS::getNextString(const std::string &str) {
 }
 
 /*
-void HeuristicSS::checkIntervals(std::string &start_str, std::string &end_str) {
+void ALMSS::checkIntervals(std::string &start_str, std::string &end_str) {
   if (start_str.compare(end_str) >= 0) assert(false);
   std::sort(intervals_.begin(), intervals_.end(),
             [](const std::pair<std::string, std::string> &x, const std::pair<std::string, std::string> &y) {
@@ -329,7 +329,7 @@ void HeuristicSS::checkIntervals(std::string &start_str, std::string &end_str) {
 }
 */
 
-void HeuristicSS::mergeAdjacentComPrefixIntervals() {
+void ALMSS::mergeAdjacentComPrefixIntervals() {
   std::vector<std::pair<std::string, std::string>> merged_intervals;
   merged_intervals.push_back(std::make_pair(intervals_.begin()->first, intervals_.begin()->second));
   std::string last_prefix = std::string();
@@ -351,4 +351,4 @@ void HeuristicSS::mergeAdjacentComPrefixIntervals() {
 
 }  // namespace ope
 
-#endif  // HEURISTIC_SS_H
+#endif  // ALM_SS_H

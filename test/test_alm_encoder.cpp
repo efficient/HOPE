@@ -9,11 +9,11 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "heuristic_encoder.hpp"
+#include "ALM_encoder.hpp"
 
 namespace ope {
 
-namespace heuristicencodertest {
+namespace almencodertest {
 
 static const char kWordFilePath[] = "../../datasets/words.txt";
 static const char kWikiFilePath[] = "../../datasets/wikis.txt";
@@ -28,7 +28,7 @@ static std::vector<std::string> urls;
 static std::vector<std::string> integers;
 static const int kLongestCodeLen = 4096;
 
-class HeuristicEncoderTest : public ::testing::Test {};
+class ALMEncoderTest : public ::testing::Test {};
 
 int GetByteLen(const int bitlen) { return ((bitlen + 7) & ~7) / 8; }
 
@@ -51,8 +51,8 @@ std::string changeToBinary(int64_t num, int8_t len) {
   return result;
 }
 
-TEST_F(HeuristicEncoderTest, intervalTest) {
-  HeuristicEncoder *encoder = new HeuristicEncoder();
+TEST_F(ALMEncoderTest, intervalTest) {
+  ALMEncoder *encoder = new ALMEncoder();
   encoder->build(words, 4096);
   std::vector<SymbolCode> symbol_code_list = encoder->getSymbolCodeList();
   std::sort(symbol_code_list.begin(), symbol_code_list.end(),
@@ -71,8 +71,8 @@ TEST_F(HeuristicEncoderTest, intervalTest) {
   }
 }
 
-TEST_F(HeuristicEncoderTest, wordTest) {
-  HeuristicEncoder *encoder = new HeuristicEncoder();
+TEST_F(ALMEncoderTest, wordTest) {
+  ALMEncoder *encoder = new ALMEncoder();
   encoder->build(words, 4096);
   auto buffer = new uint8_t[kLongestCodeLen];
   int64_t total_len = 0;
@@ -92,8 +92,8 @@ TEST_F(HeuristicEncoderTest, wordTest) {
   std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
 }
 
-TEST_F(HeuristicEncoderTest, wordPairTest) {
-  HeuristicEncoder *encoder = new HeuristicEncoder();
+TEST_F(ALMEncoderTest, wordPairTest) {
+  Encoder *encoder = new ALMEncoder();
   encoder->build(words, 4096);
   // encode pair
   auto l_buffer = new uint8_t[kLongestCodeLen];
@@ -111,8 +111,26 @@ TEST_F(HeuristicEncoderTest, wordPairTest) {
   delete encoder;
 }
 
-TEST_F(HeuristicEncoderTest, wikiTest) {
-  HeuristicEncoder *encoder = new HeuristicEncoder();
+TEST_F(ALMEncoderTest, wordBatchTest) {
+  ALMEncoder *encoder = new ALMEncoder();
+  std::vector<std::string> enc_keys;
+  encoder->build(words, 1000);
+  int batch_size = 10;
+  int ls = static_cast<int>(words.size());
+  for (int i = 0; i < ls - batch_size; i += batch_size) {
+    encoder->encodeBatch(words, i, batch_size, enc_keys);
+  }
+  for (int i = 0; i < static_cast<int>(enc_keys.size()) - 1; i += 2) {
+    std::string str1 = enc_keys[i];
+    std::string str2 = enc_keys[i + 1];
+    int cmp = str1.compare(str2);
+    EXPECT_LT(words[i].compare(words[i+1]), 0);
+    EXPECT_LT(cmp, 0);
+  }
+}
+
+TEST_F(ALMEncoderTest, wikiTest) {
+  ALMEncoder *encoder = new ALMEncoder();
   encoder->build(wikis, 4096);
   auto buffer = new uint8_t[kLongestCodeLen];
   int64_t total_len = 0;
@@ -132,8 +150,8 @@ TEST_F(HeuristicEncoderTest, wikiTest) {
   std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
 }
 
-TEST_F(HeuristicEncoderTest, urlTest) {
-  HeuristicEncoder *encoder = new HeuristicEncoder();
+TEST_F(ALMEncoderTest, urlTest) {
+  ALMEncoder *encoder = new ALMEncoder();
   encoder->build(urls, 4096);
   auto buffer = new uint8_t[kLongestCodeLen];
   int64_t total_len = 0;
@@ -153,8 +171,8 @@ TEST_F(HeuristicEncoderTest, urlTest) {
   std::cout << "cpr = " << ((total_len + 0.0) / total_enc_len) << std::endl;
 }
 
-TEST_F(HeuristicEncoderTest, intTest) {
-  HeuristicEncoder *encoder = new HeuristicEncoder();
+TEST_F(ALMEncoderTest, intTest) {
+  ALMEncoder *encoder = new ALMEncoder();
   encoder->build(integers, 4096);
   auto buffer = new uint8_t[kLongestCodeLen];
   int64_t total_len = 0;
@@ -229,9 +247,9 @@ void GenerateInt64() {
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
-  ope::heuristicencodertest::LoadWords();
-  ope::heuristicencodertest::LoadWikis();
-  ope::heuristicencodertest::LoadUrls();
-  ope::heuristicencodertest::GenerateInt64();
+  ope::almencodertest::LoadWords();
+  ope::almencodertest::LoadWikis();
+  ope::almencodertest::LoadUrls();
+  ope::almencodertest::GenerateInt64();
   return RUN_ALL_TESTS();
 }

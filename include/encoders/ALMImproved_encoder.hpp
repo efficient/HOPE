@@ -39,6 +39,7 @@ class ALMImprovedEncoder : public Encoder {
   Dictionary *dict_;
   std::vector<SymbolCode> symbol_code_list;
   std::string changeToBinary(int64_t num, int8_t len);
+  inline int GetByteLen(const int bitlen) { return ((bitlen + 7) & ~7) / 8; };
 };
 
 std::vector<SymbolCode> ALMImprovedEncoder::getSymbolCodeList() { return symbol_code_list; }
@@ -110,7 +111,16 @@ void ALMImprovedEncoder::encodePair(const std::string &l_key, const std::string 
 int64_t ALMImprovedEncoder::encodeBatch(const std::vector<std::string> &ori_keys,
 					int start_id, int batch_size,
                                         std::vector<std::string> &enc_keys) {
-  return 0;
+  uint8_t key_buffer[8192];
+  int64_t batch_code_size = 0;
+  for (int i = 0; i < batch_size; i++) {
+    int enc_len = GetByteLen(encode(ori_keys[start_id + i], key_buffer));
+#ifndef BATCH_DRY_ENCODE
+    enc_keys.push_back(std::string((const char *)key_buffer, enc_len));
+#endif
+    batch_code_size += enc_len;
+  }
+  return batch_code_size;
 }
 
 int ALMImprovedEncoder::decode(const std::string &enc_key, uint8_t *buffer) const { return 0; }

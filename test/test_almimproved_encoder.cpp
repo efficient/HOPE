@@ -90,6 +90,26 @@ TEST_F(ALMImprovedEncoderTest, wordPairTest) {
     int cmp = str1.compare(str2);
     EXPECT_LT(cmp, 0);
   }
+  delete encoder;
+}
+
+TEST_F(ALMImprovedEncoderTest, wordBatchTest) {
+  ALMImprovedEncoder *encoder = new ALMImprovedEncoder();
+  std::vector<std::string> enc_keys;
+  encoder->build(words, 1000);
+  int batch_size = 10;
+  int ls = static_cast<int>(words.size());
+  for (int i = 0; i < ls - batch_size; i += batch_size) {
+    encoder->encodeBatch(words, i, batch_size, enc_keys);
+  }
+  for (int i = 0; i < static_cast<int>(enc_keys.size()) - 1; i += 2) {
+    std::string str1 = enc_keys[i];
+    std::string str2 = enc_keys[i + 1];
+    int cmp = str1.compare(str2);
+    EXPECT_LT(words[i].compare(words[i+1]), 0);
+    EXPECT_LT(cmp, 0);
+  }
+  delete encoder;
 }
 
 TEST_F(ALMImprovedEncoderTest, wikiTest) {
