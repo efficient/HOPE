@@ -19,7 +19,7 @@ typedef struct SymbolFreqValid {
 
 typedef std::vector<SymbolFreqValid>::iterator freq_iter;
 
-namespace ope {
+namespace hope {
 class ALMImprovedSS : public SymbolSelector {
  public:
   ALMImprovedSS();
@@ -349,6 +349,6 @@ void ALMImprovedSS::mergeAdjacentComPrefixIntervals() {
   intervals_.insert(intervals_.begin(), merged_intervals.begin(), merged_intervals.end());
 }
 
-}  // namespace ope
+}  // namespace hope
 
 #endif  // ALMImprovedSS_H

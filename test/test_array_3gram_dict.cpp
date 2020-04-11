@@ -12,7 +12,7 @@
 #include "array_3gram_dict.hpp"
 #include "gtest/gtest.h"
 
-namespace ope {
+namespace hope {
 
 namespace treetest {
 static const char kWordFilePath[] = "../../datasets/words.txt";
@@ -48,9 +48,9 @@ class Array3GramDicTest : public ::testing::Test {
     }
     std::sort(int_3_.begin(), int_3_.end());
     for (int i = 0; i < (int)int_3_.size(); i++) {
-      ope::SymbolCode symbol_code = ope::SymbolCode();
+      hope::SymbolCode symbol_code = hope::SymbolCode();
       symbol_code.first = int_3_[i];
-      symbol_code.second = ope::Code();
+      symbol_code.second = hope::Code();
       symbol_code.second.code = i;
       int_symbol_code_list_.push_back(symbol_code);
     }
@@ -61,9 +61,9 @@ class Array3GramDicTest : public ::testing::Test {
     }
     std::sort(word_3_.begin(), word_3_.end());
     for (int i = 0; i < (int)word_3_.size(); i++) {
-      ope::SymbolCode symbol_code = ope::SymbolCode();
+      hope::SymbolCode symbol_code = hope::SymbolCode();
       symbol_code.first = word_3_[i];
-      symbol_code.second = ope::Code();
+      symbol_code.second = hope::Code();
       symbol_code.second.code = i;
       word_symbol_code_list_.push_back(symbol_code);
     }
@@ -77,22 +77,22 @@ class Array3GramDicTest : public ::testing::Test {
 };
 
 TEST_F(Array3GramDicTest, pointLookupInt64Test) {
-  auto dict = new ope::Array3GramDict();
+  auto dict = new hope::Array3GramDict();
   dict->build(int_symbol_code_list_);
   int prefix_len = -1;
   for (int i = 0; i < (int)int_3_.size(); i++) {
-    ope::Code code = dict->lookup(int_3_[i].c_str(), (int)int_3_[i].size(), prefix_len);
+    hope::Code code = dict->lookup(int_3_[i].c_str(), (int)int_3_[i].size(), prefix_len);
     EXPECT_EQ(code.code, i);
   }
   delete dict;
 }
 
 TEST_F(Array3GramDicTest, pointLookupWordTest) {
-  auto dict = new ope::Array3GramDict();
+  auto dict = new hope::Array3GramDict();
   dict->build(word_symbol_code_list_);
   int prefix_len = -1;
   for (int i = 0; i < (int)word_3_.size(); i++) {
-    ope::Code code = dict->lookup(word_3_[i].c_str(), word_3_.size(), prefix_len);
+    hope::Code code = dict->lookup(word_3_[i].c_str(), word_3_.size(), prefix_len);
     EXPECT_EQ(code.code, i);
   }
   delete dict;
@@ -137,11 +137,11 @@ void GenerateInt64() {
 
 }  // namespace treetest
 
-}  // namespace ope
+}  // namespace hope
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
-  ope::treetest::LoadWords();
-  ope::treetest::GenerateInt64();
+  hope::treetest::LoadWords();
+  hope::treetest::GenerateInt64();
   return RUN_ALL_TESTS();
 }

@@ -3,7 +3,7 @@
 
 #include "dictionary.hpp"
 
-namespace ope {
+namespace hope {
 
 class Array3GramDict : public Dictionary {
  public:
@@ -105,6 +105,6 @@ int Array3GramDict::compareDictEntry(const char *s1, const int s1_len, const int
   }
 }
 
-}  // namespace ope
+}  // namespace hope
 
 #endif  // ARRAY_3GRAM_DICT_H

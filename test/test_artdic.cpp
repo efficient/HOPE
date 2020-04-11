@@ -12,7 +12,7 @@
 #include "art_dic_tree.hpp"
 #include "gtest/gtest.h"
 
-namespace ope {
+namespace hope {
 
 namespace treetest {
 static const char kWordFilePath[] = "../../datasets/words.txt";
@@ -92,12 +92,12 @@ class ARTDICTest : public ::testing::Test {
 
 TEST_F(ARTDICTest, pointLookupInt64Test) {
   auto test = new ArtDicTree();
-  std::vector<ope::SymbolCode> ls;
+  std::vector<hope::SymbolCode> ls;
 
   for (int i = 0; i < static_cast<int>(integers.size()) - 1; i++) {
-    ope::SymbolCode symbol_code = ope::SymbolCode();
+    hope::SymbolCode symbol_code = hope::SymbolCode();
     symbol_code.first = integers[i];
-    symbol_code.second = ope::Code();
+    symbol_code.second = hope::Code();
     symbol_code.second.code = i;
     ls.push_back(symbol_code);
   }
@@ -106,7 +106,7 @@ TEST_F(ARTDICTest, pointLookupInt64Test) {
 
   for (int i = 0; i < static_cast<int>(integers.size()) - 1; i++) {
     int prefix_len = -1;
-    ope::Code result = test->lookup(integers[i].c_str(), integers[i].size(), prefix_len);
+    hope::Code result = test->lookup(integers[i].c_str(), integers[i].size(), prefix_len);
     if (result.code != i) std::cout << "lookup:" << result.code << " answer:" << i << std::endl;
     EXPECT_TRUE(result.code == i);
   }
@@ -115,12 +115,12 @@ TEST_F(ARTDICTest, pointLookupInt64Test) {
 
 TEST_F(ARTDICTest, pointLookupWordTest) {
   auto test = new ArtDicTree();
-  std::vector<ope::SymbolCode> ls;
+  std::vector<hope::SymbolCode> ls;
 
   for (int i = 0; i < static_cast<int>(words.size()) - 1; i++) {
-    ope::SymbolCode symbol_code = ope::SymbolCode();
+    hope::SymbolCode symbol_code = hope::SymbolCode();
     symbol_code.first = words[i];
-    symbol_code.second = ope::Code();
+    symbol_code.second = hope::Code();
     symbol_code.second.code = i;
     ls.push_back(symbol_code);
   }
@@ -129,7 +129,7 @@ TEST_F(ARTDICTest, pointLookupWordTest) {
 
   for (int i = 0; i < static_cast<int>(words.size()) - 1; i++) {
     int prefix_len = -1;
-    ope::Code result = test->lookup(words[i].c_str(), words[i].size(), prefix_len);
+    hope::Code result = test->lookup(words[i].c_str(), words[i].size(), prefix_len);
     if (result.code != i) std::cout << "lookup:" << result.code << " answer:" << i << std::endl;
     EXPECT_TRUE(result.code == i);
   }
@@ -143,13 +143,13 @@ TEST_F(ARTDICTest, pointLookupWordTest) {
  */
 TEST_F(ARTDICTest, withinRangeLookupTest) {
   auto test = new ArtDicTree();
-  std::vector<ope::SymbolCode> ls;
+  std::vector<hope::SymbolCode> ls;
   std::sort(words.begin(), words.end());
 
   for (int i = 0; i < static_cast<int>(words.size()); i++) {
-    ope::SymbolCode symbol_code = ope::SymbolCode();
+    hope::SymbolCode symbol_code = hope::SymbolCode();
     symbol_code.first = words[i];
-    symbol_code.second = ope::Code();
+    symbol_code.second = hope::Code();
     symbol_code.second.code = i;
     ls.push_back(symbol_code);
   }
@@ -166,7 +166,7 @@ TEST_F(ARTDICTest, withinRangeLookupTest) {
     if (!find_next) {
       break;
     }
-    ope::Code result;
+    hope::Code result;
     result = test->lookup(cur_str.c_str(), cur_str.size(), prefix_len);
 
     if (result.code != next_idx) {
@@ -220,11 +220,11 @@ void GenerateInt64() {
 
 }  // namespace treetest
 
-}  // namespace ope
+}  // namespace hope
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
-  ope::treetest::LoadWords();
-  ope::treetest::GenerateInt64();
+  hope::treetest::LoadWords();
+  hope::treetest::GenerateInt64();
   return RUN_ALL_TESTS();
 }

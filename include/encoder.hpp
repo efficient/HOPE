@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace ope {
+namespace hope {
 
 class Encoder {
  public:
@@ -35,6 +35,6 @@ class Encoder {
   virtual int64_t memoryUse() const = 0;
 };
 
-}  // namespace ope
+}  // namespace hope
 
 #endif  // ENCODER_H

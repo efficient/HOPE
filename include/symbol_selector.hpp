@@ -7,7 +7,7 @@
 
 #include "common.hpp"
 
-namespace ope {
+namespace hope {
 
 class SymbolSelector {
  public:
@@ -21,6 +21,6 @@ class SymbolSelector {
                              std::vector<SymbolFreq> *symbol_freq_list) = 0;
 };
 
-}  // namespace ope
+}  // namespace hope
 
 #endif  // SYMBOL_SELECTOR_H

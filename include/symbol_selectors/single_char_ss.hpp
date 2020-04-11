@@ -3,7 +3,7 @@
 
 #include "symbol_selector.hpp"
 
-namespace ope {
+namespace hope {
 
 class SingleCharSS : public SymbolSelector {
  public:
@@ -45,6 +45,6 @@ void SingleCharSS::countSymbolFreq(const std::vector<std::string> &key_list) {
   }
 }
 
-}  // namespace ope
+}  // namespace hope
 
 #endif  // SINGLE_CHAR_SS_H

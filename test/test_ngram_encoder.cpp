@@ -10,7 +10,7 @@
 #include "gtest/gtest.h"
 #include "ngram_encoder.hpp"
 
-namespace ope {
+namespace hope {
 
 namespace ngramencodertest {
 
@@ -403,13 +403,13 @@ void GenerateInt64() {
 
 }  // namespace ngramencodertest
 
-}  // namespace ope
+}  // namespace hope
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
-  ope::ngramencodertest::LoadWords();
-  ope::ngramencodertest::LoadWikis();
-  ope::ngramencodertest::LoadUrls();
-  ope::ngramencodertest::GenerateInt64();
+  hope::ngramencodertest::LoadWords();
+  hope::ngramencodertest::LoadWikis();
+  hope::ngramencodertest::LoadUrls();
+  hope::ngramencodertest::GenerateInt64();
   return RUN_ALL_TESTS();
 }

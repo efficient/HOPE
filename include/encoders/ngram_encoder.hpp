@@ -7,7 +7,7 @@
 #include "dictionary_factory.hpp"
 #include "symbol_selector_factory.hpp"
 
-namespace ope {
+namespace hope {
 
 class NGramEncoder : public Encoder {
  public:
@@ -323,6 +323,6 @@ int NGramEncoder::numEntries() const { return dict_->numEntries(); }
 
 int64_t NGramEncoder::memoryUse() const { return dict_->memoryUse(); }
 
-}  // namespace ope
+}  // namespace hope
 
 #endif  // NGRAM_ENCODER_H

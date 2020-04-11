@@ -8,7 +8,7 @@
 #include "ngram_encoder.hpp"
 #include "single_char_encoder.hpp"
 
-namespace ope {
+namespace hope {
 
 class EncoderFactory {
  public:
@@ -30,6 +30,6 @@ class EncoderFactory {
   }
 };
 
-}  // namespace ope
+}  // namespace hope
 
 #endif  // ENCODER_FACTORY_H

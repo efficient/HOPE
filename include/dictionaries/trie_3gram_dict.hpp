@@ -3,7 +3,7 @@
 
 #include "dictionary.hpp"
 
-namespace ope {
+namespace hope {
 
 class Trie3GramDict : public Dictionary {
  public:
@@ -248,6 +248,6 @@ int64_t Trie3GramDict::memoryUse() const {
           sizeof(Code) * num_leafs_);
 }
 
-}  // namespace ope
+}  // namespace hope
 
 #endif  // TRIE_3GRAM_DICT_H

@@ -8,7 +8,7 @@
 #include "common.hpp"
 #include "rank_bitvector.hpp"
 
-namespace ope {
+namespace hope {
 
 class Btnode {
  public:
@@ -156,6 +156,6 @@ void SBT::moveToLeftChild(int &pos) {
 
 int SBT::memory() { return (sizeof(SBT) + trie_->size() + num_nodes_ * sizeof(int)); }
 
-}  // namespace ope
+}  // namespace hope
 
 #endif  // SBT_H

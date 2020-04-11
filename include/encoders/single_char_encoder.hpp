@@ -9,7 +9,7 @@
 #include "sbt.hpp"
 #include "symbol_selector_factory.hpp"
 
-namespace ope {
+namespace hope {
 
 class SingleCharEncoder : public Encoder {
  public:
@@ -289,6 +289,6 @@ bool SingleCharEncoder::buildDict(const std::vector<SymbolCode> &symbol_code_lis
   return true;
 }
 
-}  // namespace ope
+}  // namespace hope
 
 #endif  // SINGLE_CHAR_ENCODER_H

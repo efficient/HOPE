@@ -1,7 +1,7 @@
 #include "art_dic_N.hpp"
 #include "gtest/gtest.h"
 
-namespace ope {
+namespace hope {
 namespace nodetest {
 
 class ARTNodeTest : public ::testing::Test {
@@ -63,7 +63,7 @@ TEST_F(ARTNodeTest, prefixSetGetTest) {
 }
 
 }  // namespace nodetest
-}  // namespace ope
+}  // namespace hope
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

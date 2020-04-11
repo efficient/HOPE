@@ -8,7 +8,7 @@
 #include "trie_4gram_dict.hpp"
 #include "trie_art_dict.hpp"
 
-namespace ope {
+namespace hope {
 
 class DictionaryFactory {
  public:
@@ -32,6 +32,6 @@ class DictionaryFactory {
   }
 };
 
-}  // namespace ope
+}  // namespace hope
 
 #endif  // DICTIONARY_FACTORY_H

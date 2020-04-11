@@ -11,7 +11,7 @@
 #include "ALMImproved_encoder.hpp"
 #include "gtest/gtest.h"
 
-namespace ope {
+namespace hope {
 
 namespace almimprovedencodertest {
 
@@ -221,13 +221,13 @@ void GenerateInt64() {
 }
 
 }  // namespace almimprovedencodertest
-}  // namespace ope
+}  // namespace hope
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
-  ope::almimprovedencodertest::LoadWords();
-  ope::almimprovedencodertest::LoadWikis();
-  ope::almimprovedencodertest::LoadUrls();
-  ope::almimprovedencodertest::GenerateInt64();
+  hope::almimprovedencodertest::LoadWords();
+  hope::almimprovedencodertest::LoadWikis();
+  hope::almimprovedencodertest::LoadUrls();
+  hope::almimprovedencodertest::GenerateInt64();
   return RUN_ALL_TESTS();
 }

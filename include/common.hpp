@@ -18,7 +18,10 @@
 // For benchmark only
 // #define PRINT_BUILD_TIME_BREAKDOWN 1
 
-namespace ope {
+// For batch encoding benchmark only
+// #define BATCH_DRY_ENCODE 1
+
+namespace hope {
 
 static const int kNumSingleChar = 256;
 static const int kNumDoubleChar = 65536;
@@ -73,7 +76,7 @@ void setStopWatch(double &cur_time, int msg_select) {
 #endif
   cur_time = getNow();
 }
-    
+
 void printElapsedTime(double &cur_time, int msg_select) {
 #ifdef PRINT_BUILD_TIME_BREAKDOWN
   double elapsed_time = getNow() - cur_time;
@@ -88,6 +91,6 @@ void printElapsedTime(double &cur_time, int msg_select) {
   cur_time = getNow();
 }
 
-}  // namespace ope
+}  // namespace hope
 
 #endif  // COMMON_H

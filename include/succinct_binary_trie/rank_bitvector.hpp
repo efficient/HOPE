@@ -7,7 +7,7 @@
 
 #include "popcount.h"
 
-namespace ope {
+namespace hope {
 
 class RankBitvector {
  public:
@@ -85,6 +85,6 @@ int RankBitvector::rank(const int pos) const {
   return (rank_lut_[block_id] + surf::popcountLinear(bits_, block_id * 8, offset + 1));
 }
 
-}  // namespace ope
+}  // namespace hope
 
 #endif  // RANKBITVECTOR_H_

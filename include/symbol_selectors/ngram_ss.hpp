@@ -5,7 +5,7 @@
 #include <map>
 #include "symbol_selector.hpp"
 
-namespace ope {
+namespace hope {
 
 class NGramSS : public SymbolSelector {
  public:
@@ -207,6 +207,6 @@ int NGramSS::binarySearch(const std::string &key) const {
   return l;
 }
 
-}  // namespace ope
+}  // namespace hope
 
 #endif  // NGRAM_SS_H

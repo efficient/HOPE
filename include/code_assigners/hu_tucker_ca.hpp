@@ -5,7 +5,7 @@
 
 #include "code_assigner.hpp"
 
-namespace ope {
+namespace hope {
 
 class HuTuckerCA : public CodeAssigner {
  public:
@@ -253,6 +253,6 @@ void HuTuckerCA::destroyBinaryTree() {
   }
 }
 
-}  // namespace ope
+}  // namespace hope
 
 #endif  // HU_TUCKER_CA_H

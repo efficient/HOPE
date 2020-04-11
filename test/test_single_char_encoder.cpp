@@ -12,7 +12,7 @@
 #include "symbol_selector_factory.hpp"
 #include "code_assigner_factory.hpp"
 
-namespace ope {
+namespace hope {
 
 namespace singlecharencodertest {
 
@@ -231,13 +231,13 @@ void GenerateInt64() {
 }
 
 }  // namespace singlecharencodertest
-}  // namespace ope
+}  // namespace hope
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
-  ope::singlecharencodertest::LoadWords();
-  ope::singlecharencodertest::LoadWikis();
-  ope::singlecharencodertest::LoadUrls();
-  ope::singlecharencodertest::GenerateInt64();
+  hope::singlecharencodertest::LoadWords();
+  hope::singlecharencodertest::LoadWikis();
+  hope::singlecharencodertest::LoadUrls();
+  hope::singlecharencodertest::GenerateInt64();
   return RUN_ALL_TESTS();
 }

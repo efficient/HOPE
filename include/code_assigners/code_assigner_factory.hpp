@@ -8,7 +8,7 @@
 #include "fixed_len_dict_ca.hpp"
 #endif
 
-namespace ope {
+namespace hope {
 
 class CodeAssignerFactory {
  public:
@@ -25,6 +25,6 @@ class CodeAssignerFactory {
   }
 };
 
-}  // namespace ope
+}  // namespace hope
 
 #endif  // CODE_ASSIGNER_FACTORY_H

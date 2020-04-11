@@ -3,7 +3,7 @@
 
 #include "code_assigner.hpp"
 
-namespace ope {
+namespace hope {
 
 class FixedLenDictCA : public CodeAssigner {
  public:
@@ -51,6 +51,6 @@ double FixedLenDictCA::getCompressionRate() const {
   return cpr;
 }
 
-}  // namespace ope
+}  // namespace hope
 
 #endif  // FIXED_LEN_DICT_CA_H

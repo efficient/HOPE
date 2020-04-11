@@ -6,7 +6,7 @@
 
 #include "common.hpp"
 
-namespace ope {
+namespace hope {
 
 class CodeAssigner {
  public:
@@ -21,6 +21,6 @@ class CodeAssigner {
   virtual double getCompressionRate() const = 0;
 };
 
-}  // namespace ope
+}  // namespace hope
 
 #endif  // CODE_ASSIGNER_H

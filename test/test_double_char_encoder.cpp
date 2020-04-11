@@ -12,7 +12,7 @@
 #include "symbol_selector_factory.hpp"
 #include "code_assigner_factory.hpp"
 
-namespace ope {
+namespace hope {
 
 namespace doublecharencodertest {
 
@@ -205,13 +205,13 @@ void GenerateInt64() {
 }
 }  // namespace doublecharencodertest
 
-}  // namespace ope
+}  // namespace hope
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
-  ope::doublecharencodertest::LoadWords();
-  ope::doublecharencodertest::LoadWikis();
-  ope::doublecharencodertest::LoadUrls();
-  ope::doublecharencodertest::GenerateInt64();
+  hope::doublecharencodertest::LoadWords();
+  hope::doublecharencodertest::LoadWikis();
+  hope::doublecharencodertest::LoadUrls();
+  hope::doublecharencodertest::GenerateInt64();
   return RUN_ALL_TESTS();
 }

@@ -8,7 +8,7 @@
 #include "single_char_ss.hpp"
 #include "symbol_selector.hpp"
 
-namespace ope {
+namespace hope {
 
 class SymbolSelectorFactory {
  public:
@@ -30,6 +30,6 @@ class SymbolSelectorFactory {
   }
 };
 
-}  // namespace ope
+}  // namespace hope
 
 #endif  // SYMBOL_SELECTOR_FACTORY_H

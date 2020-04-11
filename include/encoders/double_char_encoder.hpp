@@ -9,7 +9,7 @@
 #include "sbt.hpp"
 #include "symbol_selector_factory.hpp"
 
-namespace ope {
+namespace hope {
 
 class DoubleCharEncoder : public Encoder {
  public:
@@ -310,6 +310,6 @@ bool DoubleCharEncoder::buildDict(const std::vector<SymbolCode> &symbol_code_lis
   return true;
 }
 
-}  // namespace ope
+}  // namespace hope
 
 #endif  // DOUBLE_CHAR_ENCODER_H

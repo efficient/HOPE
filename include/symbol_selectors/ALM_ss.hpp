@@ -11,7 +11,7 @@
 #include "blending_trie.hpp"
 #include "symbol_selector.hpp"
 
-namespace ope {
+namespace hope {
 class ALMSS : public SymbolSelector {
  public:
   ALMSS();
@@ -349,6 +349,6 @@ void ALMSS::mergeAdjacentComPrefixIntervals() {
   intervals_.insert(intervals_.begin(), merged_intervals.begin(), merged_intervals.end());
 }
 
-}  // namespace ope
+}  // namespace hope
 
 #endif  // ALM_SS_H

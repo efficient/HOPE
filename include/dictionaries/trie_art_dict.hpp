@@ -4,7 +4,7 @@
 #include "art_dic_tree.hpp"
 #include "dictionary.hpp"
 
-namespace ope {
+namespace hope {
 class TrieArtDict : public Dictionary {
  public:
   TrieArtDict();
@@ -19,7 +19,7 @@ class TrieArtDict : public Dictionary {
   ArtDicTree *tree;
 };
 
-TrieArtDict::TrieArtDict() { tree = new ope::ArtDicTree(); }
+TrieArtDict::TrieArtDict() { tree = new hope::ArtDicTree(); }
 
 TrieArtDict::~TrieArtDict() { delete tree; }
 
@@ -40,6 +40,6 @@ int64_t TrieArtDict::memoryUse() const {
          sizeof(N256) * tree->getN256Num();
 }
 
-}  // namespace ope
+}  // namespace hope
 
 #endif  // TRIE_ART_DICT_H

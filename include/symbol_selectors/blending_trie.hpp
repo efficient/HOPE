@@ -12,7 +12,7 @@
 
 #include "common.hpp"
 
-namespace ope {
+namespace hope {
 
 class TrieNode {
  public:
@@ -149,7 +149,7 @@ void BlendTrie::blendingAndGetLeaves(std::vector<SymbolFreq> *freq_vec) {
   }
 }
 
-void BlendTrie::clear(ope::TrieNode *node) {
+void BlendTrie::clear(hope::TrieNode *node) {
   if (!node->hasChildren()) {
     delete node;
     return;
@@ -161,6 +161,6 @@ void BlendTrie::clear(ope::TrieNode *node) {
   delete node;
 }
 
-}  // namespace ope
+}  // namespace hope
 
 #endif

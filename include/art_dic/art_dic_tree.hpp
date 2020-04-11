@@ -8,7 +8,7 @@
 
 #define TmpMaxPrefixLen 4096
 
-namespace ope {
+namespace hope {
 class ArtDicTree {
  public:
   ArtDicTree();
@@ -265,6 +265,6 @@ int ArtDicTree::getN16Num() { return cnt_N16; }
 int ArtDicTree::getN48Num() { return cnt_N48; }
 
 int ArtDicTree::getN256Num() { return cnt_N256; }
-}  // namespace ope
+}  // namespace hope
 
 #endif  // OPE_TREE_H

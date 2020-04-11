@@ -9,7 +9,7 @@
 #include "dictionary_factory.hpp"
 #include "symbol_selector_factory.hpp"
 
-namespace ope {
+namespace hope {
 class ALMImprovedEncoder : public Encoder {
  public:
   static const int kCaType = 0;
@@ -129,6 +129,6 @@ int ALMImprovedEncoder::numEntries() const { return dict_->numEntries(); }
 
 int64_t ALMImprovedEncoder::memoryUse() const { return dict_->memoryUse(); }
 
-}  // namespace ope
+}  // namespace hope
 
 #endif  // ALMIMPROVED_ENCODER_H

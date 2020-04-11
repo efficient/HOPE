@@ -3,7 +3,7 @@
 
 #include "symbol_selector.hpp"
 
-namespace ope {
+namespace hope {
 
 class DoubleCharSS : public SymbolSelector {
  public:
@@ -51,6 +51,6 @@ void DoubleCharSS::countSymbolFreq(const std::vector<std::string> &key_list) {
   }
 }
 
-}  // namespace ope
+}  // namespace hope
 
 #endif  // DOUBLE_CHAR_SS_H

@@ -7,7 +7,7 @@
 
 #include "common.hpp"
 
-namespace ope {
+namespace hope {
 
 class Dictionary {
  public:
@@ -22,6 +22,6 @@ class Dictionary {
   virtual int64_t memoryUse() const = 0;
 };
 
-}  // namespace ope
+}  // namespace hope
 
 #endif  // DICTIONARY_H

@@ -10,7 +10,7 @@
 
 #include "common.hpp"
 
-namespace ope {
+namespace hope {
 
 struct LeafInfo {
   const SymbolCode *symbol_code;
@@ -822,6 +822,6 @@ void N256::copyTo(NODE *n) const {
   }
 }
 
-}  // namespace ope
+}  // namespace hope
 
 #endif
