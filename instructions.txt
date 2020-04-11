@@ -1,5 +1,0 @@
-Steps to run the experiment
-1. Make sure you have gtest installed
-2. Put emails.txt, wikis.txt, poisson_timestamps.csv and urls.txt in the dataset folder
-3. In project root directory, run './run_experiment 2' (2 here means run experiment twice and get the average as the final result)
-
