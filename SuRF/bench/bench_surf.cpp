@@ -281,7 +281,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point, const int f
           const int64_t point_true_positives, const int64_t range_true_positives,
           const std::vector<std::string> &insert_keys, const std::vector<std::string> &insert_keys_sample,
           const std::vector<std::string> &txn_keys, const std::vector<std::string> &upper_bound_keys) {
-  ope::Encoder *encoder = nullptr;
+  hope::Encoder *encoder = nullptr;
   uint8_t *buffer = new uint8_t[8192];
   uint8_t *buffer_r = new uint8_t[8192];
   std::vector<std::string> enc_insert_keys;
@@ -298,7 +298,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point, const int f
 
   double start_time = getNow();
   if (is_compressed) {
-    encoder = ope::EncoderFactory::createEncoder(encoder_type, W);
+    encoder = hope::EncoderFactory::createEncoder(encoder_type, W);
     encoder->build(insert_keys_sample, input_dict_size);
     for (int i = 0; i < (int)insert_keys.size(); i++) {
       int enc_len = encoder->encode(insert_keys[i], buffer);

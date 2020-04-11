@@ -32,7 +32,7 @@ class ARTUnitTest : public ::testing::Test {
   void eliminatePrefixKeys();
   std::string encodeString(const std::string &key);
 
-  ope::Encoder *encoder_;
+  hope::Encoder *encoder_;
   ART_ROWEX::Tree *art_;
   std::vector<std::string> words_;
   std::vector<std::string> words_compressed_;
@@ -78,7 +78,7 @@ TEST_F(ARTUnitTest, lookupWordTest) {
 }
 
 TEST_F(ARTUnitTest, opcLookupWordTest) {
-  encoder_ = ope::EncoderFactory::createEncoder(kEncoderType);
+  encoder_ = hope::EncoderFactory::createEncoder(kEncoderType);
   encoder_->build(words_, kDictSizeLimit);
   for (int i = 0; i < (int)words_.size(); i++) {
     words_compressed_.push_back(encodeString(words_[i]));

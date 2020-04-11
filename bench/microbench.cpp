@@ -180,7 +180,7 @@ void exec_helper(const int encoder_type, const int W, const int input_dict_size,
                  const std::vector<std::string> sample_keys, const std::vector<std::string> enc_src_keys,
                  const int64_t enc_src_len, int encode_method, const int batch_size, double &bt, double &tput,
                  double &lat, double &cpr, double &dict_size, double &mem) {
-  ope::Encoder *encoder = ope::EncoderFactory::createEncoder(encoder_type, W);
+  hope::Encoder *encoder = hope::EncoderFactory::createEncoder(encoder_type, W);
   double time_start = getNow();
   encoder->build(sample_keys, input_dict_size);
   double time_end = getNow();

@@ -134,13 +134,13 @@ int main(int argc, char *argv[]) {
   }
 
   // create filter ==============================================
-  ope::Encoder *encoder = nullptr;
+  hope::Encoder *encoder = nullptr;
   uint8_t *buffer = new uint8_t[8192];
   std::vector<std::string> enc_insert_keys;
 
   double time1 = getNow();
   if (is_compressed) {
-    encoder = ope::EncoderFactory::createEncoder(encoder_type);
+    encoder = hope::EncoderFactory::createEncoder(encoder_type);
     encoder->build(insert_keys, dict_size_limit);
     for (int i = 0; i < (int)insert_keys.size(); i++) {
       int enc_len = encoder->encode(insert_keys[i], buffer);

@@ -34,7 +34,7 @@ class SuRFUnitTest : public ::testing::Test {
 
   std::string encodeString(const std::string &key);
 
-  ope::Encoder *encoder_;
+  hope::Encoder *encoder_;
   SuRF *surf_;
   std::vector<std::string> words_compressed_;
   uint8_t buffer_[256];
@@ -60,7 +60,7 @@ std::string SuRFUnitTest::encodeString(const std::string &key) {
 }
 
 TEST_F(SuRFUnitTest, lookupWordTest) {
-  encoder_ = ope::EncoderFactory::createEncoder(kEncoderType);
+  encoder_ = hope::EncoderFactory::createEncoder(kEncoderType);
   encoder_->build(words, kDictSizeLimit);
   for (int i = 0; i < (int)words.size(); i++) {
     words_compressed_.push_back(encodeString(words[i]));
@@ -82,7 +82,7 @@ TEST_F(SuRFUnitTest, lookupWordTest) {
 
 TEST_F(SuRFUnitTest, lookupRangeWordTest) {
   words_compressed_.clear();
-  encoder_ = ope::EncoderFactory::createEncoder(kEncoderType);
+  encoder_ = hope::EncoderFactory::createEncoder(kEncoderType);
   encoder_->build(words, kDictSizeLimit);
   for (int i = 0; i < (int)words.size(); i++) {
     words_compressed_.push_back(encodeString(words[i]));

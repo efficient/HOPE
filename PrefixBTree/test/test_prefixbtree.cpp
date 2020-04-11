@@ -29,7 +29,7 @@ class PrefixBtreeUnitTest : public ::testing::Test {
 
   std::string encodeString(const std::string &key);
 
-  ope::Encoder *encoder_;
+  hope::Encoder *encoder_;
   cpsbtreeolc::BTree<int64_t> *bt_;
   std::vector<std::string> words_compressed_;
   std::vector<std::string> integers_compressed_;
@@ -62,7 +62,7 @@ TEST_F(PrefixBtreeUnitTest, lookupWordTest) {
 }
 
 TEST_F(PrefixBtreeUnitTest, opcLookupWordTest) {
-  encoder_ = ope::EncoderFactory::createEncoder(kEncoderType);
+  encoder_ = hope::EncoderFactory::createEncoder(kEncoderType);
   encoder_->build(words, kDictSizeLimit);
   for (int i = 0; i < (int)words.size(); i++) {
     words_compressed_.push_back(encodeString(words[i]));
@@ -122,7 +122,7 @@ TEST_F(PrefixBtreeUnitTest, rangeScanWordTest) {
 }
 
 TEST_F(PrefixBtreeUnitTest, rangeScanEncodeWordTest) {
-  encoder_ = ope::EncoderFactory::createEncoder(kEncoderType);
+  encoder_ = hope::EncoderFactory::createEncoder(kEncoderType);
   encoder_->build(words, kDictSizeLimit);
   for (int i = 0; i < (int)words.size(); i++) {
     words_compressed_.push_back(encodeString(words[i]));
