@@ -27,7 +27,7 @@ class DoubleCharEncoder : public Encoder {
 		      int start_id, int batch_size,
                       std::vector<std::string> &enc_keys);
 
-  int decode(const std::string &enc_key, uint8_t *buffer) const;
+  int decode(const std::string &enc_key, const int bit_len, uint8_t *buffer) const;
 
   int numEntries() const;
   int64_t memoryUse() const;
@@ -256,14 +256,15 @@ int64_t DoubleCharEncoder::encodeBatch(const std::vector<std::string> &ori_keys,
   return batch_code_size;
 }
 
-int DoubleCharEncoder::decode(const std::string &enc_key, uint8_t *buffer) const {
+int DoubleCharEncoder::decode(const std::string &enc_key,
+			      const int bit_len, uint8_t *buffer) const {
 #ifdef INCLUDE_DECODE
   int buf_pos = 0;
   int key_bit_pos = 0;
   int idx = 0;
-  while (key_bit_pos < (int)enc_key.size() * 8) {
+  while (key_bit_pos < bit_len) {
     if (!decode_dict_->lookup(enc_key, key_bit_pos, &idx)) {
-      if (key_bit_pos < (int)enc_key.size() * 8) {
+      if (key_bit_pos < bit_len) {
         return 0;
       } else {
         if (buffer[buf_pos - 1] == 0) buf_pos--;
@@ -274,7 +275,7 @@ int DoubleCharEncoder::decode(const std::string &enc_key, uint8_t *buffer) const
     buffer[buf_pos + 1] = (uint8_t)(unsigned)(idx & 0xFF);
     buf_pos += 2;
   }
-  if (buffer[buf_pos - 1] == 0) buf_pos--;
+  //if (buffer[buf_pos - 1] == 0) buf_pos--;
   return buf_pos;
 #else
   return 0;

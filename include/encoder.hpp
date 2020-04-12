@@ -28,7 +28,8 @@ class Encoder {
 			      int start_id, int batch_size,
                               std::vector<std::string> &enc_keys) = 0;
 
-  virtual int decode(const std::string &enc_key, uint8_t *buffer) const = 0;
+  virtual int decode(const std::string &enc_key,
+		     const int bit_len, uint8_t *buffer) const = 0;
 
   virtual int numEntries() const = 0;
 

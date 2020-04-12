@@ -27,7 +27,7 @@ class ALMImprovedEncoder : public Encoder {
 		      int start_id, int batch_size,
                       std::vector<std::string> &enc_keys);
 
-  int decode(const std::string &enc_key, uint8_t *buffer) const;
+  int decode(const std::string &enc_key, const int bit_len, uint8_t *buffer) const;
 
   int numEntries() const;
   int64_t memoryUse() const;
@@ -123,7 +123,7 @@ int64_t ALMImprovedEncoder::encodeBatch(const std::vector<std::string> &ori_keys
   return batch_code_size;
 }
 
-int ALMImprovedEncoder::decode(const std::string &enc_key, uint8_t *buffer) const { return 0; }
+int ALMImprovedEncoder::decode(const std::string &enc_key, const int bit_len, uint8_t *buffer) const { return 0; }
 
 int ALMImprovedEncoder::numEntries() const { return dict_->numEntries(); }
 

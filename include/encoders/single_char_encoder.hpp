@@ -30,7 +30,7 @@ class SingleCharEncoder : public Encoder {
 		      int start_id, int batch_size,
                       std::vector<std::string> &enc_keys);
 
-  int decode(const std::string &enc_key, uint8_t *buffer) const;
+  int decode(const std::string &enc_key, const int bit_len, uint8_t *buffer) const;
 
   int numEntries() const;
   int64_t memoryUse() const;
@@ -239,19 +239,19 @@ int64_t SingleCharEncoder::encodeBatch(const std::vector<std::string> &ori_keys,
   return batch_code_size;
 }
 
-int SingleCharEncoder::decode(const std::string &enc_key, uint8_t *buffer) const {
+int SingleCharEncoder::decode(const std::string &enc_key,
+			      const int bit_len, uint8_t *buffer) const {
 #ifdef INCLUDE_DECODE
   int buf_pos = 0;
   int key_bit_pos = 0;
   int idx = 0;
-  while (key_bit_pos < (int)enc_key.size() * 8) {
+  while (key_bit_pos < bit_len) {
     if (!decode_dict_->lookup(enc_key, key_bit_pos, &idx)) {
-      if (key_bit_pos < (int)enc_key.size() * 8)
+      if (key_bit_pos < bit_len)
         return 0;
       else
         return buf_pos;
     }
-    if (idx == 0) return buf_pos;
     buffer[buf_pos] = (uint8_t)(unsigned)idx;
     buf_pos++;
   }

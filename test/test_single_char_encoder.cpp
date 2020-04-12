@@ -49,20 +49,20 @@ TEST_F(SingleCharEncoderTest, wordTest) {
   encoder->build(words, 1000);
   uint8_t *buffer = new uint8_t[kLongestCodeLen];
   for (int i = 0; i < static_cast<int>(words.size()) - 1; i++) {
-    int len = encoder->encode(words[i], buffer);
-    std::string str1 = std::string((const char *)buffer, GetByteLen(len));
-    len = encoder->encode(words[i + 1], buffer);
-    std::string str2 = std::string((const char *)buffer, GetByteLen(len));
+    int len1 = encoder->encode(words[i], buffer);
+    std::string str1 = std::string((const char *)buffer, GetByteLen(len1));
+    int len2 = encoder->encode(words[i + 1], buffer);
+    std::string str2 = std::string((const char *)buffer, GetByteLen(len2));
     int cmp = str1.compare(str2);
     EXPECT_LT(cmp, 0);
 
 #ifdef INCLUDE_DECODE
-    len = encoder->decode(str1, buffer);
+    int len = encoder->decode(str1, len1, buffer);
     std::string dec_str1 = std::string((const char *)buffer, len);
     cmp = dec_str1.compare(words[i]);
     EXPECT_EQ(cmp, 0);
 
-    len = encoder->decode(str2, buffer);
+    len = encoder->decode(str2, len2, buffer);
     std::string dec_str2 = std::string((const char *)buffer, len);
     cmp = dec_str2.compare(words[i + 1]);
     EXPECT_EQ(cmp, 0);
@@ -107,20 +107,20 @@ TEST_F(SingleCharEncoderTest, wikiTest) {
   encoder->build(wikis, 1000);
   uint8_t *buffer = new uint8_t[kLongestCodeLen];
   for (int i = 0; i < static_cast<int>(wikis.size()) - 1; i++) {
-    int len = encoder->encode(wikis[i], buffer);
-    std::string str1 = std::string((const char *)buffer, GetByteLen(len));
-    len = encoder->encode(wikis[i + 1], buffer);
-    std::string str2 = std::string((const char *)buffer, GetByteLen(len));
+    int len1 = encoder->encode(wikis[i], buffer);
+    std::string str1 = std::string((const char *)buffer, GetByteLen(len1));
+    int len2 = encoder->encode(wikis[i + 1], buffer);
+    std::string str2 = std::string((const char *)buffer, GetByteLen(len2));
     int cmp = str1.compare(str2);
     EXPECT_LT(cmp, 0);
 
 #ifdef INCLUDE_DECODE
-    len = encoder->decode(str1, buffer);
+    int len = encoder->decode(str1, len1, buffer);
     std::string dec_str1 = std::string((const char *)buffer, len);
     cmp = dec_str1.compare(wikis[i]);
     EXPECT_EQ(cmp, 0);
 
-    len = encoder->decode(str2, buffer);
+    len = encoder->decode(str2, len2, buffer);
     std::string dec_str2 = std::string((const char *)buffer, len);
     cmp = dec_str2.compare(wikis[i + 1]);
     EXPECT_EQ(cmp, 0);
@@ -133,20 +133,20 @@ TEST_F(SingleCharEncoderTest, urlTest) {
   encoder->build(urls, 1000);
   uint8_t *buffer = new uint8_t[kLongestCodeLen];
   for (int i = 0; i < static_cast<int>(urls.size()) - 1; i++) {
-    int len = encoder->encode(urls[i], buffer);
-    std::string str1 = std::string((const char *)buffer, GetByteLen(len));
-    len = encoder->encode(urls[i + 1], buffer);
-    std::string str2 = std::string((const char *)buffer, GetByteLen(len));
+    int len1 = encoder->encode(urls[i], buffer);
+    std::string str1 = std::string((const char *)buffer, GetByteLen(len1));
+    int len2 = encoder->encode(urls[i + 1], buffer);
+    std::string str2 = std::string((const char *)buffer, GetByteLen(len2));
     int cmp = str1.compare(str2);
     EXPECT_LT(cmp, 0);
 
 #ifdef INCLUDE_DECODE
-    len = encoder->decode(str1, buffer);
+    int len = encoder->decode(str1, len1, buffer);
     std::string dec_str1 = std::string((const char *)buffer, len);
     cmp = dec_str1.compare(urls[i]);
     EXPECT_EQ(cmp, 0);
 
-    len = encoder->decode(str2, buffer);
+    len = encoder->decode(str2, len2, buffer);
     std::string dec_str2 = std::string((const char *)buffer, len);
     cmp = dec_str2.compare(urls[i + 1]);
     EXPECT_EQ(cmp, 0);
@@ -159,24 +159,24 @@ TEST_F(SingleCharEncoderTest, intTest) {
   encoder->build(integers, 1000);
   uint8_t *buffer = new uint8_t[kLongestCodeLen];
   for (int i = 0; i < static_cast<int>(integers.size()) - 1; i++) {
-    int len = encoder->encode(integers[i], buffer);
-    std::string str1 = std::string((const char *)buffer, GetByteLen(len));
-    len = encoder->encode(integers[i + 1], buffer);
-    std::string str2 = std::string((const char *)buffer, GetByteLen(len));
+    int len1 = encoder->encode(integers[i], buffer);
+    std::string str1 = std::string((const char *)buffer, GetByteLen(len1));
+    int len2 = encoder->encode(integers[i + 1], buffer);
+    std::string str2 = std::string((const char *)buffer, GetByteLen(len2));
     int cmp = str1.compare(str2);
     EXPECT_LT(cmp, 0);
-/*    #ifdef INCLUDE_DECODE
-        len = encoder->decode(str1, buffer);
-        std::string dec_str1 = std::string((const char *)buffer, len);
-        cmp = dec_str1.compare(integers[i]);
-        EXPECT_EQ(cmp, 0);
+    
+#ifdef INCLUDE_DECODE
+    int len = encoder->decode(str1, len1, buffer);
+    std::string dec_str1 = std::string((const char *)buffer, len);
+    cmp = dec_str1.compare(integers[i]);
+    EXPECT_EQ(cmp, 0);
 
-        len = encoder->decode(str2, buffer);
-        std::string dec_str2 = std::string((const char *)buffer, len);
-        cmp = dec_str2.compare(integers[i + 1]);
-        EXPECT_EQ(cmp, 0);
-    #endif
-*/
+    len = encoder->decode(str2, len2, buffer);
+    std::string dec_str2 = std::string((const char *)buffer, len);
+    cmp = dec_str2.compare(integers[i + 1]);
+    EXPECT_EQ(cmp, 0);
+#endif
   }
 }
 
