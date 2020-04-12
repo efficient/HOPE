@@ -14,7 +14,3 @@ python gen_txn_scan_len.py url zipfian
 python gen_load.py wiki uniform
 python gen_txn.py wiki zipfian
 python gen_txn_scan_len.py wiki zipfian
-
-python gen_load.py timestamp uniform
-python gen_txn.py timestamp zipfian
-

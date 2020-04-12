@@ -11,7 +11,7 @@
 #include <string>
 #include <utility>
 
-namespace cpsbtreeolc {
+namespace prefixbtreeolc {
 
 enum class PageType : uint8_t { BTreeInner = 1, BTreeLeaf = 2 };
 
@@ -1074,4 +1074,4 @@ class BTree {
   }
 };
 
-}  // namespace cpsbtreeolc
+}  // namespace prefixbtreeolc

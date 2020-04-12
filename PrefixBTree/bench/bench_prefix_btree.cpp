@@ -46,7 +46,7 @@ static const int kTs = 3;
 //-------------------------------------------------------------
 // Expt ID = 0
 //-------------------------------------------------------------
-static const std::string output_dir_btree_point = "results/cpsbtree/point/";
+static const std::string output_dir_btree_point = "results/prefixbtree/point/";
 static const std::string file_lookuplat_email_btree = output_dir_btree_point + "lookuplat_email_btree.csv";
 std::ofstream output_lookuplat_email_btree;
 static const std::string file_insertlat_email_btree = output_dir_btree_point + "insertlat_email_btree.csv";
@@ -71,7 +71,7 @@ std::ofstream output_mem_url_btree;
 //-------------------------------------------------------------
 // Expt ID = 1
 //-------------------------------------------------------------
-static const std::string output_dir_btree_range = "results/cpsbtree/range/";
+static const std::string output_dir_btree_range = "results/prefixbtree/range/";
 static const std::string file_lookuplat_email_btree_range = output_dir_btree_range + "lookuplat_email_btree_range.csv";
 std::ofstream output_lookuplat_email_btree_range;
 static const std::string file_insertlat_email_btree_range = output_dir_btree_range + "insertlat_email_btree_range.csv";
@@ -234,14 +234,14 @@ void exec(const int expt_id, const int wkld_id, const bool is_point, const bool 
     enc_insert_keys.push_back(std::make_pair(insert_keys[i], encode_str));
   }
 
-  auto bt = new cpsbtreeolc::BTree<int64_t>();
+  auto bt = new prefixbtreeolc::BTree<int64_t>();
   std::cout << enc_insert_keys.size() << "*" << std::endl;
   double insert_start_time = getNow();
   for (int i = 0; i < (int)enc_insert_keys.size(); i++) {
     if (i % 1000000 == 0) std::cout << i << "/" << enc_insert_keys.size() << std::endl;
     std::pair<std::string, std::string> *tmp_pair = &enc_insert_keys[i];
     int enc_len = 0;
-    cpsbtreeolc::Key key;
+    prefixbtreeolc::Key key;
     if (is_compressed) {
       enc_len = encoder->encode(tmp_pair->first, buffer);
       int enc_len_round = (enc_len + 7) >> 3;
@@ -276,7 +276,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point, const bool 
       for (int i = 0; i < (int)txn_keys.size(); i++) {
         int enc_len = encoder->encode(txn_keys[i], buffer);
         int enc_len_round = (enc_len + 7) >> 3;
-        cpsbtreeolc::Key key;
+        prefixbtreeolc::Key key;
         key.setKeyStr(reinterpret_cast<char *>(buffer), enc_len_round);
         int64_t re;
         bool find = bt->lookup(key, re);
@@ -284,7 +284,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point, const bool 
       }
     } else {
       for (int i = 0; i < (int)txn_keys.size(); i++) {
-        cpsbtreeolc::Key key;
+        prefixbtreeolc::Key key;
         key.setKeyStr(txn_keys[i].c_str(), txn_keys[i].length());
         int64_t re;
         bool find = bt->lookup(key, re);
@@ -298,13 +298,13 @@ void exec(const int expt_id, const int wkld_id, const bool is_point, const bool 
         enc_len = encoder->encode(txn_keys[i], buffer);
         int enc_len_round = (enc_len + 7) >> 3;
         std::string left_key = std::string((const char *)buffer, enc_len_round);
-        cpsbtreeolc::Key key;
+        prefixbtreeolc::Key key;
         key.setKeyStr(left_key.c_str(), left_key.length());
         sum += bt->rangeScan(key, scan_key_lens[i], TIDs);
       }
     } else {
       for (int i = 0; i < (int)txn_keys.size(); i++) {
-        cpsbtreeolc::Key key;
+        prefixbtreeolc::Key key;
         key.setKeyStr(txn_keys[i].c_str(), txn_keys[i].length());
         sum += bt->rangeScan(key, scan_key_lens[i], TIDs);
       }

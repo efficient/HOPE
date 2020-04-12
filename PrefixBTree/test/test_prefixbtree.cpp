@@ -30,7 +30,7 @@ class PrefixBtreeUnitTest : public ::testing::Test {
   std::string encodeString(const std::string &key);
 
   hope::Encoder *encoder_;
-  cpsbtreeolc::BTree<int64_t> *bt_;
+  prefixbtreeolc::BTree<int64_t> *bt_;
   std::vector<std::string> words_compressed_;
   std::vector<std::string> integers_compressed_;
   uint8_t buffer_[256];
@@ -43,15 +43,15 @@ std::string PrefixBtreeUnitTest::encodeString(const std::string &key) {
 }
 
 TEST_F(PrefixBtreeUnitTest, lookupWordTest) {
-  bt_ = new cpsbtreeolc::BTree<int64_t>();
+  bt_ = new prefixbtreeolc::BTree<int64_t>();
   for (int i = 0; i < (int)words.size(); i++) {
-    cpsbtreeolc::Key key;
+    prefixbtreeolc::Key key;
     key.setKeyStr(words[i].c_str(), words[i].length());
     bt_->insert(key, reinterpret_cast<int64_t>(&words[i]));
   }
 
   for (int i = 0; i < (int)words.size(); i++) {
-    cpsbtreeolc::Key key;
+    prefixbtreeolc::Key key;
     key.setKeyStr(words[i].c_str(), words[i].length());
     int64_t re;
     bool find = bt_->lookup(key, re);
@@ -67,16 +67,16 @@ TEST_F(PrefixBtreeUnitTest, opcLookupWordTest) {
   for (int i = 0; i < (int)words.size(); i++) {
     words_compressed_.push_back(encodeString(words[i]));
   }
-  bt_ = new cpsbtreeolc::BTree<int64_t>();
+  bt_ = new prefixbtreeolc::BTree<int64_t>();
   for (int i = 0; i < (int)words_compressed_.size(); i++) {
-    cpsbtreeolc::Key key;
+    prefixbtreeolc::Key key;
     key.setKeyStr(words_compressed_[i].c_str(), words_compressed_[i].length());
     bt_->insert(key, reinterpret_cast<int64_t>(&words_compressed_[i]));
   }
 
   for (int i = 0; i < (int)words.size(); i++) {
     std::string enc_str = encodeString(words[i]);
-    cpsbtreeolc::Key key;
+    prefixbtreeolc::Key key;
     key.setKeyStr(enc_str.c_str(), enc_str.length());
     int64_t re;
     bool find = bt_->lookup(key, re);
@@ -88,7 +88,7 @@ TEST_F(PrefixBtreeUnitTest, opcLookupWordTest) {
 }
 
 TEST_F(PrefixBtreeUnitTest, rangeScanWordTest) {
-  bt_ = new cpsbtreeolc::BTree<int64_t>();
+  bt_ = new prefixbtreeolc::BTree<int64_t>();
   std::vector<std::string> sorted_words;
   for (int i = 0; i < (int)words.size(); i++) {
     sorted_words.push_back(words[i]);
@@ -102,7 +102,7 @@ TEST_F(PrefixBtreeUnitTest, rangeScanWordTest) {
   }
 
   for (int i = 0; i < (int)words.size(); i++) {
-    cpsbtreeolc::Key key;
+    prefixbtreeolc::Key key;
     key.setKeyStr(words[i].c_str(), words[i].length());
     bt_->insert(key, reinterpret_cast<int64_t>(&words[i]));
   }
@@ -110,7 +110,7 @@ TEST_F(PrefixBtreeUnitTest, rangeScanWordTest) {
   int scanlen = 100;
   int64_t re[200];
   for (int i = 0; i + scanlen < (int)words.size(); i++) {
-    cpsbtreeolc::Key key;
+    prefixbtreeolc::Key key;
     key.setKeyStr(words[i].c_str(), words[i].length());
     int cnt = bt_->rangeScan(key, scanlen, re);
     int start_idx = index_map[str_hash(*reinterpret_cast<std::string *>(re[0]))];
@@ -128,7 +128,7 @@ TEST_F(PrefixBtreeUnitTest, rangeScanEncodeWordTest) {
     words_compressed_.push_back(encodeString(words[i]));
   }
 
-  bt_ = new cpsbtreeolc::BTree<int64_t>();
+  bt_ = new prefixbtreeolc::BTree<int64_t>();
   std::vector<std::string> sorted_words;
   for (int i = 0; i < (int)words_compressed_.size(); i++) {
     sorted_words.push_back(words_compressed_[i]);
@@ -142,7 +142,7 @@ TEST_F(PrefixBtreeUnitTest, rangeScanEncodeWordTest) {
   }
 
   for (int i = 0; i < (int)words_compressed_.size(); i++) {
-    cpsbtreeolc::Key key;
+    prefixbtreeolc::Key key;
     key.setKeyStr(words_compressed_[i].c_str(), words_compressed_[i].length());
     bt_->insert(key, reinterpret_cast<int64_t>(&words_compressed_[i]));
   }
@@ -150,7 +150,7 @@ TEST_F(PrefixBtreeUnitTest, rangeScanEncodeWordTest) {
   int scanlen = 100;
   int64_t re[200];
   for (int i = 0; i + scanlen < (int)words_compressed_.size(); i++) {
-    cpsbtreeolc::Key key;
+    prefixbtreeolc::Key key;
     key.setKeyStr(words_compressed_[i].c_str(), words_compressed_[i].length());
     int cnt = bt_->rangeScan(key, scanlen, re);
     int start_idx = index_map[str_hash(*reinterpret_cast<std::string *>(re[0]))];
@@ -163,15 +163,15 @@ TEST_F(PrefixBtreeUnitTest, rangeScanEncodeWordTest) {
 }
 
 TEST_F(PrefixBtreeUnitTest, lookIntTest) {
-  bt_ = new cpsbtreeolc::BTree<int64_t>();
+  bt_ = new prefixbtreeolc::BTree<int64_t>();
   for (int i = 0; i < (int)integers.size(); i++) {
-    cpsbtreeolc::Key key;
+    prefixbtreeolc::Key key;
     key.setKeyStr(integers[i].c_str(), integers[i].length());
     bt_->insert(key, reinterpret_cast<int64_t>(&integers[i]));
   }
 
   for (int i = 0; i < (int)integers.size(); i++) {
-    cpsbtreeolc::Key key;
+    prefixbtreeolc::Key key;
     key.setKeyStr(integers[i].c_str(), integers[i].length());
     int64_t re;
     bool find = bt_->lookup(key, re);
@@ -182,7 +182,7 @@ TEST_F(PrefixBtreeUnitTest, lookIntTest) {
 }
 
 TEST_F(PrefixBtreeUnitTest, rangeScanIntTest) {
-  bt_ = new cpsbtreeolc::BTree<int64_t>();
+  bt_ = new prefixbtreeolc::BTree<int64_t>();
   std::vector<std::string> sorted_integers;
   for (int i = 0; i < (int)integers.size(); i++) {
     sorted_integers.push_back(integers[i]);
@@ -196,7 +196,7 @@ TEST_F(PrefixBtreeUnitTest, rangeScanIntTest) {
   }
 
   for (int i = 0; i < (int)integers.size(); i++) {
-    cpsbtreeolc::Key key;
+    prefixbtreeolc::Key key;
     key.setKeyStr(integers[i].c_str(), integers[i].length());
     bt_->insert(key, reinterpret_cast<int64_t>(&integers[i]));
   }
@@ -204,7 +204,7 @@ TEST_F(PrefixBtreeUnitTest, rangeScanIntTest) {
   int scanlen = 100;
   int64_t re[200];
   for (int i = 0; i + scanlen < (int)integers.size(); i++) {
-    cpsbtreeolc::Key key;
+    prefixbtreeolc::Key key;
     key.setKeyStr(integers[i].c_str(), integers[i].length());
     int cnt = bt_->rangeScan(key, scanlen, re);
     int start_idx = index_map[str_hash(*reinterpret_cast<std::string *>(re[0]))];

@@ -54,8 +54,11 @@ add_subdirectory(PrefixBTree/bench)
 add_subdirectory(PrefixBTree/test)
 add_subdirectory(ART/test)
 add_subdirectory(ART/bench)
-
 add_subdirectory(SuRF/test)
 add_subdirectory(SuRF/bench)
 add_subdirectory(btree)
-#add_subdirectory(hot)
+
+option(BUILD_HOT "Build HOT" OFF)
+if (BUILD_HOT)
+  add_subdirectory(hot)
+endif()

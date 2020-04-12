@@ -7,7 +7,7 @@ run_hot=$4
 run_btree=$5
 run_breakdown=$6
 
-PYTHON='/usr/local/bin/python3.5'
+PYTHON='python'
 if [ ${run_microbench} == 1 ]
 then
     ############################################################
@@ -142,6 +142,25 @@ then
     ${PYTHON} ../plot/btree/range/lat_wiki_btree.py
     ${PYTHON} ../plot/btree/range/lat_url_btree.py
 fi
+
+
+if [ ${run_prefixbtree} == 1 ]
+then
+    ############################################################
+    # Btree point
+    ############################################################
+    ${PYTHON} ../plot/preifxbtree/point/lookuplat_mem_email_btree.py
+    ${PYTHON} ../plot/prefixbtree/point/lookuplat_mem_wiki_btree.py
+    ${PYTHON} ../plot/prefixbtree/point/lookuplat_mem_url_btree.py
+
+    ############################################################
+    # Btree range
+    ############################################################
+    ${PYTHON} ../plot/prefixbtree/range/lat_email_btree.py
+    ${PYTHON} ../plot/prefixbtree/range/lat_wiki_btree.py
+    ${PYTHON} ../plot/prefixbtree/range/lat_url_btree.py
+fi
+
 
 if [ ${run_hot} == 1 ]
 then
