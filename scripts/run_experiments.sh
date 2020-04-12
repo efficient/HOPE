@@ -17,7 +17,7 @@ PYTHON=python
 
 if [${run_hot} == 1]; then
   ##################################################
-  # Initialize modules for hot
+  # Initialize modules for HOT
   ##################################################
   wget --directory-prefix=hot/third-party/ https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.gz
   tar -xvf hot/third-party/boost_1_66_0.tar.gz -C hot/third-party/
@@ -33,8 +33,8 @@ fi
 
 ###################################################
 # Generate worklaods
-##################################################
-# Download YCSB if the directory not exists
+###################################################
+# Download YCSB if the directory does not exist
 cd workload_gen
 chmod 744 ./ycsb_download.sh
 [ ! -d "./YCSB" ] && ./ycsb_download.sh
@@ -43,13 +43,14 @@ chmod 744 ./ycsb_download.sh
 
 ###################################################
 # Build Project
-##################################################
+###################################################
 cd ${PROJECT_DIR}
 mkdir build
 cd build
 cmake ..
 make -j
 cd ${PROJECT_DIR}
+
 ##################################################
 # Run experiments
 ##################################################
@@ -115,10 +116,10 @@ then
     #${PYTHON} generate_result.py ta
     #rm ta
 fi
-echo "===========Finish Generating results============"
+echo "===========Finish Generating Results============"
 #################################################
 # Generate plots
-################################################
+#################################################
 ./plot.sh ${run_microbench} ${run_surf} ${run_art} ${run_hot} ${run_btree} ${run_small_experiment}
 
 
