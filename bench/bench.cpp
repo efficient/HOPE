@@ -74,7 +74,7 @@ int64_t loadKeysInt(const std::string &file_name, const int sample_percent, std:
 
 int64_t getInputSize(const int encoder_type, const std::vector<std::string> &keys_shuffle,
                      const int64_t dict_size_limit, int64_t &cur_dict_size) {
-  ope::Encoder *encoder = nullptr;
+  hope::Encoder *encoder = nullptr;
   int64_t input_size = 0;
   int64_t l = 0;
   int64_t r;
@@ -88,7 +88,7 @@ int64_t getInputSize(const int encoder_type, const std::vector<std::string> &key
     if (encoder != nullptr) delete encoder;
     input_size = (l + r) / 2;
     std::cout << cur_dict_size << " " << input_size << " " << l << " " << r << std::endl;
-    encoder = ope::EncoderFactory::createEncoder(encoder_type);
+    encoder = hope::EncoderFactory::createEncoder(encoder_type);
     encoder->build(keys_shuffle, input_size);
     cur_dict_size = encoder->numEntries();
     if (cur_dict_size < dict_size_limit) {
@@ -121,7 +121,7 @@ void findAllInputSize(const int encoder_type, const int wkld, const std::vector<
   }
   if (encoder_type == 5) {
     for (int i = 0; i < 9; i++) {
-      ope::Encoder *encoder = ope::EncoderFactory::createEncoder(encoder_type, 200000);
+      hope::Encoder *encoder = hope::EncoderFactory::createEncoder(encoder_type, 200000);
       encoder->build(keys_shuffle, dic[i]);
     }
   }
@@ -133,7 +133,7 @@ void exec(const int encoder_type, const int64_t dict_size_limit, const std::vect
   int64_t input_size = getInputSize(encoder_type, keys_shuffle, dict_size_limit, cur_dict_size);
   int W = 0;
   if (encoder_type == 5 || encoder_type == 6) W = 50000;
-  ope::Encoder *encoder = ope::EncoderFactory::createEncoder(encoder_type, W);
+  hope::Encoder *encoder = hope::EncoderFactory::createEncoder(encoder_type, W);
   encoder->build(keys_shuffle, input_size);
 
   uint8_t *buffer = new uint8_t[kLongestCodeLen];

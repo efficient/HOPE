@@ -58,6 +58,9 @@ add_subdirectory(SuRF/test)
 add_subdirectory(SuRF/bench)
 add_subdirectory(btree)
 
+add_executable(example example.cpp)
+target_link_libraries(example)
+
 option(BUILD_HOT "Build HOT" OFF)
 if (BUILD_HOT)
   add_subdirectory(hot)
