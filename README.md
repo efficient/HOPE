@@ -19,7 +19,14 @@ Detailed description can be found in our
     cmake ..
     make -j
 
-## Run Unit Tests
+## Usage Example
+A simple example can be found [here](https://github.com/efficient/OPE/blob/master/example.cpp). To run the example:
+```
+cd build
+./example
+```
+
+## Unit Tests
     make test
 
 ## Benchmark
