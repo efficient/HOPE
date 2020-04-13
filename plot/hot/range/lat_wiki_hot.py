@@ -25,16 +25,16 @@ Y_LABEL = "Latency(us)"
 GROUP_SIZE = 7
 CATEGORY_NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 65536", "4-Grams, 65536", "ALM 8192", "ALM 65536"]
 
-CSV_ART_LOOKUP_FILE_PATH = "results/btree/range/final_lookuplat_wiki_btree_range.csv"
-CSV_ART_INS_FILE_PATH = "results/btree/range/final_insertlat_wiki_btree_range.csv"
-GRAPH_OUTPUT_PATH = "figures/btree/range/lat_wiki_btree.pdf"
+CSV_HOT_LOOKUP_FILE_PATH = "results/hot/range/final_lookuplat_wiki_hot_range.csv"
+CSV_HOT_INS_FILE_PATH = "results/hot/range/final_insertlat_wiki_hot_range.csv"
+GRAPH_OUTPUT_PATH = "figures/hot/range/lat_wiki_hot.pdf"
 
 COLORS = ['#ffffff', '#fff7ec', '#fee8c8', '#fc8d59', '#d7301f', '#7f0000', '#4c0000']
 
 LEGEND_FONT_SIZE = 18
 LEGEND_POS = 'upper left'
 
-lookup_in_art = open(CSV_ART_LOOKUP_FILE_PATH)
+lookup_in_art = open(CSV_HOT_LOOKUP_FILE_PATH)
 reader = csv.reader(lookup_in_art)
 csvrows = list(reader)
 data_lookup = []
@@ -42,7 +42,7 @@ for row in csvrows :
     for item in row :
         data_lookup.append(float(item))
 
-insert_in_art = open(CSV_ART_INS_FILE_PATH)
+insert_in_art = open(CSV_HOT_INS_FILE_PATH)
 reader = csv.reader(insert_in_art)
 csvrows = list(reader)
 data_insert = []
@@ -75,15 +75,18 @@ ax1.set_xlim([0,1])
 ax2.set_xlim([0,1])
 
 ax1.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
-y1_ticks = [0, 2, 4, 6]
+y1_ticks = [0, 2, 4, 6, 8]
 ax1.set_yticks(y1_ticks)
-ax1.set_ylim(0,6)
+ax1.set_ylim(0, 8)
+ax1.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
 
-ax2.set_ylim(0, 4)
-ax2.yaxis.set_ticks([0, 1, 2, 3, 4])
+ax2.set_ylim(0, 3)
+ax2.yaxis.set_ticks([0, 1, 2, 3])
 
 ax1.yaxis.tick_left()
+ax1.yaxis.set_label_position('left')
 ax2.yaxis.tick_right()
+ax2.yaxis.set_label_position('right')
 
 ax=[ax1,ax2]
 for j in range(0, GROUP_NUM) :

@@ -26,8 +26,8 @@ X_LABEL_FONT_SIZE = 20
 X_TICK_FONT_SIZE = 16
 Y_TICK_FONT_SIZE = 16
 
-X_START = 10
-X_LIMIT = 100
+X_START = 0
+X_LIMIT = 110
 
 LEGEND_FONT_SIZE = 14
 LEGEND_POS = 'upper left'
@@ -35,7 +35,7 @@ LEGEND_POS = 'upper left'
 GRAPH_HEIGHT = 4.5 #inches
 GRAPH_WIDTH = 8 #inches
 
-CSV_FILE_PATH = "results/microbench/percentage/per_cpr_lat.csv"
+CSV_FILE_PATH = "results/microbench/percentage/per_cpr.csv"
 GRAPH_OUTPUT_PATH = "figures/microbench/percentage/cpr_email_dict_size.pdf"
 
 data_x = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
@@ -48,30 +48,12 @@ for row in csvrows :
     for item in row :
         data_y.append(float(item))
 
-single_x = []
-double_x = []
-three_grams_x = []
-three_grams_y = []
-four_grams_x = []
-four_grams_y = []
-alm_x = []
-alm_y = []
-alm_improved_x = []
-alm_improved_y = []
-
-
-def get_add(start_idx, end_idx, step, data):
-    part_data = []
-    for i in range(start_idx, end_idx, step):
-        part_data.append(data[i])
-    return part_data
-
-single_y = get_data(0, 20, 2, data)
-double_y = get_data(20, 40, 2, data)
-three_grams_y = get_data(40, 60, 2, data)
-four_grams_y = get_data(60, 80, 2, data)
-alm_y = get_data(80, 100, 2, data)
-alm_improved_y = get_data(100, 120, 2, data)
+single_y = data_y[0:10]
+double_y = data_y[10:20]
+three_grams_y = data_y[20:30]
+four_grams_y = data_y[30:40]
+alm_y = data_y[40:50]
+alm_improved_y = data_y[50:60]
 
 #========================================================================================
 mpl.rcParams['ps.useafm'] = True
@@ -91,7 +73,7 @@ fig = plot.figure(figsize={GRAPH_HEIGHT, GRAPH_WIDTH})
 ax = fig.add_subplot(111)
 
 ax.plot(data_x, single_y, 's-', ms=10, mew = SHAPE_BORDER, mec = EDGE_COLOR, lw = 3, color=COLORS[0], label=LINE_NAMES[0])
-ax.plot(double_x, double_y, 'o-', ms=10, mew = SHAPE_BORDER, mec = EDGE_COLOR,lw = 3, color=COLORS[1], label=LINE_NAMES[1])
+ax.plot(data_x, double_y, 'o-', ms=10, mew = SHAPE_BORDER, mec = EDGE_COLOR,lw = 3, color=COLORS[1], label=LINE_NAMES[1])
 ax.plot(data_x, alm_y, 'd-', ms=10, lw = 3, mew = SHAPE_BORDER, mec = EDGE_COLOR, color=COLORS[2], label=LINE_NAMES[2])
 ax.plot(data_x, three_grams_y, 'p-', mew = SHAPE_BORDER, mec = EDGE_COLOR, ms=10, lw = 3, color=COLORS[3], label=LINE_NAMES[3])
 ax.plot(data_x, four_grams_y, '^-', mew = SHAPE_BORDER, mec = EDGE_COLOR, ms=10, lw = 3, color=COLORS[4], label=LINE_NAMES[4])
@@ -106,8 +88,8 @@ for label in ax.get_yticklabels():
 
 ax.set_xlabel(X_LABEL, fontsize=X_LABEL_FONT_SIZE)
 
+ax.set_xlim(xmin=0, xmax=110)
 ax.set_xticks(data_x)
-ax.set_xlim(X_START, X_LIMIT)
 
 y_ticks = [0, 1.0, 2.0, 3.0, 4.0]
 ax.set_yticks(y_ticks)

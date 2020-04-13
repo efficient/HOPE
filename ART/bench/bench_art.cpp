@@ -11,10 +11,11 @@
 #include "parameters.h"
 
 static const uint64_t kNumEmailRecords = 25000000;
-static const uint64_t kNumWikiRecords = 14000000;
+static const uint64_t kNumWikiRecords = 14000;
+static const uint64_t kNumUrlRecords = 5000;
 static const uint64_t kNumTxns = 10000000;
 
-static const int kSamplePercent = 1;
+static const int kSamplePercent = 20;
 static int runALM = 1;
 
 static const std::string file_load_email = "workloads/load_email";
@@ -40,7 +41,6 @@ static const std::string end_key_str = std::string(255, char(255));
 static const int kEmail = 0;
 static const int kWiki = 1;
 static const int kUrl = 2;
-static const int kTs = 3;
 
 //-------------------------------------------------------------
 // Expt ID = 0
@@ -162,7 +162,7 @@ void loadWorkload(int wkld_id, std::vector<std::string> &insert_keys, std::vecto
   else if (wkld_id == kWiki)
     loadKeysFromFile(file_load_wiki, kNumWikiRecords, load_keys);
   else if (wkld_id == kUrl)
-    loadKeysFromFile(file_load_url, kNumEmailRecords, load_keys);
+    loadKeysFromFile(file_load_url, kNumUrlRecords, load_keys);
   else
     return;
 

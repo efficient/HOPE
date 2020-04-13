@@ -1,11 +1,11 @@
 import sys
 import os
 import numpy as np
-RESULT_DIR = '../results/'
-PREFIX = ['ART', 'btree', 'hot', 'microbench/cpr_latency', 'SuRF', 'SuRF_real']
+RESULT_DIR = 'results/'
+PREFIX = ['ART', 'btree', 'hot', 'microbench/cpr_latency', 'SuRF']
 TYPE = ['point', 'range']
-DATASETS = ['email', 'ts', 'url', 'wiki']
-VAR = ['cpr','x','height', 'fpr', 'lat', 'insertlat', 'lookuplat', 'stats']
+DATASETS = ['email', 'url', 'wiki']
+VAR = ['cpr','x','height', 'fpr', 'lat', 'insertlat', 'lookuplat', 'mem', 'stats']
 BT_OUTFILE = "../results/microbench/build_time_breakdown/bt_breakdown.csv"
 
 def generate_result_single(dirpath, filename):

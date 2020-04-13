@@ -13,8 +13,9 @@ def autolabel(rects):
     for rect in rects:
         height = rect.get_height()
         ax.text(rect.get_x() + rect.get_width()/2., height + 0.01,
-                '%0.2f' % float(height),
+                '%0.1f' % float(height),
 #                '%d' % int(height),
+                fontsize=14,
                 ha='center', va='bottom')
 
 #GROUP_SIZE = 9
@@ -28,9 +29,6 @@ GRAPH_OUTPUT_PATH = "figures/ART/point/height_url_art.pdf"
 COLORS = ['#ffffff', '#fff7ec', '#fee8c8', '#fc8d59', '#d7301f', '#7f0000', '#4c0000']
 
 Y_LABEL = "Average Trie Height"
-
-X_TICK_FONT_SIZE = 20
-Y_TICK_FONT_SIZE = 16
 
 LEGEND_FONT_SIZE = 18
 LEGEND_POS = 'upper left'
@@ -59,7 +57,7 @@ mpl.rcParams['text.latex.preamble'] = [
 ]
 #========================================================================================
 
-width = 1  / (GROUP_SIZE + 1.0)
+width = 1  / (GROUP_SIZE + 2.0)
 
 fig = plot.figure(figsize=(GRAPH_WIDTH, GRAPH_HEIGHT))
 ax = fig.add_subplot(111)
@@ -68,7 +66,7 @@ rect = []
 
 for i in range(0, GROUP_SIZE) :
     if i == 0: # baseline
-        hatch="/"
+        hatch = HATCH
     else:
         hatch = ""
     pos = []

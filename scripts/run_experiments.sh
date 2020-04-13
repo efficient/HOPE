@@ -5,6 +5,17 @@ PROJECT_DIR="$(pwd)"
 ###################################################
 # Parse Experiment Arguments
 ###################################################
+run_microbench=0
+run_small_experiment=0
+run_alm=0
+run_art=0
+run_btree=0
+run_hot=0
+run_surf=0
+run_prefixbtree=0
+
+PYTHON=python
+
 for i in "$@"
 do
 case $i in
@@ -14,6 +25,10 @@ case $i in
   ;;
   --alm)
   run_alm=1
+  shift
+  ;;
+  --art)
+  run_art=1
   shift
   ;;
   --btree)
@@ -37,10 +52,6 @@ case $i in
 esac
 done
 
-run_microbench=0
-run_small_experiment=0
-
-PYTHON=python
 
 function install_hot_dependeny() {
   wget --directory-prefix=hot/third-party/ https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.gz
@@ -122,7 +133,7 @@ remove_old_results ${run_prefixbtree} "figures/prefixbtree"
 ./scripts/create_dir.sh
 
 cnt=0
-while [ ${cnt} -lt ${repeat_times} ]
+while [[ ${cnt} -lt ${repeat_times} ]]
 do
     run_experiment ${run_microbench} "build/bench/microbench 1 ${run_alm}"
     run_experiment ${run_surf} "build/SuRF/bench/bench_surf 0 ${run_alm}"
@@ -139,7 +150,7 @@ do
 done
 
 # Get the average result
-${PYTHON} generate_result.py micro-tree
+${PYTHON} scripts/generate_result.py micro-tree
 
 if [ ${run_small_experiment} == 1 ]
 then
@@ -157,4 +168,4 @@ echo "===========Finish Generating Results============"
 #################################################
 # Generate plots
 #################################################
-./plot.sh ${run_microbench} ${run_surf} ${run_art} ${run_hot} ${run_btree} ${run_prefixbtree} ${run_small_experiment}
+./scripts/plot.sh ${run_microbench} ${run_surf} ${run_art} ${run_hot} ${run_btree} ${run_prefixbtree} ${run_small_experiment}

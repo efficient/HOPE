@@ -11,12 +11,12 @@
 #include "surf.hpp"
 #include "parameters.h"
 
-static const uint64_t kNumEmailRecords = 25000000;
-static const uint64_t kNumWikiRecords = 14000000;
-static const uint64_t kNumTsRecords = 25000000;
+static const uint64_t kNumEmailRecords = 10000;
+static const uint64_t kNumWikiRecords = 14000;
+static const uint64_t kNumUrlRecords = 5000;
 static const uint64_t kNumTxns = 10000000;
 static const unsigned kPercent = 50;
-static const int kSamplePercent = 1;
+static const int kSamplePercent = 20;
 
 static const std::string file_load_email = "workloads/load_email";
 static const std::string file_load_wiki = "workloads/load_wiki";
@@ -36,7 +36,6 @@ static const char *kNoColor = "\033[0;0m";
 static const int kEmail = 0;
 static const int kWiki = 1;
 static const int kUrl = 2;
-static const int kTs = 3;
 
 //-------------------------------------------------------------
 // Expt ID = 0
@@ -238,7 +237,7 @@ void loadWorkload(int wkld_id, int64_t &point_tp, int64_t &range_tp, std::vector
   else if (wkld_id == kWiki)
     loadKeysFromFile(file_load_wiki, kNumWikiRecords, load_keys);
   else if (wkld_id == kUrl)
-    loadKeysFromFile(file_load_url, kNumEmailRecords, load_keys);
+    loadKeysFromFile(file_load_url, kNumUrlRecords, load_keys);
   else
     return;
 
@@ -493,7 +492,6 @@ void exec_group(const int expt_id, const int filter_type, const uint32_t suffix_
        insert_urls_sample, txn_urls, upper_bound_urls);
   expt_num++;
 
-  //=================================================
   std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
   exec(expt_id, kEmail, is_point, filter_type, suffix_len, true, 1, 0, email_point_tp, email_range_tp, insert_emails,
        insert_emails_sample, txn_emails, upper_bound_emails);

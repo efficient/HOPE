@@ -1,4 +1,7 @@
 import sys
+import os
+sys.path.append(os.path.abspath('./plot/'))
+from option import *
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plot
@@ -11,17 +14,9 @@ LINE_NAMES = ["Single-Char", "Double-Char", "ALM", "3-Grams", "4-Grams", "ALM-Im
 NUM_3_POINTS = 7
 NUM_4_EXTRA_POINTS = 2
 
-#COLORS = ['#fef0d9', '#fdcc8a', '#fc8d59', '#d7301f', '#33b3cc', '#3366CC']
 COLORS = ['#fff7ec', '#fee8c8', '#fdd49e', '#fc8d59', '#d7301f', '#7f0000']
-
-SHAPE_BORDER = 0.5
-EDGE_COLOR = 'black'
-
 Y_LABEL = "Compression Rate"
-Y_LABEL_FONT_SIZE = 20
-
 X_LABEL = "Number of Dictionary Entries"
-X_LABEL_FONT_SIZE = 20
 
 X_TICK_FONT_SIZE = 16
 Y_TICK_FONT_SIZE = 16
@@ -31,9 +26,6 @@ X_LIMIT = 2**19
 
 LEGEND_FONT_SIZE = 14
 LEGEND_POS = 'upper left'
-
-GRAPH_HEIGHT = 4.5 #inches
-GRAPH_WIDTH = 8 #inches
 
 CSV_X_FILE_PATH = "results/microbench/cpr_latency/final_x_email_dict_size.csv"
 CSV_Y_FILE_PATH = "results/microbench/cpr_latency/final_cpr_email_dict_size.csv"
@@ -100,17 +92,25 @@ mpl.rcParams['text.latex.preamble'] = [
 ]
 #========================================================================================
 
-fig = plot.figure(figsize={GRAPH_HEIGHT, GRAPH_WIDTH})
+fig = plot.figure(figsize=(GRAPH_WIDTH,GRAPH_HEIGHT))
 ax = fig.add_subplot(111)
 
-ax.plot(single_x, single_y, 's-', ms=10, mew = SHAPE_BORDER, mec = EDGE_COLOR, lw = 3, color=COLORS[0], label=LINE_NAMES[0])
-ax.plot(double_x, double_y, 'o-', ms=10, mew = SHAPE_BORDER, mec = EDGE_COLOR,lw = 3, color=COLORS[1], label=LINE_NAMES[1])
-ax.plot(alm_x, alm_y, 'd-', ms=10, lw = 3, mew = SHAPE_BORDER, mec = EDGE_COLOR, color=COLORS[2], label=LINE_NAMES[2])
-ax.plot(three_grams_x, three_grams_y, 'p-', mew = SHAPE_BORDER, mec = EDGE_COLOR, ms=10, lw = 3, color=COLORS[3], label=LINE_NAMES[3])
-ax.plot(four_grams_x, four_grams_y, '^-', mew = SHAPE_BORDER, mec = EDGE_COLOR, ms=10, lw = 3, color=COLORS[4], label=LINE_NAMES[4])
-ax.plot(alm_improved_x, alm_improved_y, 'v-', mew = SHAPE_BORDER,mec = EDGE_COLOR, ms=10, lw = 3, color=COLORS[5], label=LINE_NAMES[5])
+ax.plot(single_x, single_y, marker=MARKERS[1], ms=10, mew = BORDER_SIZE, mec = BORDER_COLOR, lw = 3, color=COLORS[0], label=LINE_NAMES[0])
+ax.plot(double_x, double_y, marker=MARKERS[2], ms=10, mew = BORDER_SIZE, mec = BORDER_COLOR,lw = 3, color=COLORS[1], label=LINE_NAMES[1])
+ax.plot(alm_x, alm_y, marker=MARKERS[5], ms=10, lw = 3, mew = BORDER_SIZE, mec = BORDER_COLOR, color=COLORS[2], label=LINE_NAMES[2])
+ax.plot(three_grams_x, three_grams_y, marker=MARKERS[3], mew = BORDER_SIZE, mec = BORDER_COLOR, ms=10, lw = 3, color=COLORS[3], label=LINE_NAMES[3])
+ax.plot(four_grams_x, four_grams_y, marker=MARKERS[4], mew = BORDER_SIZE, mec = BORDER_COLOR, ms=10, lw = 3, color=COLORS[4], label=LINE_NAMES[4])
+ax.plot(alm_improved_x, alm_improved_y, marker=MARKERS[6], mew = BORDER_SIZE,mec = BORDER_COLOR, ms=10, lw = 3, color=COLORS[5], label=LINE_NAMES[5])
+
+ax.annotate('Single-Char', xy=(single_x[0], single_y[0]), xytext=(single_x[0] * 0.6, single_y[0] + 0.17),
+             fontsize=14
+            )
+ax.annotate('Double-Char', xy=(double_x[0], double_y[0]), xytext=(double_x[0] * 1.3, double_y[0] - 0.06),
+             fontsize=14
+            )
 
 ax.set_xscale('log', basex=2)
+ax.set_xlabel(X_LABEL, fontsize=X_LABEL_FONT_SIZE)
 
 for label in ax.get_xticklabels():
     label.set_fontsize(X_TICK_FONT_SIZE)
@@ -118,7 +118,6 @@ for label in ax.get_xticklabels():
 for label in ax.get_yticklabels():
     label.set_fontsize(Y_TICK_FONT_SIZE)
 
-ax.set_xlabel(X_LABEL, fontsize=X_LABEL_FONT_SIZE)
 
 X = [2**8, 2**10, 2**12, 2**14, 2**16, 2**18]
 ax.set_xticks(X)

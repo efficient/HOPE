@@ -32,10 +32,31 @@ cd build
 ## Benchmark
 Go to project root directory, run
 ```
-bash ./scripts/run_experiment.sh 2
+./scripts/run_experiment.sh [OPTION]
+
+Description
+  -r, --repeat_times=NUM
+    repeat the experiment NUM times, get the average as the final result. Experiments will run once by default
+  --alm
+    run alm and alm improved encoders. All benchmarks will only run single, double, 3 gram, 4 gram encoders by default
+  --art
+    run art benchmark
+  --surf
+    run surf benchmark
+  --btree
+    run btree benchmark
+  --prefixbtree
+    run prefix btree benchmark
+  --hot
+    run hot benchmark
+  --all
+    run all benchmarks (art, surf, btree, prefixbtree, hot)
+
+Example
+./scripts/run_experiment.sh -r=3 --surf --alm
+run surf benchmark on all encoders (include alm and alm improved) three times and get the average as the result
 ```
-2 here means running experiment twice and getting the average as the final result. You can control which benchmark (ART, SuRF, BTree, PrefixBTree) to run by changing arguments in ```scripts/run_experiment.sh```.
-Results will be in results/ and figures will be in figures/
+The script will record numbers of specified benchmarks. To generate corresponding figures, make sure you include the --alm flag. Results will be in results/ and figures will be in figures/.
 
 ## License
 Copyright 2020, Carnegie Mellon University

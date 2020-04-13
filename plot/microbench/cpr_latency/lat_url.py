@@ -1,4 +1,7 @@
 import sys
+import os
+sys.path.append(os.path.abspath('./plot/'))
+from option import *
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plot
@@ -14,13 +17,7 @@ NUM_4_EXTRA_POINTS = 2
 COLORS = ['#fff7ec', '#fee8c8', '#fdd49e', '#fc8d59', '#d7301f', '#7f0000']
 
 Y_LABEL = "Latency (ns per char)"
-Y_LABEL_FONT_SIZE = 20
-
 X_LABEL = "Number of Dictionary Entries"
-X_LABEL_FONT_SIZE = 20
-
-SHAPE_BORDER = 0.5
-EDGE_COLOR = 'black'
 
 X_TICK_FONT_SIZE = 16
 Y_TICK_FONT_SIZE = 16
@@ -30,9 +27,6 @@ X_LIMIT = 2**19
 
 LEGEND_FONT_SIZE = 14
 LEGEND_POS = 'upper left'
-
-GRAPH_HEIGHT = 4.5 #inches
-GRAPH_WIDTH = 8 #inches
 
 CSV_X_FILE_PATH = "results/microbench/cpr_latency/final_x_url_dict_size.csv"
 CSV_Y_FILE_PATH = "results/microbench/cpr_latency/final_lat_url_dict_size.csv"
@@ -100,15 +94,22 @@ mpl.rcParams['text.latex.preamble'] = [
 ]
 #========================================================================================
 
-fig = plot.figure(figsize={GRAPH_HEIGHT, GRAPH_WIDTH})
+fig = plot.figure(figsize=(GRAPH_WIDTH,GRAPH_HEIGHT))
 ax = fig.add_subplot(111)
 
-ax.plot(single_x, single_y, 's-', ms=10, lw = 3, mew = SHAPE_BORDER, mec = EDGE_COLOR, color=COLORS[0], label=LINE_NAMES[0])
-ax.plot(double_x, double_y, 'o-', ms=10, lw = 3, mew = SHAPE_BORDER, mec = EDGE_COLOR, color=COLORS[1], label=LINE_NAMES[1])
-ax.plot(alm_x, alm_y, 'd-', ms=10, lw = 3, mew = SHAPE_BORDER, mec = EDGE_COLOR, color=COLORS[2], label=LINE_NAMES[2])
-ax.plot(three_grams_x, three_grams_y, 'p-', ms=10, lw = 3, mew = SHAPE_BORDER, mec = EDGE_COLOR, color=COLORS[3], label=LINE_NAMES[3])
-ax.plot(four_grams_x, four_grams_y, '^-', ms=10, lw = 3, mew = SHAPE_BORDER, mec = EDGE_COLOR, color=COLORS[4], label=LINE_NAMES[4])
-ax.plot(alm_improved_x, alm_improved_y, 'v-', ms=10, lw = 3, mew = SHAPE_BORDER, mec = EDGE_COLOR, color=COLORS[5], label=LINE_NAMES[5])
+ax.plot(single_x, single_y, marker=MARKERS[1], ms=10, lw = 3, mew = BORDER_SIZE, mec = BORDER_COLOR, color=COLORS[0], label=LINE_NAMES[0])
+ax.plot(double_x, double_y, marker=MARKERS[2], ms=10, lw = 3, mew = BORDER_SIZE, mec = BORDER_COLOR, color=COLORS[1], label=LINE_NAMES[1])
+ax.plot(alm_x, alm_y, marker=MARKERS[5], ms=10, lw = 3, mew = BORDER_SIZE, mec = BORDER_COLOR, color=COLORS[2], label=LINE_NAMES[2])
+ax.plot(three_grams_x, three_grams_y, marker=MARKERS[3], ms=10, lw = 3, mew = BORDER_SIZE, mec = BORDER_COLOR, color=COLORS[3], label=LINE_NAMES[3])
+ax.plot(four_grams_x, four_grams_y, marker=MARKERS[4], ms=10, lw = 3, mew = BORDER_SIZE, mec = BORDER_COLOR, color=COLORS[4], label=LINE_NAMES[4])
+ax.plot(alm_improved_x, alm_improved_y, marker=MARKERS[6], ms=10, lw = 3, mew = BORDER_SIZE, mec = BORDER_COLOR, color=COLORS[5], label=LINE_NAMES[5])
+
+ax.annotate('Single-Char', xy=(single_x[0], single_y[0]), xytext=(single_x[0] * 1.3, single_y[0] * 0.6),
+            fontsize=14
+            )
+ax.annotate('Double-Char', xy=(double_x[0], double_y[0]), xytext=(double_x[0] * 1.3, double_y[0] * 0.6),
+            fontsize=14
+            )
 
 ax.set_xscale('log', basex=2)
 
@@ -124,7 +125,7 @@ X = [2**8, 2**10, 2**12, 2**14, 2**16, 2**18]
 ax.set_xticks(X)
 ax.set_xlim(X_START, X_LIMIT)
 
-y_ticks = [0, 20, 40, 60, 80, 100, 120]
+y_ticks = [0, 25, 50, 75, 100, 125]
 ax.set_yticks(y_ticks)
 ax.set_ylim(0, 125)
 

@@ -15,7 +15,6 @@ namespace microbench {
 static const std::string file_email = "datasets/emails.txt";
 static const std::string file_wiki = "datasets/wikis.txt";
 static const std::string file_url = "datasets/urls.txt";
-static const std::string file_ts = "datasets/poisson_timestamps.csv";
 static const std::string file_email1 = "datasets/email_1.txt";
 static const std::string file_email2 = "datasets/email_2.txt";
 static const int kLongestCodeLen = 4096;
@@ -28,7 +27,6 @@ static bool runBatch = false;
 static const int kEmail = 0;
 static const int kWiki = 1;
 static const int kUrl = 2;
-static const int kTs = 3;
 
 static const std::string output_dir = "results/microbench/";
 
@@ -304,11 +302,6 @@ void exec(const int expt_id, const int wkld_id, const int encoder_type, const in
       output_cpr_url_dict_size << cpr << "\n";
       output_lat_url_dict_size << lat << "\n";
       output_mem_url_dict_size << mem << "\n";
-    } else if (wkld_id == kTs) {
-      output_x_ts_dict_size << dict_size << "\n";
-      output_cpr_ts_dict_size << cpr << "\n";
-      output_lat_ts_dict_size << lat << "\n";
-      output_mem_ts_dict_size << mem << "\n";
     }
   } else if (expt_id == 4) {
     if (wkld_id == kEmail) {
@@ -378,7 +371,7 @@ int main(int argc, char *argv[]) {
     int total_num_expts = 36;
     for (int p = 0; p < 3; p++) {
       int percent = percent_list[p];
-      for (int et = 1; et < 5; et++) {
+      for (int et = 1; et < 7; et++) {
         std::cout << "Sample Size Sweep " << (expt_num++) << "/" << total_num_expts << std::endl;
         exec(expt_id, kEmail, et, ds, percent, enc_src_percent, emails_shuffle, total_len_email);
         std::cout << "Sample Size Sweep " << (expt_num++) << "/" << total_num_expts << std::endl;
@@ -526,21 +519,16 @@ int main(int argc, char *argv[]) {
     std::cout << "Trie vs Array; Expt ID = 2" << std::endl;
     std::cout << "------------------------------------------------" << std::endl;
 
-    int sample_percent = 1;
+    int sample_percent = 20;
     int enc_src_percent = 100;
-    // int expt_num = 1;
-    // int total_num_expts = 16;
-    /*for (int ds = 0; ds < 7; ds++) {
-        std::cout << "Trie vs Array " << (expt_num++) << "/" << total_num_expts << std::endl;
-    }
-
+    int expt_num = 1;
+    int total_num_expts = 9;
+    int encoder_type = 4;
     for (int ds = 0; ds < 9; ds++) {
         //int dict_size_limit = dict_size_list[ds];
         std::cout << "Trie vs Array " << (expt_num++) << "/" << total_num_expts << std::endl;
-        exec(expt_id, kEmail, 4, ds, percent, emails_shuffle, total_len_email);
-    }*/
-    int ds = 4;
-    exec(expt_id, kEmail, 4, ds, sample_percent, enc_src_percent, emails_shuffle, total_len_email);
+        exec(expt_id, kEmail, encoder_type, ds, percent, emails_shuffle, total_len_email);
+    }
   } else if (expt_id == 3) {
     //-------------------------------------------------------------
     // Hu-Tucker Build Time; Expt ID = 3
@@ -577,7 +565,6 @@ int main(int argc, char *argv[]) {
     int expt_num = 0;
     int total_num_expts = 9;
     for (int ds = 0; ds < 9; ds++) {
-      // int dict_size_limit = dict_size_list[ds];
       std::cout << "Hu-Tucker vs. Fixed Length Dict Codes (Part 1: Hu-Tucker) " << (expt_num++) << "/"
                 << total_num_expts << std::endl;
       exec(expt_id, kEmail, encoder_type, ds, sample_percent, enc_src_percent, emails_shuffle, total_len_email);
@@ -606,7 +593,6 @@ int main(int argc, char *argv[]) {
     int expt_num = 0;
     int total_num_expts = 9;
     for (int ds = 0; ds < 9; ds++) {
-      // int dict_size_limit = dict_size_list[ds];
       std::cout << "Hu-Tucker vs. Fixed Length Dict Codes (Part 2: Dict Codes) " << (expt_num++) << "/"
                 << total_num_expts << std::endl;
       exec(expt_id, kEmail, encoder_type, ds, sample_percent, enc_src_percent, emails_shuffle, total_len_email);

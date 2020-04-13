@@ -13,8 +13,9 @@ def autolabel(rects):
     for rect in rects:
         height = rect.get_height()
         ax.text(rect.get_x() + rect.get_width()/2., height + 0.01,
-                '%0.2f' % float(height),
+                '%0.1f' % float(height),
 #                '%d' % int(height),
+                fontsize=14,
                 ha='center', va='bottom')
 
 #GROUP_SIZE = 9
@@ -24,13 +25,9 @@ CATEGORY_NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 65536", "4-Grams
 CSV_FILE_PATH = "results/SuRF/point/final_height_email_surf.csv"
 GRAPH_OUTPUT_PATH = "figures/SuRF/point/height_email_surf.pdf"
 
-#COLORS = ['#fef0d9', '#fdd49e', '#fdbb84', '#fc8d59', '#ef6548', '#d7301f', '#990000', '#5b0006', '#350004']
 COLORS = ['#ffffff', '#fff7ec', '#fee8c8', '#fc8d59', '#d7301f', '#7f0000', '#4c0000']
 
 Y_LABEL = "Average Trie Height"
-
-X_TICK_FONT_SIZE = 20
-Y_TICK_FONT_SIZE = 16
 
 LEGEND_FONT_SIZE = 18
 LEGEND_POS = 'upper left'
@@ -59,7 +56,7 @@ mpl.rcParams['text.latex.preamble'] = [
 ]
 #========================================================================================
 
-width = 1  / (GROUP_SIZE + 1.0)
+width = 1  / (GROUP_SIZE + 2.0)
 
 fig = plot.figure(figsize=(GRAPH_WIDTH, GRAPH_HEIGHT))
 ax = fig.add_subplot(111)
@@ -68,7 +65,7 @@ rect = []
 
 for i in range(0, GROUP_SIZE) :
     if i == 0: # baseline
-        hatch="/"
+        hatch = HATCH
     else:
         hatch = ""
     pos = []
@@ -78,9 +75,9 @@ for i in range(0, GROUP_SIZE) :
 
 ax.get_xaxis().set_visible(False)
 
-y_ticks = [0, 5, 10, 15, 20, 25]
+y_ticks = [0, 5, 10, 15, 20]
 ax.set_yticks(y_ticks)
-ax.set_ylim(0, 25)
+ax.set_ylim(0, 20)
 ax.set_xlim([0,1])
 
 for label in ax.get_yticklabels():
