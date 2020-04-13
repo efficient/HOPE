@@ -527,7 +527,7 @@ int main(int argc, char *argv[]) {
     for (int ds = 0; ds < 9; ds++) {
         //int dict_size_limit = dict_size_list[ds];
         std::cout << "Trie vs Array " << (expt_num++) << "/" << total_num_expts << std::endl;
-        exec(expt_id, kEmail, encoder_type, ds, percent, emails_shuffle, total_len_email);
+        exec(expt_id, kEmail, encoder_type, ds, sample_percent, enc_src_percent, emails_shuffle, total_len_email);
     }
   } else if (expt_id == 3) {
     //-------------------------------------------------------------
