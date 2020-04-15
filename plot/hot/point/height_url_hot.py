@@ -17,14 +17,12 @@ def autolabel(rects):
 #                '%d' % int(height),
                 ha='center', va='bottom')
 
-#GROUP_SIZE = 9
 GROUP_SIZE = 7
 CATEGORY_NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 65536", "4-Grams, 65536", "ALM, 8192", "ALM, 65536"]
 
 CSV_FILE_PATH = "results/hot/point/final_height_url_hot.csv"
 GRAPH_OUTPUT_PATH = "figures/hot/point/height_url_hot.pdf"
 
-#COLORS = ['#fef0d9', '#fdd49e', '#fdbb84', '#fc8d59', '#ef6548', '#d7301f', '#990000', '#5b0006', '#350004']
 COLORS = ['#ffffff', '#fff7ec', '#fee8c8', '#fc8d59', '#d7301f', '#7f0000', '#4c0000']
 
 Y_LABEL = "Average Trie Height"
@@ -82,9 +80,10 @@ for i in range(0, GROUP_SIZE) :
 
 ax.get_xaxis().set_visible(False)
 
-y_ticks = [0, 2, 4, 6, 8, 10]
+y_limit = getLimit(data)
+y_ticks = getTicks(y_limit)
 ax.set_yticks(y_ticks)
-ax.set_ylim(0, 10)
+ax.set_ylim(0, y_limit)
 ax.set_xlim([0,1])
 
 for label in ax.get_yticklabels():

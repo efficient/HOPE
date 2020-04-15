@@ -15,7 +15,8 @@
 
 static const uint64_t kNumEmailRecords = 25000000;
 static const uint64_t kNumWikiRecords = 14000;
-static const uint64_t kNumTxns = 5000;
+static const uint64_t kNumUrlRecords = 5000;
+static const uint64_t kNumTxns = 10000000;
 static const int kSamplePercent = 20;
 static const double kUrlSamplePercent = 20;
 
@@ -222,7 +223,7 @@ void loadWorkload(int wkld_id,
     else if (wkld_id == kWiki)
         loadKeysFromFile(file_load_wiki, kNumWikiRecords, load_keys);
     else if (wkld_id == kUrl)
-        loadKeysFromFile(file_load_url, kNumEmailRecords, load_keys);
+        loadKeysFromFile(file_load_url, kNumUrlRecords, load_keys);
     else
         return;
 
@@ -449,7 +450,6 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     std::cout << kGreen << "Throughput = " << kNoColor << tput << "\n";
     double lookup_lat = (exec_time * 1000000) / txn_keys.size(); // us
     double insert_lat = (insert_time * 1000000) / cstr_enc_insert_keys.size(); // us
-    std::cout << TIDs[0] << std::endl;
     std::cout << kGreen << "Lookup Latency = " << kNoColor << lookup_lat << "\n";
     std::cout << kGreen << "Insert Latency = " << kNoColor << insert_lat << "\n";
 
@@ -543,11 +543,7 @@ void exec_group(const int expt_id, const bool is_point,
 		const std::vector<std::string>& insert_urls,
 		const std::vector<std::string>& insert_urls_sample,
 		const std::vector<std::string>& txn_urls,
-		const std::vector<int>& upper_bound_urls,
-        const std::vector<std::string>& insert_tss,
-		const std::vector<std::string>& insert_tss_sample,
-		const std::vector<std::string>& txn_tss,
-		const std::vector<int>& upper_bound_tss){
+		const std::vector<int>& upper_bound_urls){
 
     std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
     exec(expt_id, kEmail, is_point, false, 0, 0,
@@ -669,8 +665,6 @@ int main(int argc, char *argv[]) {
     std::vector<int> upper_bound_urls;
     loadWorkload(kUrl, insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 
-    std::vector<std::string> insert_tss, insert_tss_sample, txn_tss;
-    std::vector<int> upper_bound_tss;
     if (expt_id == 0) {
 	//-------------------------------------------------------------
 	// Point Queries; Expt ID = 0
@@ -704,8 +698,7 @@ int main(int argc, char *argv[]) {
 	exec_group(expt_id, is_point, expt_num, total_num_expt,
 		   insert_emails, insert_emails_sample, txn_emails, upper_bound_emails,
 		   insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis,
-		   insert_urls, insert_urls_sample, txn_urls, upper_bound_urls,
-		   insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
+		   insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 #ifdef WRITE_TO_FILE
     output_lookuplat_email_hot << "-" << "\n";
     output_insertlat_email_hot << "-" << "\n";
@@ -773,8 +766,7 @@ int main(int argc, char *argv[]) {
 	exec_group(expt_id, is_point, expt_num, total_num_expt,
 		   insert_emails, insert_emails_sample, txn_emails, upper_bound_emails,
 		   insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis,
-		   insert_urls, insert_urls_sample, txn_urls, upper_bound_urls,
-		   insert_tss, insert_tss_sample, txn_tss, upper_bound_tss);
+		   insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
 #ifdef WRITE_TO_FILE
     output_lookuplat_email_hot_range << "-" << "\n";
     output_insertlat_email_hot_range << "-" << "\n";
