@@ -23,8 +23,16 @@ SIZE = 100
 X_LABEL = "Latency (us)"
 Y_LABEL = "Memory(MB)"
 
-X_LIMIT = 20
-Y_LIMIT = 120
+if BENCH_TYPE == 'big':
+    X_LIMIT = 20
+    Y_LIMIT = 120
+    x_ticks = [0, 5, 10, 15, 20]
+    y_ticks = [20, 40, 60, 80, 100]
+elif BENCH_TYPE == 'small':
+    X_LIMIT = 12
+    Y_LIMIT = 8
+    x_ticks = [0, 3, 6, 9, 12]
+    y_ticks = [2, 4, 6, 8]
 
 LEGEND_FONT_SIZE = 16
 LEGEND_POS = 'upper left'
@@ -93,7 +101,8 @@ ax.scatter(data_x[2], data_y[2], s=MARKER_SIZE, c=COLORS[2], marker=MARKERS[2], 
 ax.scatter(data_x[3], data_y[3], s=MARKER_SIZE, c=COLORS[3], marker=MARKERS[3], linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[3])
 ax.scatter(data_x[4], data_y[4], s=MARKER_SIZE, c=COLORS[4], marker=MARKERS[4], linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[4])
 ax.scatter(data_x[5], data_y[5], s=MARKER_SIZE, c=COLORS[5], marker=MARKERS[5], linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[5])
-ax.scatter(data_x[6], data_y[6], s=MARKER_SIZE, c=COLORS[6], marker=MARKERS[6], linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[5])
+if BENCH_TYPE == 'big':
+    ax.scatter(data_x[6], data_y[6], s=MARKER_SIZE, c=COLORS[6], marker=MARKERS[6], linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[5])
 
 
 ax.set_xlabel(X_LABEL, fontsize=X_LABEL_FONT_SIZE)
@@ -102,11 +111,9 @@ ax.set_xlim(0, X_LIMIT)
 ax.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
 ax.set_ylim(0, Y_LIMIT)
 
-x_ticks = [5, 10, 15, 20]
 ax.set_xticks(x_ticks)
 ax.tick_params(axis='x', labelsize=X_TICK_FONT_SIZE)
 
-y_ticks = [0, 20, 40, 60, 80, 100, 120]
 ax.set_yticks(y_ticks)
 ax.tick_params(axis='y', labelsize=Y_TICK_FONT_SIZE)
 
@@ -118,11 +125,7 @@ ax.annotate(LABELS[2], (data_x[2] * 0.82, data_y[2]), ha='center', va='center', 
 ax.annotate(LABELS[3], (data_x[3], data_y[3] * 0.89), ha='center', va='center', size=ANNOTATOR_SIZE)
 ax.annotate(LABELS[4], (data_x[4] * 1.2, data_y[4]), ha='center', va='center', size=ANNOTATOR_SIZE)
 ax.annotate(LABELS[5], (data_x[5], data_y[5] * 0.92), ha='center', va='center', size=ANNOTATOR_SIZE)
-ax.annotate(LABELS[6], (data_x[6] * 1.06, data_y[6] * 1.08), ha='center', va='center', size=ANNOTATOR_SIZE)
-
-#ax.legend(loc=LEGEND_POS, prop={'size':LEGEND_FONT_SIZE}, scatterpoints=1)
-
-#ax.text(160, 450, "better", size=26, va="center", ha="center", rotation=45,
-#        bbox=dict(boxstyle="larrow,pad=0.5", fc="w", ec="k", lw=2))
+if BENCH_TYPE == 'big':
+    ax.annotate(LABELS[6], (data_x[6] * 1.06, data_y[6] * 1.08), ha='center', va='center', size=ANNOTATOR_SIZE)
 
 plot.savefig(GRAPH_OUTPUT_PATH, bbox_inches='tight')

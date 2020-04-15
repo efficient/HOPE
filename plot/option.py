@@ -23,3 +23,27 @@ ARROW_HEAD_LEN = 10
 MARKERS = ["o", "^", "v", "s", "d", "p", "h"]
 MARKER_SIZE = 150
 ANNOTATOR_SIZE = 13
+
+SCALE = 1.2
+LABEL_NUM = 4
+
+def getLimit(data):
+  return max(data) * SCALE
+
+def getRoundTickGap(gap):
+  if gap < 10:
+    return int(gap)
+  if gap < 100:
+    return int(gap/10)*10
+  if gap < 500:
+    return int(gap/50)*50
+  if gap < 2000:
+    return int(gap/100)*100
+  return int(gap/1000)*1000
+
+def getTicks(lim):
+  return list(range(0, int(lim), int(getRoundTickGap(1 + lim / LABEL_NUM))))
+
+
+#BENCH_TYPE = 'big'
+BENCH_TYPE = 'small'

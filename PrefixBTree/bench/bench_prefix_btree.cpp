@@ -14,8 +14,8 @@ static const uint64_t kNumWikiRecords = 14000;
 static const uint64_t kNumUrlRecords = 5000;
 static const uint64_t kNumTxns = 10000000;
 
-static const int kSamplePercent = 1;
-static const double kUrlSamplePercent = 1;
+static const int kSamplePercent = 20;
+static const double kUrlSamplePercent = 20;
 
 static const std::string file_load_email = "workloads/load_email";
 static const std::string file_load_wiki = "workloads/load_wiki";

@@ -5,7 +5,8 @@ run_surf=$2
 run_art=$3
 run_hot=$4
 run_btree=$5
-run_breakdown=$6
+run_prefixbtree=$6
+run_breakdown=$7
 
 PYTHON='python'
 if [[ ${run_microbench} == 1 ]]
@@ -13,13 +14,13 @@ then
     ############################################################
     # Sample Size Sweep
     ############################################################
-    ${PYTHON} ./plot/microbench/sample_size_sweep/cpr_email.py
-    ${PYTHON} ./plot/microbench/sample_size_sweep/cpr_wiki.py
-    ${PYTHON} ./plot/microbench/sample_size_sweep/cpr_url.py
+    #${PYTHON} ./plot/microbench/sample_size_sweep/cpr_email.py
+    #${PYTHON} ./plot/microbench/sample_size_sweep/cpr_wiki.py
+    #${PYTHON} ./plot/microbench/sample_size_sweep/cpr_url.py
 
-    ${PYTHON} ./plot/microbench/sample_size_sweep/bt_email.py
-    ${PYTHON} ./plot/microbench/sample_size_sweep/bt_wiki.py
-    ${PYTHON} ./plot/microbench/sample_size_sweep/bt_url.py
+    #${PYTHON} ./plot/microbench/sample_size_sweep/bt_email.py
+    #${PYTHON} ./plot/microbench/sample_size_sweep/bt_wiki.py
+    #${PYTHON} ./plot/microbench/sample_size_sweep/bt_url.py
 
     ############################################################
     # CPR Latency
@@ -39,26 +40,26 @@ then
     ############################################################
     # Hu-Tucker
     ############################################################
-    ${PYTHON} ./plot/microbench/hu_tucker/hu_tucker_email.py
+    #${PYTHON} ./plot/microbench/hu_tucker/hu_tucker_email.py
 
     ############################################################
     # Array vs. Trie
     ############################################################
-    ${PYTHON} ./plot/microbench/array_trie/array_trie_email.py
+    #${PYTHON} ./plot/microbench/array_trie/array_trie_email.py
 
     ############################################################
     # Hu-Tucker vs. Fixed-Len Dict
     ############################################################
-    ${PYTHON} ./plot/microbench/ht_vs_dc/cpr_email_ht_vs_dc.py
-    ${PYTHON} ./plot/microbench/ht_vs_dc/lat_email_ht_vs_dc.py
-    ${PYTHON} ./plot/microbench/ht_vs_dc/bt_email_ht_vs_dc.py
+    #${PYTHON} ./plot/microbench/ht_vs_dc/cpr_email_ht_vs_dc.py
+    #${PYTHON} ./plot/microbench/ht_vs_dc/lat_email_ht_vs_dc.py
+    #${PYTHON} ./plot/microbench/ht_vs_dc/bt_email_ht_vs_dc.py
 
     ############################################################
     # Build Time Breakdown
     ############################################################
-    ${PYTHON} ./plot/microbench/build_time_breakdown/bt_100_breakdown.py
-    ${PYTHON} ./plot/microbench/build_time_breakdown/bt_10_breakdown.py
-    ${PYTHON} ./plot/microbench/build_time_breakdown/bt_1_breakdown.py
+    #${PYTHON} ./plot/microbench/build_time_breakdown/bt_100_breakdown.py
+    #${PYTHON} ./plot/microbench/build_time_breakdown/bt_10_breakdown.py
+    #${PYTHON} ./plot/microbench/build_time_breakdown/bt_1_breakdown.py
 fi
 
 if [[ ${run_surf} == 1 ]]
@@ -128,7 +129,7 @@ then
     ############################################################
     # Btree point
     ############################################################
-    ${PYTHON} ./plot/preifxbtree/point/lookuplat_mem_email_btree.py
+    ${PYTHON} ./plot/prefixbtree/point/lookuplat_mem_email_btree.py
     ${PYTHON} ./plot/prefixbtree/point/lookuplat_mem_wiki_btree.py
     ${PYTHON} ./plot/prefixbtree/point/lookuplat_mem_url_btree.py
 

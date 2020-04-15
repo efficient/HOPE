@@ -18,11 +18,9 @@ COLORS = ['#ffffff', '#fff7ec', '#fee8c8', '#fc8d59', '#d7301f', '#7f0000', '#4c
 
 BACKCOLORS = ['#fff7fb', '#ece7f2', '#d0d1e6', '#a6bddb', '#74a9cf', '#3690c0', '#0570b0', '#045a8d', '#023858']
 
+
 X_LABEL = "Latency (us)"
 Y_LABEL = "Memory(MB)"
-
-X_LIMIT = 3.5
-Y_LIMIT = 800
 
 LEGEND_FONT_SIZE = 10
 LEGEND_POS = 'upper left'
@@ -46,6 +44,17 @@ data_y = []
 for row in csvrows :
     for item in row :
         data_y.append(float(item))
+
+if BENCH_TYPE == 'big':
+    X_LIMIT = 3.5
+    Y_LIMIT = 800
+    x_ticks = [0.5, 1, 1.5, 2, 2.5, 3, 3.5]
+    y_ticks = [0, 200, 400, 600, 800]
+elif BENCH_TYPE == 'small':
+    X_LIMIT = 3
+    Y_LIMIT = 10
+    x_ticks = [0.5, 1, 1.5, 2, 2.5, 3]
+    y_ticks = [2, 4, 6, 8, 10]
 
 #========================================================================================
 mpl.rcParams['ps.useafm'] = True
@@ -91,7 +100,8 @@ ax.scatter(data_x[2], data_y[2], s=MARKER_SIZE, c=COLORS[2], marker=MARKERS[2], 
 ax.scatter(data_x[3], data_y[3], s=MARKER_SIZE, c=COLORS[3], marker=MARKERS[3], linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[3])
 ax.scatter(data_x[4], data_y[4], s=MARKER_SIZE, c=COLORS[4], marker=MARKERS[4], linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[4])
 ax.scatter(data_x[5], data_y[5], s=MARKER_SIZE, c=COLORS[5], marker=MARKERS[5], linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[5])
-ax.scatter(data_x[6], data_y[6], s=MARKER_SIZE, c=COLORS[6], marker=MARKERS[6], linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[6])
+if BENCH_TYPE == 'big':
+    ax.scatter(data_x[6], data_y[6], s=MARKER_SIZE, c=COLORS[6], marker=MARKERS[6], linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[6])
 
 ax.set_xlabel(X_LABEL, fontsize=X_LABEL_FONT_SIZE)
 ax.set_xlim(0, X_LIMIT)
@@ -99,11 +109,9 @@ ax.set_xlim(0, X_LIMIT)
 ax.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
 ax.set_ylim(0, Y_LIMIT)
 
-x_ticks = [0.5, 1, 1.5, 2, 2.5, 3, 3.5]
 ax.set_xticks(x_ticks)
 ax.tick_params(axis='x', labelsize=X_TICK_FONT_SIZE)
 
-y_ticks = [0, 200, 400, 600, 800]
 ax.set_yticks(y_ticks)
 ax.tick_params(axis='y', labelsize=Y_TICK_FONT_SIZE)
 
@@ -115,13 +123,7 @@ ax.annotate(LABELS[2], (data_x[2] * 0.72, data_y[2]), ha='center', va='center', 
 ax.annotate(LABELS[3], (data_x[3] * 1.04, data_y[3] * 0.9), ha='center', va='center', size=ANNOTATOR_SIZE)
 ax.annotate(LABELS[4], (data_x[4] * 1.24, data_y[4]), ha='center', va='center', size=ANNOTATOR_SIZE)
 ax.annotate(LABELS[5], (data_x[5] * 1.02, data_y[5] * 0.88), ha='center', va='center', size=ANNOTATOR_SIZE)
-ax.annotate(LABELS[6], (data_x[6], data_y[6] * 1.08), ha='center', va='center', size=ANNOTATOR_SIZE)
-
-# ax.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left",
-#                mode="expand", borderaxespad=0, ncol=4,
-#                prop={'size':LEGEND_FONT_SIZE}, scatterpoints=1)
-
-#ax.text(160, 450, "better", size=26, va="center", ha="center", rotation=45,
-#        bbox=dict(boxstyle="larrow,pad=0.5", fc="w", ec="k", lw=2))
+if BENCH_TYPE == 'big':
+    ax.annotate(LABELS[6], (data_x[6], data_y[6] * 1.08), ha='center', va='center', size=ANNOTATOR_SIZE)
 
 plot.savefig(GRAPH_OUTPUT_PATH, bbox_inches='tight')

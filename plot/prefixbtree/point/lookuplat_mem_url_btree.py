@@ -28,8 +28,16 @@ Y_LABEL = "Memory(MB)"
 X_TICK_FONT_SIZE = 18
 Y_TICK_FONT_SIZE = 18
 
-X_LIMIT = 18
-Y_LIMIT = 3500
+if BENCH_TYPE == 'big':
+  X_LIMIT = 18
+  Y_LIMIT = 3500
+  x_ticks = [3, 6, 9, 12, 15, 18]
+  y_ticks = [500, 1000, 1500, 2000, 2500, 3000]
+elif BENCH_TYPE == 'small':
+  X_LIMIT = 15
+  Y_LIMIT = 12
+  x_ticks = [3, 6, 9, 12, 15]
+  y_ticks = [3, 6, 9, 12]
 
 LEGEND_FONT_SIZE = 10
 LEGEND_POS = 'upper left'
@@ -98,7 +106,8 @@ ax.scatter(data_x[2], data_y[2], s=SIZE, c=COLORS[2], marker='o', linewidths = B
 ax.scatter(data_x[3], data_y[3], s=SIZE, c=COLORS[3], marker='o', linewidths = BORDER_SIZE, edgecolors = EDGE_COLOR, label=NAMES[3])
 ax.scatter(data_x[4], data_y[4], s=SIZE, c=COLORS[4], marker='o', linewidths = BORDER_SIZE, edgecolors = EDGE_COLOR, label=NAMES[4])
 ax.scatter(data_x[5], data_y[5], s=SIZE, c=COLORS[5], marker='o', linewidths = BORDER_SIZE, edgecolors = EDGE_COLOR, label=NAMES[5])
-ax.scatter(data_x[6], data_y[6], s=SIZE, c=COLORS[6], marker='s', linewidths = BORDER_SIZE, edgecolors = EDGE_COLOR, label=NAMES[6])
+if BENCH_TYPE == 'big':
+  ax.scatter(data_x[6], data_y[6], s=SIZE, c=COLORS[6], marker='s', linewidths = BORDER_SIZE, edgecolors = EDGE_COLOR, label=NAMES[6])
 
 ax.set_xlabel(X_LABEL, fontsize=X_LABEL_FONT_SIZE)
 ax.set_xlim(0, X_LIMIT)
@@ -106,11 +115,9 @@ ax.set_xlim(0, X_LIMIT)
 ax.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
 ax.set_ylim(0, Y_LIMIT)
 
-x_ticks = [3, 6, 9, 12, 15, 18]
 ax.set_xticks(x_ticks)
 ax.tick_params(axis='x', labelsize=X_TICK_FONT_SIZE)
 
-y_ticks = [0, 500, 1000, 1500, 2000, 2500, 3000, 3500]
 ax.set_yticks(y_ticks)
 ax.tick_params(axis='y', labelsize=Y_TICK_FONT_SIZE)
 
@@ -123,12 +130,5 @@ ax.tick_params(axis='y', labelsize=Y_TICK_FONT_SIZE)
 #ax.annotate(LABELS[4], (data_x[4] * 1.22, data_y[4]), ha='center', va='center', size=12)
 #ax.annotate(LABELS[5], (data_x[5], data_y[5] * 1.07), ha='center', va='center', size=12)
 #ax.annotate(LABELS[6], (data_x[6], data_y[6] * 0.89), ha='center', va='center', size=12)
-
-# ax.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left",
-#                mode="expand", borderaxespad=0, ncol=4,
-#                prop={'size':LEGEND_FONT_SIZE}, scatterpoints=1)
-
-#ax.text(160, 450, "better", size=26, va="center", ha="center", rotation=45,
-#        bbox=dict(boxstyle="larrow,pad=0.5", fc="w", ec="k", lw=2))
 
 plot.savefig(GRAPH_OUTPUT_PATH, bbox_inches='tight')

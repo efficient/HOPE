@@ -14,18 +14,15 @@ def autolabel(rects):
         height = rect.get_height()
         ax.text(rect.get_x() + rect.get_width()/2., height + 0.01,
                 '%0.1f' % float(height),
-#                '%d' % int(height),
                 fontsize=14,
                 ha='center', va='bottom')
 
-#GROUP_SIZE = 9
 GROUP_SIZE = 7
 CATEGORY_NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 65536", "4-Grams, 65536", "ALM, 8192", "ALM, 65536"]
 
 CSV_FILE_PATH = "results/ART/point/final_height_wiki_art.csv"
 GRAPH_OUTPUT_PATH = "figures/ART/point/height_wiki_art.pdf"
 
-#COLORS = ['#fef0d9', '#fdd49e', '#fdbb84', '#fc8d59', '#ef6548', '#d7301f', '#990000', '#5b0006', '#350004']
 COLORS = ['#ffffff', '#fff7ec', '#fee8c8', '#fc8d59', '#d7301f', '#7f0000', '#4c0000']
 
 Y_LABEL = "Average Trie Height"
@@ -57,7 +54,7 @@ mpl.rcParams['text.latex.preamble'] = [
 ]
 #========================================================================================
 
-width = 1  / (GROUP_SIZE + 2.0)
+width = 1 / (GROUP_SIZE + 2.0)
 
 fig = plot.figure(figsize=(GRAPH_WIDTH, GRAPH_HEIGHT))
 ax = fig.add_subplot(111)
@@ -76,17 +73,13 @@ for i in range(0, GROUP_SIZE) :
 
 ax.get_xaxis().set_visible(False)
 
-y_ticks = [0, 3, 6, 9, 12, 15]
-ax.set_yticks(y_ticks)
-ax.set_ylim(0, 15)
+ylim = getLimit(data)
+ax.set_ylim(0, ylim)
 ax.set_xlim([0,1])
-
+ax.set_yticks(getTicks(ylim))
+ax.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
 for label in ax.get_yticklabels():
     label.set_fontsize(Y_TICK_FONT_SIZE)
-
-ax.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
-#ax.set_xlabel('Test',  fontsize=Y_LABEL_FONT_SIZE)
-#ax.legend(loc=LEGEND_POS, prop={'size':LEGEND_FONT_SIZE})
 
 outFile = GRAPH_OUTPUT_PATH
 plot.savefig(outFile, bbox_inches='tight')

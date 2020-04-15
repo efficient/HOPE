@@ -21,7 +21,6 @@ BACKCOLORS = ['#fff7fb', '#ece7f2', '#d0d1e6', '#a6bddb', '#74a9cf', '#3690c0', 
 X_LABEL = "Latency (us)"
 Y_LABEL = "Memory(MB)"
 
-X_LIMIT = 2.4
 Y_LIMIT = 1500
 
 LEGEND_FONT_SIZE = 10
@@ -46,7 +45,8 @@ data_y = []
 for row in csvrows :
     for item in row :
         data_y.append(float(item))
-
+X_LIMIT = getLimit(data_x)
+Y_LIMIT = getLimit(data_y)
 #========================================================================================
 mpl.rcParams['ps.useafm'] = True
 mpl.rcParams['pdf.use14corefonts'] = True
@@ -99,15 +99,13 @@ ax.set_xlim(0, X_LIMIT)
 ax.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
 ax.set_ylim(0, Y_LIMIT)
 
-x_ticks = [0.4, 0.8, 1.2, 1.6, 2.0, 2.4]
+x_ticks = getTicks(X_LIMIT)
 ax.set_xticks(x_ticks)
 ax.tick_params(axis='x', labelsize=X_TICK_FONT_SIZE)
 
-y_ticks = [0, 300, 600, 900, 1200, 1500]
+y_ticks = getTicks(Y_LIMIT)
 ax.set_yticks(y_ticks)
 ax.tick_params(axis='y', labelsize=Y_TICK_FONT_SIZE)
-
-#ax.grid()
 
 ax.annotate(LABELS[0], (data_x[0], data_y[0] * 1.08), ha='center', va='center', size=ANNOTATOR_SIZE)
 ax.annotate(LABELS[1], (data_x[1], data_y[1] * 1.08), ha='center', va='center', size=ANNOTATOR_SIZE)
@@ -116,12 +114,5 @@ ax.annotate(LABELS[3], (data_x[3], data_y[4] * 0.88), ha='center', va='center', 
 ax.annotate(LABELS[4], (data_x[4] * 1.08, data_y[4] * 0.88), ha='center', va='center', size=ANNOTATOR_SIZE)
 ax.annotate(LABELS[5], (data_x[5], data_y[5] * 0.88), ha='center', va='center', size=ANNOTATOR_SIZE)
 ax.annotate(LABELS[6], (data_x[6] * 0.96, data_y[6] * 1.08), ha='center', va='center', size=ANNOTATOR_SIZE)
-
-# ax.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left",
-#                mode="expand", borderaxespad=0, ncol=4,
-#                prop={'size':LEGEND_FONT_SIZE}, scatterpoints=1)
-
-#ax.text(160, 450, "better", size=26, va="center", ha="center", rotation=45,
-#        bbox=dict(boxstyle="larrow,pad=0.5", fc="w", ec="k", lw=2))
 
 plot.savefig(GRAPH_OUTPUT_PATH, bbox_inches='tight')

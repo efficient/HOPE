@@ -23,8 +23,16 @@ SIZE = 100
 X_LABEL = "Latency (us)"
 Y_LABEL = "Memory(MB)"
 
-X_LIMIT = 4
-Y_LIMIT = 1200
+if BENCH_TYPE == 'big':
+    X_LIMIT = 4
+    Y_LIMIT = 1200
+    x_ticks = [0, 1, 2, 3, 4]
+    y_ticks = [400, 800, 1200]
+elif BENCH_TYPE == 'small':
+    X_LIMIT = 4
+    Y_LIMIT = 2.5
+    x_ticks = [0, 1, 2, 3, 4]
+    y_ticks = [0.5, 1, 1.5, 2, 2.5]
 
 LEGEND_FONT_SIZE = 10
 LEGEND_POS = 'upper left'
@@ -93,7 +101,8 @@ ax.scatter(data_x[2], data_y[2], s=MARKER_SIZE, c=COLORS[2], marker=MARKERS[2], 
 ax.scatter(data_x[3], data_y[3], s=MARKER_SIZE, c=COLORS[3], marker=MARKERS[3], linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[3])
 ax.scatter(data_x[4], data_y[4], s=MARKER_SIZE, c=COLORS[4], marker=MARKERS[4], linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[4])
 ax.scatter(data_x[5], data_y[5], s=MARKER_SIZE, c=COLORS[5], marker=MARKERS[5], linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[5])
-ax.scatter(data_x[6], data_y[6], s=MARKER_SIZE, c=COLORS[6], marker=MARKERS[6], linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[6])
+if BENCH_TYPE == 'big':
+    ax.scatter(data_x[6], data_y[6], s=MARKER_SIZE, c=COLORS[6], marker=MARKERS[6], linewidths = BORDER_SIZE, edgecolors = BORDER_COLOR, label=NAMES[6])
 
 ax.set_xlabel(X_LABEL, fontsize=X_LABEL_FONT_SIZE)
 ax.set_xlim(0, X_LIMIT)
@@ -101,11 +110,9 @@ ax.set_xlim(0, X_LIMIT)
 ax.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
 ax.set_ylim(0, Y_LIMIT)
 
-x_ticks = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4]
 ax.set_xticks(x_ticks)
 ax.tick_params(axis='x', labelsize=X_TICK_FONT_SIZE)
 
-y_ticks = [0, 300, 600, 900, 1200]
 ax.set_yticks(y_ticks)
 ax.tick_params(axis='y', labelsize=Y_TICK_FONT_SIZE)
 
@@ -117,6 +124,7 @@ ax.annotate(LABELS[2], (data_x[2] * 0.8, data_y[2]), ha='center', va='center', s
 ax.annotate(LABELS[3], (data_x[3], data_y[3] * 0.9), ha='center', va='center', size=ANNOTATOR_SIZE)
 ax.annotate(LABELS[4], (data_x[4] * 1.2, data_y[4]), ha='center', va='center', size=ANNOTATOR_SIZE)
 ax.annotate(LABELS[5], (data_x[5], data_y[5] * 1.06), ha='center', va='center', size=ANNOTATOR_SIZE)
-ax.annotate(LABELS[6], (data_x[6], data_y[6] * 0.9), ha='center', va='center', size=ANNOTATOR_SIZE)
+if BENCH_TYPE == 'big':
+    ax.annotate(LABELS[6], (data_x[6], data_y[6] * 0.9), ha='center', va='center', size=ANNOTATOR_SIZE)
 
 plot.savefig(GRAPH_OUTPUT_PATH, bbox_inches='tight')

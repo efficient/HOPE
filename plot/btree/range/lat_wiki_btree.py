@@ -14,7 +14,6 @@ def autolabel(rects, ax):
         height = rect.get_height()
         ax.text(rect.get_x() + rect.get_width()/2., height + 0.01,
                 '%0.1f' % float(height),
-#                '%d' % int(height),
                 fontsize=14,
                 ha='center', va='bottom')
 
@@ -75,12 +74,15 @@ ax1.set_xlim([0,1])
 ax2.set_xlim([0,1])
 
 ax1.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
-y1_ticks = [0, 2, 4, 6]
+y1_limit = getLimit(data_lookup)
+y1_ticks = getTicks(y1_limit)
 ax1.set_yticks(y1_ticks)
-ax1.set_ylim(0,6)
+ax1.set_ylim(0, y1_limit)
 
-ax2.set_ylim(0, 4)
-ax2.yaxis.set_ticks([0, 1, 2, 3, 4])
+y2_limit = getLimit(data_insert)
+y2_ticks = getTicks(y2_limit)
+ax2.set_ylim(0, y2_limit)
+ax2.yaxis.set_ticks(y2_ticks)
 
 ax1.yaxis.tick_left()
 ax2.yaxis.tick_right()
@@ -108,7 +110,6 @@ for j in range(0, GROUP_NUM) :
     for label in ax[j].get_yticklabels():
         label.set_fontsize(Y_TICK_FONT_SIZE)
 
-#ax.legend(loc=LEGEND_POS, prop={'size':LEGEND_FONT_SIZE})
 
 outFile = GRAPH_OUTPUT_PATH
 plot.savefig(outFile, bbox_inches='tight')

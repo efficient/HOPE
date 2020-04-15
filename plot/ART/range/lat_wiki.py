@@ -23,7 +23,6 @@ GROUP_NAMES = ["Range", "Insert"]
 Y_LABEL = "Latency(us)"
 
 GROUP_SIZE = 7
-#CATEGORY_NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 8192", "3-Grams, 65536", "4-Grams, 8192", "4-Grams, 65536"]
 CATEGORY_NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 65536", "4-Grams, 65536", "ALM 8192", "ALM 65536"]
 
 CSV_ART_LOOKUP_FILE_PATH = "results/ART/range/final_lookuplat_wiki_art_range.csv"
@@ -76,16 +75,18 @@ ax1.set_xlim([0,1])
 ax2.set_xlim([0,1])
 
 ax1.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
-y1_ticks = [0, 3, 6, 9, 12]
+y1_limit = getLimit(data_lookup)
+y1_ticks = getTicks(y1_limit)
 ax1.set_yticks(y1_ticks)
-ax1.set_ylim(0, 12)
+ax1.set_ylim(0, y1_limit)
 
-ax2.set_ylim(0,2.8)
-ax2.yaxis.set_ticks([0, 0.7, 1.4, 2.1, 2.8])
+y2_limit = getLimit(data_insert)
+y2_ticks = getTicks(y2_limit)
+ax2.set_ylim(0, y2_limit)
+ax2.yaxis.set_ticks(y2_ticks)
 
 ax1.yaxis.tick_left()
 ax2.yaxis.tick_right()
-
 
 ax=[ax1,ax2]
 for j in range(0, GROUP_NUM) :

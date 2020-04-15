@@ -74,13 +74,16 @@ ax1.set_xlim([0,1])
 ax2.set_xlim([0,1])
 
 ax1.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
-y1_ticks = [0, 3, 6, 9, 12, 15, 18]
+y1_limit = getLimit(data_lookup)
+y1_ticks = getTicks(y1_limit)
 ax1.set_yticks(y1_ticks)
-ax1.set_ylim(0, 18)
+ax1.set_ylim(0, y1_limit)
 ax1.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
 
-ax2.set_ylim(0, 12)
-ax2.yaxis.set_ticks([0, 3, 6, 9, 12])
+y2_limit = getLimit(data_insert)
+y2_ticks = getTicks(y2_limit)
+ax2.set_ylim(0, y2_limit)
+ax2.yaxis.set_ticks(y2_ticks)
 
 ax1.yaxis.tick_left()
 ax2.yaxis.tick_right()

@@ -14,11 +14,9 @@ def autolabel(rects):
         height = rect.get_height()
         ax.text(rect.get_x() + rect.get_width()/2., height + 0.01,
                 '%0.1f' % float(height),
-#                '%d' % int(height),
                 fontsize=14,
                 ha='center', va='bottom')
 
-#GROUP_SIZE = 9
 GROUP_SIZE = 7
 CATEGORY_NAMES = ["Uncompressed", "Single", "Double", "3-Grams, 65536", "4-Grams, 65536", "ALM, 8192", "ALM, 65536"]
 
@@ -75,17 +73,16 @@ for i in range(0, GROUP_SIZE) :
 
 ax.get_xaxis().set_visible(False)
 
-y_ticks = [0, 5, 10, 15, 20]
+y_limit = getLimit(data)
+y_ticks = getTicks(y_limit)
 ax.set_yticks(y_ticks)
-ax.set_ylim(0, 20)
+ax.set_ylim(0, y_limit)
 ax.set_xlim([0,1])
 
 for label in ax.get_yticklabels():
     label.set_fontsize(Y_TICK_FONT_SIZE)
 
 ax.set_ylabel(Y_LABEL, fontsize=Y_LABEL_FONT_SIZE)
-#ax.set_xlabel('Test',  fontsize=Y_LABEL_FONT_SIZE)
-#ax.legend(loc=LEGEND_POS, prop={'size':LEGEND_FONT_SIZE})
 
 outFile = GRAPH_OUTPUT_PATH
 plot.savefig(outFile, bbox_inches='tight')
