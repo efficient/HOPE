@@ -4,24 +4,24 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
+#include <map>
 
 #include "encoder_factory.hpp"
-#include <hot/singlethreaded/HOTSingleThreaded.hpp>
-#include <idx/contenthelpers/IdentityKeyExtractor.hpp>
+#include "hot/singlethreaded/HOTSingleThreaded.hpp"
+#include "idx/contenthelpers/IdentityKeyExtractor.hpp"
+#include "parameters.h"
 
 #define WRITE_TO_FILE
 
 static const uint64_t kNumEmailRecords = 25000000;
-static const uint64_t kNumWikiRecords = 14000000;
-static const uint64_t kNumTsRecords = 25000000;
-static const uint64_t kNumTxns = 10000000;
-static const int kSamplePercent = 1;
-static const double kUrlSamplePercent = 1;
+static const uint64_t kNumWikiRecords = 14000;
+static const uint64_t kNumTxns = 5000;
+static const int kSamplePercent = 20;
+static const double kUrlSamplePercent = 20;
 
 static const std::string file_load_email = "workloads/load_email";
 static const std::string file_load_wiki = "workloads/load_wiki";
 static const std::string file_load_url = "workloads/load_url";
-static const std::string file_load_ts = "workloads/load_timestamp";
 
 static const std::string file_txn_email = "workloads/txn_email_zipfian";
 static const std::string file_txn_email_len = "workloads/scan_len_email_zipfian";
@@ -29,11 +29,9 @@ static const std::string file_txn_wiki = "workloads/txn_wiki_zipfian";
 static const std::string file_txn_wiki_len = "workloads/scan_len_wiki_zipfian";
 static const std::string file_txn_url = "workloads/txn_url_zipfian";
 static const std::string file_txn_url_len = "workloads/scan_len_url_zipfian";
-static const std::string file_txn_ts = "workloads/txn_timestamp_zipfian";
 
 // for pretty print
 static const char* kGreen ="\033[0;32m";
-//static const char* kRed ="\033[0;31m";
 static const char* kNoColor ="\033[0;0m";
 
 static int runALM = 1;
@@ -43,7 +41,6 @@ static int runALM = 1;
 static const int kEmail = 0;
 static const int kWiki = 1;
 static const int kUrl = 2;
-static const int kTs = 3;
 
 //-------------------------------------------------------------
 // Expt ID = 0
@@ -226,8 +223,6 @@ void loadWorkload(int wkld_id,
         loadKeysFromFile(file_load_wiki, kNumWikiRecords, load_keys);
     else if (wkld_id == kUrl)
         loadKeysFromFile(file_load_url, kNumEmailRecords, load_keys);
-    else if (wkld_id == kTs)
-        loadKeysInt(file_load_ts, kNumTsRecords, load_keys);
     else
         return;
 
@@ -261,10 +256,7 @@ void loadWorkload(int wkld_id,
     } else if (wkld_id == kUrl) {
         loadKeysFromFile(file_txn_url, kNumTxns, txn_keys);
         loadLensInt(file_txn_url_len, kNumTxns, upper_bound_keys);
-    } else if (wkld_id == kTs) {
-        loadKeysInt(file_txn_ts, kNumTxns, txn_keys);
     }
-
 
     std::cout << "insert_keys size = " << insert_keys.size() << std::endl;
     std::cout << "insert_keys_sample size = " << insert_keys_sample.size() << std::endl;
@@ -273,7 +265,7 @@ void loadWorkload(int wkld_id,
 }
 
 double getStatsDefault(std::map<std::string, double>& stats_map, std::string name) {
-    map<std::string,double>::iterator it =  stats_map.find(name);
+    std::map<std::string,double>::iterator it =  stats_map.find(name);
     if (it != stats_map.end()) {
         return it->second;
     }
@@ -315,7 +307,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
 	  const std::vector<std::string>& insert_keys_sample,
 	  const std::vector<std::string>& txn_keys,
 	  const std::vector<int>& scan_key_lens) {
-    ope::Encoder* encoder = nullptr;
+    hope::Encoder* encoder = nullptr;
     uint8_t* buffer = new uint8_t[8192];
     uint8_t* buffer_r = new uint8_t[8192];
     std::vector<std::pair<std::string, char*> > cstr_enc_insert_keys;
@@ -334,7 +326,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
 
     double start_time = getNow();
     if (is_compressed) {
-        encoder = ope::EncoderFactory::createEncoder(encoder_type, W);
+        encoder = hope::EncoderFactory::createEncoder(encoder_type, W);
         encoder->build(insert_keys_sample, input_dict_size);
     }
 
@@ -506,18 +498,6 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
                 output_stats_url_hot << node_stats[i] << ",";
             }
             output_stats_url_hot << std::endl;
-	    }  else if (wkld_id == kTs) {
-            output_lookuplat_ts_hot << lookup_lat << "\n";
-            output_insertlat_ts_hot << insert_lat << "\n";
-	        output_mem_ts_hot << mem << "\n";
-            for (int i = 0; i < int(height); i++) {
-                output_height_ts_hot << std::fixed << heights[i] << ",";
-            }
-            output_height_ts_hot << std::endl;
-            for (int i = 0; i < int(node_stats.size()); i++) {
-                output_stats_ts_hot << node_stats[i] << ",";
-            }
-            output_stats_ts_hot << std::endl;
 	    }
     } else if (expt_id == 1) {
         if (wkld_id == kEmail) {
@@ -545,14 +525,6 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
                 output_height_url_hot_range << std::fixed << heights[i] << ",";
             }
             output_height_url_hot_range << std::endl;
-	    } else if (wkld_id == kTs) {
-            output_lookuplat_ts_hot_range << lookup_lat << "\n";
-            output_insertlat_ts_hot_range << insert_lat << "\n";
-	        output_mem_ts_hot_range << mem << "\n";
-            for (int i = 0; i < int(height); i++) {
-                output_height_ts_hot_range << std::fixed << heights[i] << ",";
-            }
-            output_height_ts_hot_range << std::endl;
 	    }
     }
 #endif

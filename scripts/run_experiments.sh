@@ -54,15 +54,7 @@ done
 
 
 function install_hot_dependeny() {
-  wget --directory-prefix=hot/third-party/ https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.gz
-  tar -xvf hot/third-party/boost_1_66_0.tar.gz -C hot/third-party/
-  mkdir hot/third-party/boost_install
-  cd hot/third-party/boost_1_66_0
-  ./bootstrap.sh --prefix=./boost_install
-  ./b2 install
   cd ${PROJECT_DIR}
-  ## Add boost to include path
-  export LD_LIBRARY_PATH=${PROJECT_DIR}/hot/third-party/boost_install/lib:$LD_LIBRARY_PATH
   git submodule update --init --recursive
 }
 
