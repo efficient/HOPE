@@ -13,6 +13,7 @@ run_btree=0
 run_hot=0
 run_surf=0
 run_prefixbtree=0
+repeat_times=1
 
 PYTHON=python
 
@@ -22,6 +23,10 @@ case $i in
   -r=*|--repeat=*)
   repeat_times="${i#*=}"
   shift # past argument=value
+  ;;
+  --microbench)
+  run_microbench=1
+  shift
   ;;
   --alm)
   run_alm=1
@@ -44,6 +49,15 @@ case $i in
   shift
   ;;
   --prefixbtree)
+  run_prefixbtree=1
+  shift
+  ;;
+  --all)
+  run_microbench=1
+  run_art=1
+  run_btree=1
+  run_hot=1
+  run_surf=1
   run_prefixbtree=1
   shift
   ;;
@@ -144,8 +158,8 @@ do
     run_experiment ${run_hot} "build/hot/bench_hot 1 ${run_alm}"
     run_experiment ${run_btree} "build/btree/bench_btree 0 ${run_alm}"
     run_experiment ${run_btree} "build/btree/bench_btree 1 ${run_alm}"
-    run_experiment ${run_prefixbtree} "build/PrefixBtree/bench/bench_prefix_btree 0 ${run_alm}"
-    run_experiment ${run_prefixbtree} "build/PrefixBtree/bench/bench_prefix_btree 1 ${run_alm}"
+    run_experiment ${run_prefixbtree} "build/PrefixBTree/bench/bench_prefix_btree 0 ${run_alm}"
+    run_experiment ${run_prefixbtree} "build/PrefixBTree/bench/bench_prefix_btree 1 ${run_alm}"
     let "cnt+=1"
 done
 
