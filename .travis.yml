@@ -17,6 +17,7 @@ install:
 - sudo apt-get install libtbb-dev
 
 script:
+- cd $TRAVIS_BUILD_DIR
 - mkdir build
 - cd build
 - cmake -DCMAKE_BUILD_TYPE=Debug -DCOVERALLS=ON -DHOT=OFF ..
