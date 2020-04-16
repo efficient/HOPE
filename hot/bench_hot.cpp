@@ -447,6 +447,7 @@ void exec(const int expt_id, const int wkld_id, const bool is_point,
     end_time = getNow();
     double exec_time = end_time - start_time;
     double tput = txn_keys.size() / exec_time / 1000000; // Mops/sec
+    std::cout << "TID 0:" << TIDs[0] << std::endl;
     std::cout << kGreen << "Throughput = " << kNoColor << tput << "\n";
     double lookup_lat = (exec_time * 1000000) / txn_keys.size(); // us
     double insert_lat = (insert_time * 1000000) / cstr_enc_insert_keys.size(); // us
