@@ -30,6 +30,7 @@ cd build
     make test
 
 ## Benchmark
+You need an email dataset to run the benchmark. Make sure you include email.txt under the dataset folder.
 Go to project root directory, run
 ```
 ./scripts/run_experiment.sh [OPTION]
