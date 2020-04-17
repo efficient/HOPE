@@ -3,6 +3,7 @@ language: cpp
 dist: bionic
 
 install:
+- travis_wait 60 mvn install 
 - sudo apt-get install build-essential
 - sudo apt-get install cmake
 - sudo apt-get install libgtest.dev
