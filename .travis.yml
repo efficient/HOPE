@@ -3,7 +3,6 @@ language: cpp
 dist: bionic
 
 install:
-- travis_wait 60 mvn install 
 - sudo apt-get install build-essential
 - sudo apt-get install cmake
 - sudo apt-get install libgtest.dev
@@ -23,7 +22,7 @@ script:
 - cd build
 - cmake -DCMAKE_BUILD_TYPE=Debug -DCOVERALLS=ON -DHOT=OFF ..
 - make -j
-- make coverage
+- travis_wait 60 make coverage
 
 after_success:
 - lcov --remove coverage.info '*/ART/*' '*/SuRF/*' '*/test/*' '/usr/*' '/lib/*' --output-file coverage.info
