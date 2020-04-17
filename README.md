@@ -38,7 +38,7 @@ Description
   -r, --repeat_times=NUM
     repeat the experiment NUM times, get the average as the final result. Experiments will run once by default
   --alm
-    run alm and alm improved encoders. All benchmarks will only run single, double, 3 gram, 4 gram encoders by default
+    run alm improved encoders. All benchmarks will only run single, double, 3 gram, 4 gram encoders by default
   --art
     run art benchmark
   --surf
@@ -54,7 +54,7 @@ Description
 
 Example
 ./scripts/run_experiment.sh -r=3 --surf --alm
-run surf benchmark on all encoders (include alm and alm improved) three times and get the average as the result
+run surf benchmark on all encoders (include alm improved) three times and get the average as the result
 ```
 The script will record numbers of specified benchmarks. To generate corresponding figures, make sure you include the --alm flag. Results will be in results/ and figures will be in figures/.
 
