@@ -22,7 +22,7 @@ script:
 - cd build
 - cmake -DCMAKE_BUILD_TYPE=Debug -DCOVERALLS=ON -DHOT=OFF ..
 - make -j
-- make coverage
+- travis_wait 60 make coverage
 
 after_success:
 - lcov --remove coverage.info '*/ART/*' '*/SuRF/*' '*/test/*' '/usr/*' '/lib/*' --output-file coverage.info
