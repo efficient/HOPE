@@ -61,4 +61,4 @@ The script will record numbers of specified benchmarks. To generate correspondin
 ## License
 Copyright 2020, Carnegie Mellon University
 
-Licensed under the [GNU General Public License v3.0](https://github.com/efficient/OPE/blob/master/LICENSE).
+Licensed under the [Apache License 2.0](https://github.com/efficient/OPE/blob/master/LICENSE).
