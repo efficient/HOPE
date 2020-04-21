@@ -29,7 +29,10 @@ static const std::string file_txn_url_len = "workloads/scan_len_url_zipfian";
 static const char *kGreen = "\033[0;32m";
 static const char *kNoColor = "\033[0;0m";
 
-static int runALM = 1;
+static int kRunALM = 1;
+static int kRunEmail = 0;
+static int kRunWiki = 0;
+static bool kRunUrl = 0;
 static const double kSamplePercent = 1;
 static std::string endStr = std::string(255, char(255));
 
@@ -337,81 +340,97 @@ void exec_group(const int expt_id, const bool is_point, int &expt_num, const int
                 const std::vector<std::string> &txn_wikis, const std::vector<int> &upper_bound_wikis,
                 const std::vector<std::string> &insert_urls, const std::vector<std::string> &insert_urls_sample,
                 const std::vector<std::string> &txn_urls, const std::vector<int> &upper_bound_urls) {
-  std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-  exec(expt_id, kEmail, is_point, false, 0, 0, insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
+
+  if (kRunEmail) {
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kEmail, is_point, false, 0, 0, insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
   expt_num++;
 
-  std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-  exec(expt_id, kWiki, is_point, false, 0, 0, insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
-  expt_num++;
-
-  std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-  exec(expt_id, kUrl, is_point, false, 0, 0, insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
-  expt_num++;
-
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kEmail, is_point, true, 2, 6, insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
+    expt_num++;
+  
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kEmail, is_point, true, 3, 6, insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
+    expt_num++;
+  
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kEmail, is_point, true, 4, 6, insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
+    expt_num++;
+  
+  }
   //=================================================
-  std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-  exec(expt_id, kEmail, is_point, true, 1, 0, insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
-  expt_num++;
 
-  std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-  exec(expt_id, kWiki, is_point, true, 1, 0, insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
-  expt_num++;
+  if (kRunWiki) {
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kWiki, is_point, false, 0, 0, insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
+    expt_num++;
 
-  std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-  exec(expt_id, kUrl, is_point, true, 1, 0, insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
-  expt_num++;
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kWiki, is_point, true, 1, 0, insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
+    expt_num++;
 
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kWiki, is_point, true, 2, 6, insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
+    expt_num++;
+
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kWiki, is_point, true, 3, 6, insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
+    expt_num++;
+
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kWiki, is_point, true, 4, 6, insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
+    expt_num++;
+  }
   //=================================================
-  std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-  exec(expt_id, kEmail, is_point, true, 2, 6, insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
-  expt_num++;
-
-  std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-  exec(expt_id, kWiki, is_point, true, 2, 6, insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
-  expt_num++;
-
-  std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-  exec(expt_id, kUrl, is_point, true, 2, 6, insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
-  expt_num++;
-
-  std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-  exec(expt_id, kEmail, is_point, true, 3, 6, insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
-  expt_num++;
-
-  std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-  exec(expt_id, kWiki, is_point, true, 3, 6, insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
-  expt_num++;
-
-  std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-  exec(expt_id, kUrl, is_point, true, 3, 6, insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
-  expt_num++;
-  std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-  exec(expt_id, kEmail, is_point, true, 4, 6, insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
-  expt_num++;
-
-  std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-  exec(expt_id, kWiki, is_point, true, 4, 6, insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
-  expt_num++;
-
-  std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
-  exec(expt_id, kUrl, is_point, true, 4, 6, insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
-  expt_num++;
+  if (kRunUrl) {
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kUrl, is_point, false, 0, 0, insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
+    expt_num++;
+  
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kUrl, is_point, true, 1, 0, insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
+    expt_num++;
+  
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kUrl, is_point, true, 2, 6, insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
+    expt_num++;
+  
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kUrl, is_point, true, 3, 6, insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
+    expt_num++;
+  
+    std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
+    exec(expt_id, kUrl, is_point, true, 4, 6, insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
+    expt_num++;
+  }
 
   int dict_size_5[2] = {2, 6};
-  if (runALM == 1) {
+  if (kRunALM && kRunEmail) {
     for (int encoder_type = 6; encoder_type < 7; encoder_type++) {
       for (int j = 0; j < 2; j++) {
         std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
         exec(expt_id, kEmail, is_point, true, encoder_type, dict_size_5[j], insert_emails, insert_emails_sample,
              txn_emails, upper_bound_emails);
         expt_num++;
+      }
+    }
+  }
 
+  if (kRunALM && kRunWiki) {
+    for (int encoder_type = 6; encoder_type < 7; encoder_type++) {
+      for (int j = 0; j < 2; j++) {
         std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
         exec(expt_id, kWiki, is_point, true, encoder_type, dict_size_5[j], insert_wikis, insert_wikis_sample, txn_wikis,
              upper_bound_wikis);
         expt_num++;
+      }
+    }
+  }
 
+  if (kRunALM && kRunUrl) {
+    for (int encoder_type = 6; encoder_type < 7; encoder_type++) {
+      for (int j = 0; j < 2; j++) {
         std::cout << "-------------" << expt_num << "/" << total_num_expt << "--------------" << std::endl;
         exec(expt_id, kUrl, is_point, true, encoder_type, dict_size_5[j], insert_urls, insert_urls_sample, txn_urls,
              upper_bound_urls);
@@ -423,22 +442,31 @@ void exec_group(const int expt_id, const bool is_point, int &expt_num, const int
 
 int main(int argc, char *argv[]) {
   int expt_id = (int)atoi(argv[1]);
-  runALM = (int)atoi(argv[2]);
+  kRunALM = (int)atoi(argv[2]);
+  kRunEmail = (int)atoi(argv[3]);
+  kRunWiki = (int)atoi(argv[4]);
+  kRunUrl = (int)atoi(argv[5]);
 
   //-------------------------------------------------------------
   // Init Workloads
   //-------------------------------------------------------------
   std::vector<std::string> insert_emails, insert_emails_sample, txn_emails;
   std::vector<int> upper_bound_emails;
-  loadWorkload(kEmail, insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
+  if (kRunEmail) {
+    loadWorkload(kEmail, insert_emails, insert_emails_sample, txn_emails, upper_bound_emails);
+  }
 
   std::vector<std::string> insert_wikis, insert_wikis_sample, txn_wikis;
   std::vector<int> upper_bound_wikis;
-  loadWorkload(kWiki, insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
+  if (kRunWiki) {
+    loadWorkload(kWiki, insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis);
+  }
 
   std::vector<std::string> insert_urls, insert_urls_sample, txn_urls;
   std::vector<int> upper_bound_urls;
-  loadWorkload(kUrl, insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
+  if (kRunUrl) {
+    loadWorkload(kUrl, insert_urls, insert_urls_sample, txn_urls, upper_bound_urls);
+  }
 
   if (expt_id == 0) {
     //-------------------------------------------------------------
@@ -448,17 +476,24 @@ int main(int argc, char *argv[]) {
     std::cout << "Point Queries; Expt ID = 0" << std::endl;
     std::cout << "====================================" << std::endl;
 
-    output_lookuplat_email_btree.open(file_lookuplat_email_btree, std::ofstream::app);
-    output_insertlat_email_btree.open(file_insertlat_email_btree, std::ofstream::app);
-    output_mem_email_btree.open(file_mem_email_btree, std::ofstream::app);
+    if (kRunEmail) {
+      output_lookuplat_email_btree.open(file_lookuplat_email_btree, std::ofstream::app);
+      output_insertlat_email_btree.open(file_insertlat_email_btree, std::ofstream::app);
+      output_mem_email_btree.open(file_mem_email_btree, std::ofstream::app);
+    }
 
-    output_lookuplat_wiki_btree.open(file_lookuplat_wiki_btree, std::ofstream::app);
-    output_insertlat_wiki_btree.open(file_insertlat_wiki_btree, std::ofstream::app);
-    output_mem_wiki_btree.open(file_mem_wiki_btree, std::ofstream::app);
+    if (kRunWiki) {
+      output_lookuplat_wiki_btree.open(file_lookuplat_wiki_btree, std::ofstream::app);
+      output_insertlat_wiki_btree.open(file_insertlat_wiki_btree, std::ofstream::app);
+      output_mem_wiki_btree.open(file_mem_wiki_btree, std::ofstream::app);
+    }
 
-    output_lookuplat_url_btree.open(file_lookuplat_url_btree, std::ofstream::app);
-    output_insertlat_url_btree.open(file_insertlat_url_btree, std::ofstream::app);
-    output_mem_url_btree.open(file_mem_url_btree, std::ofstream::app);
+    if (kRunUrl) {
+      output_lookuplat_url_btree.open(file_lookuplat_url_btree, std::ofstream::app);
+      output_insertlat_url_btree.open(file_insertlat_url_btree, std::ofstream::app);
+      output_mem_url_btree.open(file_mem_url_btree, std::ofstream::app);
+    }
+
     bool is_point = true;
     int expt_num = 1;
     int total_num_expt = 24;
@@ -466,38 +501,44 @@ int main(int argc, char *argv[]) {
                upper_bound_emails, insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis, insert_urls,
                insert_urls_sample, txn_urls, upper_bound_urls);
 
-    output_lookuplat_email_btree << "-"
+    if (kRunEmail) {
+      output_lookuplat_email_btree << "-"
                                  << "\n";
-    output_insertlat_email_btree << "-"
+      output_insertlat_email_btree << "-"
                                  << "\n";
-    output_mem_email_btree << "-"
+      output_mem_email_btree << "-"
                            << "\n";
+    
+      output_lookuplat_email_btree.close();
+      output_insertlat_email_btree.close();
+      output_mem_email_btree.close();
+    }
 
-    output_lookuplat_email_btree.close();
-    output_insertlat_email_btree.close();
-    output_mem_email_btree.close();
-
-    output_lookuplat_wiki_btree << "-"
+    if (kRunWiki) {
+      output_lookuplat_wiki_btree << "-"
                                 << "\n";
-    output_insertlat_wiki_btree << "-"
+      output_insertlat_wiki_btree << "-"
                                 << "\n";
-    output_mem_wiki_btree << "-"
+      output_mem_wiki_btree << "-"
                           << "\n";
 
-    output_lookuplat_wiki_btree.close();
-    output_insertlat_wiki_btree.close();
-    output_mem_wiki_btree.close();
+      output_lookuplat_wiki_btree.close();
+      output_insertlat_wiki_btree.close();
+      output_mem_wiki_btree.close();
+    }
 
-    output_lookuplat_url_btree << "-"
+    if (kRunUrl) {
+      output_lookuplat_url_btree << "-"
                                << "\n";
-    output_insertlat_url_btree << "-"
+      output_insertlat_url_btree << "-"
                                << "\n";
-    output_mem_url_btree << "-"
+      output_mem_url_btree << "-"
                          << "\n";
 
-    output_lookuplat_url_btree.close();
-    output_insertlat_url_btree.close();
-    output_mem_url_btree.close();
+      output_lookuplat_url_btree.close();
+      output_insertlat_url_btree.close();
+      output_mem_url_btree.close();
+    }
   } else if (expt_id == 1) {
     //-------------------------------------------------------------
     // Range Queries; Expt ID = 1
@@ -506,17 +547,24 @@ int main(int argc, char *argv[]) {
     std::cout << "Range Queries; Expt ID = 1" << std::endl;
     std::cout << "====================================" << std::endl;
 
-    output_lookuplat_email_btree_range.open(file_lookuplat_email_btree_range, std::ofstream::app);
-    output_insertlat_email_btree_range.open(file_insertlat_email_btree_range, std::ofstream::app);
-    output_mem_email_btree_range.open(file_mem_email_btree_range, std::ofstream::app);
+    if (kRunEmail) {
+      output_lookuplat_email_btree_range.open(file_lookuplat_email_btree_range, std::ofstream::app);
+      output_insertlat_email_btree_range.open(file_insertlat_email_btree_range, std::ofstream::app);
+      output_mem_email_btree_range.open(file_mem_email_btree_range, std::ofstream::app);
+    }
 
-    output_lookuplat_wiki_btree_range.open(file_lookuplat_wiki_btree_range, std::ofstream::app);
-    output_insertlat_wiki_btree_range.open(file_insertlat_wiki_btree_range, std::ofstream::app);
-    output_mem_wiki_btree_range.open(file_mem_wiki_btree_range, std::ofstream::app);
+    if (kRunWiki) {
+      output_lookuplat_wiki_btree_range.open(file_lookuplat_wiki_btree_range, std::ofstream::app);
+      output_insertlat_wiki_btree_range.open(file_insertlat_wiki_btree_range, std::ofstream::app);
+      output_mem_wiki_btree_range.open(file_mem_wiki_btree_range, std::ofstream::app);
+    }
 
-    output_lookuplat_url_btree_range.open(file_lookuplat_url_btree_range, std::ofstream::app);
-    output_insertlat_url_btree_range.open(file_insertlat_url_btree_range, std::ofstream::app);
-    output_mem_url_btree_range.open(file_mem_url_btree_range, std::ofstream::app);
+    if (kRunUrl) {
+      output_lookuplat_url_btree_range.open(file_lookuplat_url_btree_range, std::ofstream::app);
+      output_insertlat_url_btree_range.open(file_insertlat_url_btree_range, std::ofstream::app);
+      output_mem_url_btree_range.open(file_mem_url_btree_range, std::ofstream::app);
+    }
+
     bool is_point = false;
     int expt_num = 1;
     int total_num_expt = 24;
@@ -524,38 +572,44 @@ int main(int argc, char *argv[]) {
                upper_bound_emails, insert_wikis, insert_wikis_sample, txn_wikis, upper_bound_wikis, insert_urls,
                insert_urls_sample, txn_urls, upper_bound_urls);
 
-    output_lookuplat_email_btree_range << "-"
+    if (kRunEmail) {
+      output_lookuplat_email_btree_range << "-"
                                        << "\n";
-    output_insertlat_email_btree_range << "-"
+      output_insertlat_email_btree_range << "-"
                                        << "\n";
-    output_mem_email_btree_range << "-"
+      output_mem_email_btree_range << "-"
                                  << "\n";
 
-    output_lookuplat_email_btree_range.close();
-    output_insertlat_email_btree_range.close();
-    output_mem_email_btree_range.close();
+      output_lookuplat_email_btree_range.close();
+      output_insertlat_email_btree_range.close();
+      output_mem_email_btree_range.close();
+    }
 
-    output_lookuplat_wiki_btree_range << "-"
+    if (kRunWiki) {
+      output_lookuplat_wiki_btree_range << "-"
                                       << "\n";
-    output_insertlat_wiki_btree_range << "-"
+      output_insertlat_wiki_btree_range << "-"
                                       << "\n";
-    output_mem_wiki_btree_range << "-"
+      output_mem_wiki_btree_range << "-"
                                 << "\n";
 
-    output_lookuplat_wiki_btree_range.close();
-    output_insertlat_wiki_btree_range.close();
-    output_mem_wiki_btree_range.close();
+      output_lookuplat_wiki_btree_range.close();
+      output_insertlat_wiki_btree_range.close();
+      output_mem_wiki_btree_range.close();
+    }
 
-    output_lookuplat_url_btree_range << "-"
+    if (kRunUrl) {
+      output_lookuplat_url_btree_range << "-"
                                      << "\n";
-    output_insertlat_url_btree_range << "-"
+      output_insertlat_url_btree_range << "-"
                                      << "\n";
-    output_mem_url_btree_range << "-"
+      output_mem_url_btree_range << "-"
                                << "\n";
 
-    output_lookuplat_url_btree_range.close();
-    output_insertlat_url_btree_range.close();
-    output_mem_url_btree_range.close();
+      output_lookuplat_url_btree_range.close();
+      output_insertlat_url_btree_range.close();
+      output_mem_url_btree_range.close();
+    }
   }
   return 0;
 }
