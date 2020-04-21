@@ -7,6 +7,9 @@ run_hot=$4
 run_btree=$5
 run_prefixbtree=$6
 run_breakdown=$7
+run_email=$8
+run_wiki=$9
+run_url=$10
 
 PYTHON='python'
 if [[ ${run_microbench} == 1 ]]
@@ -25,18 +28,26 @@ then
     ############################################################
     # CPR Latency
     ############################################################
-    ${PYTHON} ./plot/microbench/cpr_latency/cpr_email.py
-    ${PYTHON} ./plot/microbench/cpr_latency/cpr_wiki.py
-    ${PYTHON} ./plot/microbench/cpr_latency/cpr_url.py
+    if [[ ${run_email} == 1 ]]
+    then
+        ${PYTHON} ./plot/microbench/cpr_latency/cpr_email.py
+        ${PYTHON} ./plot/microbench/cpr_latency/lat_email.py
+        ${PYTHON} ./plot/microbench/cpr_latency/mem_email.py
+    fi
 
-    ${PYTHON} ./plot/microbench/cpr_latency/lat_email.py
-    ${PYTHON} ./plot/microbench/cpr_latency/lat_wiki.py
-    ${PYTHON} ./plot/microbench/cpr_latency/lat_url.py
+    if [[ ${run_wiki} == 1 ]]
+    then
+        ${PYTHON} ./plot/microbench/cpr_latency/cpr_wiki.py
+        ${PYTHON} ./plot/microbench/cpr_latency/lat_wiki.py
+        ${PYTHON} ./plot/microbench/cpr_latency/mem_wiki.py
+    fi
 
-    ${PYTHON} ./plot/microbench/cpr_latency/mem_email.py
-    ${PYTHON} ./plot/microbench/cpr_latency/mem_wiki.py
-    ${PYTHON} ./plot/microbench/cpr_latency/mem_url.py
-
+    if [[ ${run_url} == 1 ]]
+    then
+        ${PYTHON} ./plot/microbench/cpr_latency/cpr_url.py
+        ${PYTHON} ./plot/microbench/cpr_latency/lat_url.py
+        ${PYTHON} ./plot/microbench/cpr_latency/mem_url.py
+    fi
     ############################################################
     # Hu-Tucker
     ############################################################
@@ -64,106 +75,119 @@ fi
 
 if [[ ${run_surf} == 1 ]]
 then
-    ############################################################
-    # SuRF point
-    ############################################################
-    ${PYTHON} ./plot/SuRF/point/lat_mem_email_surf.py
-    ${PYTHON} ./plot/SuRF/point/lat_mem_wiki_surf.py
-    ${PYTHON} ./plot/SuRF/point/lat_mem_url_surf.py
-
-    ${PYTHON} ./plot/SuRF/point/height_email_surf.py
-    ${PYTHON} ./plot/SuRF/point/height_wiki_surf.py
-    ${PYTHON} ./plot/SuRF/point/height_url_surf.py
-
-    ${PYTHON} ./plot/SuRF/point/fprcompare_email_surf.py
-    ############################################################
-    # SuRF range
-    ############################################################
-    ${PYTHON} ./plot/SuRF/range/lat_email_surf.py
-    ${PYTHON} ./plot/SuRF/range/lat_wiki_surf.py
-    ${PYTHON} ./plot/SuRF/range/lat_url_surf.py
-
+    if [[ ${run_email} == 1 ]]
+    then
+        ${PYTHON} ./plot/SuRF/point/lat_mem_email_surf.py
+        ${PYTHON} ./plot/SuRF/point/height_email_surf.py
+        ${PYTHON} ./plot/SuRF/point/fprcompare_email_surf.py
+        ${PYTHON} ./plot/SuRF/range/lat_email_surf.py
+    fi
+    
+    if [[ ${run_wiki} == 1 ]]
+    then
+        ${PYTHON} ./plot/SuRF/point/lat_mem_wiki_surf.py
+        ${PYTHON} ./plot/SuRF/point/height_wiki_surf.py
+        ${PYTHON} ./plot/SuRF/range/lat_wiki_surf.py
+    fi
+    
+    if [[ ${run_url} == 1 ]]
+    then
+        ${PYTHON} ./plot/SuRF/point/lat_mem_url_surf.py
+        ${PYTHON} ./plot/SuRF/point/height_url_surf.py
+        ${PYTHON} ./plot/SuRF/range/lat_url_surf.py
+    fi
 fi
 
 if [[ ${run_art} == 1 ]]
 then
-    ############################################################
-    # ART point
-    ############################################################
-    ${PYTHON} ./plot/ART/point/lookuplat_mem_email_art.py
-    ${PYTHON} ./plot/ART/point/lookuplat_mem_wiki_art.py
-    ${PYTHON} ./plot/ART/point/lookuplat_mem_url_art.py
+    if [[ ${run_email} == 1 ]]
+    then
+        ${PYTHON} ./plot/ART/point/lookuplat_mem_email_art.py
+        ${PYTHON} ./plot/ART/point/height_email_art.py
+        ${PYTHON} ./plot/ART/range/lat_email.py
+    fi
 
-    ${PYTHON} ./plot/ART/point/height_email_art.py
-    ${PYTHON} ./plot/ART/point/height_wiki_art.py
-    ${PYTHON} ./plot/ART/point/height_url_art.py
-
-    ############################################################
-    # ART range
-    ############################################################
-    ${PYTHON} ./plot/ART/range/lat_email.py
-    ${PYTHON} ./plot/ART/range/lat_wiki.py
-    ${PYTHON} ./plot/ART/range/lat_url.py
+    if [[ ${run_wiki} == 1 ]]
+    then
+        ${PYTHON} ./plot/ART/point/lookuplat_mem_wiki_art.py
+        ${PYTHON} ./plot/ART/point/height_wiki_art.py
+        ${PYTHON} ./plot/ART/range/lat_wiki.py
+    fi
+    
+    if [[ ${run_url} == 1 ]]
+    then
+        ${PYTHON} ./plot/ART/point/lookuplat_mem_url_art.py
+        ${PYTHON} ./plot/ART/point/height_url_art.py
+        ${PYTHON} ./plot/ART/range/lat_url.py
+    fi
 fi
 
 if [[ ${run_btree} == 1 ]]
 then
-    ############################################################
-    # Btree point
-    ############################################################
-    ${PYTHON} ./plot/btree/point/lookuplat_mem_email_btree.py
-    ${PYTHON} ./plot/btree/point/lookuplat_mem_wiki_btree.py
-    ${PYTHON} ./plot/btree/point/lookuplat_mem_url_btree.py
+    if [[ ${run_email} == 1 ]]
+    then
+        ${PYTHON} ./plot/btree/point/lookuplat_mem_email_btree.py
+        ${PYTHON} ./plot/btree/range/lat_email_btree.py
+    fi
 
-    ############################################################
-    # Btree range
-    ############################################################
-    ${PYTHON} ./plot/btree/range/lat_email_btree.py
-    ${PYTHON} ./plot/btree/range/lat_wiki_btree.py
-    ${PYTHON} ./plot/btree/range/lat_url_btree.py
+    if [[ ${run_wiki} == 1 ]]
+    then
+        ${PYTHON} ./plot/btree/point/lookuplat_mem_wiki_btree.py
+        ${PYTHON} ./plot/btree/range/lat_wiki_btree.py
+    fi
+
+    if [[ ${run_wiki} == 1 ]]
+    then
+        ${PYTHON} ./plot/btree/point/lookuplat_mem_url_btree.py
+        ${PYTHON} ./plot/btree/range/lat_url_btree.py
+    fi
 fi
 
 
 if [[ ${run_prefixbtree} == 1 ]]
 then
-    ############################################################
-    # Btree point
-    ############################################################
-    ${PYTHON} ./plot/prefixbtree/point/lookuplat_mem_email_btree.py
-    ${PYTHON} ./plot/prefixbtree/point/lookuplat_mem_wiki_btree.py
-    ${PYTHON} ./plot/prefixbtree/point/lookuplat_mem_url_btree.py
+    if [[ ${run_email} == 1 ]]
+    then
+        ${PYTHON} ./plot/prefixbtree/point/lookuplat_mem_email_btree.py
+        ${PYTHON} ./plot/prefixbtree/range/lat_email_btree.py
+    fi
 
-    ############################################################
-    # Btree range
-    ############################################################
-    ${PYTHON} ./plot/prefixbtree/range/lat_email_btree.py
-    ${PYTHON} ./plot/prefixbtree/range/lat_wiki_btree.py
-    ${PYTHON} ./plot/prefixbtree/range/lat_url_btree.py
+    if [[ ${run_wiki} == 1 ]]
+    then
+        ${PYTHON} ./plot/prefixbtree/point/lookuplat_mem_wiki_btree.py
+        ${PYTHON} ./plot/prefixbtree/range/lat_wiki_btree.py
+    fi
+
+    if [[ ${run_url} == 1 ]]
+    then
+        ${PYTHON} ./plot/prefixbtree/point/lookuplat_mem_url_btree.py
+        ${PYTHON} ./plot/prefixbtree/range/lat_url_btree.py
+    fi
 fi
 
 
 if [[ ${run_hot} == 1 ]]
 then
-    ############################################################
-    # hot point
-    ############################################################
-    ${PYTHON} ./plot/hot/point/lookuplat_mem_email_hot.py
-    ${PYTHON} ./plot/hot/point/lookuplat_mem_wiki_hot.py
-    ${PYTHON} ./plot/hot/point/lookuplat_mem_url_hot.py
+    if [[ ${run_email} == 1 ]]
+    then
+        ${PYTHON} ./plot/hot/point/lookuplat_mem_email_hot.py
+        ${PYTHON} ./plot/hot/range/lookuplat_mem_email_hot.py
+        ${PYTHON} ./plot/hot/point/height_email_hot.py
+    fi
 
-    ############################################################
-    # hot range
-    ############################################################
-    ${PYTHON} ./plot/hot/range/lookuplat_mem_email_hot.py
-    ${PYTHON} ./plot/hot/range/lookuplat_mem_wiki_hot.py
-    ${PYTHON} ./plot/hot/range/lookuplat_mem_url_hot.py
+    if [[ ${run_wiki} == 1 ]]
+    then
+        ${PYTHON} ./plot/hot/point/lookuplat_mem_wiki_hot.py
+        ${PYTHON} ./plot/hot/range/lookuplat_mem_wiki_hot.py
+        ${PYTHON} ./plot/hot/point/height_wiki_hot.py
+    fi
 
-    ############################################################
-    # hot height
-    ############################################################
-    ${PYTHON} ./plot/hot/point/height_email_hot.py
-    ${PYTHON} ./plot/hot/point/height_wiki_hot.py
-    ${PYTHON} ./plot/hot/point/height_url_hot.py
+    if [[ ${run_url} == 1 ]]
+    then
+        ${PYTHON} ./plot/hot/point/lookuplat_mem_url_hot.py
+        ${PYTHON} ./plot/hot/range/lookuplat_mem_url_hot.py
+        ${PYTHON} ./plot/hot/point/height_url_hot.py
+    fi
 fi
 
 
