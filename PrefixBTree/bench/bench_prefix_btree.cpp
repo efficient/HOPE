@@ -570,7 +570,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Range Queries; Expt ID = 1" << std::endl;
     std::cout << "====================================" << std::endl;
 
-    if (kRumEmail) {
+    if (kRunEmail) {
       output_lookuplat_email_btree_range.open(file_lookuplat_email_btree_range, std::ofstream::app);
       output_insertlat_email_btree_range.open(file_insertlat_email_btree_range, std::ofstream::app);
       output_mem_email_btree_range.open(file_mem_email_btree_range, std::ofstream::app);
@@ -601,7 +601,6 @@ int main(int argc, char *argv[]) {
                                          << "\n";
       output_mem_email_btree_range << "-"
                                    << "\n";
-  
       output_lookuplat_email_btree_range.close();
       output_insertlat_email_btree_range.close();
       output_mem_email_btree_range.close();
@@ -609,11 +608,10 @@ int main(int argc, char *argv[]) {
     if (kRunWiki) {
       output_lookuplat_wiki_btree_range << "-"
                                         << "\n";
-      ounntput_insertlat_wiki_btree_range << "-"
+      output_insertlat_wiki_btree_range << "-"
                                         << "\n";
       output_mem_wiki_btree_range << "-"
                                   << "\n";
-  
       output_lookuplat_wiki_btree_range.close();
       output_insertlat_wiki_btree_range.close();
       output_mem_wiki_btree_range.close();
@@ -625,7 +623,6 @@ int main(int argc, char *argv[]) {
                                        << "\n";
       output_mem_url_btree_range << "-"
                                  << "\n";
-  
       output_lookuplat_url_btree_range.close();
       output_insertlat_url_btree_range.close();
       output_mem_url_btree_range.close();
