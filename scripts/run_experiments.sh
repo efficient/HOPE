@@ -13,6 +13,9 @@ run_btree=0
 run_hot=0
 run_surf=0
 run_prefixbtree=0
+run_email=0
+run_wiki=0
+run_url=0
 repeat_times=1
 
 PYTHON=python
@@ -50,6 +53,24 @@ case $i in
   ;;
   --prefixbtree)
   run_prefixbtree=1
+  shift
+  ;;
+  --email)
+  run_email=1
+  shift
+  ;;
+  --wiki)
+  run_wiki=1
+  shift
+  ;;
+  --url)
+  run_url=1
+  shift
+  ;;
+  --alldatasets)
+  run_email=1
+  run_wiki=1
+  run_url=1
   shift
   ;;
   --all)
@@ -141,17 +162,17 @@ remove_old_results ${run_prefixbtree} "figures/prefixbtree"
 cnt=0
 while [[ ${cnt} -lt ${repeat_times} ]]
 do
-    run_experiment ${run_microbench} "build/bench/microbench 1 ${run_alm}"
-    run_experiment ${run_surf} "build/SuRF/bench/bench_surf 0 ${run_alm}"
-    run_experiment ${run_surf} "build/SuRF/bench/bench_surf 1 ${run_alm}"
-    run_experiment ${run_art} "build/ART/bench/bench_art 0 ${run_alm}"
-    run_experiment ${run_art} "build/ART/bench/bench_art 1 ${run_alm}"
-    run_experiment ${run_hot} "build/hot/bench_hot 0 ${run_alm}"
-    run_experiment ${run_hot} "build/hot/bench_hot 1 ${run_alm}"
-    run_experiment ${run_btree} "build/btree/bench_btree 0 ${run_alm}"
-    run_experiment ${run_btree} "build/btree/bench_btree 1 ${run_alm}"
-    run_experiment ${run_prefixbtree} "build/PrefixBTree/bench/bench_prefix_btree 0 ${run_alm}"
-    run_experiment ${run_prefixbtree} "build/PrefixBTree/bench/bench_prefix_btree 1 ${run_alm}"
+    run_experiment ${run_microbench} "build/bench/microbench 1 ${run_alm} ${run_email} ${run_wiki} ${run_url}"
+    run_experiment ${run_surf} "build/SuRF/bench/bench_surf 0 ${run_alm} ${run_email} ${run_wiki} ${run_url}"
+    run_experiment ${run_surf} "build/SuRF/bench/bench_surf 1 ${run_alm} ${run_email} ${run_wiki} ${run_url}"
+    run_experiment ${run_art} "build/ART/bench/bench_art 0 ${run_alm} ${run_email} ${run_wiki} ${run_url}"
+    run_experiment ${run_art} "build/ART/bench/bench_art 1 ${run_alm} ${run_email} ${run_wiki} ${run_url}"
+    run_experiment ${run_hot} "build/hot/bench_hot 0 ${run_alm} ${run_email} ${run_wiki} ${run_url}"
+    run_experiment ${run_hot} "build/hot/bench_hot 1 ${run_alm} ${run_email} ${run_wiki} ${run_url}"
+    run_experiment ${run_btree} "build/btree/bench_btree 0 ${run_alm} ${run_email} ${run_wiki} ${run_url}"
+    run_experiment ${run_btree} "build/btree/bench_btree 1 ${run_alm} ${run_email} ${run_wiki} ${run_url}"
+    run_experiment ${run_prefixbtree} "build/PrefixBTree/bench/bench_prefix_btree 0 ${run_alm} ${run_email} ${run_wiki} ${run_url}"
+    run_experiment ${run_prefixbtree} "build/PrefixBTree/bench/bench_prefix_btree 1 ${run_alm} ${run_email} ${run_wiki} ${run_url}"
     let "cnt+=1"
 done
 
@@ -174,4 +195,4 @@ echo "===========Finish Generating Results============"
 #################################################
 # Generate plots
 #################################################
-./scripts/plot.sh ${run_microbench} ${run_surf} ${run_art} ${run_hot} ${run_btree} ${run_prefixbtree} ${run_small_experiment}
+./scripts/plot.sh ${run_microbench} ${run_surf} ${run_art} ${run_hot} ${run_btree} ${run_prefixbtree} ${run_small_experiment} ${run_email} ${run_wiki} ${run_url}
