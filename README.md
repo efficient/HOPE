@@ -30,36 +30,31 @@ cd build
     make test
 
 ## Benchmark
-You need an email dataset to run the benchmark. Make sure you include email.txt under the dataset folder.
-Go to project root directory, run
 ```
 ./scripts/run_experiment.sh [OPTION]
-
-Description
-  -r, --repeat_times=NUM
-    repeat the experiment NUM times, get the average as the final result. Experiments will run once by default
-  --alm
-    run alm and alm improved encoders. All benchmarks will only run single, double, 3 gram, 4 gram encoders by default
-  --art
-    run art benchmark
-  --surf
-    run surf benchmark
-  --btree
-    run btree benchmark
-  --prefixbtree
-    run prefix btree benchmark
-  --hot
-    run hot benchmark
-  --all
-    run all benchmarks (art, surf, btree, prefixbtree, hot)
-
-Example
-./scripts/run_experiment.sh -r=3 --surf --alm
-run surf benchmark on all encoders (include alm and alm improved) three times and get the average as the result
 ```
-The script will record numbers of specified benchmarks. To generate corresponding figures, make sure you include the --alm flag. Results will be in results/ and figures will be in figures/.
+
+We included a sample of the Wiki and URL datasets in this repository. To reproduce the results in our paper, please download the full datasets (download links are in the paper) to replace the samples. Our Email dataset is private. You need to provide your own email list (email.txt) to run the corresponding experiments. Below are options to facilitate running a subset of the full benchmark:
+```
+Options
+  -r, --repeat_times=N
+    Run each experiment N times and report the average measurements. Default: 1.
+  --email, --wiki, --url
+    Run the benchmark using the Email/Wiki/URL dataset.
+    If unspecified, the scripts includes the Wiki and URL experiments.
+  --alldatasets
+    Include benchmarks for all three datasets.
+  --alm
+    Include the alm-based encoders. The other encoders (Single, Double, 3-gram, 4-gram) are enabled by default.
+  --surf, --art, --hot, --btree, --prefixbtree
+    Run the SuRF/ART/HOT/B+tree/prefix B+tree benchmark suite.
+  --all
+    Run the full benchmark. If unspecified, the script only runs the microbenchmarks for Wiki and URL.
+```
+
+The above script will record benchmark measurements under "results/". The plotting scripts are under "plots/". Generated figures will be under "figures/". Make sure you run the benchmark with the --alm option on before using the plot scripts.
 
 ## License
 Copyright 2020, Carnegie Mellon University
 
-Licensed under the [GNU General Public License v3.0](https://github.com/efficient/OPE/blob/master/LICENSE).
+Licensed under the [Apache License 2.0](https://github.com/efficient/OPE/blob/master/LICENSE).
