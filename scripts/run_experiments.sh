@@ -29,51 +29,63 @@ case $i in
   ;;
   --microbench)
   run_microbench=1
+  echo "Run microbench"
   shift
   ;;
   --alm)
   run_alm=1
+  echo "Run ALM encoder"
   shift
   ;;
   --art)
   run_art=1
+  echo "Run ART"
   shift
   ;;
   --btree)
   run_btree=1
+  echo "Run BTree"
   shift
   ;;
   --hot)
   run_hot=1
+  echo "Run HOT"
   shift
   ;;
   --surf)
   run_surf=1
+  echo "Run SuRF"
   shift
   ;;
   --prefixbtree)
   run_prefixbtree=1
+  echo "Run Prefix BTree"
   shift
   ;;
   --email)
   run_email=1
+  echo "Run email dataset"
   shift
   ;;
   --wiki)
   run_wiki=1
+  echo "Run wiki dataset"
   shift
   ;;
   --url)
   run_url=1
+  echo "Run url dataset"
   shift
   ;;
   --alldatasets)
+  echo "Run all datasets"
   run_email=1
   run_wiki=1
   run_url=1
   shift
   ;;
   --all)
+  echo "Run All Benchmarks"
   run_microbench=1
   run_art=1
   run_btree=1
@@ -179,20 +191,17 @@ done
 # Get the average result
 ${PYTHON} scripts/generate_result.py micro-tree
 
-if [ ${run_small_experiment} == 1 ]
-then
-    ./build/bench/microbench 6 1 > bt
-    ${PYTHON} generate_result.py bt
-    rm bt
-
-    #script ta
-    #./build/bench/microbench 5 1
-    #eval "exit"
-    #${PYTHON} generate_result.py ta
-    #rm ta
-fi
 echo "===========Finish Generating Results============"
 #################################################
 # Generate plots
 #################################################
-./scripts/plot.sh ${run_microbench} ${run_surf} ${run_art} ${run_hot} ${run_btree} ${run_prefixbtree} ${run_small_experiment} ${run_email} ${run_wiki} ${run_url}
+if [[ ${run_microbench} == 1 ]] || [[ ${run_surf} == 1 ]] || [[ ${run_art} == 1 ]] || [[ ${run_hot} == 1 ]] || [[ ${run_btree} == 1 ]] || [[ ${run_prefixbtree} == 1 ]]
+then
+  if [[ ${run_alm} == 1 ]]
+  then
+    ./scripts/plot.sh ${run_microbench} ${run_surf} ${run_art} ${run_hot} ${run_btree} ${run_prefixbtree} ${run_small_experiment} ${run_email} ${run_wiki} ${run_url}
+    echo "Finish generate plots"
+  else
+    echo "Did not generate plots. You must run ALM encoder to generate plots"
+  fi
+fi
