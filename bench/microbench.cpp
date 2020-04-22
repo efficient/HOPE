@@ -20,6 +20,10 @@ static const std::string file_email2 = "datasets/email_2.txt";
 static const int kLongestCodeLen = 4096;
 
 static int runALM = 1;
+static int kRunEmail = 0;
+static int kRunWiki = 0;
+static int kRunUrl = 0;
+
 static bool runBatch = false;
 //-------------------------------------------------------------
 // Workload IDs
@@ -331,6 +335,9 @@ using namespace microbench;
 int main(int argc, char *argv[]) {
   int expt_id = (int)atoi(argv[1]);
   runALM = (int)atoi(argv[2]);
+  kRunEmail = (int)atoi(argv[3]);
+  kRunWiki = (int)atoi(argv[4]);
+  kRunUrl = (int)atoi(argv[5]);
 
   std::vector<std::string> emails;
   std::vector<std::string> emails1;
@@ -338,17 +345,30 @@ int main(int argc, char *argv[]) {
   std::vector<std::string> emails_shuffle;
   std::vector<std::string> emails1_shuffle;
   std::vector<std::string> emails2_shuffle;
-  int64_t total_len_email = loadKeys(file_email, emails, emails_shuffle);
-  int64_t total_len_email1 = loadKeys(file_email1, emails1, emails1_shuffle);
-  int64_t total_len_email2 = loadKeys(file_email2, emails2, emails2_shuffle);
+  int64_t total_len_email = 0;
+  int64_t total_len_email1 = 0;
+  int64_t total_len_email2 = 0;
+
+  if (kRunEmail) {
+    loadKeys(file_email, emails, emails_shuffle);
+    loadKeys(file_email1, emails1, emails1_shuffle);
+    loadKeys(file_email2, emails2, emails2_shuffle);
+  }
 
   std::vector<std::string> wikis;
   std::vector<std::string> wikis_shuffle;
-  int64_t total_len_wiki = loadKeys(file_wiki, wikis, wikis_shuffle);
+  int64_t total_len_wiki = 0;
+
+  if (kRunWiki) {
+    loadKeys(file_wiki, wikis, wikis_shuffle);
+  }
 
   std::vector<std::string> urls;
   std::vector<std::string> urls_shuffle;
-  int64_t total_len_url = loadKeys(file_url, urls, urls_shuffle);
+  int64_t total_len_url = 0;
+  if (kRunUrl) {
+    loadKeys(file_url, urls, urls_shuffle);
+  }
 
   if (expt_id == 0) {
     //-------------------------------------------------------------
@@ -372,12 +392,20 @@ int main(int argc, char *argv[]) {
     for (int p = 0; p < 3; p++) {
       int percent = percent_list[p];
       for (int et = 1; et < 7; et++) {
-        std::cout << "Sample Size Sweep " << (expt_num++) << "/" << total_num_expts << std::endl;
-        exec(expt_id, kEmail, et, ds, percent, enc_src_percent, emails_shuffle, total_len_email);
-        std::cout << "Sample Size Sweep " << (expt_num++) << "/" << total_num_expts << std::endl;
-        exec(expt_id, kWiki, et, ds, percent, enc_src_percent, wikis_shuffle, total_len_wiki);
-        std::cout << "Sample Size Sweep " << (expt_num++) << "/" << total_num_expts << std::endl;
-        exec(expt_id, kUrl, et, ds, percent, enc_src_percent, urls_shuffle, total_len_url);
+        if (kRunEmail) {
+          std::cout << "Sample Size Sweep " << (expt_num++) << "/" << total_num_expts << std::endl;
+          exec(expt_id, kEmail, et, ds, percent, enc_src_percent, emails_shuffle, total_len_email);
+        }
+
+        if (kRunWiki) {
+          std::cout << "Sample Size Sweep " << (expt_num++) << "/" << total_num_expts << std::endl;
+          exec(expt_id, kWiki, et, ds, percent, enc_src_percent, wikis_shuffle, total_len_wiki);
+        }
+
+        if (kRunUrl) {
+          std::cout << "Sample Size Sweep " << (expt_num++) << "/" << total_num_expts << std::endl;
+          exec(expt_id, kUrl, et, ds, percent, enc_src_percent, urls_shuffle, total_len_url);
+        }
       }
     }
 
@@ -394,20 +422,26 @@ int main(int argc, char *argv[]) {
     std::cout << "------------------------------------------------" << std::endl;
     std::cout << "CPR and Latency; Expt ID = 1" << std::endl;
     std::cout << "------------------------------------------------" << std::endl;
-    output_x_email_dict_size.open(file_x_email_dict_size, std::fstream::app);
-    output_cpr_email_dict_size.open(file_cpr_email_dict_size, std::fstream::app);
-    output_lat_email_dict_size.open(file_lat_email_dict_size, std::fstream::app);
-    output_mem_email_dict_size.open(file_mem_email_dict_size, std::fstream::app);
+    if (kRunEmail) {
+      output_x_email_dict_size.open(file_x_email_dict_size, std::fstream::app);
+      output_cpr_email_dict_size.open(file_cpr_email_dict_size, std::fstream::app);
+      output_lat_email_dict_size.open(file_lat_email_dict_size, std::fstream::app);
+      output_mem_email_dict_size.open(file_mem_email_dict_size, std::fstream::app);
+    }
 
-    output_x_wiki_dict_size.open(file_x_wiki_dict_size, std::fstream::app);
-    output_cpr_wiki_dict_size.open(file_cpr_wiki_dict_size, std::fstream::app);
-    output_lat_wiki_dict_size.open(file_lat_wiki_dict_size, std::fstream::app);
-    output_mem_wiki_dict_size.open(file_mem_wiki_dict_size, std::fstream::app);
+    if (kRunWiki) {
+      output_x_wiki_dict_size.open(file_x_wiki_dict_size, std::fstream::app);
+      output_cpr_wiki_dict_size.open(file_cpr_wiki_dict_size, std::fstream::app);
+      output_lat_wiki_dict_size.open(file_lat_wiki_dict_size, std::fstream::app);
+      output_mem_wiki_dict_size.open(file_mem_wiki_dict_size, std::fstream::app);
+    }
 
-    output_x_url_dict_size.open(file_x_url_dict_size, std::fstream::app);
-    output_cpr_url_dict_size.open(file_cpr_url_dict_size, std::fstream::app);
-    output_lat_url_dict_size.open(file_lat_url_dict_size, std::fstream::app);
-    output_mem_url_dict_size.open(file_mem_url_dict_size, std::fstream::app);
+    if (kRunUrl) {
+      output_x_url_dict_size.open(file_x_url_dict_size, std::fstream::app);
+      output_cpr_url_dict_size.open(file_cpr_url_dict_size, std::fstream::app);
+      output_lat_url_dict_size.open(file_lat_url_dict_size, std::fstream::app);
+      output_mem_url_dict_size.open(file_mem_url_dict_size, std::fstream::app);
+    }
 
     int sample_percent = 1;
     int enc_src_percent = 100;
@@ -423,94 +457,106 @@ int main(int argc, char *argv[]) {
       total_num_expts = 57;
     }
 
-    // Single-Char
-    std::cout << "CPR and Latency (" << (expt_num++) << "/" << total_num_expts << ")" << std::endl;
-    exec(expt_id, kEmail, 1, 0, sample_percent, enc_src_percent, emails_shuffle, total_len_email);
-    std::cout << "CPR and Latency (" << (expt_num++) << "/" << total_num_expts << ")" << std::endl;
-    exec(expt_id, kWiki, 1, 0, sample_percent, enc_src_percent, wikis_shuffle, total_len_wiki);
-
-    std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-    exec(expt_id, kUrl, 1, 0, sample_percent, enc_src_percent, urls_shuffle, total_len_url);
-    expt_num++;
-
-    // Double-Char
-    std::cout << "CPR and Latency (" << (expt_num++) << "/" << total_num_expts << ")" << std::endl;
-    exec(expt_id, kEmail, 2, 6, sample_percent, enc_src_percent, emails_shuffle, total_len_email);
-    std::cout << "CPR and Latency (" << (expt_num++) << "/" << total_num_expts << ")" << std::endl;
-    exec(expt_id, kWiki, 2, 6, sample_percent, enc_src_percent, wikis_shuffle, total_len_wiki);
-
-    std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-    exec(expt_id, kUrl, 2, 6, sample_percent, enc_src_percent, urls_shuffle, total_len_url);
-    expt_num++;
-
-    for (int ds = 0; ds < 7; ds++) {
-      for (int et = 3; et < stop_method; et++) {
-        std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-        exec(expt_id, kEmail, et, ds, sample_percent, enc_src_percent, emails_shuffle, total_len_email);
-        expt_num++;
-        std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-        exec(expt_id, kWiki, et, ds, sample_percent, enc_src_percent, wikis_shuffle, total_len_wiki);
-        expt_num++;
-        std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-        exec(expt_id, kUrl, et, ds, sample_percent, enc_src_percent, urls_shuffle, total_len_url);
-        expt_num++;
+    if (kRunEmail) {
+      std::cout << "CPR and Latency (" << (expt_num++) << "/" << total_num_expts << ")" << std::endl;
+      exec(expt_id, kEmail, 1, 0, sample_percent, enc_src_percent, emails_shuffle, total_len_email);
+      std::cout << "CPR and Latency (" << (expt_num++) << "/" << total_num_expts << ")" << std::endl;
+      exec(expt_id, kEmail, 2, 6, sample_percent, enc_src_percent, emails_shuffle, total_len_email);
+       for (int ds = 0; ds < 7; ds++) {
+        for (int et = 3; et < stop_method; et++) {
+          std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
+          exec(expt_id, kEmail, et, ds, sample_percent, enc_src_percent, emails_shuffle, total_len_email);
+          expt_num++;
+        }
       }
+      for (int ds = 7; ds < 9; ds++) {
+        for (int et = 4; et < stop_method; et++) {
+          std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
+          exec(expt_id, kEmail, et, ds, sample_percent, enc_src_percent, emails_shuffle, total_len_email);
+          expt_num++;
+        }
+      }
+      output_x_email_dict_size << "-"
+                               << "\n";
+      output_cpr_email_dict_size << "-"
+                                 << "\n";
+      output_lat_email_dict_size << "-"
+                                 << "\n";
+      output_mem_email_dict_size << "-"
+                                 << "\n";
+
+      output_x_email_dict_size.close();
+      output_cpr_email_dict_size.close();
+      output_lat_email_dict_size.close();
+      output_mem_email_dict_size.close();
     }
 
-    for (int ds = 7; ds < 9; ds++) {
-      for (int et = 4; et < stop_method; et++) {
-        std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-        exec(expt_id, kEmail, et, ds, sample_percent, enc_src_percent, emails_shuffle, total_len_email);
-        expt_num++;
-        std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-        exec(expt_id, kWiki, et, ds, sample_percent, enc_src_percent, wikis_shuffle, total_len_wiki);
-        expt_num++;
-        std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
-        exec(expt_id, kUrl, et, ds, sample_percent, enc_src_percent, urls_shuffle, total_len_url);
-        expt_num++;
+    if (kRunWiki) {
+      std::cout << "CPR and Latency (" << (expt_num++) << "/" << total_num_expts << ")" << std::endl;
+      exec(expt_id, kWiki, 1, 0, sample_percent, enc_src_percent, wikis_shuffle, total_len_wiki);
+      std::cout << "CPR and Latency (" << (expt_num++) << "/" << total_num_expts << ")" << std::endl;
+      exec(expt_id, kWiki, 2, 6, sample_percent, enc_src_percent, wikis_shuffle, total_len_wiki);
+      for (int ds = 0; ds < 7; ds++) {
+        for (int et = 3; et < stop_method; et++) {
+          std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
+          exec(expt_id, kWiki, et, ds, sample_percent, enc_src_percent, wikis_shuffle, total_len_wiki);
+          expt_num++;
+        }
       }
+      for (int ds = 7; ds < 9; ds++) {
+        for (int et = 4; et < stop_method; et++) {
+          std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
+          exec(expt_id, kWiki, et, ds, sample_percent, enc_src_percent, wikis_shuffle, total_len_wiki);
+          expt_num++;
+        }
+      }
+      output_x_wiki_dict_size << "-"
+                              << "\n";
+      output_cpr_wiki_dict_size << "-"
+                                << "\n";
+      output_lat_wiki_dict_size << "-"
+                                << "\n";
+      output_mem_wiki_dict_size << "-"
+                                << "\n";
+      output_x_wiki_dict_size.close();
+      output_cpr_wiki_dict_size.close();
+      output_lat_wiki_dict_size.close();
+      output_mem_wiki_dict_size.close();
     }
-    output_x_email_dict_size << "-"
+
+    if (kRunUrl) {
+      std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
+      exec(expt_id, kUrl, 1, 0, sample_percent, enc_src_percent, urls_shuffle, total_len_url);
+      expt_num++;
+      std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
+      exec(expt_id, kUrl, 2, 6, sample_percent, enc_src_percent, urls_shuffle, total_len_url);
+      expt_num++;
+      for (int ds = 0; ds < 7; ds++) {
+        for (int et = 3; et < stop_method; et++) {
+          std::cout << "CPR and Latency (" << expt_num << "/" << total_num_expts << ")" << std::endl;
+          exec(expt_id, kUrl, et, ds, sample_percent, enc_src_percent, urls_shuffle, total_len_url);
+          expt_num++;
+        }
+      }
+      for (int ds = 7; ds < 9; ds++) {
+        for (int et = 4; et < stop_method; et++) {
+          exec(expt_id, kUrl, et, ds, sample_percent, enc_src_percent, urls_shuffle, total_len_url);
+          expt_num++;
+        }
+      }
+      output_x_url_dict_size << "-"
                              << "\n";
-    output_cpr_email_dict_size << "-"
+      output_cpr_url_dict_size << "-"
                                << "\n";
-    output_lat_email_dict_size << "-"
+      output_lat_url_dict_size << "-"
                                << "\n";
-    output_mem_email_dict_size << "-"
+      output_mem_url_dict_size << "-"
                                << "\n";
-
-    output_x_email_dict_size.close();
-    output_cpr_email_dict_size.close();
-    output_lat_email_dict_size.close();
-    output_mem_email_dict_size.close();
-
-    output_x_wiki_dict_size << "-"
-                            << "\n";
-    output_cpr_wiki_dict_size << "-"
-                              << "\n";
-    output_lat_wiki_dict_size << "-"
-                              << "\n";
-    output_mem_wiki_dict_size << "-"
-                              << "\n";
-
-    output_x_wiki_dict_size.close();
-    output_cpr_wiki_dict_size.close();
-    output_lat_wiki_dict_size.close();
-    output_mem_wiki_dict_size.close();
-
-    output_x_url_dict_size << "-"
-                           << "\n";
-    output_cpr_url_dict_size << "-"
-                             << "\n";
-    output_lat_url_dict_size << "-"
-                             << "\n";
-    output_mem_url_dict_size << "-"
-                             << "\n";
-
-    output_x_url_dict_size.close();
-    output_cpr_url_dict_size.close();
-    output_lat_url_dict_size.close();
-    output_mem_url_dict_size.close();
+      output_x_url_dict_size.close();
+      output_cpr_url_dict_size.close();
+      output_lat_url_dict_size.close();
+      output_mem_url_dict_size.close();
+    }
   } else if (expt_id == 2) {
     //-------------------------------------------------------------
     // Trie vs Array; Expt ID = 2
