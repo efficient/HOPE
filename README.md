@@ -1,4 +1,6 @@
 # High-speed Order-Preserving Encoder (HOPE)
+[![Build Status](https://travis-ci.org/efficient/HOPE.svg?branch=master)](https://travis-ci.org/efficient/HOPE)
+[![Coverage Status](https://coveralls.io/repos/github/efficient/HOPE/badge.svg?branch=master)](https://coveralls.io/github/efficient/HOPE?branch=master)
 
 **HOPE** is a fast dictionary-based compressor that encodes
 arbitrary byte-strings while preserving their order.
