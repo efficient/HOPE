@@ -52,7 +52,7 @@ Options
     Run the full benchmark. If unspecified, the script only runs the microbenchmarks for Wiki and URL.
 ```
 
-The above script will record benchmark measurements under "results/". The plotting scripts are under "plots/". Generated figures will be under "figures/". Make sure you run the benchmark with the --alm option on before using the plot scripts.
+The above script will record benchmark measurements under "results/". The master plotting script is under "scripts/". The individual scripts are under "plots/". Generated figures will be under "figures/". Make sure you run the benchmark with the --alm option on before using the plotting scripts.
 
 ## License
 Copyright 2020, Carnegie Mellon University

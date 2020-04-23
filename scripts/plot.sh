@@ -15,7 +15,7 @@ PYTHON='python'
 if [[ ${run_microbench} == 1 ]]
 then
     ############################################################
-    # Sample Size Sweep
+    # Sample Size Sweep (Figure 13 in paper)
     ############################################################
     #${PYTHON} ./plot/microbench/sample_size_sweep/cpr_email.py
     #${PYTHON} ./plot/microbench/sample_size_sweep/cpr_wiki.py
@@ -26,7 +26,7 @@ then
     #${PYTHON} ./plot/microbench/sample_size_sweep/bt_url.py
 
     ############################################################
-    # CPR Latency
+    # CPR Latency (Figure 8 in paper)
     ############################################################
     if [[ ${run_email} == 1 ]]
     then
@@ -73,6 +73,9 @@ then
     #${PYTHON} ./plot/microbench/build_time_breakdown/bt_1_breakdown.py
 fi
 
+############################################################
+# SuRF (Figure 10, 11 in paper)
+############################################################
 if [[ ${run_surf} == 1 ]]
 then
     if [[ ${run_email} == 1 ]]
@@ -98,6 +101,9 @@ then
     fi
 fi
 
+############################################################
+# SuRF (Figure 12, 16 in paper)
+############################################################
 if [[ ${run_art} == 1 ]]
 then
     if [[ ${run_email} == 1 ]]
@@ -190,7 +196,9 @@ then
     fi
 fi
 
-
+############################################################
+# (Figure 9 in paper)
+############################################################
 if [[ ${run_breakdown} == 1 ]]
 then
     ${PYTHON} ./plot/microbench/build_time_breakdown/bt_breakdown.py
